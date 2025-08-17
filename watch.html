@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+
     <meta name="screen-orientation" content="landscape">
     <link rel="manifest" href="/manifest.json">
 
@@ -774,6 +774,8 @@
                         moviePlayer.title = data.title;
                         downloadButton.href = data.video_url;
                         movieTitleDisplay.textContent = data.title;
+                        // NEW: Update the document title (tab name)
+                        document.title = data.title;
                         console.log(`Successfully fetched video source: ${data.video_url}`);
                     } else {
                         console.error('API response is missing the video URL.');
