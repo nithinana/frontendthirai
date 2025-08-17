@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirai</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thirai">
+    <link rel="apple-touch-icon" href="./static/ios/icon-192x192.png">
+    <link rel="icon" type="image/png" href="./static/favicon.png" id="faviconLink"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* CSS Variables for a Themed, Modern UI */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-border-color: #ced4da;
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --header-height: 80px; /* NEW: A variable for the header height, default value */
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        /* Make close button visible in dark mode */
+        body.dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        /* Base Body Styles */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: var(--header-height); /* NEW: Use the dynamic variable */
+            overflow-x: hidden; /* NEW: PREVENT HORIZONTAL SCROLLING */
+        }
+
+        /* --- Header and Navigation --- */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            padding: 1rem 1rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--header-shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .header-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        /* --- Styles for Logo Dropdown --- */
+        .logo-dropdown-container {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .logo-dropdown-toggle {
+            color: var(--text-color);
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        .logo-dropdown-toggle:hover {
+            color: var(--text-color);
+            opacity: 1;
+        }
+        /* Hide the default bootstrap caret since we are using an icon */
+        .logo-dropdown-toggle::after {
+            display: none;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: var(--card-bg-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* --- Search Bar in Header (Layout from all.html) --- */
+        .header-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-search .form-control {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            height: calc(1.5em + 1rem + 2px); /* Ensures the input has a fixed height */
+        }
+
+        .header-search .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            border-color: var(--primary-color);
+        }
+        
+        /* NEW RULE for placeholder text in dark mode */
+        body.dark-mode .header-search .form-control::placeholder {
+            color: #888; /* A lighter gray for visibility */
+            opacity: 1; /* Ensure it's not transparent */
+        }
+        
+        /* ADJUSTMENTS FOR SEARCH BUTTON */
+        .header-search .btn-primary {
+            /* Remove default button padding */
+            padding: 0; 
+            /* Set a fixed size to match the input height */
+            height: calc(1.5em + 1rem + 2px);
+            width: calc(1.5em + 1rem + 2px); 
+            /* Vertically center the icon */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Make it a little smaller by reducing font size */
+            font-size: 1.1rem;
+        }
+        /* END ADJUSTMENTS */
+        
+        .dropdown-menu {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 0.5rem;
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        body.dark-mode .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        /* --- Main Content & Movie Grid --- */
+        .movie-grid {
+            padding: 1.5rem 0;
+        }
+        
+        /* --- STYLES FOR THE MOVIE TITLE BAR --- */
+        .movie-card .movie-title {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: normal;
+            word-break: break-word;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            height: 4.0em;
+            text-align: center;
+        }
+
+        .movie-card {
+            background-color: var(--card-bg-color);
+            border-radius: 0.75rem;
+            border: none;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .movie-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .movie-img {
+            width: 100%;
+            aspect-ratio: 2 / 3; /* For a consistent movie poster shape */
+            object-fit: cover;
+            background-color: var(--bg-color); /* Placeholder color while loading */
+        }
+        
+        /* --- Load More & Spinner --- */
+        .load-more-container {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover-color);
+            border-color: var(--primary-hover-color);
+        }
+
+        #loadingSpinner {
+            display: none;
+        }
+        
+        /* --- Loading Screen --- */
+        #loadingScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+            visibility: visible;
+        }
+
+        #loadingScreen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* --- Modal Styling --- */
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* New rule to remove the header border in modals */
+        .modal-header {
+            border-bottom: none;
+        }
+
+        .modal-header h5 {
+            font-weight: bold;
+        }
+
+        /* Fix for list-group-item theming */
+        .modal-body .list-group-item {
+            cursor: pointer;
+            color: var(--text-color);
+            background-color: transparent;
+            border-color: var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        /* Added for highlighting selected options */
+        .modal-body .list-group-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        /* New rule for dark mode active item */
+        body.dark-mode .modal-body .list-group-item.active {
+            background-color: var(--input-border-color);
+            color: var(--text-color);
+            border-color: var(--input-border-color);
+        }
+        .modal-body .list-group-item:hover {
+            background-color: var(--border-color); /* A subtle hover color */
+        }
+        
+        body.dark-mode .modal-body .list-group-item:hover {
+            background-color: var(--input-bg-color); /* A darker hover color */
+        }
+        
+        /* Updated rule for the red outline on the close button */
+        .modal-body .btn-secondary[data-bs-dismiss="modal"] {
+            border-color: #dc3545; /* Red color */
+            color: #dc3545;
+            background-color: transparent; /* This line removes the grey filling */
+            transition: all 0.2s ease;
+        }
+        .modal-body .btn-secondary[data-bs-dismiss="modal"]:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* --- Responsive Header Layout (from all.html) --- */
+        @media (min-width: 992px) {
+            .header-main-content { flex-grow: 1; justify-content: center; }
+            .header-search { max-width: 500px; width: 100%; }
+        }
+
+        @media (max-width: 991.98px) {
+            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
+            .header-search { flex-grow: 1; }
+        }
+
+        /* NEW: Mobile-specific adjustments to prevent overflow */
+        @media (max-width: 575.98px) {
+            .app-header .container-fluid {
+                padding: 0.75rem 0.5rem; /* Reduce padding to save space */
+            }
+            .header-center-nav .nav-link {
+                padding: 0.5rem 0.5rem; /* Smaller padding for nav links */
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* NEW: Responsive grid to handle column widths and gutters */
+        .movie-grid .row {
+            --bs-gutter-x: 0.75rem;
+            --bs-gutter-y: 0.75rem;
+        }
+        .movie-grid .col {
+            padding: var(--bs-gutter-y) var(--bs-gutter-x);
+        }
+
+        /* Extra Small devices (mobile) - 3 columns */
+        @media (max-width: 575.98px) {
+            .movie-grid .row {
+                --bs-gutter-x: 0.5rem;
+                --bs-gutter-y: 0.5rem;
+            }
+            .movie-grid .col {
+                width: 33.333333%;
+                flex: 0 0 auto;
+            }
+        }
+        
+        /* Small devices (tablets) - 4 columns */
+        @media (min-width: 576px) and (max-width: 767.98px) {
+            .movie-grid .row {
+                --bs-gutter-x: 0.75rem;
+                --bs-gutter-y: 0.75rem;
+            }
+            .movie-grid .col {
+                width: 25%;
+                flex: 0 0 auto;
+            }
+        }
+
+        /* Medium devices (desktops) - 5 columns */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .movie-grid .row {
+                --bs-gutter-x: 1rem;
+                --bs-gutter-y: 1rem;
+            }
+            .movie-grid .col {
+                width: 20%;
+                flex: 0 0 auto;
+            }
+        }
+        
+        /* Large devices (desktops) - 6 columns */
+        @media (min-width: 992px) {
+            .movie-grid .row {
+                --bs-gutter-x: 1.5rem;
+                --bs-gutter-y: 1.5rem;
+            }
+            .movie-grid .col {
+                width: 16.666667%;
+                flex: 0 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen">
+        <img id="loadingImage" src="./static/thiraiblack.png" alt="Loading..." style="max-width: 250px;">
+    </div>
+
+    <header class="app-header">
+        <div class="container-fluid d-flex flex-wrap align-items-center">
+            <div class="dropdown logo-dropdown-container me-lg-4">
+                <a id="logoLink" href="./index.html">
+                    <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+                </a>
+                <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+                <ul class="dropdown-menu" id="languageDropdownMenu">
+                    </ul>
+            </div>
+            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
+                <form id="searchForm" action="./language.html" method="GET" class="header-search">
+                    <input type="hidden" name="lang" id="searchLangInput"> <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
+                    <button type="submit" class="btn btn-primary" title="Search">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="d-flex align-items-center ms-auto">
+                <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav me-3">
+                    <a class="nav-link" href="./all.html">Home</a>
+                    <a id="recentLink" class="nav-link" href="#">Recent</a>
+                    <a id="popularLink" class="nav-link" href="#">Popular</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container movie-grid">
+        <div class="row" id="moviesContainer"></div>
+
+        <div class="load-more-container">
+            <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
+            <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </main>
+    
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="h6 mb-3">Appearance</p>
+                    <div class="list-group mb-4">
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="light">Light</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="dark">Dark</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System Default</a>
+                    </div>
+                    <p class="h6 mb-3">Preferred Language</p>
+                    <div id="preferredLangList" class="list-group mb-4">
+                        </div>
+                    <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
+                    <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = 'https://backendthirai-test.onrender.com';
+        const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+
+        // --- Element Selectors ---
+        const body = document.body;
+        const moviesContainer = document.getElementById('moviesContainer');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const spinner = document.getElementById('loadingSpinner');
+        const searchInput = document.getElementById('searchInput');
+        const searchLangInput = document.getElementById('searchLangInput');
+        const recentLink = document.getElementById('recentLink');
+        const popularLink = document.getElementById('popularLink');
+        const categoryNav = document.getElementById('categoryNav');
+        const languageDropdownMenu = document.getElementById('languageDropdownMenu');
+        const preferredLangList = document.getElementById('preferredLangList');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const headerLogo = document.getElementById('headerLogo');
+        const loadingImage = document.getElementById('loadingImage');
+        const faviconLink = document.getElementById('faviconLink');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
+        const logoLink = document.getElementById('logoLink');
+
+        let currentPage = 1;
+        let isLoading = false;
+
+        // --- Theme Management ---
+        function updateThemeAssets(isDarkMode) {
+            const lightLogo = './static/thiraiblack.png';
+            const darkLogo = './static/thiraiwhite.png';
+            faviconLink.href = isDarkMode ? './static/favicon.png' : './static/faviconlight.png';
+            headerLogo.src = isDarkMode ? darkLogo : lightLogo;
+            loadingImage.src = isDarkMode ? darkLogo : lightLogo;
+        }
+
+        function applyTheme(theme) {
+            let isDarkMode;
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                isDarkMode = true;
+            } else if (theme === 'light') {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                isDarkMode = false;
+            } else { // System default
+                localStorage.removeItem('theme');
+                isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDarkMode) body.classList.add('dark-mode');
+                else body.classList.remove('dark-mode');
+            }
+            updateThemeAssets(isDarkMode);
+        }
+        
+        function updateActiveThemeOption(theme) {
+            themeOptions.forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === theme) option.classList.add('active');
+            });
+        }
+        
+        themeOptions.forEach(option => {
+            option.addEventListener('click', (event) => {
+                event.preventDefault();
+                const selectedTheme = event.currentTarget.dataset.theme;
+                applyTheme(selectedTheme);
+                updateActiveThemeOption(selectedTheme);
+            });
+        });
+        
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!localStorage.getItem('theme')) applyTheme('system');
+            });
+        }
+
+        // --- Preferred Language ---
+        function updateDisableBtnVisibility() {
+            disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
+        }
+
+        function updateActiveLanguageOption(language) {
+            document.querySelectorAll('.preferred-lang-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.language === language) option.classList.add('active');
+            });
+        }
+
+        function updateLogoLink(language) {
+            if (language && language !== 'all') {
+                logoLink.href = `./language.html?lang=${language}`;
+            } else {
+                 logoLink.href = './index.html';
+            }
+        }
+        
+        function setupPreferredLanguage() {
+             const storedLanguage = localStorage.getItem('preferred-language');
+             updateDisableBtnVisibility();
+             updateActiveLanguageOption(storedLanguage);
+             updateLogoLink(storedLanguage);
+
+            document.querySelectorAll('.preferred-lang-option').forEach(option => {
+                option.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const selectedLanguage = event.currentTarget.dataset.language;
+                    localStorage.setItem('preferred-language', selectedLanguage);
+                    updateDisableBtnVisibility();
+                    updateActiveLanguageOption(selectedLanguage);
+                    updateLogoLink(selectedLanguage);
+                });
+            });
+
+            disablePreferredLanguageBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                localStorage.removeItem('preferred-language');
+                updateDisableBtnVisibility();
+                updateActiveLanguageOption(null);
+                updateLogoLink(null);
+            });
+        }
+
+        // --- Movie Rendering ---
+        function renderMovies(movies, append = true) {
+            if (!append) moviesContainer.innerHTML = '';
+            
+            if (!movies || movies.length === 0) {
+                if (!append) moviesContainer.innerHTML = '<p class="text-center text-muted col-12">No movies found.</p>';
+                loadMoreBtn.style.display = 'none';
+                return;
+            }
+
+            const moviesHtml = movies.map(movie => {
+                const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
+                const movieTitleEncoded = encodeURIComponent(movie.title);
+                // Prepend API_BASE_URL to image source if it's a relative path
+                const imageUrl = movie.img_url.startsWith('http') ? movie.img_url : API_BASE_URL + movie.img_url;
+
+                return `
+                    <div class="col">
+                        <div class="movie-card">
+                            <a href="./watch.html?url=${moviePageUrlEncoded}&title=${movieTitleEncoded}" class="movie-link">
+                                <img src="${imageUrl}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
+                                <div class="movie-title">${movie.title}</div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
+        }
+
+        // --- Data Fetching ---
+        async function fetchAndRenderMovies(url, append = true) {
+            if (isLoading) return;
+            isLoading = true;
+            loadMoreBtn.style.display = 'none';
+            spinner.style.display = 'block';
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
+                
+                renderMovies(data.movies, append);
+                
+                if (data.has_more) {
+                    currentPage = data.next_page;
+                    loadMoreBtn.style.display = 'inline-block';
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading movies:', error);
+                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Failed to load movies. Please try again later.</p>';
+            } finally {
+                spinner.style.display = 'none';
+                isLoading = false;
+                if (loadingScreen.style.display !== 'none') {
+                    loadingScreen.classList.add('fade-out');
+                    loadingScreen.addEventListener('transitionend', () => {
+                        loadingScreen.style.display = 'none';
+                    }, { once: true });
+                }
+            }
+        }
+        
+        // --- Page Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme(localStorage.getItem('theme') || 'system');
+            updateActiveThemeOption(localStorage.getItem('theme') || 'system');
+
+            populateLanguageMenus();
+            setupPreferredLanguage();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang');
+            const category = urlParams.get('category') || 'recent';
+            const searchQuery = urlParams.get('q');
+            
+            if (!lang || !ALL_LANGUAGES.includes(lang)) {
+                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language specified in URL.</p>';
+                loadMoreBtn.style.display = 'none';
+                loadingScreen.classList.add('fade-out');
+                document.title = "Error - Thirai";
+                return;
+            }
+
+            const capitalizedLang = lang.charAt(0).toUpperCase() + lang.slice(1);
+            
+            document.title = `Thirai - ${capitalizedLang}`;
+            searchInput.placeholder = `Search ${capitalizedLang} movies...`;
+            searchLangInput.value = lang;
+            recentLink.href = `./language.html?lang=${lang}&category=recent`;
+            popularLink.href = `./language.html?lang=${lang}&category=popular`;
+            
+            if (searchQuery) {
+                document.title = `Search for "${searchQuery}" - Thirai`;
+                searchInput.value = searchQuery;
+                categoryNav.style.display = 'none';
+                loadMoreBtn.style.display = 'none';
+                const searchUrl = `${API_BASE_URL}/search/${lang}?q=${encodeURIComponent(searchQuery)}`;
+                fetchAndRenderMovies(searchUrl, false);
+            } else {
+                if (category === 'popular') popularLink.classList.add('active');
+                else recentLink.classList.add('active');
+                
+                const initialUrl = `${API_BASE_URL}/language/${lang}?category=${category}&page=1`;
+                fetchAndRenderMovies(initialUrl, false);
+            }
+        });
+        
+        function populateLanguageMenus() {
+            languageDropdownMenu.innerHTML = '<li><h6 class="dropdown-header">Languages</h6></li>';
+            preferredLangList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
+
+            ALL_LANGUAGES.forEach(lang => {
+                const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
+                
+                const li = document.createElement('li');
+                li.innerHTML = `<a class="dropdown-item" href="./language.html?lang=${lang}">${capitalized}</a>`;
+                languageDropdownMenu.appendChild(li);
+
+                const prefLink = document.createElement('a');
+                prefLink.className = 'list-group-item list-group-item-action preferred-lang-option';
+                prefLink.href = '#';
+                prefLink.dataset.language = lang;
+                prefLink.textContent = capitalized;
+                preferredLangList.appendChild(prefLink);
+            });
+            languageDropdownMenu.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
+        }
+
+        // --- Event Listeners ---
+        loadMoreBtn.addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang');
+            const category = urlParams.get('category') || 'recent';
+            
+            const url = `${API_BASE_URL}/language/${lang}?category=${category}&page=${currentPage}`;
+            fetchAndRenderMovies(url, true);
+        });
+
+        searchForm.addEventListener('submit', function(event) {
+            if (searchInput.value.trim() === '') {
+                event.preventDefault(); 
+                searchInput.focus();
+            }
+        });
+
+        const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+        const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        document.getElementById('aboutButtonInModal').addEventListener('click', function (event) {
+            event.preventDefault();
+            settingsModal.hide();
+            aboutModal.show();
+        });
+        document.getElementById('aboutModal').addEventListener('hidden.bs.modal', function () {
+            settingsModal.show();
+        });
+
+    </script>
+</body>
+</html>
