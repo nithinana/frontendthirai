@@ -25,7 +25,7 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>{{ movie_title }}</title>
+    <title>Thirai</title>
     <link rel="icon" type="image/png" href="/static/favicon.png"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
@@ -316,8 +316,8 @@
                 <button id="backButton" class="top-button" title="Back to Previous Page">
                     <i class="bi bi-arrow-left"></i>
                 </button>
-                <div class="movie-title-display" id="movieTitleDisplay">{{ movie_title }}</div>
-                <a href="#" id="downloadButton" download="{{ movie_title | replace(' ', '_') }}.mp4" class="top-button" title="Download Video">
+                <div class="movie-title-display" id="movieTitleDisplay">Thirai</div>
+                <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button" title="Download Video">
                     <i class="bi bi-download"></i>
                 </a>
                 <button id="magnificationButton" class="top-button" title="Toggle Magnification">
@@ -520,9 +520,9 @@
             loadingSpinner.style.display = 'none';
             playPauseIcon.style.display = 'block';
             showControls();
-            const movieKey = `movie_progress_${'{{ movie_title }}'.trim().replace(/\s+/g, '_').toLowerCase()}`;
+            const movieKey = `movie_progress_thirai`;
             localStorage.removeItem(movieKey);
-            console.log(`Video ended, cleared progress for ${'{{ movie_title }}'.trim()}.`);
+            console.log(`Video ended, cleared progress for Thirai.`);
         });
 
         function updateProgressBar() {
@@ -800,13 +800,13 @@
         // Call the fetch function when the page loads
         document.addEventListener('DOMContentLoaded', fetchMovieSource);
 
-        const movieKey = `movie_progress_${'{{ movie_title }}'.trim().replace(/\s+/g, '_').toLowerCase()}`;
+        const movieKey = `movie_progress_thirai`;
 
         moviePlayer.addEventListener('loadeddata', () => {
             const savedTime = localStorage.getItem(movieKey);
             if (savedTime && moviePlayer.duration > 0 && parseFloat(savedTime) > 0 && parseFloat(savedTime) < moviePlayer.duration) {
                 moviePlayer.currentTime = parseFloat(savedTime);
-                console.log(`Resuming ${'{{ movie_title }}'.trim()} at ${formatTime(parseFloat(savedTime))}.`);
+                console.log(`Resuming Thirai at ${formatTime(parseFloat(savedTime))}.`);
             }
             updateProgressBar();
         }, { once: true });
@@ -827,7 +827,7 @@
         window.addEventListener('beforeunload', () => {
             if (!moviePlayer.ended && moviePlayer.currentTime > 0) {
                 localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
-                console.log(`Saved progress on unload for ${'{{ movie_title }}'.trim()}: ${moviePlayer.currentTime}s`);
+                console.log(`Saved progress on unload for Thirai: ${moviePlayer.currentTime}s`);
             }
         });
 
