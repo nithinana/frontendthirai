@@ -184,6 +184,12 @@
             cursor: not-allowed;
             box-shadow: none;
         }
+        
+        /* Hide tags on hover */
+        .control-button:hover:not(:disabled) i,
+        .control-button:hover:not(:disabled) .visually-hidden {
+            visibility: hidden;
+        }
 
         /* Specific size for the play/pause button */
         #playPauseButton {
@@ -278,6 +284,12 @@
         .top-button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        
+        /* Hide tags on hover for top buttons */
+        .top-button:hover i,
+        .top-button:hover .visually-hidden {
+            visibility: hidden;
         }
 
         /* Hidden visually, but accessible for screen readers */
