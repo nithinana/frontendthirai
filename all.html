@@ -596,8 +596,8 @@
             </a>
 
             <div class="d-flex justify-content-center flex-grow-1 header-main-content">
-                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
-                    <select name="selected_language" id="languageSelect" class="form-select w-auto">
+                <form id="searchForm" action="language.html" method="GET" class="header-search">
+                    <select name="lang" id="languageSelect" class="form-select w-auto">
                         <option value="tamil">Tamil</option>
                         <option value="hindi">Hindi</option>
                         <option value="telugu">Telugu</option>
@@ -1099,23 +1099,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
-            const languageSelect = document.getElementById('languageSelect');
-
-            // This function updates the form's action attribute based on the selected language
-            function updateSearchFormAction() {
-                if (languageSelect && searchForm) {
-                    const selectedLanguage = languageSelect.value;
-                    searchForm.action = `/language/${selectedLanguage}`;
-                }
-            }
-
-            // Set the initial form action when the page loads
-            updateSearchFormAction();
-
-            // Add a listener to update the action whenever the user changes the language
-            if (languageSelect) {
-                languageSelect.addEventListener('change', updateSearchFormAction);
-            }
 
             // Search validation logic
             if (searchForm) {
