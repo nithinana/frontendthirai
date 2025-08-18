@@ -571,27 +571,33 @@
 
         /* NEW: Keyframe animation for the pulsating logo */
         @keyframes pulse-logo {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
         }
+
     </style>
 </head>
 <body>
     <div id="loadingOverlay">
         <img id="overlayLogo" src="/static/thiraiblack.png" alt="Thirai Logo">
         <div id="slowNetworkMessage" class="text-muted" style="display: none;">
-            <i class="bi bi-info-circle"></i>
-            <span>If our servers are slow, consider choosing a specific language or use the search bar at the main site to reduce loading times.</span>
+            <i class="bi bi-info-circle"></i> <span>If our servers are slow, consider choosing a specific language or use the search bar at the main site to reduce loading times.</span>
         </div>
     </div>
+    
     <header class="app-header">
         <div class="container-fluid d-flex flex-wrap align-items-center">
             <a href="/" class="d-flex align-items-center me-lg-4" id="logoLink">
                 <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
             </a>
+
             <div class="d-flex justify-content-center flex-grow-1 header-main-content">
-                <form id="searchForm" action="/search" method="GET" class="header-search">
-                    <select name="lang" id="languageSelect" class="form-select w-auto">
+                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
+                    <select name="selected_language" id="languageSelect" class="form-select w-auto">
                         <option value="tamil">Tamil</option>
                         <option value="hindi">Hindi</option>
                         <option value="telugu">Telugu</option>
@@ -614,14 +620,14 @@
                             Languages
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="languagesDropdown">
-                            <li><a class="dropdown-item" href="/language?lang=tamil">Tamil</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=hindi">Hindi</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=telugu">Telugu</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=malayalam">Malayalam</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=kannada">Kannada</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=bengali">Bengali</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=marathi">Marathi</a></li>
-                            <li><a class="dropdown-item" href="/language?lang=punjabi">Punjabi</a></li>
+                            <li><a class="dropdown-item" href="/language/tamil">Tamil</a></li>
+                            <li><a class="dropdown-item" href="/language/hindi">Hindi</a></li>
+                            <li><a class="dropdown-item" href="/language/telugu">Telugu</a></li>
+                            <li><a class="dropdown-item" href="/language/malayalam">Malayalam</a></li>
+                            <li><a class="dropdown-item" href="/language/kannada">Kannada</a></li>
+                            <li><a class="dropdown-item" href="/language/bengali">Bengali</a></li>
+                            <li><a class="dropdown-item" href="/language/marathi">Marathi</a></li>
+                            <li><a class="dropdown-item" href="/language/punjabi">Punjabi</a></li>
                         </ul>
                     </div>
                 </div>
@@ -653,6 +659,7 @@
             </div>
         </div>
     </header>
+
     <main class="container-fluid mt-4">
         <div class="promo-banner">
             <img src="https://image.tmdb.org/t/p/original/6xoVGz8HWkR9KGEnWaARRFbiiLl.png" alt="Movie Logo" class="movie-logo">
@@ -660,16 +667,18 @@
                 <i class="bi bi-play-fill"></i> Watch Now
             </a>
         </div>
+
         <div class="language-section" id="section-tamil">
             <div class="language-header">
-                <h2 class="language-title">Tamil <a href="/language?lang=tamil" class="explore-link" title="Explore All Tamil movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Tamil
+                    <a href="/language/tamil" class="explore-link" title="Explore All Tamil movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-tamil">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="tamil" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -677,24 +686,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tamil"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-tamil">
-                    <div class="d-flex movies-row" id="movies-row-tamil">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tamil" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-tamil">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-tamil"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-tamil" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-hindi">
             <div class="language-header">
-                <h2 class="language-title">Hindi <a href="/language?lang=hindi" class="explore-link" title="Explore All Hindi movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Hindi
+                    <a href="/language/hindi" class="explore-link" title="Explore All Hindi movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-hindi">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="hindi" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -702,24 +718,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-hindi"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-hindi">
-                    <div class="d-flex movies-row" id="movies-row-hindi">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-hindi" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-hindi">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-hindi"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-hindi" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-telugu">
             <div class="language-header">
-                <h2 class="language-title">Telugu <a href="/language?lang=telugu" class="explore-link" title="Explore All Telugu movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Telugu
+                    <a href="/language/telugu" class="explore-link" title="Explore All Telugu movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-telugu">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="telugu" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -727,24 +750,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-telugu"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-telugu">
-                    <div class="d-flex movies-row" id="movies-row-telugu">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-telugu" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-telugu">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-telugu"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-telugu" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-malayalam">
             <div class="language-header">
-                <h2 class="language-title">Malayalam <a href="/language?lang=malayalam" class="explore-link" title="Explore All Malayalam movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Malayalam
+                    <a href="/language/malayalam" class="explore-link" title="Explore All Malayalam movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-malayalam">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="malayalam" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -752,24 +782,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-malayalam"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-malayalam">
-                    <div class="d-flex movies-row" id="movies-row-malayalam">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-malayalam" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-malayalam">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-malayalam"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-malayalam" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-kannada">
             <div class="language-header">
-                <h2 class="language-title">Kannada <a href="/language?lang=kannada" class="explore-link" title="Explore All Kannada movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Kannada
+                    <a href="/language/kannada" class="explore-link" title="Explore All Kannada movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-kannada">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="kannada" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -777,24 +814,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-kannada"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-kannada">
-                    <div class="d-flex movies-row" id="movies-row-kannada">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-kannada" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-kannada">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-kannada"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-kannada" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-bengali">
             <div class="language-header">
-                <h2 class="language-title">Bengali <a href="/language?lang=bengali" class="explore-link" title="Explore All Bengali movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Bengali
+                    <a href="/language/bengali" class="explore-link" title="Explore All Bengali movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-bengali">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="bengali" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -802,24 +846,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-bengali"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-bengali">
-                    <div class="d-flex movies-row" id="movies-row-bengali">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-bengali" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-bengali">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-bengali"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-bengali" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-marathi">
             <div class="language-header">
-                <h2 class="language-title">Marathi <a href="/language?lang=marathi" class="explore-link" title="Explore All Marathi movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Marathi
+                    <a href="/language/marathi" class="explore-link" title="Explore All Marathi movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-marathi">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="marathi" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -827,24 +878,31 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-marathi"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-marathi">
-                    <div class="d-flex movies-row" id="movies-row-marathi">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-marathi" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-marathi">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-marathi"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-marathi" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         <div class="language-section" id="section-punjabi">
             <div class="language-header">
-                <h2 class="language-title">Punjabi <a href="/language?lang=punjabi" class="explore-link" title="Explore All Punjabi movies">
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="explore-text">Explore</span>
-                </a>
+                <h2 class="language-title">Punjabi
+                    <a href="/language/punjabi" class="explore-link" title="Explore All Punjabi movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
                 </h2>
                 <div class="d-flex align-items-center gap-2">
                     <div class="spinner-border spinner-border-sm" role="status" id="spinner-punjabi">
-                        <span class="visually-hidden">Loading...</span>
+                      <span class="visually-hidden">Loading...</span>
                     </div>
                     <button class="btn load-more-arrow" data-language="punjabi" data-page="1" data-category="popular" title="Load More">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -852,355 +910,404 @@
                 </div>
             </div>
             <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-punjabi"><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller-wrapper" id="scroller-wrapper-punjabi">
-                    <div class="d-flex movies-row" id="movies-row-punjabi">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-punjabi" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-punjabi">
                         </div>
+                    </div>
                 </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-punjabi"><i class="bi bi-chevron-right"></i></button>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-punjabi" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
     </main>
-
-    <footer class="text-center text-muted py-4">
-        <p>&copy; 2024 Thirai. All rights reserved.</p>
-    </footer>
-
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="aboutModalLabel">About</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Thirai is a movie search engine built to provide easy access to a vast library of movies. We strive to offer a clean, user-friendly experience for all movie enthusiasts.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <h6 class="dropdown-header">Preferred Language</h6>
-                    <div class="list-group list-group-flush">
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="all">All Languages</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="tamil">Tamil</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="hindi">Hindi</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="telugu">Telugu</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="malayalam">Malayalam</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="kannada">Kannada</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="bengali">Bengali</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="marathi">Marathi</a>
-                        <a href="#" class="list-group-item preferred-lang-option" data-language="punjabi">Punjabi</a>
-                    </div>
-                    <button id="disablePreferredLanguage" class="btn btn-sm btn-outline-danger mt-3" style="display: none;">Disable Language Preference</button>
-
-                    <h6 class="dropdown-header mt-4">Appearance</h6>
-                    <div class="list-group list-group-flush">
-                        <a href="#" class="list-group-item theme-option" data-theme="light">Light</a>
-                        <a href="#" class="list-group-item theme-option" data-theme="dark">Dark</a>
-                        <a href="#" class="list-group-item theme-option" data-theme="system">System Default</a>
-                    </div>
-
-                    <a href="#" class="d-block mt-3" id="aboutButtonInModal">About Thirai</a>
-                </div>
-            </div>
-        </div>
-    </div>
     
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+            <p class="text-muted mt-3">
+                <i class="bi bi-filetype-py"></i> Powered by Python
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const API_BASE_URL = window.location.origin;
-        const searchForm = document.getElementById('searchForm');
-        const languageSelect = document.getElementById('languageSelect');
-        const languageSections = document.querySelectorAll('.language-section');
+        const API_BASE_URL = 'https://backendthirai-test.onrender.com';
+
+        // --- Element Selectors ---
+        const body = document.body;
+        const faviconLink = document.getElementById('faviconLink');
+        const headerLogo = document.getElementById('headerLogo');
+        const overlayLogo = document.getElementById('overlayLogo');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
+        let initialLoadComplete = false;
+        const logoLink = document.getElementById('logoLink');
+
+        // Start a 7-second timer to show the slow network message
+        const loadingTimer = setTimeout(() => {
+            if (!initialLoadComplete) {
+                slowNetworkMessage.style.display = 'flex';
+            }
+        }, 7000);
+        
         const preferredLangOptions = document.querySelectorAll('.preferred-lang-option');
         const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguage');
-        const logoLink = document.getElementById('logoLink');
-        const headerLogo = document.getElementById('headerLogo');
-        const searchInput = document.getElementById('searchInput');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const spinner = loadingOverlay.querySelector('.spinner-border');
-        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
-        const aboutButton = document.getElementById('aboutButton');
-        const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-        const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        const disableLangOptionLi = document.getElementById('disableLangOptionLi');
+        const themeOptions = document.querySelectorAll('.theme-option');
 
-        // Helper function to check scroll position
-        function updateScrollButtonsVisibility(container, prevBtn, nextBtn) {
-            if (!container || !prevBtn || !nextBtn) return;
-            const isAtStart = container.scrollLeft === 0;
-            const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
-
-            if (isAtStart) {
-                prevBtn.style.display = 'none';
-            } else {
-                prevBtn.style.display = 'flex';
+        // --- NEW FUNCTION: Update Logo Height ---
+        function updateLogoHeight() {
+            const logoHeight = headerLogo.getAttribute('data-height');
+            if (logoHeight) {
+                headerLogo.style.height = `${logoHeight}px`;
             }
-            if (isAtEnd) {
-                nextBtn.style.display = 'none';
-            } else {
-                nextBtn.style.display = 'flex';
-            }
-
-            container.closest('.movies-scroller-wrapper').classList.toggle('is-at-start', isAtStart);
-            container.closest('.movies-scroller-wrapper').classList.toggle('is-at-end', isAtEnd);
+        }
+        
+        // --- THEME MANAGEMENT ---
+        function updateThemeAssets(isDarkMode) {
+            const lightLogo = '/static/thiraiblack.png';
+            const darkLogo = '/static/thiraiwhite.png';
+            
+            faviconLink.href = isDarkMode ? '/static/favicon.png' : '/static/faviconlight.png';
+            headerLogo.src = isDarkMode ? darkLogo : lightLogo;
+            overlayLogo.src = isDarkMode ? darkLogo : lightLogo;
         }
 
-        // Language data
-        const languages = {
-            "tamil": "Tamil", "hindi": "Hindi", "telugu": "Telugu", "malayalam": "Malayalam",
-            "kannada": "Kannada", "bengali": "Bengali", "marathi": "Marathi", "punjabi": "Punjabi"
-        };
-        const allLang = Object.keys(languages);
-        let fetchQueue = [];
-
-        // --- Theme and Preferences Logic ---
         function applyTheme(theme) {
-            document.body.classList.remove('light-mode', 'dark-mode');
-            if (theme === 'light' || theme === 'dark') {
-                document.body.classList.add(`${theme}-mode`);
+            let isDarkMode;
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                isDarkMode = true;
+            } else if (theme === 'light') {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                isDarkMode = false;
+            } else { // System default
+                localStorage.removeItem('theme');
+                isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDarkMode) {
+                    body.classList.add('dark-mode');
+                } else {
+                    body.classList.remove('dark-mode');
+                }
             }
-            localStorage.setItem('theme', theme);
-            updateFavicon(theme);
-            updateLogo(theme);
+            updateThemeAssets(isDarkMode);
         }
 
-        function updateFavicon(theme) {
-            const faviconLink = document.getElementById('faviconLink');
-            if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                faviconLink.href = '/static/favicon-white.png';
-            } else {
-                faviconLink.href = '/static/favicon.png';
-            }
-        }
-
-        function updateLogo(theme) {
-            const logo = document.getElementById('headerLogo');
-            const overlayLogo = document.getElementById('overlayLogo');
-            if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                if (logo) logo.src = '/static/thirailight.png';
-                if (overlayLogo) overlayLogo.src = '/static/thirailight.png';
-            } else {
-                if (logo) logo.src = '/static/thiraiblack.png';
-                if (overlayLogo) overlayLogo.src = '/static/thiraiblack.png';
-            }
-        }
-
-        const storedTheme = localStorage.getItem('theme') || 'system';
-        applyTheme(storedTheme);
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (localStorage.getItem('theme') === 'system') {
-                applyTheme('system');
-            }
+        // Apply theme on initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme(localStorage.getItem('theme') || 'system');
+            updateLogoHeight();
+            updateLogoLink();
         });
-
-        // Event listener for theme change
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', function(e) {
-                e.preventDefault();
-                applyTheme(this.dataset.theme);
-            });
-        });
-
-        // Function to set the preferred language and hide other sections
-        function setPreferredLanguage(lang) {
-            localStorage.setItem('preferredLanguage', lang);
-            allLang.forEach(l => {
-                const section = document.getElementById(`section-${l}`);
-                if (section) {
-                    section.style.display = (l === lang) ? '' : 'none';
+        
+        // Listen for system theme changes
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!localStorage.getItem('theme')) { // Only apply if theme is 'system'
+                    applyTheme('system');
                 }
             });
-            if (lang !== 'all') {
-                disablePreferredLanguageBtn.style.display = 'block';
-            } else {
-                disablePreferredLanguageBtn.style.display = 'none';
-            }
         }
-
-        // Function to disable language preference and show all sections
-        function disablePreferredLanguage() {
-            localStorage.removeItem('preferredLanguage');
-            allLang.forEach(l => {
-                const section = document.getElementById(`section-${l}`);
-                if (section) {
-                    section.style.display = '';
-                }
+        
+        // Event listeners for theme options in dropdown
+        themeOptions.forEach(option => {
+            option.addEventListener('click', (event) => {
+                event.preventDefault();
+                applyTheme(event.currentTarget.dataset.theme);
             });
-            disablePreferredLanguageBtn.style.display = 'none';
-            updateSettingsActiveState('all');
+        });
+
+        // --- PREFERRED LANGUAGE ---
+        function updateDisableLangOptionVisibility() {
+            // UPDATED: Show the disable button if any language preference is set.
+            disableLangOptionLi.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
         }
 
-        // Function to update the active state in the settings modal
-        function updateSettingsActiveState(activeLang) {
+        // Function to set the active class on the correct language option
+        function updateActiveLanguageOption(language) {
             preferredLangOptions.forEach(option => {
                 option.classList.remove('active');
-                if (option.dataset.language === activeLang) {
+                if (option.dataset.language === language) {
                     option.classList.add('active');
                 }
             });
         }
 
+        // NEW: Function to update the logo's href based on the preferred language
+        function updateLogoLink() {
+            const preferredLanguage = localStorage.getItem('preferred-language');
+            if (preferredLanguage && preferredLanguage !== 'all') {
+                logoLink.href = `/language/${preferredLanguage}`;
+            } else {
+                logoLink.href = '/';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check on page load and set active class
+            const storedLanguage = localStorage.getItem('preferred-language');
+            updateDisableLangOptionVisibility();
+            updateActiveLanguageOption(storedLanguage);
+        });
+
         preferredLangOptions.forEach(option => {
-            option.addEventListener('click', function(e) {
-                e.preventDefault();
-                const lang = this.dataset.language;
-                if (lang === 'all') {
-                    disablePreferredLanguage();
-                } else {
-                    setPreferredLanguage(lang);
-                    updateSettingsActiveState(lang);
-                }
+            option.addEventListener('click', (event) => {
+                event.preventDefault();
+                const selectedLanguage = event.currentTarget.dataset.language;
+                localStorage.setItem('preferred-language', selectedLanguage);
+                updateDisableLangOptionVisibility();
+                updateActiveLanguageOption(selectedLanguage);
+                updateLogoLink(); // Update the logo link when a preference is set
             });
         });
 
-        if (disablePreferredLanguageBtn) {
-            disablePreferredLanguageBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                disablePreferredLanguage();
-            });
-        }
+        disablePreferredLanguageBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            localStorage.removeItem('preferred-language');
+            updateDisableLangOptionVisibility();
+            updateActiveLanguageOption(null); // Remove active class from all language options
+            updateLogoLink(); // Update the logo link when the preference is disabled
+        });
         
-        // --- API & Data Fetching ---
-        function fetchAndRenderMovies(lang, category = 'popular') {
-            const url = `${API_BASE_URL}/api/movies/language/${lang}?category=${category}`;
-            const spinner = document.getElementById(`spinner-${lang}`);
-            const loadMoreBtn = document.querySelector(`.load-more-arrow[data-language="${lang}"]`);
+        // --- ABOUT MODAL ---
+        document.getElementById('aboutButton').addEventListener('click', function (event) {
+            event.preventDefault();
+            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+            aboutModal.show();
+        });
+
+        // --- START: MODIFIED SEARCH LOGIC ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const languageSelect = document.getElementById('languageSelect');
+
+            // This function updates the form's action attribute based on the selected language
+            function updateSearchFormAction() {
+                if (languageSelect && searchForm) {
+                    const selectedLanguage = languageSelect.value;
+                    searchForm.action = `/language/${selectedLanguage}`;
+                }
+            }
+
+            // Set the initial form action when the page loads
+            updateSearchFormAction();
+
+            // Add a listener to update the action whenever the user changes the language
+            if (languageSelect) {
+                languageSelect.addEventListener('change', updateSearchFormAction);
+            }
+
+            // Search validation logic
+            if (searchForm) {
+                searchForm.addEventListener('submit', (e) => {
+                    if (searchInput.value.trim() === '') {
+                        e.preventDefault();
+                        searchInput.classList.add('highlight-red');
+                        searchInput.focus();
+                    } else {
+                        searchInput.classList.remove('highlight-red');
+                    }
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    if (searchInput.value.trim() !== '') {
+                        searchInput.classList.remove('highlight-red');
+                    }
+                });
+            }
+        });
+        // --- END: MODIFIED SEARCH LOGIC ---
+
+
+        // --- MOVIE LOADING LOGIC ---
+        const languageSections = document.querySelectorAll('.language-section');
+        const languagePages = {};
+
+        async function loadMovies(language, category, pageToLoad) {
+            const moviesContainer = document.getElementById(`movies-row-${language}`);
+            const spinner = document.getElementById(`spinner-${language}`);
+            const button = document.querySelector(`.load-more-arrow[data-language="${language}"]`);
             
-            if (fetchQueue.includes(url)) return; // Prevent duplicate requests
-            fetchQueue.push(url);
-            
+            button.style.display = 'none';
             if (spinner) spinner.style.display = 'inline-block';
-            if (loadMoreBtn) loadMoreBtn.disabled = true;
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const moviesRow = document.getElementById(`movies-row-${lang}`);
-                    if (!moviesRow) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/language/${language}?category=${category}&page=${pageToLoad}`);
 
-                    moviesRow.innerHTML = ''; // Clear existing content
+                if (!res.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const data = await res.json();
+
+                const existingMessage = moviesContainer.querySelector('.empty-or-error-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+
+                if (!data.movies || data.movies.length === 0) {
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.className = 'text-muted my-3 empty-or-error-message';
+                    emptyMessage.textContent = 'No movies found for this language.';
+                    moviesContainer.appendChild(emptyMessage);
                     
-                    if (data.length > 0) {
-                        data.forEach(movie => {
-                            const movieCard = `
-                                <div class="col">
-                                    <a href="/watch?url=${encodeURIComponent(movie.watch_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
-                                        <div class="card movie-card">
-                                            <img src="${movie.poster_url}" class="card-img-top movie-img" alt="${movie.title} poster">
-                                            <div class="movie-title-text">${movie.title}</div>
-                                        </div>
+                    button.disabled = true;
+                    button.innerHTML = '<i class="bi bi-check-lg"></i>';
+
+                } else {
+                    const moviesHtml = data.movies.map(movie => {
+                        const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
+                        const movieTitleEncoded = encodeURIComponent(movie.title);
+                        return `
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/watch?url=${moviePageUrlEncoded}&title=${movieTitleEncoded}" class="movie-link">
+                                        <img src="${movie.img_url}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
+                                        <div class="movie-title-text">${movie.title}</div>
                                     </a>
                                 </div>
-                            `;
-                            moviesRow.innerHTML += movieCard;
-                        });
-                        // Initialize scroll button visibility after content is loaded
-                        const scrollContainer = document.getElementById(`movies-row-${lang}`);
-                        const prevBtn = document.getElementById(`prev-btn-${lang}`);
-                        const nextBtn = document.getElementById(`next-btn-${lang}`);
-                        updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
+                            </div>
+                        `;
+                    }).join('');
+                    moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
+                    
+                    if (pageToLoad === languagePages[language]) {
+                        languagePages[language]++;
+                    }
+                    
+                    if (!data.has_more) {
+                        button.disabled = true;
+                        button.innerHTML = '<i class="bi bi-check-lg"></i>';
                     } else {
-                        moviesRow.innerHTML = `<div class="col-12 text-center text-muted py-5">No movies found for this language.</div>`;
+                        button.disabled = false;
+                        button.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
                     }
-                })
-                .catch(error => {
-                    console.error(`Error fetching movies for ${lang}:`, error);
-                    const moviesRow = document.getElementById(`movies-row-${lang}`);
-                    if (moviesRow) {
-                         moviesRow.innerHTML = `<div class="col-12 text-center text-danger py-5">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            Failed to load movies. Please try again.
-                         </div>`;
-                    }
-                })
-                .finally(() => {
-                    fetchQueue = fetchQueue.filter(item => item !== url); // Remove from queue
-                    if (spinner) spinner.style.display = 'none';
-                    if (loadMoreBtn) loadMoreBtn.disabled = false;
-                    hideLoadingOverlay();
-                });
-        }
-
-        // Hide the loading overlay when a request is finished
-        function hideLoadingOverlay() {
-            // Check if all initial fetches are done
-            const allFetchesCompleted = allLang.every(lang => !fetchQueue.some(url => url.includes(lang)));
-            if (allFetchesCompleted && loadingOverlay.style.opacity !== '0') {
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                    document.body.classList.remove('no-scroll');
-                }, 500);
+                }
+            } catch (error) {
+                console.error(`Error loading movies for ${language}:`, error);
+                if (button) {
+                    button.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+                    button.disabled = true;
+                }
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'text-danger my-3 empty-or-error-message';
+                errorMessage.textContent = `Could not load ${language} movies due to a network or server error. Please try again later.`;
+                moviesContainer.appendChild(errorMessage);
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+                button.style.display = 'flex'; // Show button again after loading
             }
         }
 
-        // Show slow network message after 5 seconds if loading is still active
-        const slowNetworkTimeout = setTimeout(() => {
-            if (loadingOverlay.style.opacity !== '0') {
-                slowNetworkMessage.style.display = 'flex';
-            }
-        }, 5000);
-
-        // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const preferredLanguage = localStorage.getItem('preferredLanguage');
+        document.addEventListener('DOMContentLoaded', function() {
+            // NEW: Add the no-scroll class to the body on load to prevent scrolling during the overlay
             document.body.classList.add('no-scroll');
+
+            const languages = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+            let completedLoads = 0;
+            const totalInitialLoads = languages.length * 2; // Two initial loads for each language
+
+            const checkCompletion = () => {
+                completedLoads++;
+                if (completedLoads >= totalInitialLoads) {
+                    initialLoadComplete = true;
+                    clearTimeout(loadingTimer);
+                    // Fade out and hide the loading overlay
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        // NEW: Remove the no-scroll class once the overlay is gone
+                        document.body.classList.remove('no-scroll');
+                    }, 500); // The duration of the CSS transition
+                }
+            };
             
-            if (preferredLanguage && preferredLanguage !== 'all') {
-                // Fetch and show only the preferred language
-                setPreferredLanguage(preferredLanguage);
-                updateSettingsActiveState(preferredLanguage);
-                fetchAndRenderMovies(preferredLanguage);
-            } else {
-                // Fetch all languages concurrently
-                allLang.forEach(lang => {
-                    fetchAndRenderMovies(lang);
-                });
-                updateSettingsActiveState('all');
-            }
-            
-            // Event listener for About button
-            if (aboutButton) {
-                aboutButton.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    aboutModal.show();
-                });
-            }
+            languageSections.forEach(section => {
+                const lang = section.id.replace('section-', '');
+                const category = 'popular';
+                languagePages[lang] = 1;
+                loadMovies(lang, category, languagePages[lang]).finally(checkCompletion);
+                languagePages[lang]++;
+                loadMovies(lang, category, languagePages[lang]).finally(checkCompletion);
+            });
         });
 
-        // Add event listeners for the Load More buttons
-        document.querySelectorAll('.load-more-arrow').forEach(button => {
-            button.addEventListener('click', function() {
-                const lang = this.dataset.language;
-                let page = parseInt(this.dataset.page);
-                page += 1;
-                this.dataset.page = page;
-                fetchAndRenderMovies(lang, 'recent', page);
+        const loadMoreButtons = document.querySelectorAll('.load-more-arrow');
+        loadMoreButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const language = this.dataset.language;
+                const category = this.dataset.category;
+                loadMovies(language, category, languagePages[language]);
             });
         });
         
+        // Add this new code to the existing script block at the end
+        const scrollButtons = document.querySelectorAll('.scroll-btn');
+
+        // NEW: Modified function to handle button visibility and the fade effect
+        function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
+            if (!scrollContainer || !prevBtn || !nextBtn) return;
+
+            const wrapper = scrollContainer.closest('.movies-scroller-wrapper');
+            if (!wrapper) return;
+
+            const atStart = scrollContainer.scrollLeft <= 5;
+            const atEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 5;
+            const isScrollable = scrollContainer.scrollWidth > scrollContainer.clientWidth;
+
+            // Control the disabled state of the buttons. This will trigger the CSS transition
+            prevBtn.disabled = atStart;
+            nextBtn.disabled = atEnd || !isScrollable;
+
+            // Add/remove classes on the wrapper to control the fade effect
+            if (atStart || !isScrollable) {
+                wrapper.classList.add('is-at-start');
+            } else {
+                wrapper.classList.remove('is-at-start');
+            }
+
+            if (atEnd || !isScrollable) {
+                wrapper.classList.add('is-at-end');
+            } else {
+                wrapper.classList.remove('is-at-end');
+            }
+        }
+
         // Add event listeners for the scroll buttons
-        document.querySelectorAll('.scroll-btn').forEach(button => {
+        scrollButtons.forEach(button => {
             button.addEventListener('click', () => {
-                const lang = button.id.replace('prev-btn-', '').replace('next-btn-', '');
+                const lang = button.id.split('-').pop();
                 const scrollContainer = document.getElementById(`movies-row-${lang}`);
+                
                 if (!scrollContainer) return;
 
-                const cardWidth = scrollContainer.querySelector('.col').offsetWidth;
-                const scrollAmount = cardWidth * 5; // Scroll by 5 cards
+                const movieCard = scrollContainer.querySelector('.movie-card');
+                if (!movieCard) return;
+
+                // Calculate the width of three movie cards plus their margins
+                const movieCardWidth = movieCard.offsetWidth;
+                const scrollAmount = movieCardWidth * 3 + (16 * 3); // 16px is the margin-right of movie-card
 
                 if (button.classList.contains('scroll-btn-prev')) {
                     scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
@@ -1236,3 +1343,4 @@
     </script>
 </body>
 </html>
+
