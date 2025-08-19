@@ -30,7 +30,7 @@
             --primary-hover-color: #0056b3;
             --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            --header-height: 80px; /* NEW: A variable for the header height, default value */
+            /* --header-height: 80px; /* REMOVED: This will be handled by JavaScript */
         }
 
         body.dark-mode {
@@ -55,7 +55,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            padding-top: var(--header-height); /* NEW: Use the dynamic variable */
+            /* padding-top: var(--header-height); /* REMOVED: This is now handled by JavaScript */
             overflow-x: hidden; /* NEW: PREVENT HORIZONTAL SCROLLING */
         }
         
@@ -558,6 +558,23 @@
         let currentPage = 1;
         let isLoading = false;
 
+        /**
+         * START: Mobile Header Overlap Fix
+         * Dynamically adjusts the body's top padding to match the header's height.
+         * This prevents the fixed header from overlapping the content below it,
+         * especially on mobile where the header's height changes.
+         */
+        function adjustBodyPadding() {
+            const header = document.querySelector('.app-header');
+            if (header) {
+                const headerHeight = header.offsetHeight;
+                body.style.paddingTop = `${headerHeight}px`;
+            }
+        }
+        /**
+         * END: Mobile Header Overlap Fix
+         */
+
         // --- Theme Management ---
         function updateThemeAssets(isDarkMode) {
             const lightLogo = './static/thiraiblack.png';
@@ -726,6 +743,7 @@
         
         // --- Page Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
+            adjustBodyPadding(); // Set initial padding
             body.classList.add('no-scroll'); // Prevent scrolling during load
             applyTheme(localStorage.getItem('theme') || 'system');
             updateActiveThemeOption(localStorage.getItem('theme') || 'system');
@@ -808,6 +826,8 @@
         }
 
         // --- Event Listeners ---
+        window.addEventListener('resize', adjustBodyPadding); // Recalculate padding on resize
+
         loadMoreBtn.addEventListener('click', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang');
