@@ -223,9 +223,9 @@
         
         /* --- Load More & Spinner --- */
         .load-more-container {
-            display: flex; /* MODIFIED: Use flexbox for centering */
-            flex-direction: column; /* MODIFIED: Stack items vertically */
-            align-items: center; /* MODIFIED: Center items horizontally */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 2rem 0;
         }
         
@@ -351,16 +351,37 @@
             .header-search { flex-grow: 1; }
         }
 
-        /* Mobile-specific adjustments */
+        /* --- START: Mobile UI Header Adjustments --- */
         @media (max-width: 575.98px) {
             .app-header .container-fluid {
-                padding: 0.75rem 0.5rem;
+                padding-inline: 0.5rem; /* Reduce side padding */
+                flex-wrap: nowrap; /* Force logo, search, and nav onto one line */
+                gap: 0.5rem; /* Add a small gap between header items */
             }
+
+            /* Reset the tablet-style search bar layout to bring it inline */
+            .header-main-content {
+                order: initial; /* Reset order to default */
+                width: auto; /* Allow search to shrink */
+                margin-top: 0; /* Remove top margin */
+                min-width: 50px; /* Prevent search from collapsing entirely */
+            }
+            
+            /* Further shrink the navigation links to fit */
             .header-center-nav .nav-link {
-                padding: 0.5rem 0.5rem;
-                font-size: 0.85rem;
+                padding: 0.4rem 0.3rem;
+                font-size: 0.75rem;
+                white-space: nowrap; /* Prevent link text from wrapping */
+            }
+
+            /* Reduce the gap between nav links */
+            #categoryNav {
+                gap: 0.2rem;
+                /* The me-3 class gives 1rem of margin. Override it to save space. */
+                margin-right: 0 !important;
             }
         }
+        /* --- END: Mobile UI Header Adjustments --- */
         
         /* Responsive grid */
         .movie-grid .row {
