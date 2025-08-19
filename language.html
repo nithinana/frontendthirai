@@ -58,6 +58,11 @@
             padding-top: var(--header-height); /* NEW: Use the dynamic variable */
             overflow-x: hidden; /* NEW: PREVENT HORIZONTAL SCROLLING */
         }
+        
+        /* NEW: Prevent body from scrolling while overlay is active */
+        body.no-scroll {
+            overflow: hidden;
+        }
 
         /* --- Header and Navigation --- */
         .app-header {
@@ -252,25 +257,46 @@
             display: none;
         }
         
-        /* --- Loading Screen --- */
-        #loadingScreen {
+        /* --- START: Loading Screen --- */
+        #loadingOverlay {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--bg-color);
+            z-index: 9999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
             opacity: 1;
-            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
-            visibility: visible;
+            transition: opacity 0.5s ease;
         }
 
-        #loadingScreen.fade-out {
-            opacity: 0;
-            visibility: hidden;
+        #loadingOverlay img {
+            max-width: 250px; /* Adjusted size */
+            height: auto;
+            margin-bottom: 20px;
+            animation: pulse-logo 1.5s infinite ease-in-out;
         }
+        
+        #slowNetworkMessage {
+            max-width: 80%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        @keyframes pulse-logo {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        /* --- END: Loading Screen --- */
 
         /* --- Modal Styling --- */
         .modal-content {
@@ -411,8 +437,11 @@
 </head>
 <body>
 
-    <div id="loadingScreen">
-        <img id="loadingImage" src="./static/thiraiblack.png" alt="Loading..." style="max-width: 250px;">
+    <div id="loadingOverlay">
+        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading...">
+        <div id="slowNetworkMessage" style="display: none;">
+            <i class="bi bi-info-circle"></i> <span>Servers seem to be slow. Please be patient.</span>
+        </div>
     </div>
 
     <header class="app-header">
@@ -513,13 +542,18 @@
         const categoryNav = document.getElementById('categoryNav');
         const languageDropdownMenu = document.getElementById('languageDropdownMenu');
         const preferredLangList = document.getElementById('preferredLangList');
-        const loadingScreen = document.getElementById('loadingScreen');
         const headerLogo = document.getElementById('headerLogo');
-        const loadingImage = document.getElementById('loadingImage');
         const faviconLink = document.getElementById('faviconLink');
         const themeOptions = document.querySelectorAll('.theme-option');
         const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
         const logoLink = document.getElementById('logoLink');
+        
+        // --- NEW: Loading Overlay Selectors ---
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const overlayLogo = document.getElementById('overlayLogo');
+        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
+        let initialLoadComplete = false;
+        let loadingTimer;
 
         let currentPage = 1;
         let isLoading = false;
@@ -530,7 +564,7 @@
             const darkLogo = './static/thiraiwhite.png';
             faviconLink.href = isDarkMode ? './static/favicon.png' : './static/faviconlight.png';
             headerLogo.src = isDarkMode ? darkLogo : lightLogo;
-            loadingImage.src = isDarkMode ? darkLogo : lightLogo;
+            overlayLogo.src = isDarkMode ? darkLogo : lightLogo; // Update overlay logo
         }
 
         function applyTheme(theme) {
@@ -676,22 +710,35 @@
             } finally {
                 spinner.style.display = 'none';
                 isLoading = false;
-                if (loadingScreen.style.display !== 'none') {
-                    loadingScreen.classList.add('fade-out');
-                    loadingScreen.addEventListener('transitionend', () => {
-                        loadingScreen.style.display = 'none';
-                    }, { once: true });
+                
+                // --- NEW: Handle loading overlay fade out ---
+                if (!initialLoadComplete) {
+                    initialLoadComplete = true;
+                    clearTimeout(loadingTimer);
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        body.classList.remove('no-scroll');
+                    }, 500); // Match CSS transition duration
                 }
             }
         }
         
         // --- Page Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
+            body.classList.add('no-scroll'); // Prevent scrolling during load
             applyTheme(localStorage.getItem('theme') || 'system');
             updateActiveThemeOption(localStorage.getItem('theme') || 'system');
 
             populateLanguageMenus();
             setupPreferredLanguage();
+
+            // --- NEW: Start timer for slow network message ---
+            loadingTimer = setTimeout(() => {
+                if (!initialLoadComplete) {
+                    slowNetworkMessage.style.display = 'flex';
+                }
+            }, 7000);
 
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang');
@@ -701,7 +748,16 @@
             if (!lang || !ALL_LANGUAGES.includes(lang)) {
                 moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language specified in URL.</p>';
                 loadMoreBtn.style.display = 'none';
-                loadingScreen.classList.add('fade-out');
+                // Still need to hide loading screen on error
+                if (!initialLoadComplete) {
+                    initialLoadComplete = true;
+                    clearTimeout(loadingTimer);
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        body.classList.remove('no-scroll');
+                    }, 500);
+                }
                 document.title = "Error - Thirai";
                 return;
             }
