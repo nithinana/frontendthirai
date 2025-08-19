@@ -738,7 +738,7 @@
                 const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
                 
                 const li = document.createElement('li');
-                li.innerHTML = `<a class="dropdown-item" href="./language.html?lang=${lang}">${capitalized}</a>`;
+                li.innerHTML = `<a class="dropdown-item" href="./language.html?lang=${lang}&category=popular">${capitalized}</a>`;
                 languageDropdownMenu.appendChild(li);
 
                 const prefLink = document.createElement('a');
