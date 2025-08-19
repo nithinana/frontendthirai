@@ -30,7 +30,6 @@
             --primary-hover-color: #0056b3;
             --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            /* --header-height: 80px; /* REMOVED: This will be handled by JavaScript */
         }
 
         body.dark-mode {
@@ -55,11 +54,9 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            /* padding-top: var(--header-height); /* REMOVED: This is now handled by JavaScript */
-            overflow-x: hidden; /* NEW: PREVENT HORIZONTAL SCROLLING */
+            overflow-x: hidden; /* PREVENT HORIZONTAL SCROLLING */
         }
         
-        /* NEW: Prevent body from scrolling while overlay is active */
         body.no-scroll {
             overflow: hidden;
         }
@@ -100,7 +97,6 @@
             color: var(--text-color);
             opacity: 1;
         }
-        /* Hide the default bootstrap caret since we are using an icon */
         .logo-dropdown-toggle::after {
             display: none;
         }
@@ -122,7 +118,7 @@
             font-weight: 600;
         }
         
-        /* --- Search Bar in Header (Layout from all.html) --- */
+        /* --- Search Bar in Header --- */
         .header-search {
             display: flex;
             align-items: center;
@@ -135,7 +131,7 @@
             border: 1px solid var(--input-border-color);
             border-radius: 0.5rem;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            height: calc(1.5em + 1rem + 2px); /* Ensures the input has a fixed height */
+            height: calc(1.5em + 1rem + 2px); 
         }
 
         .header-search .form-control:focus {
@@ -143,27 +139,20 @@
             border-color: var(--primary-color);
         }
         
-        /* NEW RULE for placeholder text in dark mode */
         body.dark-mode .header-search .form-control::placeholder {
-            color: #888; /* A lighter gray for visibility */
-            opacity: 1; /* Ensure it's not transparent */
+            color: #888;
+            opacity: 1;
         }
         
-        /* ADJUSTMENTS FOR SEARCH BUTTON */
         .header-search .btn-primary {
-            /* Remove default button padding */
             padding: 0; 
-            /* Set a fixed size to match the input height */
             height: calc(1.5em + 1rem + 2px);
             width: calc(1.5em + 1rem + 2px); 
-            /* Vertically center the icon */
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Make it a little smaller by reducing font size */
             font-size: 1.1rem;
         }
-        /* END ADJUSTMENTS */
         
         .dropdown-menu {
             background-color: var(--card-bg-color);
@@ -189,7 +178,6 @@
             padding: 1.5rem 0;
         }
         
-        /* --- STYLES FOR THE MOVIE TITLE BAR --- */
         .movie-card .movie-title {
             padding: 0.75rem 1rem;
             font-weight: 600;
@@ -228,14 +216,16 @@
 
         .movie-img {
             width: 100%;
-            aspect-ratio: 2 / 3; /* For a consistent movie poster shape */
+            aspect-ratio: 2 / 3;
             object-fit: cover;
-            background-color: var(--bg-color); /* Placeholder color while loading */
+            background-color: var(--bg-color);
         }
         
         /* --- Load More & Spinner --- */
         .load-more-container {
-            text-align: center;
+            display: flex; /* MODIFIED: Use flexbox for centering */
+            flex-direction: column; /* MODIFIED: Stack items vertically */
+            align-items: center; /* MODIFIED: Center items horizontally */
             padding: 2rem 0;
         }
         
@@ -272,7 +262,7 @@
         }
 
         #loadingOverlay img {
-            max-width: 250px; /* Adjusted size */
+            max-width: 250px;
             height: auto;
             margin-bottom: 20px;
             animation: pulse-logo 1.5s infinite ease-in-out;
@@ -306,7 +296,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* New rule to remove the header border in modals */
         .modal-header {
             border-bottom: none;
         }
@@ -315,7 +304,6 @@
             font-weight: bold;
         }
 
-        /* Fix for list-group-item theming */
         .modal-body .list-group-item {
             cursor: pointer;
             color: var(--text-color);
@@ -323,31 +311,28 @@
             border-color: var(--border-color);
             transition: background-color 0.2s ease;
         }
-        /* Added for highlighting selected options */
         .modal-body .list-group-item.active {
             background-color: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
         }
-        /* New rule for dark mode active item */
         body.dark-mode .modal-body .list-group-item.active {
             background-color: var(--input-border-color);
             color: var(--text-color);
             border-color: var(--input-border-color);
         }
         .modal-body .list-group-item:hover {
-            background-color: var(--border-color); /* A subtle hover color */
+            background-color: var(--border-color);
         }
         
         body.dark-mode .modal-body .list-group-item:hover {
-            background-color: var(--input-bg-color); /* A darker hover color */
+            background-color: var(--input-bg-color);
         }
         
-        /* Updated rule for the red outline on the close button */
         .modal-body .btn-secondary[data-bs-dismiss="modal"] {
-            border-color: #dc3545; /* Red color */
+            border-color: #dc3545;
             color: #dc3545;
-            background-color: transparent; /* This line removes the grey filling */
+            background-color: transparent;
             transition: all 0.2s ease;
         }
         .modal-body .btn-secondary[data-bs-dismiss="modal"]:hover {
@@ -355,7 +340,7 @@
             color: white;
         }
 
-        /* --- Responsive Header Layout (from all.html) --- */
+        /* --- Responsive Header Layout --- */
         @media (min-width: 992px) {
             .header-main-content { flex-grow: 1; justify-content: center; }
             .header-search { max-width: 500px; width: 100%; }
@@ -366,18 +351,18 @@
             .header-search { flex-grow: 1; }
         }
 
-        /* NEW: Mobile-specific adjustments to prevent overflow */
+        /* Mobile-specific adjustments */
         @media (max-width: 575.98px) {
             .app-header .container-fluid {
-                padding: 0.75rem 0.5rem; /* Reduce padding to save space */
+                padding: 0.75rem 0.5rem;
             }
             .header-center-nav .nav-link {
-                padding: 0.5rem 0.5rem; /* Smaller padding for nav links */
+                padding: 0.5rem 0.5rem;
                 font-size: 0.85rem;
             }
         }
         
-        /* NEW: Responsive grid to handle column widths and gutters */
+        /* Responsive grid */
         .movie-grid .row {
             --bs-gutter-x: 0.75rem;
             --bs-gutter-y: 0.75rem;
@@ -386,7 +371,6 @@
             padding: var(--bs-gutter-y) var(--bs-gutter-x);
         }
 
-        /* Extra Small devices (mobile) - 3 columns */
         @media (max-width: 575.98px) {
             .movie-grid .row {
                 --bs-gutter-x: 0.5rem;
@@ -398,7 +382,6 @@
             }
         }
         
-        /* Small devices (tablets) - 4 columns */
         @media (min-width: 576px) and (max-width: 767.98px) {
             .movie-grid .row {
                 --bs-gutter-x: 0.75rem;
@@ -410,7 +393,6 @@
             }
         }
 
-        /* Medium devices (desktops) - 5 columns */
         @media (min-width: 768px) and (max-width: 991.98px) {
             .movie-grid .row {
                 --bs-gutter-x: 1rem;
@@ -422,7 +404,6 @@
             }
         }
         
-        /* Large devices (desktops) - 6 columns */
         @media (min-width: 992px) {
             .movie-grid .row {
                 --bs-gutter-x: 1.5rem;
@@ -548,7 +529,6 @@
         const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
         const logoLink = document.getElementById('logoLink');
         
-        // --- NEW: Loading Overlay Selectors ---
         const loadingOverlay = document.getElementById('loadingOverlay');
         const overlayLogo = document.getElementById('overlayLogo');
         const slowNetworkMessage = document.getElementById('slowNetworkMessage');
@@ -559,10 +539,7 @@
         let isLoading = false;
 
         /**
-         * START: Mobile Header Overlap Fix
-         * Dynamically adjusts the body's top padding to match the header's height.
-         * This prevents the fixed header from overlapping the content below it,
-         * especially on mobile where the header's height changes.
+         * Mobile Header Overlap Fix
          */
         function adjustBodyPadding() {
             const header = document.querySelector('.app-header');
@@ -571,9 +548,6 @@
                 body.style.paddingTop = `${headerHeight}px`;
             }
         }
-        /**
-         * END: Mobile Header Overlap Fix
-         */
 
         // --- Theme Management ---
         function updateThemeAssets(isDarkMode) {
@@ -581,7 +555,7 @@
             const darkLogo = './static/thiraiwhite.png';
             faviconLink.href = isDarkMode ? './static/favicon.png' : './static/faviconlight.png';
             headerLogo.src = isDarkMode ? darkLogo : lightLogo;
-            overlayLogo.src = isDarkMode ? darkLogo : lightLogo; // Update overlay logo
+            overlayLogo.src = isDarkMode ? darkLogo : lightLogo;
         }
 
         function applyTheme(theme) {
@@ -684,7 +658,6 @@
             const moviesHtml = movies.map(movie => {
                 const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
                 const movieTitleEncoded = encodeURIComponent(movie.title);
-                // Prepend API_BASE_URL to image source if it's a relative path
                 const imageUrl = movie.img_url.startsWith('http') ? movie.img_url : API_BASE_URL + movie.img_url;
 
                 return `
@@ -728,7 +701,6 @@
                 spinner.style.display = 'none';
                 isLoading = false;
                 
-                // --- NEW: Handle loading overlay fade out ---
                 if (!initialLoadComplete) {
                     initialLoadComplete = true;
                     clearTimeout(loadingTimer);
@@ -736,22 +708,21 @@
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                         body.classList.remove('no-scroll');
-                    }, 500); // Match CSS transition duration
+                    }, 500);
                 }
             }
         }
         
         // --- Page Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
-            adjustBodyPadding(); // Set initial padding
-            body.classList.add('no-scroll'); // Prevent scrolling during load
+            adjustBodyPadding();
+            body.classList.add('no-scroll');
             applyTheme(localStorage.getItem('theme') || 'system');
             updateActiveThemeOption(localStorage.getItem('theme') || 'system');
 
             populateLanguageMenus();
             setupPreferredLanguage();
 
-            // --- NEW: Start timer for slow network message ---
             loadingTimer = setTimeout(() => {
                 if (!initialLoadComplete) {
                     slowNetworkMessage.style.display = 'flex';
@@ -766,7 +737,6 @@
             if (!lang || !ALL_LANGUAGES.includes(lang)) {
                 moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language specified in URL.</p>';
                 loadMoreBtn.style.display = 'none';
-                // Still need to hide loading screen on error
                 if (!initialLoadComplete) {
                     initialLoadComplete = true;
                     clearTimeout(loadingTimer);
@@ -826,7 +796,7 @@
         }
 
         // --- Event Listeners ---
-        window.addEventListener('resize', adjustBodyPadding); // Recalculate padding on resize
+        window.addEventListener('resize', adjustBodyPadding);
 
         loadMoreBtn.addEventListener('click', function() {
             const urlParams = new URLSearchParams(window.location.search);
