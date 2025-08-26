@@ -537,6 +537,24 @@
 
         let currentPage = 1;
         let isLoading = false;
+        
+        // --- NEW: Function to wake up the server ---
+        async function wakeServer() {
+            try {
+                const serverUrl = 'https://thirai-watch.onrender.com/';
+                console.log('Attempting to wake up the server at:', serverUrl);
+
+                await fetch(serverUrl, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+
+                console.log('Server wake-up request sent.');
+
+            } catch (error) {
+                console.error('Failed to send wake-up request:', error);
+            }
+        }
 
         /**
          * Mobile Header Overlap Fix
@@ -715,6 +733,9 @@
         
         // --- Page Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
+            // Call the wakeServer function on page load
+            wakeServer();
+
             adjustBodyPadding();
             body.classList.add('no-scroll');
             applyTheme(localStorage.getItem('theme') || 'system');
