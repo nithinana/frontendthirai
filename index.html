@@ -365,6 +365,28 @@
         const languageSelect = document.getElementById('languageSelect');
         const languages = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
 
+        // --- NEW: Function to wake up the server ---
+        async function wakeServer() {
+            try {
+                // The URL of the server to wake up
+                const serverUrl = 'https://thirai-watch.onrender.com/';
+                console.log('Attempting to wake up the server at:', serverUrl);
+
+                // Send a simple GET request
+                const response = await fetch(serverUrl, {
+                    method: 'GET',
+                    mode: 'no-cors' // Use 'no-cors' mode for a simple ping
+                });
+
+                // Since we're using 'no-cors', we can't check for a successful status code.
+                // We just check if the fetch operation itself didn't fail.
+                console.log('Server wake-up request sent.');
+
+            } catch (error) {
+                console.error('Failed to send wake-up request:', error);
+            }
+        }
+        
         function updateLogo(isDarkMode) {
             logo.src = isDarkMode ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
         }
@@ -400,6 +422,9 @@
 
         // Apply theme as soon as the DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
+            // Call the wakeServer function on page load
+            wakeServer();
+
             const savedTheme = localStorage.getItem('theme');
             applyTheme(savedTheme || 'system');
 
