@@ -383,6 +383,9 @@
         let lastTapTime = 0;
         const DOUBLE_TAP_THRESHOLD_MS = 300;
         const SEEK_TIME = 10;
+        
+        // --- FIX: Declare a variable for the unique movie key ---
+        let movieKey;
 
         function formatTime(seconds) {
             if (isNaN(seconds) || seconds < 0) return "00:00";
@@ -520,9 +523,12 @@
             loadingSpinner.style.display = 'none';
             playPauseIcon.style.display = 'block';
             showControls();
-            const movieKey = `movie_progress_thirai`;
-            localStorage.removeItem(movieKey);
-            console.log(`Video ended, cleared progress for Thirai.`);
+            
+            // --- FIX: Use a unique movie key to clear progress ---
+            if (movieKey) {
+                localStorage.removeItem(movieKey);
+                console.log(`Video ended, cleared progress for ${movieKey}.`);
+            }
         });
 
         function updateProgressBar() {
@@ -776,6 +782,18 @@
                         // NEW: Update the document title (tab name)
                         document.title = data.title;
                         console.log(`Successfully fetched video source: ${data.video_url}`);
+                        
+                        // --- FIX: Set the unique movie key here ---
+                        movieKey = `movie_progress_${data.title}`;
+                        
+                        // Now, attempt to resume playback
+                        const savedTime = localStorage.getItem(movieKey);
+                        if (savedTime && moviePlayer.duration > 0 && parseFloat(savedTime) > 0 && parseFloat(savedTime) < moviePlayer.duration) {
+                            moviePlayer.currentTime = parseFloat(savedTime);
+                            console.log(`Resuming ${data.title} at ${formatTime(parseFloat(savedTime))}.`);
+                        }
+                        updateProgressBar();
+
                     } else {
                         console.error('API response is missing the video URL.');
                         // Hide loading spinner and show play/pause icon
@@ -798,35 +816,33 @@
         
         // Call the fetch function when the page loads
         document.addEventListener('DOMContentLoaded', fetchMovieSource);
-
-        const movieKey = `movie_progress_thirai`;
-
-        moviePlayer.addEventListener('loadeddata', () => {
-            const savedTime = localStorage.getItem(movieKey);
-            if (savedTime && moviePlayer.duration > 0 && parseFloat(savedTime) > 0 && parseFloat(savedTime) < moviePlayer.duration) {
-                moviePlayer.currentTime = parseFloat(savedTime);
-                console.log(`Resuming Thirai at ${formatTime(parseFloat(savedTime))}.`);
-            }
-            updateProgressBar();
-        }, { once: true });
-
+        
         let saveInterval;
         moviePlayer.addEventListener('play', () => {
             clearInterval(saveInterval);
             saveInterval = setInterval(() => {
-                localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
+                // --- FIX: Use the unique movie key to save progress ---
+                if (movieKey) {
+                    localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
+                }
             }, 5000);
         });
 
         moviePlayer.addEventListener('pause', () => {
             clearInterval(saveInterval);
-            localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
+            // --- FIX: Use the unique movie key to save progress ---
+            if (movieKey) {
+                localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
+            }
         });
 
         window.addEventListener('beforeunload', () => {
             if (!moviePlayer.ended && moviePlayer.currentTime > 0) {
-                localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
-                console.log(`Saved progress on unload for Thirai: ${moviePlayer.currentTime}s`);
+                // --- FIX: Use the unique movie key to save progress ---
+                if (movieKey) {
+                    localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
+                    console.log(`Saved progress on unload for ${movieKey}: ${moviePlayer.currentTime}s`);
+                }
             }
         });
 
@@ -850,5 +866,3 @@
     </script>
 </body>
 </html>
-
-
