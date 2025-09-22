@@ -12,6 +12,51 @@
   gtag('config', 'G-HKV7GQ766F');
 </script>
 
+<!-- Script to automatically shorten the 'url' parameter to 'film' and remove 'title' -->
+<script>
+    (function() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const movieUrl = urlParams.get('url');
+            let needsRewrite = false;
+
+            // Check if the 'url' parameter exists and we need to shorten it
+            if (movieUrl) {
+                needsRewrite = true;
+                // Use a regular expression to find the movie code after '/watch/'
+                const movieCodeMatch = movieUrl.match(/\/watch\/([a-zA-Z0-9]+)/);
+
+                if (movieCodeMatch && movieCodeMatch[1]) {
+                    const movieCode = movieCodeMatch[1];
+                    // Set the new 'film' parameter
+                    urlParams.set('film', movieCode);
+                    // Remove the old 'url' parameter
+                    urlParams.delete('url');
+                }
+            }
+            
+            // Check if the 'title' parameter exists and remove it
+            if (urlParams.has('title')) {
+                needsRewrite = true;
+                urlParams.delete('title');
+            }
+
+            if(needsRewrite) {
+                // Reconstruct the full URL for the address bar
+                const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+
+                // Replace the URL in the browser's history without reloading the page
+                window.history.replaceState({ path: newUrl }, '', newUrl);
+                console.log('URL has been rewritten.');
+            }
+
+        } catch (error) {
+            // Log any errors to the console without interrupting the user
+            console.error('Error rewriting URL:', error);
+        }
+    })();
+</script>
+
 
 
     <meta name="screen-orientation" content="landscape">
@@ -774,7 +819,15 @@
             forwardButton.disabled = true;
 
             const urlParams = new URLSearchParams(window.location.search);
-            const movieUrl = urlParams.get('url');
+            const filmCode = urlParams.get('film');
+            let movieUrl = urlParams.get('url'); // Keep for fallback
+
+            // Prioritize the new 'film' parameter
+            if (filmCode) {
+                // Reconstruct the full movie URL from the film code
+                movieUrl = `https://einthusan.tv/movie/watch/${filmCode}/`;
+                console.log(`Reconstructed movie URL from film code: ${movieUrl}`);
+            }
             
             if (movieUrl) {
                 try {
@@ -819,7 +872,7 @@
                     playPauseIcon.style.display = 'block';
                 }
             } else {
-                console.error('No movie URL provided in the query parameter.');
+                console.error('No movie URL or film code provided in the query parameter.');
                 // Hide loading spinner and show play/pause icon
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
@@ -878,3 +931,4 @@
     </script>
 </body>
 </html>
+
