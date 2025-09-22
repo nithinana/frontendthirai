@@ -316,7 +316,7 @@
         // Only redirect if on the root path and a preferred language is set
         if (preferredLanguage && (currentPath === '/' || currentPath.endsWith('/index.html'))) {
             // MODIFIED: Point to the static language.html file with a query parameter
-            window.location.replace(`./language.html?lang=${preferredLanguage}`);
+            window.location.replace(`./language?lang=${preferredLanguage}`);
         } else {
             // If no redirect, make the body visible
             document.addEventListener('DOMContentLoaded', () => {
@@ -335,7 +335,7 @@
     <h1 class="text-3xl font-bold text-center mb-6">Choose a Language</h1>
 
     <div class="search-box">
-        <form action="./language.html" method="GET" class="mb-4" id="searchForm">
+        <form action="./language" method="GET" class="mb-4" id="searchForm">
             <div class="input-group">
                 <select name="lang" id="languageSelect" class="form-select-lg">
                     </select>
@@ -447,7 +447,7 @@
 
                 // Create and append language link to the grid
                 const link = document.createElement('a');
-                link.href = `./language.html?lang=${lang}&category=recent`;
+                link.href = `./language?lang=${lang}&category=recent`;
                 link.className = 'block text-center lang-link p-4 rounded shadow capitalize font-semibold';
                 link.textContent = lang;
                 languageGrid.appendChild(link);
