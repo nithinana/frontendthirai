@@ -632,14 +632,14 @@
                             Languages
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="languagesDropdown">
-                            <li><a class="dropdown-item" href="/language.html?lang=tamil">Tamil</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=hindi">Hindi</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=telugu">Telugu</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=malayalam">Malayalam</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=kannada">Kannada</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=bengali">Bengali</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=marathi">Marathi</a></li>
-                            <li><a class="dropdown-item" href="/language.html?lang=punjabi">Punjabi</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=tamil">Tamil</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=hindi">Hindi</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=telugu">Telugu</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=malayalam">Malayalam</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=kannada">Kannada</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=bengali">Bengali</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=marathi">Marathi</a></li>
+                            <li><a class="dropdown-item" href="/language?lang=punjabi">Punjabi</a></li>
                         </ul>
                     </div>
                 </div>
@@ -683,7 +683,7 @@
         <div class="language-section" id="section-tamil">
             <div class="language-header">
                 <h2 class="language-title">Tamil
-                    <a href="/language.html?lang=tamil" class="explore-link" title="Explore All Tamil movies">
+                    <a href="/language?lang=tamil" class="explore-link" title="Explore All Tamil movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -715,7 +715,7 @@
         <div class="language-section" id="section-hindi">
             <div class="language-header">
                 <h2 class="language-title">Hindi
-                    <a href="/language.html?lang=hindi" class="explore-link" title="Explore All Hindi movies">
+                    <a href="/language?lang=hindi" class="explore-link" title="Explore All Hindi movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -747,7 +747,7 @@
         <div class="language-section" id="section-telugu">
             <div class="language-header">
                 <h2 class="language-title">Telugu
-                    <a href="/language.html?lang=telugu" class="explore-link" title="Explore All Telugu movies">
+                    <a href="/language?lang=telugu" class="explore-link" title="Explore All Telugu movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -779,7 +779,7 @@
         <div class="language-section" id="section-malayalam">
             <div class="language-header">
                 <h2 class="language-title">Malayalam
-                    <a href="/language.html?lang=malayalam" class="explore-link" title="Explore All Malayalam movies">
+                    <a href="/language?lang=malayalam" class="explore-link" title="Explore All Malayalam movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -811,7 +811,7 @@
         <div class="language-section" id="section-kannada">
             <div class="language-header">
                 <h2 class="language-title">Kannada
-                    <a href="/language.html?lang=kannada" class="explore-link" title="Explore All Kannada movies">
+                    <a href="/language?lang=kannada" class="explore-link" title="Explore All Kannada movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -843,7 +843,7 @@
         <div class="language-section" id="section-bengali">
             <div class="language-header">
                 <h2 class="language-title">Bengali
-                    <a href="/language.html?lang=bengali" class="explore-link" title="Explore All Bengali movies">
+                    <a href="/language?lang=bengali" class="explore-link" title="Explore All Bengali movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -875,7 +875,7 @@
         <div class="language-section" id="section-marathi">
             <div class="language-header">
                 <h2 class="language-title">Marathi
-                    <a href="/language.html?lang=marathi" class="explore-link" title="Explore All Marathi movies">
+                    <a href="/language?lang=marathi" class="explore-link" title="Explore All Marathi movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -907,7 +907,7 @@
         <div class="language-section" id="section-punjabi">
             <div class="language-header">
                 <h2 class="language-title">Punjabi
-                    <a href="/language.html?lang=punjabi" class="explore-link" title="Explore All Punjabi movies">
+                    <a href="/language?lang=punjabi" class="explore-link" title="Explore All Punjabi movies">
                         <i class="bi bi-chevron-right"></i>
                         <span class="explore-text">Explore</span>
                     </a>
@@ -1144,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault(); // Prevent default form submission
                 searchInput.classList.remove('highlight-red');
                 const selectedLanguage = languageSelect.value;
-                const newUrl = `/language.html?lang=${selectedLanguage}&q=${encodeURIComponent(searchQuery)}`;
+                const newUrl = `/language?lang=${selectedLanguage}&q=${encodeURIComponent(searchQuery)}`;
                 window.location.href = newUrl; // Redirect to the new, correct URL
             }
         });

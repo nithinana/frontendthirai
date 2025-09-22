@@ -314,7 +314,7 @@
         const currentPath = window.location.pathname;
 
         // Only redirect if on the root path and a preferred language is set
-        if (preferredLanguage && (currentPath === '/' || currentPath.endsWith('/index.html'))) {
+        if (preferredLanguage && (currentPath === '/' || currentPath.endsWith('/index'))) {
             // MODIFIED: Point to the static language.html file with a query parameter
             window.location.replace(`./language?lang=${preferredLanguage}`);
         } else {

@@ -440,7 +440,7 @@
     <header class="app-header">
         <div class="container-fluid d-flex flex-wrap align-items-center">
             <div class="dropdown logo-dropdown-container me-lg-4">
-                <a id="logoLink" href="./index.html">
+                <a id="logoLink" href="./index">
                     <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
                 </a>
                 <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -450,7 +450,7 @@
                     </ul>
             </div>
             <div class="d-flex justify-content-center flex-grow-1 header-main-content">
-                <form id="searchForm" action="./language.html" method="GET" class="header-search">
+                <form id="searchForm" action="./language" method="GET" class="header-search">
                     <input type="hidden" name="lang" id="searchLangInput"> <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
                     <button type="submit" class="btn btn-primary" title="Search">
                         <i class="bi bi-search"></i>
@@ -460,7 +460,7 @@
 
             <div class="d-flex align-items-center ms-auto">
                 <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav me-3">
-                    <a class="nav-link" href="./all.html">Home</a>
+                    <a class="nav-link" href="./all">Home</a>
                     <a id="recentLink" class="nav-link" href="#">Recent</a>
                     <a id="popularLink" class="nav-link" href="#">Popular</a>
                 </div>
@@ -643,9 +643,9 @@
 
         function updateLogoLink(language) {
             if (language && language !== 'all') {
-                logoLink.href = `./language.html?lang=${language}`;
+                logoLink.href = `./language?lang=${language}`;
             } else {
-                 logoLink.href = './index.html';
+                 logoLink.href = './index';
             }
         }
         
@@ -693,7 +693,7 @@
                 return `
                     <div class="col">
                         <div class="movie-card">
-                            <a href="./watch.html?url=${moviePageUrlEncoded}&title=${movieTitleEncoded}" class="movie-link">
+                            <a href="./watch?url=${moviePageUrlEncoded}&title=${movieTitleEncoded}" class="movie-link">
                                 <img src="${imageUrl}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
                                 <div class="movie-title">${movie.title}</div>
                             </a>
@@ -788,8 +788,8 @@
             document.title = `Thirai - ${capitalizedLang}`;
             searchInput.placeholder = `Search ${capitalizedLang} movies...`;
             searchLangInput.value = lang;
-            recentLink.href = `./language.html?lang=${lang}&category=recent`;
-            popularLink.href = `./language.html?lang=${lang}&category=popular`;
+            recentLink.href = `./language?lang=${lang}&category=recent`;
+            popularLink.href = `./language?lang=${lang}&category=popular`;
             
             if (searchQuery) {
                 document.title = `Search for "${searchQuery}" - Thirai`;
@@ -815,7 +815,7 @@
                 const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
                 
                 const li = document.createElement('li');
-                li.innerHTML = `<a class="dropdown-item" href="./language.html?lang=${lang}&category=popular">${capitalized}</a>`;
+                li.innerHTML = `<a class="dropdown-item" href="./language?lang=${lang}&category=popular">${capitalized}</a>`;
                 languageDropdownMenu.appendChild(li);
 
                 const prefLink = document.createElement('a');
