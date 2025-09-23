@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
 
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -766,6 +765,13 @@
             const lang = urlParams.get('lang');
             const category = urlParams.get('category') || 'recent';
             const searchQuery = urlParams.get('q');
+
+            // --- START: Added Redirection Logic ---
+            if (lang === 'all') {
+                window.location.replace('./all');
+                return; // Stop script execution to prevent errors before redirect
+            }
+            // --- END: Added Redirection Logic ---
             
             if (!lang || !ALL_LANGUAGES.includes(lang)) {
                 moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language specified in URL.</p>';
