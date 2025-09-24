@@ -361,6 +361,172 @@
             background: rgba(255, 255, 255, 0.1); /* Subtle hover for transparent button */
             transform: scale(1.1); /* Slightly enlarge on hover */
         }
+
+        /* --- NEW: Share Modal Styles --- */
+        .share-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure it's on top of everything */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .share-modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .share-modal-content {
+            background: #2c2c2e; /* Dark theme background */
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            position: relative;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .share-modal-overlay.visible .share-modal-content {
+            transform: scale(1);
+        }
+
+        .close-share-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close-share-modal:hover {
+            color: white;
+        }
+
+        .share-modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            border-bottom: 1px solid #444;
+            padding-bottom: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .share-section {
+            margin-bottom: 1.5rem;
+        }
+        .share-section:last-child {
+             margin-bottom: 0;
+        }
+
+        .share-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+
+        .code-box {
+            background: #1c1c1e;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease;
+            border: 1px solid #444;
+        }
+
+        .code-box:hover {
+            background: #3a3a3c;
+        }
+
+        #channelCode {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .share-url-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            flex-grow: 1;
+            padding-right: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #ddd;
+        }
+
+        .code-box i {
+            transition: color 0.3s ease;
+        }
+        .code-box i.copied {
+            color: #28a745; /* Green checkmark */
+        }
+
+
+        #qrCodeContainer {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            line-height: 0; /* Fix extra space below image */
+        }
+
+        #qrCodeContainer img {
+            display: block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .copy-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease, bottom 0.3s ease;
+            pointer-events: none;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            bottom: 30px;
+        }
+        /* --- END NEW --- */
     </style>
 </head>
 <body>
@@ -377,8 +543,13 @@
                 <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button">
                     <i class="bi bi-download"></i>
                 </a>
+                <!-- NEW: SHARE BUTTON ADDED -->
+                <button id="shareButton" class="top-button">
+                    <i class="bi bi-share"></i>
+                </button>
                 <button id="magnificationButton" class="top-button">
-                    <i class="bi bi-zoom-in"></i> </button>
+                    <i class="bi bi-zoom-in"></i>
+                </button>
             </div>
 
             <div class="center-controls">
@@ -409,6 +580,34 @@
         </div>
     </div>
 
+    <!-- NEW: SHARE MODAL HTML (UPDATED) -->
+    <div id="shareModal" class="share-modal-overlay">
+        <div class="share-modal-content">
+            <button id="closeShareModal" class="close-share-modal">&times;</button>
+            <h2 id="shareModalTitle">Share</h2>
+            <div class="share-section">
+                <div id="qrCodeContainer"></div>
+            </div>
+            <div class="share-section">
+                <label for="channelCodeBox">Channel Code</label>
+                <div id="channelCodeBox" class="code-box" title="Click to copy">
+                    <span id="channelCode"></span>
+                    <i class="bi bi-clipboard"></i>
+                </div>
+            </div>
+            <div class="share-section">
+                 <label for="copyLinkBox">Share Link</label>
+                <div id="copyLinkBox" class="code-box" title="Click to copy">
+                    <span id="shareUrl" class="share-url-text"></span>
+                    <i id="copyLinkIcon" class="bi bi-link-45deg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="copyNotification" class="copy-notification">Copied to clipboard!</div>
+    <!-- END NEW -->
+
+
     <script>
         const moviePlayer = document.getElementById('moviePlayer');
         const customControlsOverlay = document.getElementById('customControlsOverlay');
@@ -428,10 +627,24 @@
         const downloadButton = document.getElementById('downloadButton');
         const movieTitleDisplay = document.getElementById('movieTitleDisplay');
 
-        // --- NEW: Magnification Elements ---
+        // --- Magnification Elements ---
         const magnificationButton = document.getElementById('magnificationButton');
         const magnificationIcon = magnificationButton.querySelector('i');
-        let zoomLevel = 1; // 0: Slightly zoomed out, 1: Full screen, 2: More zoomed in
+        let zoomLevel = 1; // 0: Smaller, 1: Default, 2: Larger
+
+        // --- NEW: Share Modal Elements (UPDATED) ---
+        const shareButton = document.getElementById('shareButton');
+        const shareModal = document.getElementById('shareModal');
+        const closeShareModal = document.getElementById('closeShareModal');
+        const shareModalTitle = document.getElementById('shareModalTitle');
+        const channelCodeBox = document.getElementById('channelCodeBox');
+        const channelCodeSpan = document.getElementById('channelCode');
+        const channelCodeIcon = channelCodeBox.querySelector('i');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+        const copyNotification = document.getElementById('copyNotification');
+        const copyLinkBox = document.getElementById('copyLinkBox');
+        const shareUrlSpan = document.getElementById('shareUrl');
+        const copyLinkIcon = document.getElementById('copyLinkIcon');
         // --- END NEW ---
 
         let isDraggingProgressBar = false;
@@ -441,7 +654,6 @@
         const DOUBLE_TAP_THRESHOLD_MS = 300;
         const SEEK_TIME = 10;
         
-        // --- FIX: Declare a variable for the unique movie key ---
         let movieKey;
 
         function formatTime(seconds) {
@@ -581,7 +793,6 @@
             playPauseIcon.style.display = 'block';
             showControls();
             
-            // --- FIX: Use a unique movie key to clear progress ---
             if (movieKey) {
                 localStorage.removeItem(movieKey);
                 console.log(`Video ended, cleared progress for ${movieKey}.`);
@@ -706,7 +917,7 @@
             }
         });
 
-        // --- NEW: Magnification Button Event Listener ---
+        // --- Magnification Button Event Listener ---
         magnificationButton.addEventListener('click', () => {
             switch (zoomLevel) {
                 case 1:
@@ -733,7 +944,6 @@
             }
             showControls(); // Keep controls visible or reset timer after zoom
         });
-        // --- END NEW ---
 
         // --- Mobile Tap Functionality Refined ---
         document.addEventListener('touchend', (event) => {
@@ -744,13 +954,11 @@
 
             if (clickedOnControl) {
                 // If a control was tapped, prevent the main video wrapper tap logic from executing.
-                // The individual control's click handler will handle showing/hiding controls.
                 return;
             }
 
-            // Now, handle taps that are NOT on a control (i.e., taps on the video itself)
+            // Handle taps that are NOT on a control (i.e., taps on the video itself)
             if (moviePlayer.paused || moviePlayer.ended || moviePlayer.readyState < 2) {
-                // If video is paused/ended/buffering, a single tap toggles controls
                 const currentTime = new Date().getTime();
                 if (currentTime - lastTapTime > DOUBLE_TAP_THRESHOLD_MS) {
                     toggleControls();
@@ -762,7 +970,6 @@
             // Logic for double-tap seeking on playing video
             const currentTime = new Date().getTime();
             const tapX = event.changedTouches[0].clientX;
-            const tapY = event.changedTouches[0].clientY; // Not used for seeking, but good to keep if needed later
 
             if (currentTime - lastTapTime < DOUBLE_TAP_THRESHOLD_MS) {
                 const videoWidth = videoPlayerWrapper.offsetWidth;
@@ -783,9 +990,13 @@
         // --- Keyboard Functionality ---
         document.addEventListener('keydown', (event) => {
             const isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+            const isModalOpen = shareModal.classList.contains('visible');
 
-            if (isInputFocused) {
-                return; // Do not interfere with typing in input fields
+            if (isInputFocused || isModalOpen) {
+                if (isModalOpen && event.key === 'Escape') {
+                    closeTheModal();
+                }
+                return;
             }
 
             switch (event.key) {
@@ -824,14 +1035,12 @@
 
             // Prioritize the new 'film' parameter
             if (filmCode) {
-                // Reconstruct the full movie URL from the film code
                 movieUrl = `https://einthusan.tv/movie/watch/${filmCode}/`;
                 console.log(`Reconstructed movie URL from film code: ${movieUrl}`);
             }
             
             if (movieUrl) {
                 try {
-                    // Call your API
                     const response = await fetch(`https://thirai-watch.onrender.com/watch?url=${encodeURIComponent(movieUrl)}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -839,19 +1048,15 @@
                     const data = await response.json();
                     
                     if (data && data.video_url) {
-                        // Set the video source and title
                         moviePlayer.src = data.video_url;
                         moviePlayer.load();
                         downloadButton.href = data.video_url;
                         movieTitleDisplay.textContent = data.title;
-                        // NEW: Update the document title (tab name)
                         document.title = data.title;
                         console.log(`Successfully fetched video source: ${data.video_url}`);
                         
-                        // --- FIX: Set the unique movie key here ---
                         movieKey = `movie_progress_${data.title}`;
                         
-                        // Now, attempt to resume playback
                         const savedTime = localStorage.getItem(movieKey);
                         if (savedTime && moviePlayer.duration > 0 && parseFloat(savedTime) > 0 && parseFloat(savedTime) < moviePlayer.duration) {
                             moviePlayer.currentTime = parseFloat(savedTime);
@@ -861,32 +1066,28 @@
 
                     } else {
                         console.error('API response is missing the video URL.');
-                        // Hide loading spinner and show play/pause icon
                         loadingSpinner.style.display = 'none';
                         playPauseIcon.style.display = 'block';
                     }
                 } catch (error) {
                     console.error('Failed to fetch movie source:', error);
-                    // Hide loading spinner and show play/pause icon
                     loadingSpinner.style.display = 'none';
                     playPauseIcon.style.display = 'block';
                 }
             } else {
                 console.error('No movie URL or film code provided in the query parameter.');
-                // Hide loading spinner and show play/pause icon
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
             }
         }
         
-        // Call the fetch function when the page loads
+        // --- Save Progress Logic ---
         document.addEventListener('DOMContentLoaded', fetchMovieSource);
         
         let saveInterval;
         moviePlayer.addEventListener('play', () => {
             clearInterval(saveInterval);
             saveInterval = setInterval(() => {
-                // --- FIX: Use the unique movie key to save progress ---
                 if (movieKey) {
                     localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
                 }
@@ -895,7 +1096,6 @@
 
         moviePlayer.addEventListener('pause', () => {
             clearInterval(saveInterval);
-            // --- FIX: Use the unique movie key to save progress ---
             if (movieKey) {
                 localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
             }
@@ -903,7 +1103,6 @@
 
         window.addEventListener('beforeunload', () => {
             if (!moviePlayer.ended && moviePlayer.currentTime > 0) {
-                // --- FIX: Use the unique movie key to save progress ---
                 if (movieKey) {
                     localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
                     console.log(`Saved progress on unload for ${movieKey}: ${moviePlayer.currentTime}s`);
@@ -928,7 +1127,92 @@
                 forwardButton.disabled = false;
             }
         });
+
+        // --- NEW: Share Modal Logic (UPDATED) ---
+
+        // Function to show a temporary notification
+        function showCopyNotification() {
+            copyNotification.classList.add('show');
+            setTimeout(() => {
+                copyNotification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Open Share Modal
+        shareButton.addEventListener('click', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const filmCode = urlParams.get('film');
+
+            if (filmCode) {
+                // Set content
+                shareModalTitle.textContent = movieTitleDisplay.textContent;
+                channelCodeSpan.textContent = filmCode;
+                const currentUrl = window.location.href;
+                shareUrlSpan.textContent = currentUrl;
+                
+                // Generate QR Code
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}&qzone=1&bgcolor=ffffff`;
+                qrCodeContainer.innerHTML = `<img src="${qrCodeUrl}" alt="QR Code for link">`;
+
+                // Show modal
+                shareModal.style.display = 'flex';
+                setTimeout(() => shareModal.classList.add('visible'), 10);
+            } else {
+                alert('Channel Code not found in URL.');
+            }
+            showControls(); // Keep controls visible
+        });
+
+        // Function to close the modal
+        function closeTheModal() {
+            shareModal.classList.remove('visible');
+            setTimeout(() => {
+                shareModal.style.display = 'none';
+            }, 300); // Wait for transition to finish
+        }
+        
+        // Add close listeners
+        closeShareModal.addEventListener('click', closeTheModal);
+        
+        shareModal.addEventListener('click', (event) => {
+            if (event.target === shareModal) {
+                closeTheModal();
+            }
+        });
+
+        // Copy Channel Code to clipboard
+        channelCodeBox.addEventListener('click', () => {
+            const code = channelCodeSpan.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showCopyNotification();
+                channelCodeIcon.classList.remove('bi-clipboard');
+                channelCodeIcon.classList.add('bi-check-lg', 'copied');
+                setTimeout(() => {
+                    channelCodeIcon.classList.remove('bi-check-lg', 'copied');
+                    channelCodeIcon.classList.add('bi-clipboard');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy channel code: ', err);
+            });
+        });
+
+        // Copy full link to clipboard
+        copyLinkBox.addEventListener('click', () => {
+            const url = shareUrlSpan.textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                showCopyNotification();
+                copyLinkIcon.classList.remove('bi-link-45deg');
+                copyLinkIcon.classList.add('bi-check-lg', 'copied');
+                setTimeout(() => {
+                    copyLinkIcon.classList.remove('bi-check-lg', 'copied');
+                    copyLinkIcon.classList.add('bi-link-45deg');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+            });
+        });
+        // --- END NEW ---
+
     </script>
 </body>
 </html>
-
