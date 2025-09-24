@@ -287,26 +287,24 @@
 
         inputs.forEach((input, index) => {
             input.addEventListener('keyup', (e) => {
-                if (e.key.length === 1 && /[A-Z0-9]/.test(e.key.toUpperCase())) {
-                    input.value = e.key.toUpperCase();
-                    if (index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    }
-                }
-
                 if (e.key === 'Backspace' && input.value === '') {
                     if (index > 0) {
                         inputs[index - 1].focus();
                     }
                 }
-
                 checkInputs();
             });
             
             input.addEventListener('input', () => {
+                if (input.value.length > 0) {
+                     if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                }
                 if (input.value.length > 1) {
                     input.value = input.value.charAt(0);
                 }
+                checkInputs();
             });
         });
 
@@ -326,11 +324,11 @@
         joinButton.addEventListener('click', () => {
             let filmCode = '';
             inputs.forEach(input => {
-                filmCode += input.value.toUpperCase();
+                filmCode += input.value;
             });
 
             if (filmCode.length === 4) {
-                window.location.href = `watch.html?film=${filmCode}`;
+                window.location.href = `watch.html?film=${filmCode.toUpperCase()}`;
             } else {
                 errorMessage.textContent = 'Please enter a 4-character code.';
                 errorMessage.style.display = 'block';
