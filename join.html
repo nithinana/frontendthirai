@@ -108,7 +108,7 @@
             display: block;
             max-width: 175px;
             height: auto;
-            margin-bottom: 12x;
+            margin-bottom: 12px;
         }
 
         h2 {
@@ -216,10 +216,10 @@
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
         <h2>Enter the channel code</h2>
         <div class="code-input-container" id="codeInputContainer">
-            <input type="text" class="code-input" id="code1" maxlength="1" pattern="[A-Z0-9]" inputmode="numeric" autocomplete="off">
-            <input type="text" class="code-input" id="code2" maxlength="1" pattern="[A-Z0-9]" inputmode="numeric" autocomplete="off">
-            <input type="text" class="code-input" id="code3" maxlength="1" pattern="[A-Z0-9]" inputmode="numeric" autocomplete="off">
-            <input type="text" class="code-input" id="code4" maxlength="1" pattern="[A-Z0-9]" inputmode="numeric" autocomplete="off">
+            <input type="text" class="code-input" id="code1" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="code-input" id="code2" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="code-input" id="code3" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="code-input" id="code4" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
         </div>
         <button class="join-button" id="joinButton" disabled>Join</button>
         <div id="error-message"></div>
@@ -303,6 +303,30 @@
                 }
                 if (input.value.length > 1) {
                     input.value = input.value.charAt(0);
+                }
+                checkInputs();
+            });
+            
+            // Corrected paste event listener
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                // Remove the .toUpperCase() method to keep original case
+                const pasteCode = paste.trim().slice(0, 4);
+
+                // Populate input fields with pasted characters
+                for (let i = 0; i < pasteCode.length; i++) {
+                    if (inputs[i]) {
+                        inputs[i].value = pasteCode[i];
+                    }
+                }
+
+                // Move focus to the last filled input or the next one
+                const lastFilledIndex = pasteCode.length > 0 ? pasteCode.length - 1 : 0;
+                if (inputs[lastFilledIndex + 1]) {
+                    inputs[lastFilledIndex + 1].focus();
+                } else if (inputs[lastFilledIndex]) {
+                    inputs[lastFilledIndex].blur();
                 }
                 checkInputs();
             });
