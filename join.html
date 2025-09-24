@@ -328,7 +328,7 @@
             });
 
             if (filmCode.length === 4) {
-                window.location.href = `watch.html?film=${filmCode.toUpperCase()}`;
+                window.location.href = `watch.html?film=${filmCode}`;
             } else {
                 errorMessage.textContent = 'Please enter a 4-character code.';
                 errorMessage.style.display = 'block';
