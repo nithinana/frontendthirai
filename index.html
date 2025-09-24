@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-<!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -12,7 +12,7 @@
   gtag('config', 'G-HKV7GQ766F');
 </script>
 
-    
+  
     <meta property="og:title" content="Thirai">
     <meta property="og:description" content="Access South-Asian movies online on your device.">
     <meta property="og:image" content="./static/favicon.png">
@@ -278,6 +278,19 @@
         body.dark-mode #exploreAllButton:hover {
             background-color: #0b5ed7;
         }
+        #watchPartyButton {
+            background-color: #28a745;
+            color: white;
+        }
+        #watchPartyButton:hover {
+            background-color: #218838;
+        }
+        body.dark-mode #watchPartyButton {
+            background-color: #28a745;
+        }
+        body.dark-mode #watchPartyButton:hover {
+            background-color: #218838;
+        }
         #installAppButton {
             background-color: #28a745;
             color: white;
@@ -314,9 +327,9 @@
         const currentPath = window.location.pathname;
 
         // Only redirect if on the root path and a preferred language is set
-        if (preferredLanguage && (currentPath === '/' || currentPath.endsWith('/index'))) {
+        if (preferredLanguage && (currentPath === '/' || currentPath.endsWith('/index.html'))) {
             // MODIFIED: Point to the static language.html file with a query parameter
-            window.location.replace(`./language?lang=${preferredLanguage}`);
+            window.location.replace(`./language.html?lang=${preferredLanguage}`);
         } else {
             // If no redirect, make the body visible
             document.addEventListener('DOMContentLoaded', () => {
@@ -335,7 +348,7 @@
     <h1 class="text-3xl font-bold text-center mb-6">Choose a Language</h1>
 
     <div class="search-box">
-        <form action="./language" method="GET" class="mb-4" id="searchForm">
+        <form action="./language.html" method="GET" class="mb-4" id="searchForm">
             <div class="input-group">
                 <select name="lang" id="languageSelect" class="form-select-lg">
                     </select>
@@ -352,7 +365,8 @@
         </div>
 
     <div id="buttonContainer" class="flex justify-center items-center gap-4 mt-6">
-        <a href="./all" id="exploreAllButton" class="btn-fixed-size" style="background-color: #0d6efd; color: white;">Explore All</a>
+        <a href="./all.html" id="exploreAllButton" class="btn-fixed-size" style="background-color: #0d6efd; color: white;">Explore All</a>
+        <a href="./join.html" id="watchPartyButton" class="btn-fixed-size" style="background-color: #b938d9; color: white;">Channels</a>
         <button id="installAppButton" class="btn-fixed-size" style="display: none;">
             <i class="bi bi-download mr-2"></i> Install App
         </button>
@@ -447,7 +461,7 @@
 
                 // Create and append language link to the grid
                 const link = document.createElement('a');
-                link.href = `./language?lang=${lang}&category=recent`;
+                link.href = `./language.html?lang=${lang}&category=popular`;
                 link.className = 'block text-center lang-link p-4 rounded shadow capitalize font-semibold';
                 link.textContent = lang;
                 languageGrid.appendChild(link);
