@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thirai</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        /* General Body Styles (Adapted from join.html) */
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        /* Header Elements (Logo, Buttons) */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(248, 249, 250, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+        }
+
+        body.dark-mode .header {
+            background-color: rgba(18, 18, 18, 0.8);
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #logo {
+            max-width: 120px;
+            height: auto;
+        }
+
+        .icon-button {
+            color: #212529;
+            background-color: transparent;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1.25rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .icon-button {
+            color: #e0e0e0;
+        }
+
+        .icon-button:hover {
+            background-color: #e9ecef;
+        }
+
+        body.dark-mode .icon-button:hover {
+            background-color: #333;
+        }
+
+        /* Main Content Area */
+        .main-container {
+            margin-top: 80px; /* Space for the fixed header */
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Cast Toggle Buttons */
+        .cast-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .toggle-btn {
+            padding: 10px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            border: 2px solid #ccc;
+            background-color: transparent;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            color: #555;
+        }
+
+        body.dark-mode .toggle-btn {
+            border-color: #444;
+            color: #aaa;
+        }
+
+        .toggle-btn.active {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        body.dark-mode .toggle-btn.active {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        /* Cast Grid Styles */
+        #castGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .cast-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        body.dark-mode .cast-card {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            color: #e0e0e0;
+        }
+
+        .cast-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        body.dark-mode .cast-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        }
+
+        .cast-card img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 2 / 3; /* Maintain a consistent aspect ratio */
+            object-fit: cover;
+        }
+
+        .cast-card .name {
+            padding: 15px 10px;
+            font-weight: 600;
+            font-size: 0.9em;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <a href="javascript:history.back()" class="icon-button back-button" aria-label="Go back">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
+        </div>
+        <div class="header-right">
+            <button id="toggleDarkMode" class="icon-button" aria-label="Toggle dark mode" title="Toggle dark mode">
+                <i id="modeIcon" class="bi bi-moon-fill"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="cast-toggle">
+            <button class="toggle-btn active" id="actorsBtn">Actors</button>
+            <button class="toggle-btn" id="actressesBtn">Actresses</button>
+        </div>
+
+        <div id="castGrid"></div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- START: Integrated JSON Data ---
+
+            // Data from actors.json is now a JavaScript variable
+            const actorsData = [
+              { "name": "Vijay", "image_url": "https://sund-images.sunnxt.com/100587/250x375_Vijay_100587_224cc6a7-3c61-4e10-bde1-22dc80d0473b.jpg", "actor_code": "3TKYioHCAF" },
+              { "name": "Dhanush", "image_url": "https://sund-images.sunnxt.com/101546/250x375_Dhanush_101546_2680c0f6-aa8e-4358-bcfd-a545c794f1f1.jpg", "actor_code": "5vCobOqDDx" },
+              { "name": "Vijay Sethupathi", "image_url": "https://sund-images.sunnxt.com/138708/250x375_VijaySethupathi_138708_d8b98537-1c46-4b2d-8d49-6a53594ee332.jpg", "actor_code": "1yADiX9kkO" },
+              { "name": "Rajinikanth", "image_url": "https://sund-images.sunnxt.com/94511/250x375_Rajinikanth_94511_1202521b-b7e0-421b-80f2-ac5034a57930.jpg", "actor_code": "ijsq87BV3Y" },
+              { "name": "Karthi Sivakumar", "image_url": "https://sund-images.sunnxt.com/101549/250x375_KarthiSivakumar_101549_dd816cb1-d07d-4190-a025-9f183f1f5075.jpg", "actor_code": "5mHRERsgQU" },
+              { "name": "Sivakarthikeyan", "image_url": "https://sund-images.sunnxt.com/101548/250x375_Sivakarthikeyan_101548_969c4838-4b33-4b19-b2b0-76202e848226.jpg", "actor_code": "6ZDHHGuxxN" },
+              { "name": "Vishal", "image_url": "https://sund-images.sunnxt.com/101547/250x375_Vishal_101547_785b92f6-dd11-43fb-946b-c9f1f0ed898d.jpg", "actor_code": "1emttPrIgB" },
+              { "name": "Surya", "image_url": "https://sund-images.sunnxt.com/101545/250x375_Surya_101545_27017026-a6bd-43fa-a65d-e7fa86cd0528.jpg", "actor_code": "2waH3hTKAe" },
+              { "name": "Vikram", "image_url": "https://sund-images.sunnxt.com/101544/250x375_Vikram_101544_d6dcb2fb-330f-4850-b748-d503d5241704.jpg", "actor_code": "5uf7csvvAf" },
+              { "name": "Ajith Kumar", "image_url": "https://sund-images.sunnxt.com/101543/250x375_AjithKumar_101543_2a898516-1e0f-49f3-b570-8c5f4ecd8936.jpg", "actor_code": "4pDqQD0LPJ" },
+              { "name": "Kamal Haasan", "image_url": "https://sund-images.sunnxt.com/101542/250x375_KamalHaasan_101542_13c3f9ea-ae22-4e5f-a49e-c0c709c2128f.jpg", "actor_code": "5Ix02sIDeA" },
+              { "name": "Vijayakanth", "image_url": "https://sund-images.sunnxt.com/101714/250x375_Vijayakanth_101714_108c0c0d-c124-43d5-8254-c83cb6a7a943.jpg", "actor_code": "8huiZv1bPB" },
+              { "name": "Arjun", "image_url": "https://sund-images.sunnxt.com/101713/250x375_Arjun_101713_0fdf5c74-57f1-4aa8-a3a2-e5d8175bf404.jpg", "actor_code": "5urIDrSLp9" },
+              { "name": "Prabhu", "image_url": "https://sund-images.sunnxt.com/101711/250x375_Prabhu_101711_2124675c-d79e-47c5-9ce4-2bdfffdc2a64.jpg", "actor_code": "5ycjeOX2Hm" }
+            ];
+
+            // Data from actress.json, with placeholder actor_codes added
+            const actressesData = [
+              { "name": "Trisha Krishnan", "image_url": "https://sund-images.sunnxt.com/131408/250x375_TrishaKrishnan_131408_d8af3600-7fdd-4bc0-b723-4be0ced8f2e4.jpg", "actor_code": "F1cHse9jWW" },
+              { "name": "Samantha", "image_url": "https://sund-images.sunnxt.com/131409/250x375_Samantha_131409_65c2f409-f020-4360-969a-b9f741232ccf.jpg", "actor_code": "6WfqAcxel5" },
+              { "name": "Nayanthara", "image_url": "https://sund-images.sunnxt.com/131441/250x375_Nayanthara_131441_76f534d9-19d3-4a02-a01a-03669dcd21c1.jpg", "actor_code": "7tFt1Le1Ep" },
+              { "name": "Pooja Hegde", "image_url": "https://sund-images.sunnxt.com/138711/250x375_PoojaHegde_138711_b484d386-2c3d-408b-89db-88177887ab8a.jpg", "actor_code": "14CoLSwEXV" },
+              { "name": "Nithya Menen", "image_url": "https://sund-images.sunnxt.com/131443/250x375_NithyaMenen_131443_db5be06a-7a6a-4b30-80b4-380506464b56.jpg", "actor_code": "3AQ1iONzZQ" },
+              { "name": "Anushka Shetty", "image_url": "https://sund-images.sunnxt.com/131445/250x375_AnushkaShetty_131445_df5b5e1e-50c3-4559-a946-1cb9ab77202e.jpg", "actor_code": "2ldhTbiGgU" },
+              { "name": "Hansika Motwani", "image_url": "https://sund-images.sunnxt.com/131424/250x375_HansikaMotwani_131424_d6c17c92-d0b1-4600-b353-45c2c47d53fd.jpg", "actor_code": "3FGflYSCcj" },
+              { "name": "Kajal Aggarwal", "image_url": "https://sund-images.sunnxt.com/131426/250x375_KajalAggarwal_131426_0ca0896b-bdef-4833-9dec-770e035b149c.jpg", "actor_code": "7GLAgNWiq2" },
+              { "name": "Shruti Haasan", "image_url": "https://sund-images.sunnxt.com/131431/250x375_ShrutiHaasan_131431_78778c01-540b-4576-a883-699ec7224571.jpg", "actor_code": "7fCylLNfVi" },
+              { "name": "Priyamani", "image_url": "https://sund-images.sunnxt.com/131415/250x375_Priyamani_131415_7a92265f-5432-4e9e-a38c-46e2200c522c.jpg", "actor_code": "1mh1dheOZR" },
+              { "name": "Simran", "image_url": "https://sund-images.sunnxt.com/131407/250x375_Simran_131407_a9b95132-9205-420d-9f5f-9e6a8bba22e0.jpg", "actor_code": "33rNUL3JZx" },
+              { "name": "Aishwarya Rajesh", "image_url": "https://sund-images.sunnxt.com/131411/250x375_AishwaryaRajesh_131411_c7758ce1-6327-41b1-bd5c-7f84ac947bf3.jpg", "actor_code": "CeT6162PqU" }
+            ];
+
+            // --- END: Integrated JSON Data ---
+
+
+            // Element References
+            const toggleButton = document.getElementById('toggleDarkMode');
+            const body = document.body;
+            const modeIcon = document.getElementById('modeIcon');
+            const logo = document.getElementById('logo');
+            const castGrid = document.getElementById('castGrid');
+            const actorsBtn = document.getElementById('actorsBtn');
+            const actressesBtn = document.getElementById('actressesBtn');
+
+            // --- Theme Management (Same as before) ---
+            function updateLogo(isDarkMode) {
+                logo.src = isDarkMode ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
+            }
+
+            function updateIcon(isDarkMode) {
+                modeIcon.classList.toggle('bi-sun-fill', isDarkMode);
+                modeIcon.classList.toggle('bi-moon-fill', !isDarkMode);
+            }
+
+            function applyTheme(theme) {
+                const isDarkMode = (theme === 'dark') || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                body.classList.toggle('dark-mode', isDarkMode);
+                updateIcon(isDarkMode);
+                updateLogo(isDarkMode);
+                if (theme === 'dark' || theme === 'light') {
+                    localStorage.setItem('theme', theme);
+                } else {
+                    localStorage.removeItem('theme');
+                }
+            }
+            
+            applyTheme(localStorage.getItem('theme') || 'system');
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (!localStorage.getItem('theme')) {
+                    applyTheme('system');
+                }
+            });
+
+            toggleButton.addEventListener('click', () => {
+                const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+                applyTheme(newTheme);
+            });
+
+
+            // --- UPDATED Cast Loading Functionality ---
+            
+            /**
+             * Displays cast data from the integrated JavaScript variables.
+             * @param {string} castType - 'actors' or 'actresses'.
+             */
+            function displayCast(castType) {
+                // 1. Clear previous state
+                castGrid.innerHTML = '';
+
+                // 2. Select the correct data source
+                const castList = (castType === 'actors') ? actorsData : actressesData;
+
+                // 3. Create and append a card for each cast member
+                castList.forEach(member => {
+                    const card = document.createElement('a');
+                    card.className = 'cast-card';
+                    card.href = `actor.html?lang=tamil&actor_id=${member.actor_code}`;
+
+                    const img = document.createElement('img');
+                    img.src = member.image_url;
+                    img.alt = `Photo of ${member.name}`;
+                    img.loading = 'lazy';
+
+                    const name = document.createElement('div');
+                    name.className = 'name';
+                    name.textContent = member.name;
+                    
+                    card.appendChild(img);
+                    card.appendChild(name);
+                    
+                    castGrid.appendChild(card);
+                });
+            }
+
+            // --- Event Listeners for Toggle Buttons ---
+            actorsBtn.addEventListener('click', () => {
+                if (!actorsBtn.classList.contains('active')) {
+                    actorsBtn.classList.add('active');
+                    actressesBtn.classList.remove('active');
+                    displayCast('actors');
+                }
+            });
+
+            actressesBtn.addEventListener('click', () => {
+                if (!actressesBtn.classList.contains('active')) {
+                    actressesBtn.classList.add('active');
+                    actorsBtn.classList.remove('active');
+                    displayCast('actresses');
+                }
+            });
+
+            // Initial load: display actors by default
+            displayCast('actors');
+        });
+    </script>
+</body>
+</html>
