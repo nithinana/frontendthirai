@@ -4,128 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thirai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        /* General Body Styles (Adapted from join.html) */
-        body {
-            background-color: #f8f9fa;
-            color: #212529;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.5s ease, color 0.5s ease;
+        /* --- CSS Variables for a Themed, Modern UI (From language.html) --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
+            --primary-color: #007bff; /* Changed to match language.html's primary color */
+            --primary-hover-color: #0056b3; /* Changed to match language.html's primary color */
+            --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         body.dark-mode {
-            background-color: #121212;
-            color: #e0e0e0;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --header-bg: rgba(22, 22, 22, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            /* Make close button visible in dark mode (from language.html) */
+            --input-border-color: #444; /* Added for modal styling consistency */
+        }
+        body.dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
 
-        /* Header Elements (Logo, Buttons) */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            width: 100%;
-            box-sizing: border-box;
+        /* General Body Styles */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Adjusted transition to match language.html */
+            overflow-x: hidden;
+        }
+
+        /* --- Header and Navigation --- */
+        .app-header {
             position: fixed;
             top: 0;
             left: 0;
-            background-color: rgba(248, 249, 250, 0.8);
+            right: 0;
+            z-index: 1030;
+            /* MATCHED language.html PADDING */
+            padding: 1rem 1rem; 
+            background-color: var(--header-bg);
             backdrop-filter: blur(10px);
-            z-index: 999;
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--header-shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
-        body.dark-mode .header {
-            background-color: rgba(18, 18, 18, 0.8);
+        .header-logo {
+            height: 30px; /* MATCHED language.html height */
+            width: auto;
         }
-
-        .header-left, .header-right {
+        
+        /* The previous .logo-dropdown-container is now just a logo wrapper */
+        .logo-wrapper { 
             display: flex;
             align-items: center;
-            gap: 1rem;
         }
+        
+        /* Removed .logo-dropdown-toggle styles */
 
-        #logo {
-            max-width: 120px;
-            height: auto;
-        }
-
-        .icon-button {
-            color: #212529;
-            background-color: transparent;
-            border: none;
-            border-radius: 0.375rem;
-            padding: 0.5rem;
-            cursor: pointer;
+        /* Nav Links for Toggles (Actors/Actresses) - Styled like Home/Recent/Popular */
+        .header-center-nav {
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 2.5rem;
-            height: 2.5rem;
-            font-size: 1.25rem;
-            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem; /* MATCHED language.html padding */
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            text-decoration: none; 
+            white-space: nowrap; 
         }
 
-        body.dark-mode .icon-button {
-            color: #e0e0e0;
+        .nav-link:hover {
+            background-color: var(--card-bg-color);
         }
 
-        .icon-button:hover {
-            background-color: #e9ecef;
+        .nav-link.active {
+            color: var(--primary-color); /* MATCHED language.html active color */
+            font-weight: 600;
+            background-color: transparent; /* Changed to match language.html's category active style */
         }
-
-        body.dark-mode .icon-button:hover {
-            background-color: #333;
+        
+        .nav-link.active:hover {
+            background-color: var(--card-bg-color); /* Kept hover style consistent */
         }
-
+        
+        body.dark-mode .nav-link:hover {
+            background-color: rgba(255,255,255,0.05); /* Adjusted dark mode hover */
+        }
+        
+        /* Dropdown Menu Styling (For Language Dropdown - now only used for the modal) */
+        .dropdown-menu {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 0.5rem;
+        }
+        .dropdown-item {
+            color: var(--text-color);
+        }
+        .dropdown-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        body.dark-mode .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
         /* Main Content Area */
         .main-container {
-            margin-top: 80px; /* Space for the fixed header */
+            /* Margin set by JS to dynamically account for header height */
             padding: 20px;
             width: 100%;
             max-width: 1200px;
             box-sizing: border-box;
             margin-left: auto;
             margin-right: auto;
-        }
-
-        /* Cast Toggle Buttons */
-        .cast-toggle {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .toggle-btn {
-            padding: 10px 25px;
-            font-size: 1em;
-            cursor: pointer;
-            border: 2px solid #ccc;
-            background-color: transparent;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            color: #555;
-        }
-
-        body.dark-mode .toggle-btn {
-            border-color: #444;
-            color: #aaa;
-        }
-
-        .toggle-btn.active {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        body.dark-mode .toggle-btn.active {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-            color: #fff;
         }
 
         /* Cast Grid Styles */
@@ -136,9 +148,9 @@
         }
 
         .cast-card {
-            background-color: #fff;
+            background-color: var(--card-bg-color);
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--card-shadow);
             text-align: center;
             text-decoration: none;
             color: inherit;
@@ -149,14 +161,12 @@
         }
         
         body.dark-mode .cast-card {
-            background-color: #1e1e1e;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            color: #e0e0e0;
         }
 
         .cast-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--card-hover-shadow);
         }
 
         body.dark-mode .cast-card:hover {
@@ -166,7 +176,7 @@
         .cast-card img {
             width: 100%;
             height: auto;
-            aspect-ratio: 2 / 3; /* Maintain a consistent aspect ratio */
+            aspect-ratio: 2 / 3;
             object-fit: cover;
         }
 
@@ -179,38 +189,185 @@
             align-items: center;
             justify-content: center;
         }
+        
+        /* Modal Styling (Copied from language.html for consistency) */
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+        .modal-header {
+            border-bottom: none;
+        }
+        .modal-header h5 {
+            font-weight: bold;
+        }
+        .modal-body .list-group-item {
+            cursor: pointer;
+            color: var(--text-color);
+            background-color: transparent;
+            border-color: var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        .modal-body .list-group-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        body.dark-mode .modal-body .list-group-item.active {
+            background-color: var(--input-border-color);
+            color: var(--text-color);
+            border-color: var(--input-border-color);
+        }
+        .modal-body .list-group-item:hover {
+            background-color: var(--border-color);
+        }
+        body.dark-mode .modal-body .list-group-item:hover {
+            background-color: var(--input-bg-color);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover-color);
+            border-color: var(--primary-hover-color);
+        }
+
+
+        /* --- Responsive Layout --- */
+        @media (min-width: 992px) {
+            /* On large screens, the main content (which is empty here) is centered */
+            .header-main-content { 
+                flex-grow: 1; 
+                justify-content: center; 
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            /* On tablet/mobile, the header-main-content (which contains nothing) should not take up space */
+            .header-main-content { 
+                order: 3; 
+                width: 100%; 
+                margin-top: 0.5rem; 
+                justify-content: center;
+                display: none; /* Hide if empty */
+            }
+            /* Move the navigation to take up the space where the search bar would be */
+            .header-center-nav {
+                flex-grow: 1; 
+                justify-content: flex-end; /* Align right on smaller screens */
+            }
+        }
+        
+        @media (max-width: 768px) {
+             /* Adjust nav position on small screens for better centering/flow */
+            .header-center-nav {
+                flex-grow: 1; 
+                justify-content: center; 
+            }
+            .app-header .container-fluid {
+                padding: 0.75rem 0.5rem; /* Tighter padding on mobile */
+            }
+            .nav-link {
+                padding: 0.5rem 0.6rem; 
+                font-size: 0.85rem;
+            }
+            .main-container {
+                padding: 15px; 
+            }
+            #castGrid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 15px; 
+            }
+            .cast-card .name {
+                padding: 8px 5px; 
+                font-size: 0.8em; 
+            }
+        }
+        
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="header-left">
-            <a href="javascript:history.back()" class="icon-button back-button" aria-label="Go back">
-                <i class="bi bi-arrow-left"></i>
-            </a>
-            <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
-        </div>
-        <div class="header-right">
-            <button id="toggleDarkMode" class="icon-button" aria-label="Toggle dark mode" title="Toggle dark mode">
-                <i id="modeIcon" class="bi bi-moon-fill"></i>
-            </button>
+    <header class="app-header">
+        <div class="container-fluid d-flex flex-wrap align-items-center">
+            
+            <div class="logo-wrapper me-lg-4">
+                <a id="logoLink" href="./index.html">
+                    <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+                </a>
+                </div>
+            
+            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
+            </div>
+
+            <div class="d-flex align-items-center ms-auto">
+                <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav">
+                    <a class="nav-link active" id="actorsBtn" href="#">Actors</a>
+                    <a class="nav-link" id="actressesBtn" href="#">Actresses</a>
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </header>
 
     <main class="main-container">
-        <div class="cast-toggle">
-            <button class="toggle-btn active" id="actorsBtn">Actors</button>
-            <button class="toggle-btn" id="actressesBtn">Actresses</button>
-        </div>
-
         <div id="castGrid"></div>
     </main>
+    
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="h6 mb-3">Appearance</p>
+                    <div class="list-group mb-4">
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="light">Light</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="dark">Dark</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System Default</a>
+                    </div>
+                    <p class="h6 mb-3">Preferred Language</p>
+                    <div id="preferredLangList" class="list-group mb-4">
+                    </div>
+                    <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
+                    <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- START: Integrated JSON Data ---
-
-            // Data from actors.json is now a JavaScript variable
+            const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+            
+            // --- START: JSON Data (Kept the same) ---
             const actorsData = [
               { "name": "Vijay", "image_url": "https://sund-images.sunnxt.com/100587/250x375_Vijay_100587_224cc6a7-3c61-4e10-bde1-22dc80d0473b.jpg", "actor_code": "3TKYioHCAF" },
               { "name": "Dhanush", "image_url": "https://sund-images.sunnxt.com/101546/250x375_Dhanush_101546_2680c0f6-aa8e-4358-bcfd-a545c794f1f1.jpg", "actor_code": "5vCobOqDDx" },
@@ -228,7 +385,6 @@
               { "name": "Prabhu", "image_url": "https://sund-images.sunnxt.com/101711/250x375_Prabhu_101711_2124675c-d79e-47c5-9ce4-2bdfffdc2a64.jpg", "actor_code": "5ycjeOX2Hm" }
             ];
 
-            // Data from actress.json, with placeholder actor_codes added
             const actressesData = [
               { "name": "Trisha Krishnan", "image_url": "https://sund-images.sunnxt.com/131408/250x375_TrishaKrishnan_131408_d8af3600-7fdd-4bc0-b723-4be0ced8f2e4.jpg", "actor_code": "F1cHse9jWW" },
               { "name": "Samantha", "image_url": "https://sund-images.sunnxt.com/131409/250x375_Samantha_131409_65c2f409-f020-4360-969a-b9f741232ccf.jpg", "actor_code": "6WfqAcxel5" },
@@ -243,73 +399,172 @@
               { "name": "Simran", "image_url": "https://sund-images.sunnxt.com/131407/250x375_Simran_131407_a9b95132-9205-420d-9f5f-9e6a8bba22e0.jpg", "actor_code": "33rNUL3JZx" },
               { "name": "Aishwarya Rajesh", "image_url": "https://sund-images.sunnxt.com/131411/250x375_AishwaryaRajesh_131411_c7758ce1-6327-41b1-bd5c-7f84ac947bf3.jpg", "actor_code": "CeT6162PqU" }
             ];
-
-            // --- END: Integrated JSON Data ---
-
+            // --- END: JSON Data ---
 
             // Element References
-            const toggleButton = document.getElementById('toggleDarkMode');
             const body = document.body;
-            const modeIcon = document.getElementById('modeIcon');
             const logo = document.getElementById('logo');
             const castGrid = document.getElementById('castGrid');
             const actorsBtn = document.getElementById('actorsBtn');
             const actressesBtn = document.getElementById('actressesBtn');
+            // MODIFIED: languageDropdownMenu is no longer needed in the header, but its content needs to be created for the modal.
+            const preferredLangList = document.getElementById('preferredLangList');
+            const themeOptions = document.querySelectorAll('.theme-option');
+            const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
+            const logoLink = document.getElementById('logoLink');
 
-            // --- Theme Management (Same as before) ---
-            function updateLogo(isDarkMode) {
-                logo.src = isDarkMode ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
+
+            // --- Utility Functions (Copied from previous steps) ---
+
+            function adjustBodyPadding() {
+                const header = document.querySelector('.app-header');
+                if (header) {
+                    const headerHeight = header.offsetHeight;
+                    document.querySelector('.main-container').style.marginTop = `${headerHeight + 20}px`;
+                }
             }
-
-            function updateIcon(isDarkMode) {
-                modeIcon.classList.toggle('bi-sun-fill', isDarkMode);
-                modeIcon.classList.toggle('bi-moon-fill', !isDarkMode);
+            
+            function updateThemeAssets(isDarkMode) {
+                const lightLogo = './static/thiraiblack.png';
+                const darkLogo = './static/thiraiwhite.png';
+                logo.src = isDarkMode ? darkLogo : lightLogo;
             }
 
             function applyTheme(theme) {
-                const isDarkMode = (theme === 'dark') || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                body.classList.toggle('dark-mode', isDarkMode);
-                updateIcon(isDarkMode);
-                updateLogo(isDarkMode);
-                if (theme === 'dark' || theme === 'light') {
-                    localStorage.setItem('theme', theme);
-                } else {
+                let isDarkMode;
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                    isDarkMode = true;
+                } else if (theme === 'light') {
+                    body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                    isDarkMode = false;
+                } else { // System default
                     localStorage.removeItem('theme');
+                    isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (isDarkMode) body.classList.add('dark-mode');
+                    else body.classList.remove('dark-mode');
+                }
+                updateThemeAssets(isDarkMode);
+            }
+            
+            function updateActiveThemeOption(theme) {
+                themeOptions.forEach(option => {
+                    option.classList.remove('active');
+                    if (option.dataset.theme === theme) option.classList.add('active');
+                });
+            }
+            
+            function updateDisableBtnVisibility() {
+                disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
+            }
+
+            function updateActiveLanguageOption(language) {
+                document.querySelectorAll('.preferred-lang-option').forEach(option => {
+                    option.classList.remove('active');
+                    if (option.dataset.language === language) option.classList.add('active');
+                });
+            }
+
+            function updateLogoLink(language) {
+                if (language && language !== 'all') {
+                    logoLink.href = `./language?lang=${language}`;
+                } else {
+                    logoLink.href = './index.html';
                 }
             }
             
-            applyTheme(localStorage.getItem('theme') || 'system');
+            // MODIFIED: populateLanguageMenus now only populates the list inside the modal
+            function populateLanguageMenus() {
+                preferredLangList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
 
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                if (!localStorage.getItem('theme')) {
-                    applyTheme('system');
+                ALL_LANGUAGES.forEach(lang => {
+                    const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
+                    
+                    const prefLink = document.createElement('a');
+                    prefLink.className = 'list-group-item list-group-item-action preferred-lang-option';
+                    prefLink.href = '#';
+                    prefLink.dataset.language = lang;
+                    prefLink.textContent = capitalized;
+                    preferredLangList.appendChild(prefLink);
+                });
+            }
+
+
+            function setupThemeAndLanguage() {
+                 // --- Theme setup
+                const storedTheme = localStorage.getItem('theme') || 'system';
+                applyTheme(storedTheme);
+                updateActiveThemeOption(storedTheme);
+                if (window.matchMedia) {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                        if (!localStorage.getItem('theme')) applyTheme('system');
+                    });
                 }
+                themeOptions.forEach(option => {
+                    option.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const selectedTheme = event.currentTarget.dataset.theme;
+                        applyTheme(selectedTheme);
+                        updateActiveThemeOption(selectedTheme);
+                    });
+                });
+                
+                // --- Language setup
+                populateLanguageMenus();
+                const storedLanguage = localStorage.getItem('preferred-language');
+                updateDisableBtnVisibility();
+                updateActiveLanguageOption(storedLanguage);
+                updateLogoLink(storedLanguage);
+
+                document.querySelectorAll('.preferred-lang-option').forEach(option => {
+                    option.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const selectedLanguage = event.currentTarget.dataset.language;
+                        localStorage.setItem('preferred-language', selectedLanguage);
+                        updateDisableBtnVisibility();
+                        updateActiveLanguageOption(selectedLanguage);
+                        updateLogoLink(selectedLanguage);
+                    });
+                });
+
+                disablePreferredLanguageBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    localStorage.removeItem('preferred-language');
+                    updateDisableBtnVisibility();
+                    updateActiveLanguageOption(null);
+                    updateLogoLink(null);
+                });
+            }
+            
+            // --- Modal Event Listeners (Copied from previous steps) ---
+            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+            const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            document.getElementById('aboutButtonInModal').addEventListener('click', function (event) {
+                event.preventDefault();
+                settingsModal.hide();
+                aboutModal.show();
+            });
+            document.getElementById('aboutModal').addEventListener('hidden.bs.modal', function () {
+                settingsModal.show();
             });
 
-            toggleButton.addEventListener('click', () => {
-                const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-                applyTheme(newTheme);
-            });
-
-
-            // --- UPDATED Cast Loading Functionality ---
+            // --- Cast Loading Functionality ---
             
             /**
-             * Displays cast data from the integrated JavaScript variables.
+             * Displays cast data.
              * @param {string} castType - 'actors' or 'actresses'.
              */
             function displayCast(castType) {
-                // 1. Clear previous state
                 castGrid.innerHTML = '';
-
-                // 2. Select the correct data source
                 const castList = (castType === 'actors') ? actorsData : actressesData;
 
-                // 3. Create and append a card for each cast member
                 castList.forEach(member => {
                     const card = document.createElement('a');
                     card.className = 'cast-card';
-                    card.href = `actor.html?lang=tamil&actor_id=${member.actor_code}`;
+                    // NOTE: Actor page link kept as in original file
+                    card.href = `actor.html?lang=tamil&actor_id=${member.actor_code}`; 
 
                     const img = document.createElement('img');
                     img.src = member.image_url;
@@ -328,7 +583,8 @@
             }
 
             // --- Event Listeners for Toggle Buttons ---
-            actorsBtn.addEventListener('click', () => {
+            actorsBtn.addEventListener('click', (event) => {
+                event.preventDefault();
                 if (!actorsBtn.classList.contains('active')) {
                     actorsBtn.classList.add('active');
                     actressesBtn.classList.remove('active');
@@ -336,7 +592,8 @@
                 }
             });
 
-            actressesBtn.addEventListener('click', () => {
+            actressesBtn.addEventListener('click', (event) => {
+                event.preventDefault();
                 if (!actressesBtn.classList.contains('active')) {
                     actressesBtn.classList.add('active');
                     actorsBtn.classList.remove('active');
@@ -344,8 +601,13 @@
                 }
             });
 
-            // Initial load: display actors by default
+            // --- Initialization ---
+            setupThemeAndLanguage();
             displayCast('actors');
+            
+            // Adjust body padding on load and resize
+            adjustBodyPadding();
+            window.addEventListener('resize', adjustBodyPadding);
         });
     </script>
 </body>
