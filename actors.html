@@ -252,7 +252,7 @@
                 padding: 0 15px 15px 15px; 
             }
             #languageFilter {
-                padding: 10px 15px; 
+                padding: 10px 20px; /* FIX APPLIED: Increased horizontal padding for better mobile margins */
             }
             #castGrid {
                 grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -460,7 +460,7 @@
                 allBtn.className = 'language-filter-btn';
                 allBtn.href = '#';
                 allBtn.dataset.language = 'all';
-                allBtn.textContent = 'All Languages';
+                allBtn.textContent = 'All';
                 if (activeLanguageFilter === 'all') allBtn.classList.add('active');
                 languageFilterDiv.appendChild(allBtn);
 
@@ -567,7 +567,7 @@
                     return;
                 }
 
-                castGrid.innerHTML = '<div class="loading-message">Loading cast profiles...</div>'; 
+                castGrid.innerHTML = '<div class="loading-message"></div>'; 
 
                 const fetchPromises = castList.map(member => 
                     fetchProfileImageUrl(member.tmdb_id).then(imageUrl => ({
