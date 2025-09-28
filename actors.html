@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thirai</title>
+    <title>Thirai - Cast</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        /* --- CSS Variables for a Themed, Modern UI (From language.html) --- */
+        /* --- CSS Variables for a Themed, Modern UI --- */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -15,9 +15,10 @@
             --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
             --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             --border-color: #dee2e6;
-            --primary-color: #007bff; /* Changed to match language.html's primary color */
-            --primary-hover-color: #0056b3; /* Changed to match language.html's primary color */
-            --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
+            --primary-color: #007bff; /* Standard Blue */
+            --primary-dark-color: #0056b3; /* Darker Blue for Active State */
+            --primary-hover-color: #0056b3; 
+            --header-bg: rgba(248, 249, 250, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
@@ -28,15 +29,13 @@
             --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             --border-color: #333;
+            --primary-color: #3a8ee6; /* Lighter Blue for Dark Mode */
+            --primary-dark-color: #1e6bbd; /* Darker Blue for Dark Mode Active State */
+            --primary-hover-color: #1e6bbd;
             --header-bg: rgba(22, 22, 22, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-            /* Make close button visible in dark mode (from language.html) */
-            --input-border-color: #444; /* Added for modal styling consistency */
         }
-        body.dark-mode .btn-close {
-            filter: invert(1) grayscale(100%) brightness(200%);
-        }
-
+        
         /* General Body Styles */
         body {
             background-color: var(--bg-color);
@@ -44,7 +43,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Adjusted transition to match language.html */
+            transition: background-color 0.3s ease, color 0.3s ease; 
             overflow-x: hidden;
         }
 
@@ -55,7 +54,6 @@
             left: 0;
             right: 0;
             z-index: 1030;
-            /* MATCHED language.html PADDING */
             padding: 1rem 1rem; 
             background-color: var(--header-bg);
             backdrop-filter: blur(10px);
@@ -66,19 +64,16 @@
         }
 
         .header-logo {
-            height: 30px; /* MATCHED language.html height */
+            height: 30px; 
             width: auto;
         }
         
-        /* The previous .logo-dropdown-container is now just a logo wrapper */
         .logo-wrapper { 
             display: flex;
             align-items: center;
         }
         
-        /* Removed .logo-dropdown-toggle styles */
-
-        /* Nav Links for Toggles (Actors/Actresses) - Styled like Home/Recent/Popular */
+        /* Nav Links for Toggles (Actors/Actresses) */
         .header-center-nav {
             display: flex;
             align-items: center;
@@ -87,7 +82,7 @@
         .nav-link {
             color: var(--text-color);
             font-weight: 500;
-            padding: 0.5rem 1rem; /* MATCHED language.html padding */
+            padding: 0.5rem 1rem; 
             border-radius: 0.5rem;
             transition: background-color 0.2s ease, color 0.2s ease;
             text-decoration: none; 
@@ -99,46 +94,96 @@
         }
 
         .nav-link.active {
-            color: var(--primary-color); /* MATCHED language.html active color */
+            color: var(--primary-color);
             font-weight: 600;
-            background-color: transparent; /* Changed to match language.html's category active style */
+            background-color: transparent;
         }
         
         .nav-link.active:hover {
-            background-color: var(--card-bg-color); /* Kept hover style consistent */
+            background-color: var(--card-bg-color); 
         }
         
         body.dark-mode .nav-link:hover {
-            background-color: rgba(255,255,255,0.05); /* Adjusted dark mode hover */
+            background-color: rgba(255,255,255,0.05); 
         }
         
-        /* Dropdown Menu Styling (For Language Dropdown - now only used for the modal) */
-        .dropdown-menu {
-            background-color: var(--card-bg-color);
+        /* --- Language Filter Styles (Sleek and Fixed) --- */
+        #languageFilter {
+            display: flex;
+            /* Center the buttons within the container */
+            justify-content: center; 
+            overflow-x: auto; 
+            padding: 10px 20px; 
+            margin: 0 auto; 
+            gap: 8px;
+            width: 100%;
+            max-width: 1200px; 
+            box-sizing: border-box; 
+
+            /* FIXED POSITIONING */
+            position: fixed; 
+            top: 60px; /* This value is dynamically set by JS */
+            left: 0;
+            right: 0; 
+            z-index: 1000;
+            background-color: var(--bg-color); 
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
+            
+            /* Hide scrollbar */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        #languageFilter::-webkit-scrollbar {
+            display: none;
+        }
+
+        .language-filter-btn {
+            background-color: transparent;
             border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-            border-radius: 0.5rem;
-        }
-        .dropdown-item {
             color: var(--text-color);
+            padding: 5px 12px;
+            border-radius: 50rem; 
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0; 
         }
-        .dropdown-item:hover {
-            background-color: rgba(0,0,0,0.05);
+
+        .language-filter-btn:hover {
+            background-color: var(--card-bg-color);
         }
-        body.dark-mode .dropdown-item:hover {
-            background-color: rgba(255,255,255,0.05);
+
+        /* Highlighted/Active State: Darker Blue */
+        .language-filter-btn.active {
+            background-color: var(--primary-dark-color); /* Use darker blue */
+            border-color: var(--primary-dark-color);
+            color: white;
+            font-weight: 600;
         }
         
         /* Main Content Area */
         .main-container {
-            /* Margin set by JS to dynamically account for header height */
-            padding: 20px;
+            /* Margin set by JS to dynamically account for header + filter bar height */
+            padding: 0 20px 20px 20px;
             width: 100%;
             max-width: 1200px;
             box-sizing: border-box;
             margin-left: auto;
             margin-right: auto;
         }
+        
+        /* Loading Message Style */
+        .loading-message {
+            grid-column: 1 / -1; 
+            text-align: center;
+            padding: 50px 0;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+
 
         /* Cast Grid Styles */
         #castGrid {
@@ -190,96 +235,24 @@
             justify-content: center;
         }
         
-        /* Modal Styling (Copied from language.html for consistency) */
-        .modal-content {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-            border-radius: 0.75rem;
-            border: 1px solid var(--border-color);
-        }
-        .modal-header {
-            border-bottom: none;
-        }
-        .modal-header h5 {
-            font-weight: bold;
-        }
-        .modal-body .list-group-item {
-            cursor: pointer;
-            color: var(--text-color);
-            background-color: transparent;
-            border-color: var(--border-color);
-            transition: background-color 0.2s ease;
-        }
-        .modal-body .list-group-item.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        body.dark-mode .modal-body .list-group-item.active {
-            background-color: var(--input-border-color);
-            color: var(--text-color);
-            border-color: var(--input-border-color);
-        }
-        .modal-body .list-group-item:hover {
-            background-color: var(--border-color);
-        }
-        body.dark-mode .modal-body .list-group-item:hover {
-            background-color: var(--input-bg-color);
-        }
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
-        }
-        .btn-primary:hover {
-            background-color: var(--primary-hover-color);
-            border-color: var(--primary-hover-color);
-        }
-
-
         /* --- Responsive Layout --- */
-        @media (min-width: 992px) {
-            /* On large screens, the main content (which is empty here) is centered */
-            .header-main-content { 
-                flex-grow: 1; 
-                justify-content: center; 
-            }
-        }
-
-        @media (max-width: 991.98px) {
-            /* On tablet/mobile, the header-main-content (which contains nothing) should not take up space */
-            .header-main-content { 
-                order: 3; 
-                width: 100%; 
-                margin-top: 0.5rem; 
-                justify-content: center;
-                display: none; /* Hide if empty */
-            }
-            /* Move the navigation to take up the space where the search bar would be */
-            .header-center-nav {
-                flex-grow: 1; 
-                justify-content: flex-end; /* Align right on smaller screens */
-            }
-        }
-        
         @media (max-width: 768px) {
-             /* Adjust nav position on small screens for better centering/flow */
+            .app-header .container-fluid {
+                padding: 0.75rem 0.5rem; 
+            }
             .header-center-nav {
                 flex-grow: 1; 
                 justify-content: center; 
-            }
-            .app-header .container-fluid {
-                padding: 0.75rem 0.5rem; /* Tighter padding on mobile */
             }
             .nav-link {
                 padding: 0.5rem 0.6rem; 
                 font-size: 0.85rem;
             }
             .main-container {
-                padding: 15px; 
+                padding: 0 15px 15px 15px; 
+            }
+            #languageFilter {
+                padding: 10px 15px; 
             }
             #castGrid {
                 grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -296,136 +269,137 @@
 <body>
 
     <header class="app-header">
-        <div class="container-fluid d-flex flex-wrap align-items-center">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
             
-            <div class="logo-wrapper me-lg-4">
+            <div class="logo-wrapper">
                 <a id="logoLink" href="./index.html">
                     <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
                 </a>
-                </div>
-            
-            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
             </div>
-
+            
             <div class="d-flex align-items-center ms-auto">
                 <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav">
                     <a class="nav-link active" id="actorsBtn" href="#">Actors</a>
                     <a class="nav-link" id="actressesBtn" href="#">Actresses</a>
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                        <i class="bi bi-gear-fill"></i>
-                    </a>
                 </div>
             </div>
         </div>
     </header>
 
+    <div id="languageFilter">
+        </div>
+
     <main class="main-container">
         <div id="castGrid"></div>
     </main>
     
-    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="h6 mb-3">Appearance</p>
-                    <div class="list-group mb-4">
-                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="light">Light</a>
-                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="dark">Dark</a>
-                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System Default</a>
-                    </div>
-                    <p class="h6 mb-3">Preferred Language</p>
-                    <div id="preferredLangList" class="list-group mb-4">
-                    </div>
-                    <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
-                    <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
             
-            // --- START: JSON Data (FIXED: Added missing commas between objects) ---
+            // --- START: JSON Data (UNCHANGED) ---
             const actorsData = [
-              { "name": "Vijay", "image_url": "https://sund-images.sunnxt.com/100587/250x375_Vijay_100587_224cc6a7-3c61-4e10-bde1-22dc80d0473b.jpg", "actor_code": "3TKYioHCAF" },
-              { "name": "Dhanush", "image_url": "https://sund-images.sunnxt.com/101546/250x375_Dhanush_101546_2680c0f6-aa8e-4358-bcfd-a545c794f1f1.jpg", "actor_code": "5vCobOqDDx" },
-              { "name": "Mohanlal", "image_url": "https://sund-images.sunnxt.com/101560/250x375_Mohanlal_101560_4a4618e2-faff-4156-bbfd-723f34346e06.jpg", "actor_code": "1Uv6Det8Ej" },
-              { "name": "Mammootty", "image_url": "https://sund-images.sunnxt.com/101561/250x375_Mammootty_101561_0dd71a8d-9e60-4c77-86ef-bb773bc98038.jpg", "actor_code": "1WaoBhSG80" },
-              { "name": "Vijay Sethupathi", "image_url": "https://sund-images.sunnxt.com/138708/250x375_VijaySethupathi_138708_d8b98537-1c46-4b2d-8d49-6a53594ee332.jpg", "actor_code": "1yADiX9kkO" },
-              { "name": "Rajinikanth", "image_url": "https://sund-images.sunnxt.com/94511/250x375_Rajinikanth_94511_1202521b-b7e0-421b-80f2-ac5034a57930.jpg", "actor_code": "ijsq87BV3Y" },
-              { "name": "Karthi Sivakumar", "image_url": "https://sund-images.sunnxt.com/101549/250x375_KarthiSivakumar_101549_dd816cb1-d07d-4190-a025-9f183f1f5075.jpg", "actor_code": "5mHRERsgQU" },
-              { "name": "Sivakarthikeyan", "image_url": "https://sund-images.sunnxt.com/101548/250x375_Sivakarthikeyan_101548_969c4838-4b33-4b19-b2b0-76202e848226.jpg", "actor_code": "6ZDHHGuxxN" },
-              { "name": "Vishal", "image_url": "https://sund-images.sunnxt.com/101547/250x375_Vishal_101547_785b92f6-dd11-43fb-946b-c9f1f0ed898d.jpg", "actor_code": "1emttPrIgB" },
-              { "name": "Surya", "image_url": "https://sund-images.sunnxt.com/101545/250x375_Surya_101545_27017026-a6bd-43fa-a65d-e7fa86cd0528.jpg", "actor_code": "2waH3hTKAe" },
-              { "name": "Vikram", "image_url": "https://sund-images.sunnxt.com/101544/250x375_Vikram_101544_d6dcb2fb-330f-4850-b748-d503d5241704.jpg", "actor_code": "5uf7csvvAf" },
-              { "name": "Ajith Kumar", "image_url": "https://sund-images.sunnxt.com/101543/250x375_AjithKumar_101543_2a898516-1e0f-49f3-b570-8c5f4ecd8936.jpg", "actor_code": "4pDqQD0LPJ" },
-              { "name": "Fahadh Fassil", "image_url": "https://sund-images.sunnxt.com/101565/250x375_FahadhFaasil_101565_18dbdffc-4760-419a-a24c-d4280c6fe684.jpg", "actor_code": "5rqK8kvM2U" },
-              { "name": "Kamal Haasan", "image_url": "https://sund-images.sunnxt.com/101542/250x375_KamalHaasan_101542_13c3f9ea-ae22-4e5f-a49e-c0c709c2128f.jpg", "actor_code": "5Ix02sIDeA" },
-              { "name": "Prithviraj", "image_url": "https://sund-images.sunnxt.com/101562/250x375_PrithvirajSukumaran_101562_7617b864-4396-476e-83aa-83c27978139a.jpg", "actor_code": "4n085rJr74" },
-              { "name": "Vijayakanth", "image_url": "https://sund-images.sunnxt.com/101714/250x375_Vijayakanth_101714_108c0c0d-c124-43d5-8254-c83cb6a7a943.jpg", "actor_code": "8huiZv1bPB" },
-              { "name": "Arjun", "image_url": "https://sund-images.sunnxt.com/101713/250x375_Arjun_101713_0fdf5c74-57f1-4aa8-a3a2-e5d8175bf404.jpg", "actor_code": "5urIDrSLp9" },
-              { "name": "Prabhas", "image_url": "https://sund-images.sunnxt.com/101553/250x375_Prabhas_101553_5043283d-4812-4d2e-84e8-43313c1622f6.jpg", "actor_code": "7IcT9rmeui" },
-              { "name": "Nani", "image_url": "https://sund-images.sunnxt.com/101558/250x375_Nani_101558_bf4ca935-5d41-450d-b3e1-94e4faf5e4a9.jpg", "actor_code": "3isSF2aCCr" },
-              { "name": "Prabhu", "image_url": "https://sund-images.sunnxt.com/101711/250x375_Prabhu_101711_2124675c-d79e-47c5-9ce4-2bdfffdc2a64.jpg", "actor_code": "5ycjeOX2Hm" }
+                // Tamil Actors
+                { "name": "Vijay", "tmdb_id": "91547", "actor_code": "3TKYioHCAF", "language": "tamil" }, 
+                { "name": "Dhanush", "tmdb_id": "550165", "actor_code": "5vCobOqDDx", "language": "tamil" }, 
+                { "name": "Kamal Haasan", "tmdb_id": "93193", "actor_code": "5Ix02sIDeA", "language": "tamil" },
+                { "name": "Vijay Sethupathi", "tmdb_id": "1123766", "actor_code": "1yADiX9kkO", "language": "tamil" }, 
+                { "name": "Rajinikanth", "tmdb_id": "91555", "actor_code": "ijsq87BV3Y", "language": "tamil" },
+                { "name": "Karthi Sivakumar", "tmdb_id": "123066", "actor_code": "5mHRERsgQU", "language": "tamil" },
+                { "name": "Sivakarthikeyan", "tmdb_id": "587982", "actor_code": "6ZDHHGuxxN", "language": "tamil" },
+                { "name": "Vishal", "tmdb_id": "559892", "actor_code": "1emttPrIgB", "language": "tamil" },
+                { "name": "Suriya", "tmdb_id": "85720", "actor_code": "2waH3hTKAe", "language": "tamil" },
+                { "name": "Vikram", "tmdb_id": "93191", "actor_code": "5uf7csvvAf", "language": "tamil" },
+                { "name": "Ajith Kumar", "tmdb_id": "148360", "actor_code": "4pDqQD0LPJ", "language": "tamil" },
+                { "name": "Pradeep Ranganathan", "tmdb_id": "2274937", "actor_code": "19A9Wxsiru", "language": "tamil" },
+                { "name": "M. G. Ramachandran", "tmdb_id": "584602", "actor_code": "8L6px81Vzd", "language": "tamil" },
+                { "name": "Vijayakanth", "tmdb_id": "237635", "actor_code": "8huiZv1bPB", "language": "tamil" },
+                { "name": "Prabhu", "tmdb_id": "85722", "actor_code": "5ycjeOX2Hm", "language": "tamil" },
+                
+                // Hindi Actors
+                { "name": "Shah Rukh Khan", "tmdb_id": "35742", "actor_code": "b4tCNsNP3r", "language": "hindi" }, 
+                { "name": "Ranbir Kapoor", "tmdb_id": "85034", "actor_code": "2cKAcgtako", "language": "hindi" }, 
+                { "name": "Salman Khan", "tmdb_id": "42802", "actor_code": "73t49Zpm8Z", "language": "hindi" }, 
+                { "name": "Sidharth Malhotra", "tmdb_id": "1108117", "actor_code": "2ZZHmp8rm2", "language": "hindi" }, 
+                { "name": "Amitabh Bachchan", "tmdb_id": "35780", "actor_code": "2z1RmIZxHh", "language": "hindi" },
+                { "name": "Hrithik Roshan", "tmdb_id": "78749", "actor_code": "pQrb67ZvoX", "language": "hindi" },
+                { "name": "Aamir Khan", "tmdb_id": "52763", "actor_code": "7wg7uK17Bg", "language": "hindi" },
+                
+                // Malayalam Actors
+                { "name": "Mohanlal", "tmdb_id": "82732", "actor_code": "1Uv6Det8Ej", "language": "malayalam" },   
+                { "name": "Mammootty", "tmdb_id": "124111", "actor_code": "1WaoBhSG80", "language": "malayalam" }, 
+                { "name": "Fahadh Fassil", "tmdb_id": "1072750", "actor_code": "5rqK8kvM2U", "language": "malayalam" },
+                { "name": "Prithviraj", "tmdb_id": "117690", "actor_code": "4n085rJr74", "language": "malayalam" },
+                
+                // Telugu Actors
+                { "name": "Prabhas", "tmdb_id": "237045", "actor_code": "7IcT9rmeui", "language": "telugu" },
+                { "name": "Allu Arjun", "tmdb_id": "108215", "actor_code": "7ug2FmruQr", "language": "telugu" },
+                { "name": "Nani", "tmdb_id": "225387", "actor_code": "3isSF2aCCr", "language": "telugu" }
             ];
 
             const actressesData = [
-              { "name": "Trisha Krishnan", "image_url": "https://sund-images.sunnxt.com/131408/250x375_TrishaKrishnan_131408_d8af3600-7fdd-4bc0-b723-4be0ced8f2e4.jpg", "actor_code": "F1cHse9jWW" },
-              { "name": "Samantha", "image_url": "https://sund-images.sunnxt.com/131409/250x375_Samantha_131409_65c2f409-f020-4360-969a-b9f741232ccf.jpg", "actor_code": "6WfqAcxel5" },
-              { "name": "Nayanthara", "image_url": "https://sund-images.sunnxt.com/131441/250x375_Nayanthara_131441_76f534d9-19d3-4a02-a01a-03669dcd21c1.jpg", "actor_code": "7tFt1Le1Ep" },
-              { "name": "Pooja Hegde", "image_url": "https://sund-images.sunnxt.com/138711/250x375_PoojaHegde_138711_b484d386-2c3d-408b-89db-88177887ab8a.jpg", "actor_code": "14CoLSwEXV" },
-              { "name": "Nithya Menen", "image_url": "https://sund-images.sunnxt.com/131443/250x375_NithyaMenen_131443_db5be06a-7a6a-4b30-80b4-380506464b56.jpg", "actor_code": "3AQ1iONzZQ" },
-              { "name": "Anushka Shetty", "image_url": "https://sund-images.sunnxt.com/131445/250x375_AnushkaShetty_131445_df5b5e1e-50c3-4559-a946-1cb9ab77202e.jpg", "actor_code": "2ldhTbiGgU" },
-              { "name": "Hansika Motwani", "image_url": "https://sund-images.sunnxt.com/131424/250x375_HansikaMotwani_131424_d6c17c92-d0b1-4600-b353-45c2c47d53fd.jpg", "actor_code": "3FGflYSCcj" },
-              { "name": "Kajal Aggarwal", "image_url": "https://sund-images.sunnxt.com/131426/250x375_KajalAggarwal_131426_0ca0896b-bdef-4833-9dec-770e035b149c.jpg", "actor_code": "7GLAgNWiq2" },
-              { "name": "Shruti Haasan", "image_url": "https://sund-images.sunnxt.com/131431/250x375_ShrutiHaasan_131431_78778c01-540b-4576-a883-699ec7224571.jpg", "actor_code": "7fCylLNfVi" },
-              { "name": "Priyamani", "image_url": "https://sund-images.sunnxt.com/131415/250x375_Priyamani_131415_7a92265f-5432-4e9e-a38c-46e2200c522c.jpg", "actor_code": "1mh1dheOZR" },
-              { "name": "Simran", "image_url": "https://sund-images.sunnxt.com/131407/250x375_Simran_131407_a9b95132-9205-420d-9f5f-9e6a8bba22e0.jpg", "actor_code": "33rNUL3JZx" },
-              { "name": "Aishwarya Rajesh", "image_url": "https://sund-images.sunnxt.com/131411/250x375_AishwaryaRajesh_131411_c7758ce1-6327-41b1-bd5c-7f84ac947bf3.jpg", "actor_code": "CeT6162PqU" }
+              // Actresses (assigned primary industry language)
+              { "name": "Trisha Krishnan", "tmdb_id": "116925", "actor_code": "F1cHse9jWW", "language": "tamil" }, 
+              { "name": "Samantha", "tmdb_id": "225312", "actor_code": "6WfqAcxel5", "language": "tamil" }, 
+              { "name": "Asin", "tmdb_id": "81092", "actor_code": "F06ZXPJGJh", "language": "tamil" }, 
+              { "name": "Nayanthara", "tmdb_id": "91548", "actor_code": "7tFt1Le1Ep", "language": "tamil" }, 
+              { "name": "Pooja Hegde", "tmdb_id": "587753", "actor_code": "14CoLSwEXV", "language": "telugu" }, 
+              { "name": "Alia Bhatt", "tmdb_id": "1108120", "actor_code": "4LJUx3vqDc", "language": "hindi" }, 
+              { "name": "Nithya Menen", "tmdb_id": "225388", "actor_code": "3AQ1iONzZQ", "language": "tamil" }, 
+              { "name": "Anushka Shetty", "tmdb_id": "88167", "actor_code": "2ldhTbiGgU", "language": "telugu" },
+              { "name": "Hansika Motwani", "tmdb_id": "237967", "actor_code": "3FGflYSCcj", "language": "tamil" },
+              { "name": "Kajal Aggarwal", "tmdb_id": "55061", "actor_code": "7GLAgNWiq2", "language": "hindi" },
+              { "name": "Shruti Haasan", "tmdb_id": "85883", "actor_code": "7fCylLNfVi", "language": "tamil" },
+              { "name": "Deepika Padukone", "tmdb_id": "53975", "actor_code": "7Iwku12HLv", "language": "hindi" },
+              { "name": "Kareena Kapoor", "tmdb_id": "37233", "actor_code": "6cC1dMrY40", "language": "hindi" },
+              { "name": "Priyamani", "tmdb_id": "1107197", "actor_code": "1mh1dheOZR", "language": "tamil" },
+              { "name": "Simran", "tmdb_id": "141705", "actor_code": "33rNUL3JZx", "language": "tamil" },
+              { "name": "Aishwarya Rajesh", "tmdb_id": "1114583", "actor_code": "CeT6162PqU", "language": "tamil" }
             ];
+            
+            // Global map for accessing data arrays
+            const allCastData = {
+                'actors': actorsData,
+                'actresses': actressesData
+            };
+            
             // --- END: JSON Data ---
 
+            // TMDb API Configuration
+            const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
+            const TMDB_BASE_URL = 'https://api.themoviedb.org/3/person/';
+            const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w185';
+            
             // Element References
             const body = document.body;
             const logo = document.getElementById('logo');
             const castGrid = document.getElementById('castGrid');
             const actorsBtn = document.getElementById('actorsBtn');
             const actressesBtn = document.getElementById('actressesBtn');
-            const preferredLangList = document.getElementById('preferredLangList');
-            const themeOptions = document.querySelectorAll('.theme-option');
-            const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
             const logoLink = document.getElementById('logoLink');
+            const languageFilterDiv = document.getElementById('languageFilter'); 
+
+            // State Variables
+            let currentCastType = 'actors'; 
+            let activeLanguageFilter = 'all'; 
 
 
-            // --- Utility Functions (Copied from previous steps) ---
+            // --- Utility Functions ---
 
             function adjustBodyPadding() {
                 const header = document.querySelector('.app-header');
-                if (header) {
+                const filter = document.getElementById('languageFilter');
+                
+                if (header && filter) {
                     const headerHeight = header.offsetHeight;
-                    document.querySelector('.main-container').style.marginTop = `${headerHeight + 20}px`;
+                    const filterHeight = filter.offsetHeight;
+                    
+                    // Filter bar's top position is set right below the fixed header
+                    filter.style.top = `${headerHeight}px`;
+
+                    // Main content starts below the fixed header AND the fixed filter bar + a little extra margin
+                    const totalFixedHeight = headerHeight + filterHeight + 20; 
+                    document.querySelector('.main-container').style.marginTop = `${totalFixedHeight}px`; 
                 }
             }
             
@@ -437,16 +411,19 @@
 
             function applyTheme(theme) {
                 let isDarkMode;
+                const storedTheme = localStorage.getItem('theme');
+
+                if (theme === 'system' && storedTheme) {
+                    theme = storedTheme;
+                }
+                
                 if (theme === 'dark') {
                     body.classList.add('dark-mode');
-                    localStorage.setItem('theme', 'dark');
                     isDarkMode = true;
                 } else if (theme === 'light') {
                     body.classList.remove('dark-mode');
-                    localStorage.setItem('theme', 'light');
                     isDarkMode = false;
                 } else { // System default
-                    localStorage.removeItem('theme');
                     isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                     if (isDarkMode) body.classList.add('dark-mode');
                     else body.classList.remove('dark-mode');
@@ -454,184 +431,205 @@
                 updateThemeAssets(isDarkMode);
             }
             
-            function updateActiveThemeOption(theme) {
-                themeOptions.forEach(option => {
-                    option.classList.remove('active');
-                    if (option.dataset.theme === theme) option.classList.add('active');
+            function getUniqueLanguages(data) {
+                const languages = new Set();
+                data.forEach(member => {
+                    if (member.language) {
+                        languages.add(member.language);
+                    }
+                });
+                return Array.from(languages).sort();
+            }
+
+            function updateActiveFilterButton(language) {
+                 document.querySelectorAll('.language-filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.language === language) {
+                        btn.classList.add('active');
+                    }
                 });
             }
             
-            function updateDisableBtnVisibility() {
-                disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
-            }
-
-            function updateActiveLanguageOption(language) {
-                document.querySelectorAll('.preferred-lang-option').forEach(option => {
-                    option.classList.remove('active');
-                    if (option.dataset.language === language) option.classList.add('active');
-                });
-            }
-
-            function updateLogoLink(language) {
-                if (language && language !== 'all') {
-                    // Corrected the path to use .html extension as per app structure
-                    logoLink.href = `./language.html?lang=${language}`; 
-                } else {
-                    logoLink.href = './index.html';
-                }
-            }
-            
-            // MODIFIED: populateLanguageMenus now only populates the list inside the modal
-            function populateLanguageMenus() {
-                // Ensure 'All Languages' option is marked active if no preference is set
-                const storedLanguage = localStorage.getItem('preferred-language') || 'all'; 
+            function createLanguageFilter(castType) {
+                languageFilterDiv.innerHTML = ''; 
                 
-                preferredLangList.innerHTML = ''; // Clear existing content
+                const availableLanguages = getUniqueLanguages(allCastData[castType]);
 
-                const allLangLink = document.createElement('a');
-                allLangLink.className = 'list-group-item list-group-item-action preferred-lang-option';
-                allLangLink.href = '#';
-                allLangLink.dataset.language = 'all';
-                allLangLink.textContent = 'All Languages';
-                if (storedLanguage === 'all') allLangLink.classList.add('active');
-                preferredLangList.appendChild(allLangLink);
+                // 1. Add 'All' button
+                const allBtn = document.createElement('a');
+                allBtn.className = 'language-filter-btn';
+                allBtn.href = '#';
+                allBtn.dataset.language = 'all';
+                allBtn.textContent = 'All Languages';
+                if (activeLanguageFilter === 'all') allBtn.classList.add('active');
+                languageFilterDiv.appendChild(allBtn);
 
-
-                ALL_LANGUAGES.forEach(lang => {
+                // 2. Add language specific buttons
+                availableLanguages.forEach(lang => {
+                    // Capitalize first letter of each word (e.g., 'tamil' -> 'Tamil')
                     const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
                     
-                    const prefLink = document.createElement('a');
-                    prefLink.className = 'list-group-item list-group-item-action preferred-lang-option';
-                    prefLink.href = '#';
-                    prefLink.dataset.language = lang;
-                    prefLink.textContent = capitalized;
-                    if (storedLanguage === lang) prefLink.classList.add('active');
+                    const btn = document.createElement('a');
+                    btn.className = 'language-filter-btn';
+                    btn.href = '#';
+                    btn.dataset.language = lang;
+                    btn.textContent = capitalized;
+                    if (activeLanguageFilter === lang) btn.classList.add('active');
                     
-                    preferredLangList.appendChild(prefLink);
+                    languageFilterDiv.appendChild(btn);
                 });
-            }
 
-
-            function setupThemeAndLanguage() {
-                 // --- Theme setup
-                const storedTheme = localStorage.getItem('theme') || 'system';
-                applyTheme(storedTheme);
-                updateActiveThemeOption(storedTheme);
-                if (window.matchMedia) {
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                        if (!localStorage.getItem('theme')) applyTheme('system');
-                    });
-                }
-                themeOptions.forEach(option => {
-                    option.addEventListener('click', (event) => {
+                // 3. Attach event listeners 
+                document.querySelectorAll('.language-filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (event) => {
                         event.preventDefault();
-                        const selectedTheme = event.currentTarget.dataset.theme;
-                        applyTheme(selectedTheme);
-                        updateActiveThemeOption(selectedTheme);
+                        const selectedLang = event.currentTarget.dataset.language;
+                        if (selectedLang !== activeLanguageFilter) {
+                            activeLanguageFilter = selectedLang;
+                            updateActiveFilterButton(selectedLang);
+                            displayCast(currentCastType, activeLanguageFilter); 
+                        }
                     });
                 });
                 
-                // --- Language setup
-                populateLanguageMenus();
-                const storedLanguage = localStorage.getItem('preferred-language');
-                updateDisableBtnVisibility();
-                updateActiveLanguageOption(storedLanguage || 'all'); // Set 'all' active if none stored
-                updateLogoLink(storedLanguage);
-
-                // Need to re-query the newly created list items
-                document.querySelectorAll('.preferred-lang-option').forEach(option => {
-                    option.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        const selectedLanguage = event.currentTarget.dataset.language;
-                        
-                        // Handle 'all' language logic
-                        if (selectedLanguage === 'all') {
-                            localStorage.removeItem('preferred-language');
-                        } else {
-                            localStorage.setItem('preferred-language', selectedLanguage);
-                        }
-                        
-                        updateDisableBtnVisibility();
-                        updateActiveLanguageOption(selectedLanguage);
-                        updateLogoLink(selectedLanguage);
-                    });
-                });
-
-                disablePreferredLanguageBtn.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    localStorage.removeItem('preferred-language');
-                    updateDisableBtnVisibility();
-                    updateActiveLanguageOption('all'); // Explicitly set 'all' as active after disabling
-                    updateLogoLink(null);
-                });
+                // 4. Reset filter if the active one isn't available for the new cast type
+                if (activeLanguageFilter !== 'all' && !availableLanguages.includes(activeLanguageFilter)) {
+                    activeLanguageFilter = 'all';
+                    updateActiveFilterButton('all');
+                    displayCast(currentCastType, activeLanguageFilter);
+                }
+                
+                // Re-adjust padding after filter content is created
+                adjustBodyPadding();
             }
-            
-            // --- Modal Event Listeners (Copied from previous steps) ---
-            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-            const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-            document.getElementById('aboutButtonInModal').addEventListener('click', function (event) {
-                event.preventDefault();
-                settingsModal.hide();
-                aboutModal.show();
-            });
-            document.getElementById('aboutModal').addEventListener('hidden.bs.modal', function () {
-                settingsModal.show();
-            });
 
-            // --- Cast Loading Functionality ---
-            
-            /**
-             * Displays cast data.
-             * @param {string} castType - 'actors' or 'actresses'.
-             */
-            function displayCast(castType) {
-                castGrid.innerHTML = '';
-                const castList = (castType === 'actors') ? actorsData : actressesData;
 
-                castList.forEach(member => {
-                    const card = document.createElement('a');
-                    card.className = 'cast-card';
-                    // NOTE: Actor page link kept as in original file
-                    card.href = `actor.html?lang=tamil&actor_id=${member.actor_code}`; 
-
-                    const img = document.createElement('img');
-                    img.src = member.image_url;
-                    img.alt = `Photo of ${member.name}`;
-                    img.loading = 'lazy';
-
-                    const name = document.createElement('div');
-                    name.className = 'name';
-                    name.textContent = member.name;
+            async function fetchProfileImageUrl(tmdbId) {
+                const url = `${TMDB_BASE_URL}${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=images`;
+                
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        return null; 
+                    }
+                    const data = await response.json();
+                    const profilePath = data.profile_path; 
                     
-                    card.appendChild(img);
-                    card.appendChild(name);
-                    
-                    castGrid.appendChild(card);
-                });
+                    if (profilePath) {
+                        return `${TMDB_IMAGE_BASE_URL}${profilePath}`;
+                    } else {
+                        return null; 
+                    }
+                } catch (error) {
+                    return null;
+                }
             }
+
+            function createCastCard(member, imageUrl) {
+                 const card = document.createElement('a');
+                 card.className = 'cast-card';
+                 
+                 const lang = member.language || 'tamil'; 
+                 card.href = `actor.html?lang=${lang}&actor_id=${member.actor_code}`; 
+
+                 const img = document.createElement('img');
+                 img.src = imageUrl || './static/placeholder.png'; 
+                 img.alt = `Photo of ${member.name}`;
+                 img.loading = 'lazy';
+                 
+                 img.onerror = function() {
+                    this.onerror=null; 
+                    this.src='./static/default_actor.png'; 
+                 };
+
+                 const name = document.createElement('div');
+                 name.className = 'name';
+                 name.textContent = member.name;
+                 
+                 card.appendChild(img);
+                 card.appendChild(name);
+                 
+                 return card;
+            }
+
+            async function displayCast(castType, languageFilter) {
+                castGrid.innerHTML = ''; 
+                let castList = allCastData[castType];
+                currentCastType = castType; 
+
+                // Apply language filter
+                if (languageFilter && languageFilter !== 'all') {
+                    castList = castList.filter(member => member.language === languageFilter);
+                }
+
+                if (castList.length === 0) {
+                    castGrid.innerHTML = '<div class="loading-message">No cast members found for the selected filter.</div>';
+                    return;
+                }
+
+                castGrid.innerHTML = '<div class="loading-message">Loading cast profiles...</div>'; 
+
+                const fetchPromises = castList.map(member => 
+                    fetchProfileImageUrl(member.tmdb_id).then(imageUrl => ({
+                        member,
+                        imageUrl
+                    }))
+                );
+
+                const results = await Promise.all(fetchPromises);
+                
+                castGrid.innerHTML = ''; 
+
+                const fragment = document.createDocumentFragment();
+
+                results.forEach(result => {
+                    const card = createCastCard(result.member, result.imageUrl);
+                    fragment.appendChild(card);
+                });
+                
+                castGrid.appendChild(fragment);
+            }
+
 
             // --- Event Listeners for Toggle Buttons ---
             actorsBtn.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (!actorsBtn.classList.contains('active')) {
+                    currentCastType = 'actors';
+                    activeLanguageFilter = 'all'; // Reset filter when switching category
                     actorsBtn.classList.add('active');
                     actressesBtn.classList.remove('active');
-                    displayCast('actors');
+                    createLanguageFilter(currentCastType); 
+                    displayCast(currentCastType, activeLanguageFilter);
                 }
             });
 
             actressesBtn.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (!actressesBtn.classList.contains('active')) {
+                    currentCastType = 'actresses';
+                    activeLanguageFilter = 'all'; // Reset filter when switching category
                     actressesBtn.classList.add('active');
                     actorsBtn.classList.remove('active');
-                    displayCast('actresses');
+                    createLanguageFilter(currentCastType); 
+                    displayCast(currentCastType, activeLanguageFilter); 
                 }
             });
 
             // --- Initialization ---
-            setupThemeAndLanguage();
-            displayCast('actors');
+            
+            const storedTheme = localStorage.getItem('theme') || 'system';
+            applyTheme(storedTheme);
+            
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                    if (!localStorage.getItem('theme')) applyTheme('system');
+                });
+            }
+
+            // Load default cast and create initial filter
+            createLanguageFilter(currentCastType);
+            displayCast(currentCastType, activeLanguageFilter); 
             
             // Adjust body padding on load and resize
             adjustBodyPadding();
@@ -640,4 +638,3 @@
     </script>
 </body>
 </html>
-
