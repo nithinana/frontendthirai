@@ -604,7 +604,7 @@
                  card.className = 'cast-card';
                  
                  const lang = member.language || 'tamil'; // Default language for featured cast link
-                 card.href = `actor.html?lang=${lang}&actor_id=${member.actor_code}`; 
+                 card.href = `actor?lang=${lang}&actor_id=${member.actor_code}`; 
 
                  const img = document.createElement('img');
                  // Use direct image_url for featured cast, otherwise use fetched imageUrl
@@ -736,3 +736,4 @@
     </script>
 </body>
 </html>
+
