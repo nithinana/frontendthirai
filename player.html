@@ -318,10 +318,9 @@
             // =================================================================
             
             function updateLogo(isUnlockScreen) {
-                // If on the unlock screen (which is now permanently dark theme), show the white logo.
-                // The player screen covers the whole area, so the logo won't be visible there anyway, 
-                // but we set it just in case.
-                logo.src = isUnlockScreen ? "./static/thiraiwhite.png" : "./static/thiraiwhite.png";
+                // The logo should always be the white version in this dark-themed player.
+                logo.src = "./static/thiraiwhite.png"; 
+                // The visibility/presence of the logo is handled by the overall screen display logic
             }
 
             function showPlayer() {
@@ -341,8 +340,6 @@
                 clearTimeout(afkTimer);
                 updateLogo(true); // Unlock screen
             }
-            
-            // ... (checkInputs, isLockedOut, checkLockoutStatus, and event listeners remain the same)
             
             function checkInputs() {
                 let allFilled = true;
@@ -480,8 +477,6 @@
             // =================================================================
 
             document.addEventListener('DOMContentLoaded', () => {
-                // The unlock check logic remains, ensuring the PIN must be entered 
-                // unless previously unlocked in this session.
                 const isUnlocked = localStorage.getItem('isUnlocked');
                 
                 if (isUnlocked === 'true') {
