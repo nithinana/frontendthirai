@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Movie Embed</title>
+    <style>
+        /* Reset default browser margins/paddings */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling */
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Styling for the iframe container and the iframe itself */
+        #embed-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #movie-iframe {
+            width: 100%;
+            height: 100%;
+            border: none; /* Remove the default iframe border */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="embed-container">
+        <p>Loading movie...</p>
+    </div>
+
+    <script>
+        /**
+         * JavaScript Logic to Extract ID and Create Embed
+         */
+
+        // 1. Define the base URL for the embedding service
+        const BASE_EMBED_URL = "https://www.vidking.net/embed/movie/";
+
+        // 2. Function to get a parameter from the URL
+        function getMovieIdFromUrl() {
+            // Get the part of the URL after the '?' (e.g., "?12345")
+            const queryString = window.location.search;
+            
+            // Check if there is a query string
+            if (queryString.length > 1) {
+                // The substring(1) removes the leading '?' 
+                // We're assuming the ID is the ONLY thing after the '?'
+                return queryString.substring(1); 
+            }
+            return null; // Return null if no ID is found
+        }
+
+        // 3. Main execution function
+        function loadEmbed() {
+            const tmdbId = getMovieIdFromUrl();
+            const container = document.getElementById('embed-container');
+
+            if (tmdbId) {
+                // Construct the full embed URL
+                const fullEmbedUrl = `${BASE_EMBED_URL}${tmdbId}`;
+                
+                // Create the new iframe element
+                const iframe = document.createElement('iframe');
+                iframe.setAttribute('id', 'movie-iframe');
+                iframe.setAttribute('src', fullEmbedUrl);
+                iframe.setAttribute('allowfullscreen', 'true'); // Allow the user to manually go fullscreen if the embedded player supports it
+                
+                // Clear the container (removes "Loading movie...") and append the iframe
+                container.innerHTML = '';
+                container.appendChild(iframe);
+
+                console.log(`Successfully embedded movie with ID: ${tmdbId}`);
+            } else {
+                // Handle the case where the ID is missing
+                container.innerHTML = '<h1>Error: Movie ID Missing</h1><p>Please provide a TMDB ID in the URL. Example: yourpage.html?**12345**</p>';
+                console.error("Movie ID not found in the URL.");
+            }
+        }
+
+        // Run the main function once the page loads
+        loadEmbed();
+    </script>
+</body>
+</html>
