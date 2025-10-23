@@ -214,7 +214,7 @@
             box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
         }
 
-        /* --- MODIFIED: Banner Slideshow Styles with Animation --- */
+        /* --- Banner Slideshow Styles with Animation --- */
         .promo-banner-container {
             border-radius: 15px;
             overflow: hidden;
@@ -232,12 +232,17 @@
             /* ---------------------------------- */
         }
         
-        /* NEW CLASS: Hides and collapses the banner smoothly */
+        /* Hides and collapses the banner smoothly */
         .promo-banner-container.hidden {
             max-height: 0 !important; /* Collapses the container */
             margin-bottom: 0 !important; /* Removes the space below it */
             opacity: 0; /* Fades it out */
             padding: 0; /* Ensure no padding remains */
+        }
+        
+        /* --- NEW CSS FOR SMOOTH SEARCH RESULTS TRANSITION --- */
+        #searchResultsSection {
+            transition: opacity 0.3s ease-out;
         }
 
         #popularSlider .carousel-item {
@@ -551,6 +556,42 @@
                 font-size: 1.2rem;
             }
         }
+        
+        /* --- NEW: Custom Toggle Styling for Cleaner UI --- */
+        #mediaTypeToggle {
+            margin-top: 1rem;
+            margin-bottom: 2rem !important; 
+            padding: 0 1rem;
+        }
+
+        #mediaTypeToggle .btn-group {
+            box-shadow: var(--card-shadow);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color); /* Subtle overall border */
+        }
+
+        #mediaTypeToggle .btn-check + .btn {
+            border: none !important; /* Remove individual button borders */
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+        }
+
+        #mediaTypeToggle .btn-check:checked + .btn {
+            background-color: var(--primary-color) !important;
+            color: #fff !important;
+            box-shadow: none;
+            font-weight: 600;
+        }
+
+        #mediaTypeToggle .btn-check + .btn:hover {
+            background-color: var(--border-color); /* Subtle hover */
+        }
+        body.dark-mode #mediaTypeToggle .btn-check + .btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -618,7 +659,16 @@
                 </button>
             </div>
         </div>
+        
+        <div id="mediaTypeToggle" class="d-flex justify-content-center">
+            <div class="btn-group" role="group" aria-label="Media type toggle">
+                <input type="radio" class="btn-check" name="media-type" id="toggle-movie" autocomplete="off" checked>
+                <label class="btn" for="toggle-movie">Movies</label>
 
+                <input type="radio" class="btn-check" name="media-type" id="toggle-tv" autocomplete="off">
+                <label class="btn" for="toggle-tv">TV Shows</label>
+            </div>
+        </div>
         <div id="searchResultsSection" style="display: none;">
             <div class="language-section" id="section-search-header">
                 <div class="language-header">
@@ -718,8 +768,27 @@
                 </button>
             </div>
         </div>
-
-    </main>
+        
+        <div class="language-section data-section" id="section-top-rated">
+            <div class="language-header">
+                <h2 class="language-title">Top Rated</h2>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-top-rated" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-top-rated">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-top-rated" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        </main>
     
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -750,6 +819,10 @@
         const TMDB_IMG_BASE_URL = 'https://image.tmdb.org/t/p/w500';
         const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/original'; 
 
+        // --- GLOBAL STATE ---
+        let currentMediaType = 'movie'; // 'movie' or 'tv'
+        const mainCategories = ['popular', 'trending', 'now-playing', 'top-rated'];
+
         // --- Element Selectors ---
         const body = document.body;
         const faviconLink = document.getElementById('faviconLink');
@@ -761,14 +834,17 @@
         const logoLink = document.getElementById('logoLink');
         const themeOptions = document.querySelectorAll('.theme-option');
         
-        // --- NEW/MODIFIED SEARCH ELEMENTS ---
-        const mainSections = document.querySelectorAll('.data-section');
+        // --- SEARCH ELEMENTS ---
         const searchResultsSection = document.getElementById('searchResultsSection');
         const searchQueryDisplay = document.getElementById('searchQueryDisplay');
         const searchMoviesRow = document.getElementById('movies-row-search-movies');
         const searchTvRow = document.getElementById('movies-row-search-tv');
         const backToMainBtn = document.getElementById('backToMainBtn');
-        // --- END NEW/MODIFIED SEARCH ELEMENTS ---
+        const toggleMovie = document.getElementById('toggle-movie');
+        const toggleTv = document.getElementById('toggle-tv');
+
+        // --- Data Tracking ---
+        const categoryPages = {}; 
 
         // Loading timer (Unchanged)
         const loadingTimer = setTimeout(() => {
@@ -817,6 +893,7 @@
             updateThemeAssets(isDarkMode);
         }
 
+        // --- ABOUT MODAL (Unchanged) ---
         document.addEventListener('DOMContentLoaded', function() {
             applyTheme(localStorage.getItem('theme') || 'system');
             updateLogoHeight();
@@ -837,14 +914,31 @@
             });
         });
         
-        // --- ABOUT MODAL (Unchanged) ---
         document.getElementById('aboutButton').addEventListener('click', function (event) {
             event.preventDefault();
             const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
             aboutModal.show();
         });
+        
+        // --- SCROLL LOGIC (Unchanged) ---
+        function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
+            if (!scrollContainer || !prevBtn || !nextBtn) return;
+            const wrapper = scrollContainer.closest('.movies-scroller-wrapper');
+            if (!wrapper) return;
 
-        // --- === MODIFIED SEARCH LOGIC === ---
+            const atStart = scrollContainer.scrollLeft <= 5;
+            const atEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 5;
+            const isScrollable = scrollContainer.scrollWidth > scrollContainer.clientWidth;
+
+            prevBtn.disabled = atStart;
+            nextBtn.disabled = atEnd || !isScrollable;
+
+            wrapper.classList.toggle('is-at-start', atStart || !isScrollable);
+            wrapper.classList.toggle('is-at-end', atEnd || !isScrollable);
+        }
+
+        // --- === MODIFIED TOGGLE & LOAD LOGIC (For strict filtering) === ---
+
         /**
          * Toggles the visibility between the main content and the search results,
          * animating the popular banner away.
@@ -852,25 +946,349 @@
          */
         function toggleContentDisplay(showSearch) {
             const bannerContainer = document.querySelector('.promo-banner-container');
+            const mainContentSections = document.querySelectorAll('.data-section');
+            const toggleElement = document.getElementById('mediaTypeToggle');
             
-            // 1. Animate the banner away (or back in) using the CSS class
-            bannerContainer.classList.toggle('hidden', showSearch);
+            // 1. Manage Search Mode
+            if (showSearch) {
+                // Hide main content
+                bannerContainer.classList.add('hidden'); // Collapse Banner
+                toggleElement.style.display = 'none'; // Hide toggle
+                mainContentSections.forEach(section => { 
+                    // Only hide non-search data sections
+                    if (!section.id.includes('search')) {
+                        section.style.display = 'none'; 
+                    }
+                });
+                
+                // Show search results container and fade it in
+                searchResultsSection.style.opacity = '0';
+                searchResultsSection.style.display = 'block';
+                
+                setTimeout(() => {
+                    searchResultsSection.style.opacity = '1';
+                }, 10);
 
-            // 2. Toggle main content sections
-            // Hide/Show main content sections
-            document.getElementById('section-popular').style.display = showSearch ? 'none' : 'block';
-            document.getElementById('section-trending').style.display = showSearch ? 'none' : 'block';
-            document.getElementById('section-now-playing').style.display = showSearch ? 'none' : 'block';
-            
-            // 3. Toggle search results container
-            searchResultsSection.style.display = showSearch ? 'block' : 'none';
+            } else {
+                // 2. Exiting Search Mode (Show Main Content)
+                
+                // Fade out search results container
+                searchResultsSection.style.opacity = '0';
+                
+                // After the fade-out duration, complete the transition
+                setTimeout(() => {
+                    searchResultsSection.style.display = 'none';
+                    
+                    // Show main content
+                    toggleElement.style.display = 'flex'; // Show toggle
+                    
+                    mainContentSections.forEach(section => { 
+                         // Only show main categories
+                        if (!section.id.includes('search')) {
+                            section.style.display = 'block';
+                        }
+                    });
+
+                    // Re-evaluate 'Now Playing' visibility based on currentMediaType
+                    const nowPlayingSection = document.getElementById('section-now-playing');
+                    if (currentMediaType === 'tv') {
+                        nowPlayingSection.style.display = 'none';
+                    } else {
+                        nowPlayingSection.style.display = 'block';
+                    }
+                    
+                    // Reveal Banner (triggers smooth transition back)
+                    bannerContainer.classList.remove('hidden');
+                }, 300); // 300ms matches the typical CSS transition duration for a smooth fade
+            }
         }
         
         /**
+         * Loads all main category sections based on the currentMediaType.
+         */
+        function loadAllMainCategories() {
+            // Clear all containers first and show spinners for main categories
+            mainCategories.forEach(category => {
+                const container = document.getElementById(`movies-row-${category}`);
+                if (container) {
+                    container.innerHTML = `<div class="spinner-border text-primary m-4" role="status"><span class="visually-hidden">Loading ${category}...</span></div>`;
+                }
+            });
+
+            // Reload all categories
+            let completedLoads = 0;
+            const totalInitialLoads = mainCategories.length * 2; // 2 initial pages (used for loading overlay check)
+            
+            // Re-hide overlay message if it was shown during a slow load
+            slowNetworkMessage.style.display = 'none';
+
+            const checkCompletion = () => {
+                completedLoads++;
+                if (completedLoads >= totalInitialLoads) {
+                    // This handles the first time the page loads (initialLoadComplete is false)
+                    // and ensures the initial loading overlay is dismissed cleanly.
+                    if (!initialLoadComplete) {
+                        initialLoadComplete = true;
+                        clearTimeout(loadingTimer);
+                        loadingOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingOverlay.style.display = 'none';
+                            document.body.classList.remove('no-scroll');
+                        }, 500);
+                    }
+                }
+            };
+            
+            mainCategories.forEach(category => {
+                // Reset page tracking
+                categoryPages[category] = 1; 
+                // Load first two pages
+                loadTmdbCategory(category, 1).finally(checkCompletion);
+                loadTmdbCategory(category, 2).finally(checkCompletion);
+                categoryPages[category] = 3; 
+            });
+            
+            // Manually re-trigger scroll button visibility after load
+            setTimeout(() => {
+                 document.querySelectorAll('.data-section').forEach(section => {
+                    const category = section.id.replace('section-', '');
+                    const scrollContainer = document.getElementById(`movies-row-${category}`);
+                    const prevBtn = document.getElementById(`prev-btn-${category}`);
+                    const nextBtn = document.getElementById(`next-btn-${category}`);
+                    if (scrollContainer && prevBtn) {
+                         updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
+                    }
+                });
+            }, 500); // Longer delay to account for API fetch and rendering
+        }
+
+        /**
+         * Switches the global media type state and reloads the main categories.
+         * @param {string} newType - 'movie' or 'tv'.
+         */
+        function toggleMediaType(newType) {
+            if (newType !== currentMediaType) {
+                currentMediaType = newType;
+                loadAllMainCategories();
+                
+                // The loadPopularBanner() call is kept outside this to ensure it only runs once
+                // on initial load, but if you wanted the banner to switch to TV popular, 
+                // you would call it here as well.
+            }
+        }
+        
+        // Main function to load movie/TV show data for a category
+        async function loadTmdbCategory(category, pageToLoad) {
+            const moviesContainer = document.getElementById(`movies-row-${category}`);
+            
+            // Determine media type for the endpoint.
+            const type = currentMediaType; 
+
+            let endpoint = '';
+            switch (category) {
+                case 'popular':
+                    endpoint = `/${type}/popular`;
+                    break;
+                case 'trending':
+                    // *** MODIFIED: Use /trending/{media_type}/week for strict filtering ***
+                    endpoint = `/trending/${type}/week`; 
+                    break;
+                case 'now-playing':
+                    // TMDB only has /movie/now_playing
+                    const nowPlayingSection = document.getElementById('section-now-playing');
+                    if (currentMediaType === 'tv') {
+                        nowPlayingSection.style.display = 'none';
+                        return;
+                    } 
+                    nowPlayingSection.style.display = 'block'; 
+                    endpoint = '/movie/now_playing';
+                    break;
+                case 'top-rated': 
+                    endpoint = `/${type}/top_rated`;
+                    break;
+                default:
+                    console.error('Invalid category:', category);
+                    return;
+            }
+
+            const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&page=${pageToLoad}`;
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Network response was not ok.');
+                
+                const data = await res.json();
+                moviesContainer.dataset.totalPages = data.total_pages;
+
+                // Clear only the loading/error message for the current container
+                if (pageToLoad === 1) {
+                    moviesContainer.innerHTML = ''; 
+                }
+
+                if (!data.results || data.results.length === 0) {
+                    if (pageToLoad === 1) {
+                        const emptyMessage = document.createElement('div');
+                        emptyMessage.className = 'text-muted my-3 empty-or-error-message';
+                        emptyMessage.textContent = `No ${type} items found for this category.`;
+                        moviesContainer.appendChild(emptyMessage);
+                    }
+                } else {
+                    const itemsHtml = data.results.map(item => {
+                        // Use the type from the outer scope, which matches the endpoint used
+                        const mediaType = type; 
+                        
+                        const title = item.title || item.name; 
+                        const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
+                        
+                        let detailsUrl;
+                        if (mediaType === 'tv') {
+                            detailsUrl = `/show.html?${item.id}`; 
+                        } else {
+                            detailsUrl = `/player.html?${item.id}`;
+                        }
+
+                        return `
+                            <div class="col">
+                                <div class="movie-card" data-media-type="${mediaType}">
+                                    <a href="${detailsUrl}" class="movie-link" title="${title.replace(/"/g, '&quot;')}">
+                                        <img src="${posterPath}" class="movie-img" alt="${title.replace(/"/g, '&quot;')}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
+                                        <div class="movie-title-text">${title}</div>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    moviesContainer.insertAdjacentHTML('beforeend', itemsHtml);
+                }
+            } catch (error) {
+                console.error(`Error loading content for ${category}:`, error);
+                if (pageToLoad === 1) {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'text-danger my-3 empty-or-error-message';
+                    errorMessage.textContent = `Could not load ${category} items. Please try again later.`;
+                    moviesContainer.appendChild(errorMessage);
+                }
+            } finally {
+                if (moviesContainer) {
+                    moviesContainer.dataset.isLoading = 'false';
+                }
+            }
+        }
+        
+        // --- MODIFIED: Initial Page Load and Event Binding ---
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('no-scroll');
+
+            // Load the banner (Note: kept to /movie/popular)
+            loadPopularBanner();
+            
+            // Initial load of all main categories (uses currentMediaType = 'movie')
+            loadAllMainCategories();
+
+            // --- SEARCH EVENT LISTENERS (Updated to call toggleContentDisplay) ---
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+
+            if (searchForm) {
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); 
+                    const searchQuery = searchInput.value.trim();
+                    if (searchQuery === '') {
+                        searchInput.classList.add('highlight-red');
+                        searchInput.focus();
+                    } else {
+                        searchInput.classList.remove('highlight-red');
+                        handleSearch(searchQuery);
+                    }
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    if (searchInput.value.trim() !== '') {
+                        searchInput.classList.remove('highlight-red');
+                    }
+                });
+            }
+
+            if (backToMainBtn) {
+                backToMainBtn.addEventListener('click', () => {
+                    toggleContentDisplay(false); // Show main content & banner
+                    searchInput.value = ''; // Clear search input
+                });
+            }
+            
+            // --- NEW: MEDIA TYPE TOGGLE LISTENERS ---
+            toggleMovie.addEventListener('change', () => toggleMediaType('movie'));
+            toggleTv.addEventListener('change', () => toggleMediaType('tv'));
+
+            // --- SCROLL BUTTON LISTENERS (Modified to use new mainCategories list) ---
+            const scrollButtons = document.querySelectorAll('.scroll-btn');
+            scrollButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.id.split('-').pop();
+                    const scrollContainer = document.getElementById(`movies-row-${category}`);
+                    if (!scrollContainer) return;
+
+                    const movieCard = scrollContainer.querySelector('.movie-card');
+                    if (!movieCard) return;
+                    const movieCardWidth = movieCard.offsetWidth;
+                    const scrollAmount = movieCardWidth * 3 + (16 * 3); 
+
+                    if (button.classList.contains('scroll-btn-prev')) {
+                        scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                    } 
+                    else if (button.classList.contains('scroll-btn-next')) {
+                        scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+
+                        const isNearEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - (scrollAmount * 2);
+                        const isLoading = scrollContainer.dataset.isLoading === 'true';
+                        const nextPageToLoad = categoryPages[category];
+                        const totalPages = parseInt(scrollContainer.dataset.totalPages || '999');
+
+                        if (isNearEnd && !isLoading && nextPageToLoad <= totalPages) {
+                            scrollContainer.dataset.isLoading = 'true';
+                            loadTmdbCategory(category, nextPageToLoad).then(() => {
+                                categoryPages[category]++;
+                            });
+                        }
+                    }
+                });
+            });
+
+            const categorySections = document.querySelectorAll('.data-section');
+            categorySections.forEach(section => {
+                const category = section.id.replace('section-', '');
+                const scrollContainer = document.getElementById(`movies-row-${category}`);
+                const prevBtn = document.getElementById(`prev-btn-${category}`);
+                const nextBtn = document.getElementById(`next-btn-${category}`);
+
+                if (scrollContainer) {
+                    updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
+                    scrollContainer.addEventListener('scroll', () => {
+                        updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
+                    });
+
+                    const observer = new MutationObserver(() => {
+                        updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
+                    });
+                    observer.observe(scrollContainer, { childList: true });
+                }
+            });
+            
+            // Check for initial query parameter on page load (optional)
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialQuery = urlParams.get('q');
+            if (initialQuery) {
+                searchInput.value = initialQuery;
+                handleSearch(initialQuery);
+            }
+        });
+        
+        // --- BANNER & SEARCH RESULTS RENDERERS (Unchanged logic) ---
+
+        /**
          * Renders the search results into the appropriate rows.
-         * Hides the entire section if no results are found.
-         * @param {Array} items - The array of movie/tv show results from the API.
-         * @param {string} type - 'movie' or 'tv'.
          */
         function renderSearchResults(items, type) {
             const container = type === 'movie' ? searchMoviesRow : searchTvRow;
@@ -889,8 +1307,7 @@
 
             const itemsHtml = items.map(item => {
                 const title = item.title || item.name; 
-                // Since we filtered for poster_path in handleSearch, we can use it safely here
-                const posterPath = `${TMDB_IMG_BASE_URL}${item.poster_path}`;
+                const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
                 
                 // Use the correct detail page based on media type
                 const detailsUrl = type === 'tv' ? `/show.html?${item.id}` : `/player.html?${item.id}`;
@@ -940,150 +1357,12 @@
                 searchTvRow.innerHTML = `<div class="text-danger m-4">Error loading TV show results.</div>`;
             }
         }
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchForm = document.getElementById('searchForm');
-            const searchInput = document.getElementById('searchInput');
-            
-            // --- Event Listeners ---
-
-            if (searchForm) {
-                searchForm.addEventListener('submit', (e) => {
-                    e.preventDefault(); 
-                    const searchQuery = searchInput.value.trim();
-                    if (searchQuery === '') {
-                        searchInput.classList.add('highlight-red');
-                        searchInput.focus();
-                    } else {
-                        searchInput.classList.remove('highlight-red');
-                        handleSearch(searchQuery);
-                    }
-                });
-            }
-
-            if (searchInput) {
-                searchInput.addEventListener('input', () => {
-                    if (searchInput.value.trim() !== '') {
-                        searchInput.classList.remove('highlight-red');
-                    }
-                });
-            }
-
-            if (backToMainBtn) {
-                backToMainBtn.addEventListener('click', () => {
-                    toggleContentDisplay(false); // Show main content & banner
-                    searchInput.value = ''; // Clear search input
-                });
-            }
-
-            // Check for initial query parameter on page load (optional)
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialQuery = urlParams.get('q');
-            if (initialQuery) {
-                searchInput.value = initialQuery;
-                handleSearch(initialQuery);
-            }
-        });
-        // --- END MODIFIED SEARCH LOGIC ---
-
-
-        // --- === MODIFIED MOVIE/SHOW LOADING LOGIC (TMDb - Keep context) === ---
-        const categorySections = document.querySelectorAll('.data-section');
-        const categoryPages = {}; 
-
-        async function loadTmdbCategory(category, pageToLoad) {
-            const moviesContainer = document.getElementById(`movies-row-${category}`);
-            
-            let endpoint = '';
-            switch (category) {
-                case 'popular':
-                    endpoint = '/movie/popular';
-                    break;
-                case 'trending':
-                    endpoint = '/trending/all/week'; // Mixes movies and TV
-                    break;
-                case 'now-playing':
-                    endpoint = '/movie/now_playing';
-                    break;
-                default:
-                    console.error('Invalid category:', category);
-                    return;
-            }
-
-            const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&page=${pageToLoad}`;
-
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Network response was not ok.');
-                
-                const data = await res.json();
-                moviesContainer.dataset.totalPages = data.total_pages;
-
-                const existingMessage = moviesContainer.querySelector('.empty-or-error-message');
-                if (existingMessage) existingMessage.remove();
-
-                if (!data.results || data.results.length === 0) {
-                    if (pageToLoad === 1) {
-                        const emptyMessage = document.createElement('div');
-                        emptyMessage.className = 'text-muted my-3 empty-or-error-message';
-                        emptyMessage.textContent = 'No items found for this category.';
-                        moviesContainer.appendChild(emptyMessage);
-                    }
-                } else {
-                    const itemsHtml = data.results.map(item => {
-                        // Determine media type. 'trending' has it, others are explicitly movies.
-                        let mediaType = item.media_type;
-                        if (!mediaType) {
-                            mediaType = (category === 'popular' || category === 'now-playing') ? 'movie' : 'unknown';
-                        }
-                        
-                        const title = item.title || item.name; 
-                        const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
-                        
-                        // *** CORE LOGIC CHANGE: Check media type for the link ***
-                        let detailsUrl;
-                        if (mediaType === 'tv') {
-                            detailsUrl = `/show.html?${item.id}`; 
-                        } else {
-                            // Defaults to player.html for movies and unknown types
-                            detailsUrl = `/player.html?${item.id}`;
-                        }
-                        // *** END CORE LOGIC CHANGE ***
-
-                        return `
-                            <div class="col">
-                                <div class="movie-card" data-media-type="${mediaType}">
-                                    <a href="${detailsUrl}" class="movie-link" title="${title.replace(/"/g, '&quot;')}">
-                                        <img src="${posterPath}" class="movie-img" alt="${title.replace(/"/g, '&quot;')}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
-                                        <div class="movie-title-text">${title}</div>
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                    moviesContainer.insertAdjacentHTML('beforeend', itemsHtml);
-                }
-            } catch (error) {
-                console.error(`Error loading content for ${category}:`, error);
-                if (pageToLoad === 1) {
-                    const errorMessage = document.createElement('div');
-                    errorMessage.className = 'text-danger my-3 empty-or-error-message';
-                    errorMessage.textContent = `Could not load ${category} items. Please try again later.`;
-                    moviesContainer.appendChild(errorMessage);
-                }
-            } finally {
-                if (moviesContainer) {
-                    moviesContainer.dataset.isLoading = 'false';
-                }
-            }
-        }
-
-        // --- === MODIFIED: DYNAMIC BANNER SLIDESHOW LOGIC (Unchanged) === ---
+        
         async function loadPopularBanner() {
             const indicatorsContainer = document.getElementById('slider-indicators');
             const innerContainer = document.getElementById('slider-inner');
-            const endpoint = '/movie/popular'; // This endpoint returns only movies
+            // NOTE: Banner only loads movies for simplicity and since backdrops are more common for them
+            const endpoint = '/movie/popular'; 
             const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&page=1`;
 
             try {
@@ -1094,7 +1373,7 @@
                 const topMovies = data.results.filter(item => item.backdrop_path).slice(0, 5);
 
                 if (topMovies.length === 0) {
-                     innerContainer.innerHTML = `<div class="carousel-item active"><div class="carousel-caption"><h3>No popular content found.</h3></div></div>`;
+                     innerContainer.innerHTML = `<div class="carousel-item active" style="background-color: var(--card-bg-color);"><div class="carousel-caption"><h3>No popular content found.</h3></div></div>`;
                      return;
                 }
 
@@ -1106,7 +1385,6 @@
                     const title = item.title || item.name;
                     const backdropUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
                     
-                    // Since /movie/popular is used, we assume 'movie' and use player.html
                     const playerUrl = `/player.html?${item.id}`;
 
                     // Add indicator
@@ -1135,114 +1413,6 @@
                 innerContainer.innerHTML = `<div class="carousel-item active" style="background-color: var(--card-bg-color);"><div class="carousel-caption"><h3>Could not load popular content.</h3></div></div>`;
             }
         }
-
-
-        // --- UPDATED: Initial Page Load (Unchanged) ---
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('no-scroll');
-
-            // Load the banner
-            loadPopularBanner();
-
-            const categories = ['popular', 'trending', 'now-playing'];
-            let completedLoads = 0;
-            const totalInitialLoads = categories.length * 2; // 2 initial pages
-
-            const checkCompletion = () => {
-                completedLoads++;
-                if (completedLoads >= totalInitialLoads) {
-                    initialLoadComplete = true;
-                    clearTimeout(loadingTimer);
-                    loadingOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        document.body.classList.remove('no-scroll');
-                    }, 500);
-                }
-            };
-            
-            const sectionElements = document.querySelectorAll('.data-section');
-
-            sectionElements.forEach(section => {
-                const category = section.id.replace('section-', '');
-                // Only load main categories initially, not search-related sections
-                if (categories.includes(category)) {
-                    loadTmdbCategory(category, 1).finally(checkCompletion);
-                    loadTmdbCategory(category, 2).finally(checkCompletion);
-                    categoryPages[category] = 3; // Next page to load is 3
-                }
-            });
-        });
-        
-        // --- UPDATED: Scroll Button Logic (Unchanged) ---
-        const scrollButtons = document.querySelectorAll('.scroll-btn');
-
-        function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
-            if (!scrollContainer || !prevBtn || !nextBtn) return;
-            const wrapper = scrollContainer.closest('.movies-scroller-wrapper');
-            if (!wrapper) return;
-
-            const atStart = scrollContainer.scrollLeft <= 5;
-            const atEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 5;
-            const isScrollable = scrollContainer.scrollWidth > scrollContainer.clientWidth;
-
-            prevBtn.disabled = atStart;
-            nextBtn.disabled = atEnd || !isScrollable;
-
-            wrapper.classList.toggle('is-at-start', atStart || !isScrollable);
-            wrapper.classList.toggle('is-at-end', atEnd || !isScrollable);
-        }
-
-        scrollButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const category = button.id.split('-').pop();
-                const scrollContainer = document.getElementById(`movies-row-${category}`);
-                if (!scrollContainer) return;
-
-                const movieCard = scrollContainer.querySelector('.movie-card');
-                if (!movieCard) return;
-                const movieCardWidth = movieCard.offsetWidth;
-                const scrollAmount = movieCardWidth * 3 + (16 * 3); 
-
-                if (button.classList.contains('scroll-btn-prev')) {
-                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                } 
-                else if (button.classList.contains('scroll-btn-next')) {
-                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-
-                    const isNearEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - (scrollAmount * 2);
-                    const isLoading = scrollContainer.dataset.isLoading === 'true';
-                    const nextPageToLoad = categoryPages[category];
-                    const totalPages = parseInt(scrollContainer.dataset.totalPages || '999');
-
-                    if (isNearEnd && !isLoading && nextPageToLoad <= totalPages) {
-                        scrollContainer.dataset.isLoading = 'true';
-                        loadTmdbCategory(category, nextPageToLoad).then(() => {
-                            categoryPages[category]++;
-                        });
-                    }
-                }
-            });
-        });
-
-        categorySections.forEach(section => {
-            const category = section.id.replace('section-', '');
-            const scrollContainer = document.getElementById(`movies-row-${category}`);
-            const prevBtn = document.getElementById(`prev-btn-${category}`);
-            const nextBtn = document.getElementById(`next-btn-${category}`);
-
-            if (scrollContainer) {
-                updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
-                scrollContainer.addEventListener('scroll', () => {
-                    updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
-                });
-
-                const observer = new MutationObserver(() => {
-                    updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
-                });
-                observer.observe(scrollContainer, { childList: true });
-            }
-        });
     </script>
 </body>
 </html>
