@@ -27,566 +27,614 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        /* --- GLOBAL STYLES & THEME VARIABLES --- */
+        /* CSS Variables for a Themed, Modern UI */
         :root {
-            --primary-color: #0d6efd;
-            --secondary-color: #6c757d;
-            --bg-color: #ffffff;
+            --bg-color: #f8f9fa;
             --text-color: #212529;
-            --card-bg-color: #f8f9fa;
+            --muted-text-color: #6c757d;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
             --input-bg-color: #ffffff;
             --input-border-color: #ced4da;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --transition-speed: 0.5s;
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --header-bg: rgba(248, 249, 250, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --scrollbar-thumb-color: #ccc;
         }
 
         body.dark-mode {
             --bg-color: #121212;
             --text-color: #e0e0e0;
-            --card-bg-color: #242424;
-            --input-bg-color: #333333;
-            --input-border-color: #444444;
-            --shadow-color: rgba(0, 0, 0, 0.5);
+            --muted-text-color: #adb5bd;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            --scrollbar-thumb-color: #555;
         }
 
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+        /* Base Body Styles */
+        body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color var(--transition-speed), color var(--transition-speed);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: 80px;
         }
 
-        .no-scroll {
-            overflow: hidden !important;
+        body.no-scroll {
+            overflow: hidden;
         }
 
-        /* --- LOADING OVERLAY --- */
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            color: var(--primary-color) !important;
-        }
-
-        #overlayLogo {
-            max-width: 200px;
-            margin-bottom: 20px;
+        @media (max-width: 991.98px) {
+            main {
+                padding-top: 2rem !important; /* Adjust this value as needed */
+            }
         }
         
-        #slowNetworkMessage {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background-color: var(--card-bg-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 10px var(--shadow-color);
-            display: none; /* Hidden by default */
-            z-index: 9999; 
-            text-align: center;
-            opacity: 0.9;
+        .text-muted {
+            color: var(--muted-text-color) !important;
         }
 
-        /* --- NEW: BACK BUTTON STYLES (MATCHED DARK MODE) --- */
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            text-decoration: none;
-            cursor: pointer;
-            z-index: 1001;
-            padding: 10px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Stronger shadow for contrast */
-            
-            /* Dark grey, semi-transparent look */
-            background-color: rgba(33, 37, 41, 0.7); /* Slightly darker/more opaque than before */
-            color: #ffffff; /* White icon/text */
-            opacity: 1; 
-            transition: opacity 0.5s ease-in-out, background-color 0.2s ease, box-shadow 0.5s ease; 
-        }
-
-        .back-button:hover {
-            /* Hover feedback with darker color */
-            background-color: rgba(51, 51, 51, 0.9); /* #333 with high opacity */
-            opacity: 1; 
-        }
-        
-        /* --- NEW: UNLOCK SCREEN STYLES (UPDATED FOR DARK MODE) --- */
-
-        #unlock-screen {
-            /* Must be 'none' initially, will be changed to 'flex' by JS if access is locked */
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100%;
-            flex-direction: column;
-            position: fixed; /* Use fixed to cover the entire viewport */
-            top: 0; left: 0;
-            background-color: var(--bg-color); /* Match body background variable */
-            z-index: 9998; /* High z-index to cover everything except loading overlay (9999) */
-            color: var(--text-color);
-        }
-
-        #unlock-screen .container {
-            text-align: center;
-            background-color: var(--card-bg-color); /* Match card background variable */
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Match join.html shadow */
-            max-width: 90%;
-            width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background-color 0.5s ease, box-shadow 0.5s ease; /* Added transition */
-        }
-
-        #unlock-screen #logo {
-            max-width: 175px;
-            margin-bottom: 12px;
-        }
-
-        /* Ensure heading is visible */
-        #unlock-screen h2 {
-            color: var(--text-color);
-        }
-
-        .code-input-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .code-input {
-            width: 40px;
-            height: 50px;
-            text-align: center;
-            font-size: 1.8em;
-            font-weight: bold;
-            color: var(--text-color); /* Dark mode text color variable */
-            background-color: var(--input-bg-color); /* Dark input background variable */
-            border: 2px solid var(--input-border-color); /* Darker border variable */
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.2s ease, background-color 0.5s ease, color 0.5s ease;
-        }
-
-        .code-input:focus {
-            border-color: #0d6efd;
-        }
-
-        /* --- Input Autofill Styling for Dark Mode --- */
-        input::-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #222 inset !important; /* Fixed dark background */
-            -webkit-text-fill-color: #fff !important; /* Fixed white text */
-        }
-
-        /* Join Button styles (using bootstrap primary color) */
-        .join-button {
-            width: 100%;
-            padding: 15px;
-            background-color: #0d6efd;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            margin-bottom: 25px;
-        }
-
-        .join-button:hover {
-            background-color: #0b5ed7; /* Darken slightly on hover */
-        }
-
-        .join-button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-
-        #error-message {
-            color: #dc3545;
-            font-size: 0.9em;
-            display: none;
-            margin-top: 25px;
-            text-align: center;
-        }
-        
         /* --- Header and Navigation --- */
         .app-header {
-            background-color: var(--card-bg-color);
-            padding: 10px 0;
-            box-shadow: 0 2px 4px var(--shadow-color);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            transition: background-color var(--transition-speed);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            padding: 1rem 1rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-
-        #headerLogo {
-            max-height: 40px; 
-            height: 40px; /* Default height */
-            width: auto;
-            transition: all 0.5s ease;
+        .header-logo { width: auto; }
+        .nav-link {
+            color: var(--text-color); font-weight: 500; padding: 0.5rem 1rem;
+            border-radius: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease;
         }
-
-        .search-form {
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .form-control {
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            border-color: var(--input-border-color);
-            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
-        }
-
-        .form-control:focus {
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-
-        .highlight-red {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
-        }
-        
-        /* --- Promo Banner (Carousel) --- */
-        .promo-banner-container {
-            padding: 0;
-            margin-top: -10px; /* Pulls it up slightly to blend with header shadow */
-            transition: transform 0.5s ease, opacity 0.5s ease, height 0.5s ease;
-            overflow: hidden;
-            height: 350px; /* Fixed height for consistent look */
-        }
-        
-        .promo-banner-container.hidden {
-            transform: translateY(-100%);
-            opacity: 0;
-            height: 0;
-        }
-
-        #popularSlider {
-            width: 100%;
-            height: 100%;
-        }
-
-        .carousel-item {
-            height: 350px;
-            background-size: cover;
-            background-position: center top;
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .carousel-caption {
-            position: absolute;
-            top: 0; bottom: 0;
-            left: 0; right: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
-            text-align: left;
-            padding-bottom: 20px;
+        .nav-link:hover { background-color: var(--card-bg-color); }
+        .nav-link.active { color: var(--primary-color); font-weight: 600; }
+        .header-search {
             display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: flex-start;
-            color: white;
-            padding-left: 5%;
-            padding-right: 5%;
+            align-items: center;
+            gap: 8px; /* Spacing between input and button */
+        }
+        .header-search .form-control {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color); border-radius: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .header-search .form-control::placeholder {
+            color: var(--muted-text-color);
+        }
+        .header-search .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            border-color: var(--primary-color);
         }
         
-        .carousel-caption h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+        .settings-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; }
+        .dropdown-menu {
+            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow); border-radius: 0.5rem;
+        }
+        .dropdown-item { color: var(--text-color); }
+        .dropdown-item:hover { background-color: rgba(0,0,0,0.05); }
+        body.dark-mode .dropdown-item:hover { background-color: rgba(255,255,255,0.05); }
+        
+        /* Style for the new media type toggle button in the header */
+        #mediaTypeButton {
+            font-weight: 600; /* Bolder text for visibility */
+            border-radius: 0.5rem; /* Rectangular shape */
+            background-color: var(--card-bg-color) !important; /* Forces white/dark card color */
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: var(--header-shadow);
+            transition: all 0.2s ease;
         }
 
-        .carousel-caption .btn {
-            background-color: var(--primary-color);
-            border: none;
-            color: white;
-            font-weight: bold;
-            transition: background-color 0.2s;
+        /* Header layout */
+        @media (min-width: 992px) {
+            .header-main-content { flex-grow: 1; justify-content: center; }
+            .header-search { max-width: 600px; width: 100%; }
+        }
+        @media (max-width: 991.98px) {
+            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
+            .header-search { flex-grow: 1; }
         }
 
-        /* --- Content Sections --- */
+        /* --- Reused Section Styling --- */
+        .language-section {
+            position: relative;
+            margin-bottom: 2.5rem;
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        
+        /* Add smooth transition properties to data sections */
         .data-section {
-            margin-bottom: 30px;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
-        
-        .section-header {
+
+        .language-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
-
-        .section-header h2 {
-            font-size: 1.5rem;
-            margin: 0;
-            color: var(--text-color);
+        .language-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+             display: flex;
+            align-items: center;
         }
-
-        /* --- Scroller Container and Controls --- */
-        .movies-scroller-wrapper {
+        
+        .movies-scroller {
             position: relative;
         }
 
-        .movies-scroller {
+        .movies-row {
             display: flex;
-            gap: 16px;
+            flex-wrap: nowrap;
             overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding-bottom: 10px; /* Space for scrollbar */
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb-color) var(--bg-color);
+            padding-left: 1rem; 
+            padding-right: 1rem;
         }
 
-        .movies-scroller::-webkit-scrollbar {
-            display: none; /* Chrome, Safari and Opera */
-        }
-        
-        /* Fixed width for scroll items */
-        .movies-scroller > .col {
-            flex-shrink: 0;
-            width: 120px; /* Mobile size */
-            scroll-snap-align: start;
-        }
-
-        @media (min-width: 576px) {
-            .movies-scroller > .col {
-                width: 140px; /* Small screen size */
-            }
-        }
         @media (min-width: 992px) {
-            .movies-scroller > .col {
-                width: 160px; /* Desktop size */
-            }
-        }
-        @media (min-width: 1400px) {
-            .movies-scroller > .col {
-                width: 180px; /* Extra large size */
-            }
+            .movies-row::-webkit-scrollbar { display: none; }
+            .movies-row { scrollbar-width: none; }
         }
         
+        .movies-row > .col {
+            flex: 0 0 auto;
+            width: 33.33%;
+        }
+        @media (min-width: 576px) { .movies-row > .col { width: 20%; } }
+        @media (min-width: 768px) { .movies-row > .col { width: 16.66%; } }
+        @media (min-width: 1200px) { .movies-row > .col { width: 10%; } }
 
-        .scroll-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(calc(-50% - 5px)); /* Adjusted for padding-bottom */
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            padding: 15px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 10;
-            transition: background-color 0.2s, opacity 0.3s;
+        /* Movie Card Styling */
+        .movie-card {
+            background-color: var(--card-bg-color); border-radius: 0.75rem;
+            border: none; overflow: hidden; box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            margin-right: 1rem;
+        }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
+        .movie-link { text-decoration: none; color: inherit; }
+        .movie-img {
+            width: 100%; aspect-ratio: 2 / 3; object-fit: cover;
+            background-color: var(--bg-color);
+        }
+        .movie-title-text {
+            padding: 0.75rem 1rem; font-weight: 600; font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        .highlight-red {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+        body.dark-mode .highlight-red {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
+        }
+
+        /* --- Banner Slideshow Styles with Animation --- */
+        .promo-banner-container {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: var(--card-bg-color); /* Fallback */
+
+            /* --- SMOOTH ANIMATION PROPERTIES --- */
+            transition: 
+                max-height 0.5s ease-out, 
+                opacity 0.4s ease-out, 
+                margin-bottom 0.5s ease-out;
+            max-height: 300px; /* Default visible height (Desktop) */
             opacity: 1;
+            margin-bottom: 3rem; 
+            /* ---------------------------------- */
+        }
+        
+        /* Hides and collapses the banner smoothly */
+        .promo-banner-container.hidden {
+            max-height: 0 !important; /* Collapses the container */
+            margin-bottom: 0 !important; /* Removes the space below it */
+            opacity: 0; /* Fades it out */
+            padding: 0; /* Ensure no padding remains */
+        }
+        
+        /* --- NEW CSS FOR SMOOTH SEARCH RESULTS TRANSITION --- */
+        #searchResultsSection {
+            transition: opacity 0.3s ease-out;
         }
 
-        .scroll-btn-prev {
+        #popularSlider .carousel-item {
+            height: 300px; /* Original desktop height */
+            background-size: cover;
+            background-position: center center;
+            position: relative;
+        }
+
+        /* Dark gradient overlay for text readability */
+        #popularSlider .carousel-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
             left: 0;
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
+            right: 0;
+            top: 0; /* Full overlay, stronger at bottom */
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0,0,0,0.2));
+        }
+        
+        /* Reposition & style caption to match original banner */
+        #popularSlider .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            z-index: 10;
+            text-align: left;
+            background: none; /* Remove default background */
+            
+            /* Original flex layout */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding-left: 5%;
+        }
+        
+        /* Style title to mimic original .movie-logo */
+        #popularSlider .carousel-caption h3 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            max-width: 400px;
+            margin-bottom: 15px; /* Original margin */
+        }
+        
+        /* Style button to match original .btn */
+        #popularSlider .carousel-caption .btn {
+            font-size: 1.25rem;
+            padding: 10px 24px;
+            border-radius: 50px;
+            background-color: rgba(108, 117, 125, 0.5);
+            color: white;
+            font-weight: bold;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #popularSlider .carousel-caption .btn:hover {
+            background-color: rgba(108, 117, 125, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
 
-        .scroll-btn-next {
-            right: 0;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
+        /* Adjust for mobile */
+        @media (max-width: 767.98px) {
+            .promo-banner-container {
+                max-height: 150px; /* Default visible height (Mobile) */
+            }
+            #popularSlider .carousel-item {
+                height: 150px; /* Original mobile height */
+            }
+            #popularSlider .carousel-caption {
+                padding-left: 3%;
+            }
+            #popularSlider .carousel-caption h3 {
+                font-size: 1.2rem;
+                max-width: 200px;
+                margin-bottom: 10px;
+            }
+            #popularSlider .carousel-caption .btn {
+                font-size: 0.9rem;
+                padding: 6px 15px;
+            }
+        }
+
+        /* --- MODAL STYLES (Unchanged) --- */
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+        .modal-header,
+        .modal-footer {
+            border-color: var(--border-color);
+        }
+        .modal-title,
+        .modal-body {
+            color: var(--text-color);
+        }
+        .btn-close {
+            filter: var(--bs-btn-close-color);
+            --bs-btn-close-color: #000;
+        }
+        body.dark-mode .btn-close {
+            --bs-btn-close-color: #fff;
+        }
+        
+        /* --- Scroll Button Styles (Updated position) --- */
+        .scroll-btn {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            box-shadow: var(--card-shadow);
+            transition: all 0.2s ease;
+        }
+
+        .scroll-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: #fff;
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--primary-color);
         }
 
         .scroll-btn:disabled {
             opacity: 0;
-            cursor: default;
-        }
-        
-        .movies-scroller-wrapper.is-at-start .scroll-btn-prev,
-        .movies-scroller-wrapper.is-at-end .scroll-btn-next {
-            opacity: 0;
+            visibility: hidden;
             pointer-events: none;
         }
-        
-        /* --- Movie Card --- */
-        .movie-card {
-            background-color: var(--card-bg-color);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            height: 100%;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        .movies-scroller-container {
             position: relative;
+            padding-right: 20px;
+            padding-left: 20px;
         }
 
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-        
-        .movie-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .movie-img {
+        .movies-scroller-wrapper {
+            position: relative;
             width: 100%;
-            height: auto;
-            aspect-ratio: 2 / 3;
-            display: block;
-        }
-
-        .movie-title-text {
-            color: var(--text-color);
-            padding: 5px;
-            font-size: 0.8rem;
-            text-align: center;
-            white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* --- Footer and Modals --- */
-        footer {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-            padding: 20px 0;
-            margin-top: 30px;
-            border-top: 1px solid var(--input-border-color);
-            transition: background-color var(--transition-speed);
         }
 
-        footer a {
+        .scroll-btn-prev, .scroll-btn-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        /* Moved scroll buttons further to the edge */
+        .scroll-btn-prev { left: -10px; } 
+        .scroll-btn-next { right: -10px; }
+
+        .movies-scroller-wrapper::before,
+        .movies-scroller-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50px;
+            z-index: 10;
+            pointer-events: auto;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .movies-scroller-wrapper::before {
+            left: 0;
+            background: linear-gradient(to right, var(--bg-color), transparent);
+        }
+        body.dark-mode .movies-scroller-wrapper::before {
+            background: linear-gradient(to right, var(--bg-color), transparent);
+        }
+
+        .movies-scroller-wrapper::after {
+            right: 0;
+            background: linear-gradient(to left, var(--bg-color), transparent);
+        }
+        body.dark-mode .movies-scroller-wrapper::after {
+            background: linear-gradient(to left, var(--bg-color), transparent);
+        }
+
+        .movies-scroller-wrapper.is-at-start::before { opacity: 0; }
+        .movies-scroller-wrapper.is-at-end::after { opacity: 0; }
+
+        @media (min-width: 992px) {
+            .scroll-btn-prev, .scroll-btn-next { display: flex; }
+        }
+        @media (max-width: 991.98px) {
+            .movies-scroller-container { padding-right: 0; padding-left: 0; }
+            .scroll-btn-prev, .scroll-btn-next { display: none !important; }
+            .movies-scroller-wrapper::before,
+            .movies-scroller-wrapper::after { content: none; }
+        }
+        
+        /* Loading Overlay Styles (Unchanged) */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        #loadingOverlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
             color: var(--primary-color);
-            text-decoration: none;
+        }
+        #loadingOverlay img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: pulse-logo 1.5s infinite ease-in-out;
+        }
+        #slowNetworkMessage {
+            max-width: 80%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .modal-content {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-        }
-
-        .modal-header {
-            border-bottom-color: var(--input-border-color);
-        }
-
-        .modal-footer {
-            border-top-color: var(--input-border-color);
+        @keyframes pulse-logo {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
         
-        .btn-close {
-            filter: var(--text-color);
+        /* --- UPDATED: Carousel Arrow Styling (Circular Hover Fix) --- */
+        #popularSlider .carousel-control-prev,
+        #popularSlider .carousel-control-next {
+            /* Standard Bootstrap size (15% is default, but keeps it closer to the edge) */
+            width: 8%; 
+            opacity: 1; /* Keep the control area fully visible for clicking */
+            z-index: 12; /* Ensure they are above the gradient and caption */
+            /* Remove background-color on hover from the main control */
+            background-color: transparent !important; 
+            transition: none; /* Remove any transition on the wrapper */
         }
 
+        /* Style the actual icon container to be the circle */
+        #popularSlider .carousel-control-prev-icon,
+        #popularSlider .carousel-control-next-icon {
+            background-image: none; 
+            font-size: 1.8rem; 
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            
+            /* Box for the circle */
+            width: 45px; 
+            height: 45px;
+            border-radius: 50%; /* Makes it a circle */
+            
+            /* Default non-hover state */
+            background-color: transparent; 
+            color: rgba(255, 255, 255, 0.8); /* Greyish-white arrow */
+            
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Apply hover effect to the icon container */
+        #popularSlider .carousel-control-prev:hover .carousel-control-prev-icon,
+        #popularSlider .carousel-control-next:hover .carousel-control-next-icon {
+            /* Transparent circle with a subtle white background on hover */
+            background-color: rgba(255, 255, 255, 0.2); 
+            color: #ffffff; /* Make the arrow pure white on hover */
+        }
+        
+        /* Use Bootstrap Icons for explicit arrow display (Unchanged) */
+        #popularSlider .carousel-control-prev-icon::before {
+            content: "\F284"; /* bi-chevron-left */
+            font-family: "bootstrap-icons";
+        }
+
+        #popularSlider .carousel-control-next-icon::before {
+            content: "\F285"; /* bi-chevron-right */
+            font-family: "bootstrap-icons";
+        }
+
+        /* Adjust for smaller screens (Unchanged) */
+        @media (max-width: 767.98px) {
+            #popularSlider .carousel-control-prev,
+            #popularSlider .carousel-control-next {
+                width: 10%; 
+            }
+            #popularSlider .carousel-control-prev-icon,
+            #popularSlider .carousel-control-next-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
+            }
+        }
+        
     </style>
 </head>
-<body class="no-scroll">
-
+<body>
     <div id="loadingOverlay">
-        <img id="overlayLogo" src="/static/thiraiwhite.png" alt="Thirai Logo">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <div id="slowNetworkMessage" class="text-muted">
-            The network seems slow. Please wait a moment...
+        <img id="overlayLogo" src="/static/thiraiblack.png" alt="Thirai Logo">
+        <div id="slowNetworkMessage" class="text-muted" style="display: none;">
+            <i class="bi bi-info-circle"></i> <span>Loading...</span>
         </div>
     </div>
     
-    <a href="javascript:history.back()" class="back-button" aria-label="Go back" style="display: none;">
-        <i class="bi bi-arrow-left"></i>
-    </a>
-    
-    <div id="unlock-screen">
-        <div class="container">
-            <img id="logo" src="/static/thiraiblack.png" alt="Thirai Logo"> 
-            <h2>Enter the unlock PIN</h2>
-            <div class="code-input-container" id="codeInputContainer">
-                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-            </div>
-            <button class="join-button" id="unlockButton" disabled>Unlock Access</button>
-            <div id="error-message"></div>
-        </div>
-    </div>
+    <header class="app-header">
+        <div class="container-fluid d-flex flex-wrap align-items-center">
+            <a href="/" class="d-flex align-items-center me-lg-4" id="logoLink">
+                <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
+            </a>
 
-    <header class="app-header" style="display: none;">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <a href="index.html" id="logoLink">
-                        <img id="headerLogo" src="/static/thiraiwhite.png" alt="Thirai Logo" data-height="40">
-                    </a>
-                    
-                    <button class="btn btn-outline-primary ms-3 d-none d-md-inline-flex align-items-center" id="mediaTypeButton" title="Switch to TV Shows">
-                        <i class="bi bi-film me-2"></i>
-                        <span id="mediaTypeText">Movies</span>
+            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
+                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search">
+                    <button type="submit" class="btn btn-primary" title="Search">
+                        <i class="bi bi-search"></i>
                     </button>
-                </div>
-
-                <form class="search-form d-flex mx-3" role="search" id="searchForm">
-                    <input class="form-control me-2" type="search" placeholder="Search movies or TV shows..." aria-label="Search" id="searchInput">
-                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
                 </form>
-
+            </div>
+            <div class="d-flex align-items: center ms-auto">
+                <button class="btn btn-sm btn-light me-2" id="mediaTypeButton" title="Switch to TV Shows">
+                    <span id="mediaTypeText">Movies</span>
+                </button>
+                
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="settings-btn" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Settings">
                         <i class="bi bi-gear-fill"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Theme</h6></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="dark"><i class="bi bi-moon-fill me-2"></i> Dark Mode</a></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="light"><i class="bi bi-sun-fill me-2"></i> Light Mode</a></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="system"><i class="bi bi-laptop-fill me-2"></i> System Default</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                        <li><h6 class="dropdown-header">Appearance</h6></li>
+                        <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
+                        <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
+                        <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" id="aboutButton"><i class="bi bi-info-circle-fill me-2"></i> About</a></li>
+                        <li><a class="dropdown-item" href="#" id="aboutButton">About</a></li>
                     </ul>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="container-fluid mt-4" style="display: none;">
+    <main class="container-fluid mt-4">
         
-        <div class="promo-banner-container mb-4">
+        <div class="promo-banner-container">
             <div id="popularSlider" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-indicators" id="slider-indicators">
                     </div>
                 <div class="carousel-inner" id="slider-inner">
+                    <div class="carousel-item active" style="background-color: var(--card-bg-color);">
+                        <div class="d-flex justify-content-center align-items-center w-100 h-100">
+                             <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
                     </div>
+                </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#popularSlider" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
@@ -598,128 +646,161 @@
             </div>
         </div>
         
-        <div id="searchResultsSection" class="data-section" style="display: none;">
-            <div class="section-header">
-                <h2 class="mb-0">Search results for "<span id="searchQueryDisplay"></span>"</h2>
-                <button class="btn btn-sm btn-outline-secondary" id="backToMainBtn"><i class="bi bi-arrow-left"></i> Back to Main</button>
+        <div id="searchResultsSection" style="display: none;">
+            <div class="language-section" id="section-search-header">
+                <div class="language-header">
+                    <h2 class="language-title">
+                        <button id="backToMainBtn" class="btn btn-secondary me-3" title="Back to Main Page">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        Search Results for: "<span id="searchQueryDisplay" class="fw-bold"></span>"
+                    </h2>
+                </div>
             </div>
-            
-            <div id="section-search-movies" class="data-section">
-                <h3 class="h5">Movies</h3>
-                <div class="movies-scroller-wrapper">
-                    <button class="scroll-btn scroll-btn-prev" id="prev-btn-search-movies" disabled><i class="bi bi-chevron-left"></i></button>
-                    <div class="movies-scroller row flex-nowrap" id="movies-row-search-movies">
+
+            <div class="language-section data-section" id="section-search-movies">
+                <div class="language-header">
+                    <h3 class="language-title">Movies</h3>
+                </div>
+                <div class="movies-scroller-container">
+                    <div class="movies-scroller-wrapper">
+                        <div class="movies-scroller">
+                            <div class="movies-row" id="movies-row-search-movies">
+                                </div>
                         </div>
-                    <button class="scroll-btn scroll-btn-next" id="next-btn-search-movies" disabled><i class="bi bi-chevron-right"></i></button>
+                    </div>
                 </div>
             </div>
             
-            <div id="section-search-tv" class="data-section">
-                <h3 class="h5">TV Shows</h3>
-                <div class="movies-scroller-wrapper">
-                    <button class="scroll-btn scroll-btn-prev" id="prev-btn-search-tv" disabled><i class="bi bi-chevron-left"></i></button>
-                    <div class="movies-scroller row flex-nowrap" id="movies-row-search-tv">
+            <div class="language-section data-section" id="section-search-tv">
+                <div class="language-header">
+                    <h3 class="language-title">TV Shows</h3>
+                </div>
+                <div class="movies-scroller-container">
+                    <div class="movies-scroller-wrapper">
+                        <div class="movies-scroller">
+                            <div class="movies-row" id="movies-row-search-tv">
+                                </div>
                         </div>
-                    <button class="scroll-btn scroll-btn-next" id="next-btn-search-tv" disabled><i class="bi bi-chevron-right"></i></button>
+                    </div>
                 </div>
             </div>
-            
+        </div>
+        <div class="language-section data-section" id="section-popular">
+            <div class="language-header">
+                <h2 class="language-title">What's Popular</h2>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-popular" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-popular">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-popular" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="language-section data-section" id="section-trending">
+            <div class="language-header">
+                <h2 class="language-title">Trending This Week</h2>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-trending" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-trending">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-trending" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
         </div>
         
-        <div id="section-trending" class="data-section">
-            <div class="section-header">
-                <h2>Trending This Week</h2>
+        <div class="language-section data-section" id="section-now-playing">
+            <div class="language-header">
+                <h2 class="language-title">Now Playing</h2>
             </div>
-            <div class="movies-scroller-wrapper">
-                <button class="scroll-btn scroll-btn-prev" id="prev-btn-trending" disabled><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller row flex-nowrap" id="movies-row-trending">
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-now-playing" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-now-playing">
+                        </div>
                     </div>
-                <button class="scroll-btn scroll-btn-next" id="next-btn-trending" disabled><i class="bi bi-chevron-right"></i></button>
-            </div>
-        </div>
-
-        <div id="section-now-playing" class="data-section">
-            <div class="section-header">
-                <h2>Now Playing in Theatres</h2>
-            </div>
-            <div class="movies-scroller-wrapper">
-                <button class="scroll-btn scroll-btn-prev" id="prev-btn-now-playing" disabled><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller row flex-nowrap" id="movies-row-now-playing">
-                    </div>
-                <button class="scroll-btn scroll-btn-next" id="next-btn-now-playing" disabled><i class="bi bi-chevron-right"></i></button>
-            </div>
-        </div>
-
-        <div id="section-top-rated" class="data-section">
-            <div class="section-header">
-                <h2>Top Rated</h2>
-            </div>
-            <div class="movies-scroller-wrapper">
-                <button class="scroll-btn scroll-btn-prev" id="prev-btn-top-rated" disabled><i class="bi bi-chevron-left"></i></button>
-                <div class="movies-scroller row flex-nowrap" id="movies-row-top-rated">
-                    </div>
-                <button class="scroll-btn scroll-btn-next" id="next-btn-top-rated" disabled><i class="bi bi-chevron-right"></i></button>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-now-playing" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
         
-    </main>
-
-    <footer>
-        <div class="container-fluid text-center">
-            <p class="mb-1">
-                <a href="#" id="footerAboutButton" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a> | 
-                <a href="#">Contact</a>
-            </p>
-            <p class="mb-0 text-muted" style="font-size: 0.8rem;">Content powered by The Movie Database (TMDB).</p>
+        <div class="language-section data-section" id="section-top-rated">
+            <div class="language-header">
+                <h2 class="language-title">Top Rated</h2>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-top-rated" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-top-rated">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-top-rated" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
         </div>
-    </footer>
+        </main>
     
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Thirai is a non-commercial web application designed for browsing and discovering movies and TV shows using The Movie Database (TMDB) API.</p>
-                    <p>This is a Beta version, subject to changes and new features.</p>
-                    <h6>Features:</h6>
-                    <ul>
-                        <li>Dynamic Movie/TV Show switching.</li>
-                        <li>Carousel banner of popular titles.</li>
-                        <li>Search functionality for movies and TV shows.</li>
-                        <li>Dark/Light/System theme support.</li>
-                    </ul>
-                    <p class="text-muted" style="font-size: 0.85rem;">Disclaimer: This application does not host or stream any copyrighted content. All data is provided by TMDB.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+            <p class="text-muted mt-3">
+                <i class="bi bi-filetype-py"></i> Powered by Python
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
+      </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // --- TMDB API Configuration (Kept from beta.html) ---
+        // --- TMDB API Configuration ---
         const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
         const TMDB_IMG_BASE_URL = 'https://image.tmdb.org/t/p/w500';
         const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/original'; 
 
-        // --- GLOBAL STATE (Kept from beta.html) ---
+        // --- GLOBAL STATE ---
         let currentMediaType = 'movie'; // 'movie' or 'tv'
         const mainCategories = ['popular', 'trending', 'now-playing', 'top-rated'];
 
-        // --- ACCESS CONTROL CONSTANTS (From player.html) ---
-        const CORRECT_PIN = "1451"; 
-        const MAX_ATTEMPTS = 5;
-        const LOCKOUT_DURATION_MS = 15 * 60 * 1000; 
-        const AFK_TIMEOUT_MS = 3000; // 3 seconds for inactivity fade (UNUSED here, but kept for context if you use player.html's logic)
-
-        // --- Element Selectors (Combined) ---
+        // --- Element Selectors ---
         const body = document.body;
         const faviconLink = document.getElementById('faviconLink');
         const headerLogo = document.getElementById('headerLogo');
@@ -732,6 +813,7 @@
         
         // --- NEW MEDIA TYPE BUTTON ELEMENTS ---
         const mediaTypeButton = document.getElementById('mediaTypeButton');
+        // NOTE: mediaTypeIcon element is removed from HTML but kept here for clarity if re-added
         const mediaTypeText = document.getElementById('mediaTypeText');
         
         // --- SEARCH ELEMENTS ---
@@ -741,19 +823,8 @@
         const searchTvRow = document.getElementById('movies-row-search-tv');
         const backToMainBtn = document.getElementById('backToMainBtn');
         
-        // --- PIN ACCESS CONTROL ELEMENTS (From player.html) ---
-        const unlockScreen = document.getElementById('unlock-screen');
-        // Main content is everything not the unlock screen (header and main)
-        const mainContentElements = [document.querySelector('header'), document.querySelector('main')];
-        const inputs = document.querySelectorAll('.code-input');
-        const unlockButton = document.getElementById('unlockButton');
-        const errorMessage = document.getElementById('error-message');
-        const backButton = document.querySelector('.back-button'); // Also used for AFK fade
-
         // --- Data Tracking ---
         const categoryPages = {}; 
-        let lockoutInterval = null;
-        let afkTimer; // AFK timer is not used for this page, but declared.
 
         // Loading timer (Unchanged)
         const loadingTimer = setTimeout(() => {
@@ -778,12 +849,6 @@
             faviconLink.href = isDarkMode ? '/static/favicon.png' : '/static/faviconlight.png';
             headerLogo.src = isDarkMode ? darkLogo : lightLogo;
             overlayLogo.src = isDarkMode ? darkLogo : lightLogo;
-            
-            // Also update the logo on the unlock screen (it's always visible there)
-            const unlockLogo = document.getElementById('logo');
-            if (unlockLogo) {
-                unlockLogo.src = isDarkMode ? darkLogo : lightLogo;
-            }
         }
 
         function applyTheme(theme) {
@@ -807,96 +872,33 @@
             }
             updateThemeAssets(isDarkMode);
         }
+
+        // --- ABOUT MODAL (Unchanged) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme(localStorage.getItem('theme') || 'system');
+            updateLogoHeight();
+        });
         
-        // --- UNLOCK LOGIC FUNCTIONS (From player.html) ---
-        
-        function checkInputs() {
-            let allFilled = true;
-            inputs.forEach(input => {
-                if (input.value.length === 0 || !/^\d$/.test(input.value)) {
-                    allFilled = false;
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!localStorage.getItem('theme')) {
+                    applyTheme('system');
                 }
             });
-            const isLocked = isLockedOut();
-            unlockButton.disabled = !allFilled || isLocked;
-            
-            if (allFilled && !isLocked) {
-                errorMessage.style.display = 'none';
-            }
         }
         
-        function isLockedOut() {
-            const lockoutTimestamp = localStorage.getItem('lockoutTimestamp');
-            if (lockoutTimestamp) {
-                const now = new Date().getTime();
-                const lockoutEnd = parseInt(lockoutTimestamp) + LOCKOUT_DURATION_MS;
-                
-                if (now < lockoutEnd) {
-                    const remainingTimeMs = lockoutEnd - now;
-                    const totalSeconds = Math.ceil(remainingTimeMs / 1000);
-                    const remainingMinutes = Math.floor(totalSeconds / 60);
-                    const remainingSeconds = totalSeconds % 60;
-
-                    errorMessage.textContent = `Too many failed attempts. Try again in ${remainingMinutes}:${remainingSeconds.toString().padStart(2, '0')}.`;
-                    errorMessage.style.display = 'block';
-                    return true;
-                } else {
-                    localStorage.removeItem('lockoutTimestamp');
-                    localStorage.setItem('attemptCount', '0');
-                    clearInterval(lockoutInterval);
-                    lockoutInterval = null;
-                    errorMessage.style.display = 'none';
-                    return false;
-                }
-            }
-            return false;
-        }
+        themeOptions.forEach(option => {
+            option.addEventListener('click', (event) => {
+                event.preventDefault();
+                applyTheme(event.currentTarget.dataset.theme);
+            });
+        });
         
-        function checkLockoutStatus() {
-            if (isLockedOut()) {
-                unlockButton.disabled = true;
-                if (!lockoutInterval) {
-                    lockoutInterval = setInterval(checkLockoutStatus, 1000); 
-                }
-            } else {
-                if (lockoutInterval) {
-                    clearInterval(lockoutInterval);
-                    lockoutInterval = null;
-                }
-                checkInputs(); 
-            }
-        }
-
-        // --- DISPLAY MANAGER (Modified from player.html's showPlayer/showUnlock) ---
-
-        function showContent() {
-            // Hide unlock screen
-            unlockScreen.style.display = 'none';
-            body.classList.remove('no-scroll');
-            
-            // Show main content elements
-            mainContentElements.forEach(el => el.style.display = 'block');
-            
-            // Continue with the main content loading process
-            loadPopularBanner(currentMediaType);
-            loadAllMainCategories();
-        }
-
-        function showUnlock() {
-            // Hide main content elements
-            mainContentElements.forEach(el => el.style.display = 'none');
-            
-            // Display unlock screen
-            unlockScreen.style.display = 'flex';
-            body.classList.add('no-scroll');
-
-            // Hide back button
-            backButton.style.display = 'none';
-            clearTimeout(afkTimer);
-            
-            // Check for existing lockout status
-            checkLockoutStatus();
-        }
+        document.getElementById('aboutButton').addEventListener('click', function (event) {
+            event.preventDefault();
+            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+            aboutModal.show();
+        });
         
         // --- SCROLL LOGIC (Unchanged) ---
         function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
@@ -915,7 +917,7 @@
             wrapper.classList.toggle('is-at-end', atEnd || !isScrollable);
         }
 
-        // --- CONTENT LOADING & DISPLAY (Modified to be called by showContent) ---
+        // --- === MODIFIED TOGGLE & LOAD LOGIC (For smooth transition) === ---
 
         /**
          * Toggles the visibility between the main content and the search results,
@@ -1033,6 +1035,7 @@
                             loadingOverlay.style.opacity = '0';
                             setTimeout(() => {
                                 loadingOverlay.style.display = 'none';
+                                document.body.classList.remove('no-scroll');
                             }, 500);
                         }
                     }
@@ -1076,12 +1079,13 @@
          * Switches the global media type state, updates the button, and reloads content.
          */
         function toggleMediaType() {
+            // Determine the new type
             const newType = currentMediaType === 'movie' ? 'tv' : 'movie';
             
             // 1. Update Global State
             currentMediaType = newType;
             
-            // 2. Update Button UI
+            // 2. Update Button UI (Removed icon updates)
             if (newType === 'movie') {
                 mediaTypeText.textContent = 'Movies';
                 mediaTypeButton.title = 'Switch to TV Shows';
@@ -1091,7 +1095,7 @@
             }
             
             // 3. Reload Content
-            loadPopularBanner(newType); 
+            loadPopularBanner(newType); // <-- NOW CALLS THE BANNER UPDATE
             loadAllMainCategories();
         }
         
@@ -1108,9 +1112,12 @@
                     endpoint = `/${type}/popular`;
                     break;
                 case 'trending':
+                    // *** MODIFIED: Use /trending/{media_type}/week for strict filtering ***
                     endpoint = `/trending/${type}/week`; 
                     break;
                 case 'now-playing':
+                    // TMDB only has /movie/now_playing
+                    // This check is already done in loadAllMainCategories, but good for safety
                     if (currentMediaType === 'tv') {
                         return;
                     } 
@@ -1188,119 +1195,16 @@
             }
         }
         
-        // --- Initial Page Load and Event Binding (Modified to start with unlock check) ---
+        // --- MODIFIED: Initial Page Load and Event Binding ---
         document.addEventListener('DOMContentLoaded', function() {
-            applyTheme(localStorage.getItem('theme') || 'system');
-            updateLogoHeight();
+            document.body.classList.add('no-scroll');
+
+            // Load the banner for the default media type ('movie')
+            loadPopularBanner(currentMediaType);
             
-            // --- START ACCESS CHECK ---
-            const isUnlocked = localStorage.getItem('isUnlocked');
-            
-            if (isUnlocked === 'true') {
-                showContent();
-            } else {
-                showUnlock();
-            }
-            
-            // --- PIN INPUT EVENT LISTENERS (From player.html) ---
-            inputs.forEach((input, index) => {
-                input.addEventListener('keyup', (e) => {
-                    if (e.key === 'Backspace' && input.value === '') {
-                        if (index > 0) inputs[index - 1].focus();
-                    }
-                    checkInputs();
-                });
-                
-                input.addEventListener('input', () => {
-                    let value = input.value.replace(/[^0-9]/g, '').charAt(0);
-                    input.value = value;
-                    
-                    if (input.value.length === 1 && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    } else if (index === inputs.length - 1) {
-                         unlockButton.focus(); 
-                    }
-                    checkInputs();
-                });
-                
-                input.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const pasteCode = (e.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '').slice(0, 4);
+            // Initial load of all main categories (uses currentMediaType = 'movie')
+            loadAllMainCategories();
 
-                    for (let i = 0; i < pasteCode.length; i++) {
-                        if (inputs[i]) inputs[i].value = pasteCode[i];
-                    }
-
-                    const lastFilledIndex = pasteCode.length > 0 ? pasteCode.length - 1 : 0;
-                    if (inputs[lastFilledIndex + 1]) {
-                        inputs[lastFilledIndex + 1].focus();
-                    } else if (inputs[lastFilledIndex]) {
-                        inputs[lastFilledIndex].blur();
-                    }
-                    checkInputs();
-                });
-            });
-
-            unlockButton.addEventListener('click', () => {
-                if (isLockedOut()) return;
-                
-                let enteredPin = Array.from(inputs).map(input => input.value).join('');
-
-                if (enteredPin === CORRECT_PIN) {
-                    // --- SUCCESS ---
-                    localStorage.setItem('isUnlocked', 'true'); 
-                    localStorage.setItem('premium_isUnlocked', 'true'); 
-                    localStorage.setItem('attemptCount', '0');
-                    localStorage.removeItem('lockoutTimestamp');
-                    
-                    showContent(); // Success leads to main content
-                } else {
-                    // --- FAILURE ---
-                    let currentAttempts = parseInt(localStorage.getItem('attemptCount') || '0');
-                    currentAttempts++;
-                    localStorage.setItem('attemptCount', currentAttempts.toString());
-                    
-                    if (currentAttempts >= MAX_ATTEMPTS) {
-                        localStorage.setItem('lockoutTimestamp', new Date().getTime().toString());
-                        errorMessage.textContent = `Maximum attempts reached (${MAX_ATTEMPTS}). Access locked.`;
-                        checkLockoutStatus(); 
-                    } else {
-                        const remaining = MAX_ATTEMPTS - currentAttempts;
-                        errorMessage.textContent = `Incorrect PIN. ${remaining} attempts remaining.`;
-                        errorMessage.style.display = 'block';
-                    }
-                    
-                    inputs.forEach(input => input.value = '');
-                    inputs[0].focus();
-                    unlockButton.disabled = true;
-                }
-            });
-            // --- END ACCESS CHECK LOGIC ---
-
-
-            // --- REMAINING EVENT LISTENERS (Kept from beta.html) ---
-
-            if (window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                    if (!localStorage.getItem('theme')) {
-                        applyTheme('system');
-                    }
-                });
-            }
-            
-            themeOptions.forEach(option => {
-                option.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    applyTheme(event.currentTarget.dataset.theme);
-                });
-            });
-            
-            document.getElementById('aboutButton').addEventListener('click', function (event) {
-                event.preventDefault();
-                const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-                aboutModal.show();
-            });
-            
             // --- SEARCH EVENT LISTENERS (Updated to call toggleContentDisplay) ---
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
@@ -1398,10 +1302,7 @@
             const initialQuery = urlParams.get('q');
             if (initialQuery) {
                 searchInput.value = initialQuery;
-                // Only search if already unlocked
-                if (localStorage.getItem('isUnlocked') === 'true') {
-                     handleSearch(initialQuery);
-                }
+                handleSearch(initialQuery);
             }
         });
         
