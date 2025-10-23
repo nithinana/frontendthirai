@@ -449,6 +449,7 @@
                 if (enteredPin === CORRECT_PIN) {
                     // --- SUCCESS ---
                     localStorage.setItem('isUnlocked', 'true'); 
+                    localStorage.setItem('premium_isUnlocked', 'true'); 
                     localStorage.setItem('attemptCount', '0');
                     localStorage.removeItem('lockoutTimestamp');
                     
