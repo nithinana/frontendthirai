@@ -776,7 +776,6 @@
         });
 
         // --- SEARCH LOGIC (Unchanged) ---
-        // Still redirects to /language?lang=tamil&q=...
         document.addEventListener('DOMContentLoaded', function() {
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
@@ -792,6 +791,7 @@
                         e.preventDefault(); 
                         searchInput.classList.remove('highlight-red');
                         const selectedLanguage = 'tamil'; 
+                        // Note: Search results will need to handle movie/tv logic too, but for now we keep the base redirect to /language
                         const newUrl = `/language?lang=${selectedLanguage}&q=${encodeURIComponent(searchQuery)}`;
                         window.location.href = newUrl;
                     }
@@ -811,7 +811,7 @@
         async function loadPopularBanner() {
             const indicatorsContainer = document.getElementById('slider-indicators');
             const innerContainer = document.getElementById('slider-inner');
-            const endpoint = '/movie/popular';
+            const endpoint = '/movie/popular'; // This endpoint returns only movies
             const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&page=1`;
 
             try {
@@ -822,7 +822,7 @@
                 const topMovies = data.results.filter(item => item.backdrop_path).slice(0, 5);
 
                 if (topMovies.length === 0) {
-                     innerContainer.innerHTML = `<div class="carousel-item active"><div class="carousel-caption"><h3>No popular movies found.</h3></div></div>`;
+                     innerContainer.innerHTML = `<div class="carousel-item active"><div class="carousel-caption"><h3>No popular content found.</h3></div></div>`;
                      return;
                 }
 
@@ -834,8 +834,8 @@
                     const title = item.title || item.name;
                     const backdropUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
                     
-                    // --- CORRECTED LINK ---
-                    const playerUrl = `/player.html?${item.id}`; // Corrected URL format: /player.html?(id)
+                    // Since /movie/popular is used, we assume 'movie' and use player.html
+                    const playerUrl = `/player.html?${item.id}`;
 
                     // Add indicator
                     indicatorsHtml += `
@@ -860,12 +860,12 @@
 
             } catch (error) {
                 console.error('Error loading popular banner:', error);
-                innerContainer.innerHTML = `<div class="carousel-item active" style="background-color: var(--card-bg-color);"><div class="carousel-caption"><h3>Could not load popular movies.</h3></div></div>`;
+                innerContainer.innerHTML = `<div class="carousel-item active" style="background-color: var(--card-bg-color);"><div class="carousel-caption"><h3>Could not load popular content.</h3></div></div>`;
             }
         }
 
 
-        // --- === MODIFIED MOVIE LOADING LOGIC (TMDb) === ---
+        // --- === MODIFIED MOVIE/SHOW LOADING LOGIC (TMDb) === ---
         const categorySections = document.querySelectorAll('.data-section');
         const categoryPages = {}; 
 
@@ -878,7 +878,7 @@
                     endpoint = '/movie/popular';
                     break;
                 case 'trending':
-                    endpoint = '/trending/all/week';
+                    endpoint = '/trending/all/week'; // Mixes movies and TV
                     break;
                 case 'now-playing':
                     endpoint = '/movie/now_playing';
@@ -908,17 +908,30 @@
                         moviesContainer.appendChild(emptyMessage);
                     }
                 } else {
-                    const moviesHtml = data.results.map(item => {
+                    const itemsHtml = data.results.map(item => {
+                        // Determine media type. 'trending' has it, others are explicitly movies.
+                        let mediaType = item.media_type;
+                        if (!mediaType) {
+                            mediaType = (category === 'popular' || category === 'now-playing') ? 'movie' : 'unknown';
+                        }
+                        
                         const title = item.title || item.name; 
                         const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
                         
-                        // --- CORRECTED LINK ---
-                        const playerUrl = `/player.html?${item.id}`; // Corrected URL format: /player.html?(id)
+                        // *** CORE LOGIC CHANGE: Check media type for the link ***
+                        let detailsUrl;
+                        if (mediaType === 'tv') {
+                            detailsUrl = `/show.html?${item.id}`; 
+                        } else {
+                            // Defaults to player.html for movies and unknown types
+                            detailsUrl = `/player.html?${item.id}`;
+                        }
+                        // *** END CORE LOGIC CHANGE ***
 
                         return `
                             <div class="col">
-                                <div class="movie-card">
-                                    <a href="${playerUrl}" class="movie-link" title="${title.replace(/"/g, '&quot;')}">
+                                <div class="movie-card" data-media-type="${mediaType}">
+                                    <a href="${detailsUrl}" class="movie-link" title="${title.replace(/"/g, '&quot;')}">
                                         <img src="${posterPath}" class="movie-img" alt="${title.replace(/"/g, '&quot;')}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
                                         <div class="movie-title-text">${title}</div>
                                     </a>
@@ -926,10 +939,10 @@
                             </div>
                         `;
                     }).join('');
-                    moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
+                    moviesContainer.insertAdjacentHTML('beforeend', itemsHtml);
                 }
             } catch (error) {
-                console.error(`Error loading movies for ${category}:`, error);
+                console.error(`Error loading content for ${category}:`, error);
                 if (pageToLoad === 1) {
                     const errorMessage = document.createElement('div');
                     errorMessage.className = 'text-danger my-3 empty-or-error-message';
@@ -943,7 +956,7 @@
             }
         }
 
-        // --- UPDATED: Initial Page Load ---
+        // --- UPDATED: Initial Page Load (Unchanged) ---
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('no-scroll');
 
@@ -967,9 +980,9 @@
                 }
             };
             
-            const categorySections = document.querySelectorAll('.data-section');
+            const sectionElements = document.querySelectorAll('.data-section');
 
-            categorySections.forEach(section => {
+            sectionElements.forEach(section => {
                 const category = section.id.replace('section-', '');
                 loadTmdbCategory(category, 1).finally(checkCompletion);
                 loadTmdbCategory(category, 2).finally(checkCompletion);
@@ -977,7 +990,7 @@
             });
         });
         
-        // --- UPDATED: Scroll Button Logic (Unchanged from last step) ---
+        // --- UPDATED: Scroll Button Logic (Unchanged) ---
         const scrollButtons = document.querySelectorAll('.scroll-btn');
 
         function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
