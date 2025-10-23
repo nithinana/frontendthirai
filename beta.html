@@ -465,7 +465,72 @@
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
         }
+        
+        /* --- UPDATED: Carousel Arrow Styling (Circular Hover Fix) --- */
+        #popularSlider .carousel-control-prev,
+        #popularSlider .carousel-control-next {
+            /* Standard Bootstrap size (15% is default, but keeps it closer to the edge) */
+            width: 8%; 
+            opacity: 1; /* Keep the control area fully visible for clicking */
+            z-index: 12; /* Ensure they are above the gradient and caption */
+            /* Remove background-color on hover from the main control */
+            background-color: transparent !important; 
+            transition: none; /* Remove any transition on the wrapper */
+        }
 
+        /* Style the actual icon container to be the circle */
+        #popularSlider .carousel-control-prev-icon,
+        #popularSlider .carousel-control-next-icon {
+            background-image: none; 
+            font-size: 1.8rem; 
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            
+            /* Box for the circle */
+            width: 45px; 
+            height: 45px;
+            border-radius: 50%; /* Makes it a circle */
+            
+            /* Default non-hover state */
+            background-color: transparent; 
+            color: rgba(255, 255, 255, 0.8); /* Greyish-white arrow */
+            
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Apply hover effect to the icon container */
+        #popularSlider .carousel-control-prev:hover .carousel-control-prev-icon,
+        #popularSlider .carousel-control-next:hover .carousel-control-next-icon {
+            /* Transparent circle with a subtle white background on hover */
+            background-color: rgba(255, 255, 255, 0.2); 
+            color: #ffffff; /* Make the arrow pure white on hover */
+        }
+        
+        /* Use Bootstrap Icons for explicit arrow display (Unchanged) */
+        #popularSlider .carousel-control-prev-icon::before {
+            content: "\F284"; /* bi-chevron-left */
+            font-family: "bootstrap-icons";
+        }
+
+        #popularSlider .carousel-control-next-icon::before {
+            content: "\F285"; /* bi-chevron-right */
+            font-family: "bootstrap-icons";
+        }
+
+        /* Adjust for smaller screens (Unchanged) */
+        @media (max-width: 767.98px) {
+            #popularSlider .carousel-control-prev,
+            #popularSlider .carousel-control-next {
+                width: 10%; 
+            }
+            #popularSlider .carousel-control-prev-icon,
+            #popularSlider .carousel-control-next-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -769,8 +834,8 @@
                     const title = item.title || item.name;
                     const backdropUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
                     
-                    // --- MODIFIED LINK ---
-                    const playerUrl = `/player.html?id=${item.id}`; // New player URL
+                    // --- CORRECTED LINK ---
+                    const playerUrl = `/player.html?${item.id}`; // Corrected URL format: /player.html?(id)
 
                     // Add indicator
                     indicatorsHtml += `
@@ -778,9 +843,6 @@
                     `;
 
                     // Add slide
-                    // MODIFIED: Uses style for background-image, no <img>
-                    // MODIFIED: No .movie-logo, just <h3>
-                    // MODIFIED: Button uses playerUrl
                     innerHtml += `
                         <div class="carousel-item ${isActive}" style="background-image: url('${backdropUrl}')">
                             <div class="carousel-caption">
@@ -850,8 +912,8 @@
                         const title = item.title || item.name; 
                         const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
                         
-                        // --- MODIFIED LINK ---
-                        const playerUrl = `/player.html?${item.id}`; // New player URL
+                        // --- CORRECTED LINK ---
+                        const playerUrl = `/player.html?${item.id}`; // Corrected URL format: /player.html?(id)
 
                         return `
                             <div class="col">
