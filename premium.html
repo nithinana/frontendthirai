@@ -6,7 +6,6 @@
     <title>Restricted Access</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     
-    <!-- Custom CSS copied from player.html unlock screen for identical appearance -->
     <style>
         /* Base Styles for the entire page */
         body, html {
@@ -190,10 +189,8 @@
 </head>
 <body>
     
-    <!-- Lock Screen / PIN Entry (Structure copied from player.html) -->
     <div id="unlock-screen">
         <div class="container">
-            <!-- Note: You will need to ensure 'static/thiraiwhite.png' is available for the logo to display -->
             <img id="logo" src="./static/thiraiwhite.png" alt="App Logo"> 
             <h2>Enter the access code</h2>
             
@@ -209,7 +206,6 @@
         </div>
     </div>
 
-    <!-- NEW: Success Overlay for Tick Animation and Fade -->
     <div id="success-overlay">
         <div class="check-container">
             <i class="bi bi-check-lg check-icon"></i>
@@ -225,10 +221,10 @@
             const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout
             const REDIRECT_URL = "beta.html"; 
             
-            // --- LOCAL STORAGE KEYS ---
-            const LS_UNLOCKED = 'premium_isUnlocked'; 
-            const LS_ATTEMPTS = 'premium_attemptCount';
-            const LS_LOCKOUT = 'premium_lockoutTimestamp';
+            // --- LOCAL STORAGE KEYS (MATCHED TO player.html) ---
+            const LS_UNLOCKED = 'isUnlocked'; // Changed from 'premium_isUnlocked'
+            const LS_ATTEMPTS = 'attemptCount'; // Changed from 'premium_attemptCount'
+            const LS_LOCKOUT = 'lockoutTimestamp'; // Changed from 'premium_lockoutTimestamp'
 
             // --- DOM ELEMENTS ---
             const inputs = document.querySelectorAll('.code-input');
@@ -308,6 +304,7 @@
             function handleSuccess() {
                 // 1. Store success state permanently
                 localStorage.setItem(LS_UNLOCKED, 'true'); 
+                localStorage.setItem('premium_isUnlocked', 'true'); // Keep this key for consistency with player.html's secondary set
                 localStorage.setItem(LS_ATTEMPTS, '0');
                 localStorage.removeItem(LS_LOCKOUT);
                 
