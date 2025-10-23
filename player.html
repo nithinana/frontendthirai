@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thirai - Video Player</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
         /* Base Styles for the entire page */
@@ -13,7 +14,8 @@
             overflow: hidden; 
             height: 100%;
             width: 100%;
-            font-family: Arial, sans-serif;
+            /* UPDATED FONT-FAMILY TO MATCH BOOTSTRAP'S DEFAULT/MODERN LOOK */
+            font-family: var(--bs-font-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
         }
 
         /* --- Global Styles --- */
@@ -26,7 +28,7 @@
             align-items: center;
         }
         
-        /* --- BACK BUTTON STYLES (UPDATED) --- */
+        /* --- BACK BUTTON STYLES (Kept your recent, preferred styling) --- */
         .back-button {
             position: fixed;
             top: 20px;
@@ -42,25 +44,23 @@
             justify-content: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
             
-            /* NEW: Dark grey, semi-transparent look */
-            background-color: rgba(33, 37, 41, 0.4); /* Dark grey (21, 37, 41) with 40% opacity */
-            color: #ffffff; /* White icon/text */
-            opacity: 1; /* Start fully visible */
-            transition: opacity 0.5s ease-in-out, background-color 0.2s ease; /* Transition for fade and hover */
+            background-color: rgba(33, 37, 41, 0.4); 
+            color: #ffffff; 
+            opacity: 1; 
+            transition: opacity 0.5s ease-in-out, background-color 0.2s ease; 
         }
 
         .back-button:hover {
-            /* Increase opacity and darken color slightly on hover for feedback */
             background-color: rgba(33, 37, 41, 0.7); 
-            opacity: 1; /* Stay fully visible on hover */
+            opacity: 1; 
         }
         
         .back-button.afk-fade {
-            opacity: 0; /* Class to apply when mouse is inactive */
-            pointer-events: none; /* Prevents button from blocking mouse interaction with the player */
+            opacity: 0; 
+            pointer-events: none; 
         }
         
-        /* --- UNLOCK SCREEN STYLES (Unchanged) --- */
+        /* --- UNLOCK SCREEN STYLES --- */
 
         #unlock-screen {
             display: none; 
@@ -77,7 +77,9 @@
         
         .container {
             text-align: center;
-            background-color: #fff;
+            /* Match the light "card" theme of Bootstrap */
+            background-color: var(--bs-body-bg, #fff);
+            color: var(--bs-body-color, #212529);
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -106,9 +108,9 @@
             text-align: center;
             font-size: 1.8em;
             font-weight: bold;
-            color: #212529;
-            background-color: #f0f0f0;
-            border: 2px solid #ccc;
+            color: var(--bs-body-color, #212529);
+            background-color: var(--bs-tertiary-bg, #e9ecef);
+            border: 2px solid var(--bs-border-color, #ccc);
             border-radius: 8px;
             outline: none;
             transition: border-color 0.2s ease;
@@ -117,7 +119,8 @@
         .join-button {
             width: 100%;
             padding: 15px;
-            background-color: #0d6efd;
+            /* Using Bootstrap primary color variable */
+            background-color: var(--bs-primary, #0d6efd); 
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -128,19 +131,20 @@
         }
 
         .join-button:disabled {
-            background-color: #555;
+            background-color: var(--bs-btn-disabled-bg, #6c757d);
             cursor: not-allowed;
         }
 
         #error-message {
-            color: #dc3545;
+            /* Using Bootstrap danger color variable */
+            color: var(--bs-danger, #dc3545);
             font-size: 0.9em;
             display: none;
             margin-top: 25px;
             text-align: center;
         }
         
-        /* --- PLAYER SCREEN STYLES (Unchanged) --- */
+        /* --- PLAYER SCREEN STYLES --- */
 
         #player-screen {
             width: 100vw;
@@ -159,7 +163,7 @@
         }
         
         #player-error {
-            color: #dc3545;
+            color: var(--bs-danger, #dc3545);
             font-size: 1.2em;
         }
     </style>
@@ -206,17 +210,16 @@
             const inputs = document.querySelectorAll('.code-input');
             const unlockButton = document.getElementById('unlockButton');
             const errorMessage = document.getElementById('error-message');
-            const backButton = document.querySelector('.back-button'); // Added reference to the back button
+            const backButton = document.querySelector('.back-button'); 
 
             let lockoutInterval = null;
-            let afkTimer; // Timer for the inactivity fade
+            let afkTimer; 
             
             // =================================================================
-            // === 1. USER ACTIVITY HANDLER (NEW) ==============================
+            // === 1. USER ACTIVITY HANDLER ====================================
             // =================================================================
 
             function hideBackButton() {
-                // Check if the player screen is actually visible before hiding the button
                 if (playerScreen.style.display !== 'none') {
                      backButton.classList.add('afk-fade');
                 }
@@ -225,7 +228,6 @@
             function showBackButton() {
                 backButton.classList.remove('afk-fade');
                 clearTimeout(afkTimer);
-                // Restart the timer only if the player is visible (i.e., we are past the unlock screen)
                 if (playerScreen.style.display !== 'none') {
                     afkTimer = setTimeout(hideBackButton, AFK_TIMEOUT_MS);
                 }
@@ -236,7 +238,7 @@
             }
 
             // =================================================================
-            // === 2. PLAYER EMBED LOGIC (Unchanged) ===========================
+            // === 2. PLAYER EMBED LOGIC =======================================
             // =================================================================
 
             function displayPlayerError(message) {
@@ -290,7 +292,7 @@
             }
 
             // =================================================================
-            // === 3. UNLOCK & DISPLAY MANAGER (Modified for AFK) ==============
+            // === 3. UNLOCK & DISPLAY MANAGER =================================
             // =================================================================
 
             function showPlayer() {
@@ -298,7 +300,6 @@
                 playerScreen.style.display = 'flex';
                 loadEmbed();
                 
-                // Start the AFK timer immediately after showing the player
                 showBackButton(); 
             }
 
@@ -306,12 +307,9 @@
                 playerScreen.style.display = 'none';
                 unlockScreen.style.display = 'flex';
                 checkLockoutStatus();
-                // Ensure button is visible on the unlock screen
                 backButton.classList.remove('afk-fade');
                 clearTimeout(afkTimer);
             }
-            
-            // ... (checkInputs, isLockedOut, checkLockoutStatus functions remain unchanged)
             
             function checkInputs() {
                 let allFilled = true;
@@ -457,7 +455,6 @@
                     showUnlock();
                 }
 
-                // Setup the global event listeners for AFK check
                 document.addEventListener('mousemove', handleUserActivity);
                 document.addEventListener('keypress', handleUserActivity);
                 document.addEventListener('click', handleUserActivity);
