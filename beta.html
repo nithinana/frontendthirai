@@ -214,15 +214,32 @@
             box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
         }
 
-        /* --- NEW: Banner Slideshow Styles (Matching Original) --- */
+        /* --- MODIFIED: Banner Slideshow Styles with Animation --- */
         .promo-banner-container {
             border-radius: 15px;
             overflow: hidden;
-            margin-bottom: 3rem;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             background-color: var(--card-bg-color); /* Fallback */
+
+            /* --- SMOOTH ANIMATION PROPERTIES --- */
+            transition: 
+                max-height 0.5s ease-out, 
+                opacity 0.4s ease-out, 
+                margin-bottom 0.5s ease-out;
+            max-height: 300px; /* Default visible height (Desktop) */
+            opacity: 1;
+            margin-bottom: 3rem; 
+            /* ---------------------------------- */
         }
         
+        /* NEW CLASS: Hides and collapses the banner smoothly */
+        .promo-banner-container.hidden {
+            max-height: 0 !important; /* Collapses the container */
+            margin-bottom: 0 !important; /* Removes the space below it */
+            opacity: 0; /* Fades it out */
+            padding: 0; /* Ensure no padding remains */
+        }
+
         #popularSlider .carousel-item {
             height: 300px; /* Original desktop height */
             background-size: cover;
@@ -292,6 +309,9 @@
 
         /* Adjust for mobile */
         @media (max-width: 767.98px) {
+            .promo-banner-container {
+                max-height: 150px; /* Default visible height (Mobile) */
+            }
             #popularSlider .carousel-item {
                 height: 150px; /* Original mobile height */
             }
@@ -309,7 +329,7 @@
             }
         }
 
-        /* --- MODAL STYLES --- */
+        /* --- MODAL STYLES (Unchanged) --- */
         .modal-content {
             background-color: var(--card-bg-color);
             color: var(--text-color);
@@ -599,6 +619,46 @@
             </div>
         </div>
 
+        <div id="searchResultsSection" style="display: none;">
+            <div class="language-section" id="section-search-header">
+                <div class="language-header">
+                    <h2 class="language-title">
+                        <button id="backToMainBtn" class="btn btn-secondary me-3" title="Back to Main Page">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        Search Results for: "<span id="searchQueryDisplay" class="fw-bold"></span>"
+                    </h2>
+                </div>
+            </div>
+
+            <div class="language-section data-section" id="section-search-movies">
+                <div class="language-header">
+                    <h3 class="language-title">Movies</h3>
+                </div>
+                <div class="movies-scroller-container">
+                    <div class="movies-scroller-wrapper">
+                        <div class="movies-scroller">
+                            <div class="movies-row" id="movies-row-search-movies">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="language-section data-section" id="section-search-tv">
+                <div class="language-header">
+                    <h3 class="language-title">TV Shows</h3>
+                </div>
+                <div class="movies-scroller-container">
+                    <div class="movies-scroller-wrapper">
+                        <div class="movies-scroller">
+                            <div class="movies-row" id="movies-row-search-tv">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="language-section data-section" id="section-popular">
             <div class="language-header">
                 <h2 class="language-title">What's Popular</h2>
@@ -700,6 +760,15 @@
         let initialLoadComplete = false;
         const logoLink = document.getElementById('logoLink');
         const themeOptions = document.querySelectorAll('.theme-option');
+        
+        // --- NEW/MODIFIED SEARCH ELEMENTS ---
+        const mainSections = document.querySelectorAll('.data-section');
+        const searchResultsSection = document.getElementById('searchResultsSection');
+        const searchQueryDisplay = document.getElementById('searchQueryDisplay');
+        const searchMoviesRow = document.getElementById('movies-row-search-movies');
+        const searchTvRow = document.getElementById('movies-row-search-tv');
+        const backToMainBtn = document.getElementById('backToMainBtn');
+        // --- END NEW/MODIFIED SEARCH ELEMENTS ---
 
         // Loading timer (Unchanged)
         const loadingTimer = setTimeout(() => {
@@ -775,25 +844,120 @@
             aboutModal.show();
         });
 
-        // --- SEARCH LOGIC (Unchanged) ---
+        // --- === MODIFIED SEARCH LOGIC === ---
+        /**
+         * Toggles the visibility between the main content and the search results,
+         * animating the popular banner away.
+         * @param {boolean} showSearch - True to show search results, false to show main content.
+         */
+        function toggleContentDisplay(showSearch) {
+            const bannerContainer = document.querySelector('.promo-banner-container');
+            
+            // 1. Animate the banner away (or back in) using the CSS class
+            bannerContainer.classList.toggle('hidden', showSearch);
+
+            // 2. Toggle main content sections
+            // Hide/Show main content sections
+            document.getElementById('section-popular').style.display = showSearch ? 'none' : 'block';
+            document.getElementById('section-trending').style.display = showSearch ? 'none' : 'block';
+            document.getElementById('section-now-playing').style.display = showSearch ? 'none' : 'block';
+            
+            // 3. Toggle search results container
+            searchResultsSection.style.display = showSearch ? 'block' : 'none';
+        }
+        
+        /**
+         * Renders the search results into the appropriate rows.
+         * Hides the entire section if no results are found.
+         * @param {Array} items - The array of movie/tv show results from the API.
+         * @param {string} type - 'movie' or 'tv'.
+         */
+        function renderSearchResults(items, type) {
+            const container = type === 'movie' ? searchMoviesRow : searchTvRow;
+            const section = type === 'movie' ? document.getElementById('section-search-movies') : document.getElementById('section-search-tv');
+            
+            container.innerHTML = ''; // Clear previous results
+            
+            if (items.length === 0) {
+                // If no results, hide the entire section
+                section.style.display = 'none';
+                return;
+            }
+
+            // If results exist, ensure the section is visible
+            section.style.display = 'block';
+
+            const itemsHtml = items.map(item => {
+                const title = item.title || item.name; 
+                // Since we filtered for poster_path in handleSearch, we can use it safely here
+                const posterPath = `${TMDB_IMG_BASE_URL}${item.poster_path}`;
+                
+                // Use the correct detail page based on media type
+                const detailsUrl = type === 'tv' ? `/show.html?${item.id}` : `/player.html?${item.id}`;
+
+                return `
+                    <div class="col">
+                        <div class="movie-card" data-media-type="${type}">
+                            <a href="${detailsUrl}" class="movie-link" title="${title.replace(/"/g, '&quot;')}">
+                                <img src="${posterPath}" class="movie-img" alt="${title.replace(/"/g, '&quot;')}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
+                                <div class="movie-title-text">${title}</div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.insertAdjacentHTML('beforeend', itemsHtml);
+        }
+
+        async function handleSearch(query) {
+            searchQueryDisplay.textContent = query;
+            toggleContentDisplay(true); // Show search results container & hide main sections + banner
+
+            // Clear previous results and show loading spinners
+            searchMoviesRow.innerHTML = `<div class="spinner-border text-primary m-4" role="status"><span class="visually-hidden">Loading Movies...</span></div>`;
+            searchTvRow.innerHTML = `<div class="spinner-border text-primary m-4" role="status"><span class="visually-hidden">Loading TV Shows...</span></div>`;
+
+            // Use search/multi to get both movies and TV shows
+            const url = `${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`;
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Search API failed.');
+                
+                const data = await res.json();
+                
+                // Filter results by media_type AND ensure they have a poster_path
+                const movieResults = data.results.filter(item => item.media_type === 'movie' && item.poster_path);
+                const tvResults = data.results.filter(item => item.media_type === 'tv' && item.poster_path);
+
+                renderSearchResults(movieResults, 'movie');
+                renderSearchResults(tvResults, 'tv');
+
+            } catch (error) {
+                console.error('Error during multi-search:', error);
+                searchMoviesRow.innerHTML = `<div class="text-danger m-4">Error loading movie results.</div>`;
+                searchTvRow.innerHTML = `<div class="text-danger m-4">Error loading TV show results.</div>`;
+            }
+        }
+
+
         document.addEventListener('DOMContentLoaded', function() {
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
+            
+            // --- Event Listeners ---
 
             if (searchForm) {
                 searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); 
                     const searchQuery = searchInput.value.trim();
                     if (searchQuery === '') {
-                        e.preventDefault();
                         searchInput.classList.add('highlight-red');
                         searchInput.focus();
                     } else {
-                        e.preventDefault(); 
                         searchInput.classList.remove('highlight-red');
-                        const selectedLanguage = 'tamil'; 
-                        // Note: Search results will need to handle movie/tv logic too, but for now we keep the base redirect to /language
-                        const newUrl = `/language?lang=${selectedLanguage}&q=${encodeURIComponent(searchQuery)}`;
-                        window.location.href = newUrl;
+                        handleSearch(searchQuery);
                     }
                 });
             }
@@ -805,67 +969,26 @@
                     }
                 });
             }
-        });
 
-        // --- === MODIFIED: DYNAMIC BANNER SLIDESHOW LOGIC === ---
-        async function loadPopularBanner() {
-            const indicatorsContainer = document.getElementById('slider-indicators');
-            const innerContainer = document.getElementById('slider-inner');
-            const endpoint = '/movie/popular'; // This endpoint returns only movies
-            const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&page=1`;
-
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Failed to fetch banner data');
-                const data = await res.json();
-                
-                const topMovies = data.results.filter(item => item.backdrop_path).slice(0, 5);
-
-                if (topMovies.length === 0) {
-                     innerContainer.innerHTML = `<div class="carousel-item active"><div class="carousel-caption"><h3>No popular content found.</h3></div></div>`;
-                     return;
-                }
-
-                let indicatorsHtml = '';
-                let innerHtml = '';
-
-                topMovies.forEach((item, index) => {
-                    const isActive = index === 0 ? 'active' : '';
-                    const title = item.title || item.name;
-                    const backdropUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
-                    
-                    // Since /movie/popular is used, we assume 'movie' and use player.html
-                    const playerUrl = `/player.html?${item.id}`;
-
-                    // Add indicator
-                    indicatorsHtml += `
-                        <button type="button" data-bs-target="#popularSlider" data-bs-slide-to="${index}" class="${isActive}" aria-current="${isActive ? 'true' : 'false'}" aria-label="Slide ${index + 1}"></button>
-                    `;
-
-                    // Add slide
-                    innerHtml += `
-                        <div class="carousel-item ${isActive}" style="background-image: url('${backdropUrl}')">
-                            <div class="carousel-caption">
-                                <h3>${title}</h3>
-                                <a href="${playerUrl}" class="btn">
-                                    <i class="bi bi-play-fill"></i> Watch Now
-                                </a>
-                            </div>
-                        </div>
-                    `;
+            if (backToMainBtn) {
+                backToMainBtn.addEventListener('click', () => {
+                    toggleContentDisplay(false); // Show main content & banner
+                    searchInput.value = ''; // Clear search input
                 });
-
-                indicatorsContainer.innerHTML = indicatorsHtml;
-                innerContainer.innerHTML = innerHtml;
-
-            } catch (error) {
-                console.error('Error loading popular banner:', error);
-                innerContainer.innerHTML = `<div class="carousel-item active" style="background-color: var(--card-bg-color);"><div class="carousel-caption"><h3>Could not load popular content.</h3></div></div>`;
             }
-        }
+
+            // Check for initial query parameter on page load (optional)
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialQuery = urlParams.get('q');
+            if (initialQuery) {
+                searchInput.value = initialQuery;
+                handleSearch(initialQuery);
+            }
+        });
+        // --- END MODIFIED SEARCH LOGIC ---
 
 
-        // --- === MODIFIED MOVIE/SHOW LOADING LOGIC (TMDb) === ---
+        // --- === MODIFIED MOVIE/SHOW LOADING LOGIC (TMDb - Keep context) === ---
         const categorySections = document.querySelectorAll('.data-section');
         const categoryPages = {}; 
 
@@ -956,6 +1079,64 @@
             }
         }
 
+        // --- === MODIFIED: DYNAMIC BANNER SLIDESHOW LOGIC (Unchanged) === ---
+        async function loadPopularBanner() {
+            const indicatorsContainer = document.getElementById('slider-indicators');
+            const innerContainer = document.getElementById('slider-inner');
+            const endpoint = '/movie/popular'; // This endpoint returns only movies
+            const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&page=1`;
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to fetch banner data');
+                const data = await res.json();
+                
+                const topMovies = data.results.filter(item => item.backdrop_path).slice(0, 5);
+
+                if (topMovies.length === 0) {
+                     innerContainer.innerHTML = `<div class="carousel-item active"><div class="carousel-caption"><h3>No popular content found.</h3></div></div>`;
+                     return;
+                }
+
+                let indicatorsHtml = '';
+                let innerHtml = '';
+
+                topMovies.forEach((item, index) => {
+                    const isActive = index === 0 ? 'active' : '';
+                    const title = item.title || item.name;
+                    const backdropUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
+                    
+                    // Since /movie/popular is used, we assume 'movie' and use player.html
+                    const playerUrl = `/player.html?${item.id}`;
+
+                    // Add indicator
+                    indicatorsHtml += `
+                        <button type="button" data-bs-target="#popularSlider" data-bs-slide-to="${index}" class="${isActive}" aria-current="${isActive ? 'true' : 'false'}" aria-label="Slide ${index + 1}"></button>
+                    `;
+
+                    // Add slide
+                    innerHtml += `
+                        <div class="carousel-item ${isActive}" style="background-image: url('${backdropUrl}')">
+                            <div class="carousel-caption">
+                                <h3>${title}</h3>
+                                <a href="${playerUrl}" class="btn">
+                                    <i class="bi bi-play-fill"></i> Watch Now
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                indicatorsContainer.innerHTML = indicatorsHtml;
+                innerContainer.innerHTML = innerHtml;
+
+            } catch (error) {
+                console.error('Error loading popular banner:', error);
+                innerContainer.innerHTML = `<div class="carousel-item active" style="background-color: var(--card-bg-color);"><div class="carousel-caption"><h3>Could not load popular content.</h3></div></div>`;
+            }
+        }
+
+
         // --- UPDATED: Initial Page Load (Unchanged) ---
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('no-scroll');
@@ -984,9 +1165,12 @@
 
             sectionElements.forEach(section => {
                 const category = section.id.replace('section-', '');
-                loadTmdbCategory(category, 1).finally(checkCompletion);
-                loadTmdbCategory(category, 2).finally(checkCompletion);
-                categoryPages[category] = 3; // Next page to load is 3
+                // Only load main categories initially, not search-related sections
+                if (categories.includes(category)) {
+                    loadTmdbCategory(category, 1).finally(checkCompletion);
+                    loadTmdbCategory(category, 2).finally(checkCompletion);
+                    categoryPages[category] = 3; // Next page to load is 3
+                }
             });
         });
         
