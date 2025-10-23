@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thirai - Video Player</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    
     <style>
         /* Base Styles for the entire page */
         body, html {
@@ -14,7 +15,7 @@
             height: 100%;
             width: 100%;
             font-family: Arial, sans-serif;
-            transition: background-color 0.5s ease, color 0.5s ease; /* Added transition */
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
         /* --- Global Styles: PERMANENT DARK MODE --- */
@@ -35,184 +36,160 @@
             font-size: 24px;
             text-decoration: none;
             cursor: pointer;
-            z-index: 1001;
-            padding: 10px;
-            border-radius: 8px;
-            display: inline-flex;
+            z-index: 1000; /* Ensure it's on top of everything */
+            color: #ffffff; /* White icon for dark background */
+            display: inline-flex; /* Use flex to align icon/text if needed */
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Stronger shadow for contrast */
-            
-            /* Dark grey, semi-transparent look */
-            background-color: rgba(33, 37, 41, 0.7); /* Slightly darker/more opaque than before */
-            color: #ffffff; /* White icon/text */
-            opacity: 1; 
-            transition: opacity 0.5s ease-in-out, background-color 0.2s ease, box-shadow 0.5s ease; 
+            transition: opacity 0.5s ease; /* Transition for AFK fade */
         }
 
         .back-button:hover {
-            /* Hover feedback with darker color */
-            background-color: rgba(51, 51, 51, 0.9); /* #333 with high opacity */
-            opacity: 1; 
+            opacity: 0.7;
         }
-        
+
         .back-button.afk-fade {
-            opacity: 0; 
-            pointer-events: none; 
+            opacity: 0;
+            pointer-events: none; /* Make it unclickable when invisible */
         }
         
-        /* --- UNLOCK SCREEN STYLES (UPDATED FOR DARK MODE) --- */
-
+        /* --- UNLOCK SCREEN STYLES --- */
+        
         #unlock-screen {
-            display: none; 
-            justify-content: center;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
+            min-height: 100vh;
             width: 100%;
-            flex-direction: column;
-            position: absolute; 
-            top: 0; left: 0;
-            background-color: #121212; /* Match body background */
-            z-index: 999; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #unlock-screen h1 {
+            color: #ffffff; 
+            margin-bottom: 30px;
         }
         
-        .container {
-            text-align: center;
-            background-color: #111; /* Match join.html container background */
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Match join.html shadow */
-            max-width: 90%;
-            width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background-color 0.5s ease, box-shadow 0.5s ease; /* Added transition */
+        #logo-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
         }
-        
+
         #logo {
-            max-width: 175px;
-            margin-bottom: 12px;
+            width: 150px; 
+            height: auto;
         }
 
-        /* Ensure heading is visible */
-        #unlock-screen h2 {
-            color: #ffffff;
-        }
-
-        .code-input-container {
+        .code-inputs {
             display: flex;
-            justify-content: center;
-            gap: 10px;
+            gap: 15px;
             margin-bottom: 25px;
         }
 
         .code-input {
-            width: 40px;
-            height: 50px;
+            width: 50px;
+            height: 70px;
+            font-size: 32px;
             text-align: center;
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #fff; /* White text */
-            background-color: #222; /* Dark input background */
-            border: 2px solid #333; /* Darker border */
+            border: 2px solid #555;
             border-radius: 8px;
+            background-color: #222;
+            color: #ffffff;
+            caret-color: #ffffff; /* Make cursor white */
             outline: none;
-            transition: border-color 0.2s ease, background-color 0.5s ease, color 0.5s ease;
-        }
-        
-        .code-input:focus {
-            border-color: #0d6efd;
+            transition: border-color 0.3s ease;
         }
 
-        /* --- Input Autofill Styling for Dark Mode --- */
-        input::-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #222 inset !important; /* Match input background */
-            -webkit-text-fill-color: #fff !important; /* Match input text color */
+        .code-input:focus {
+            border-color: #007bff; /* Highlight focus with a primary color */
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
         }
-        
-        /* Join Button styles remain for good contrast */
-        .join-button {
-            width: 100%;
-            padding: 15px;
-            background-color: #0d6efd;
-            color: #fff;
+
+        #unlockButton {
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            margin-bottom: 25px;
-        }
-        
-        .join-button:hover {
-            background-color: #0b5ed7; /* Darken slightly on hover */
+            transition: background-color 0.3s, opacity 0.3s;
         }
 
-        .join-button:disabled {
+        #unlockButton:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+
+        #unlockButton:disabled {
             background-color: #555;
             cursor: not-allowed;
+            opacity: 0.6;
         }
 
         #error-message {
             color: #dc3545;
-            font-size: 0.9em;
+            margin-top: 15px;
+            font-size: 16px;
             display: none;
-            margin-top: 25px;
             text-align: center;
         }
         
-        /* --- PLAYER SCREEN STYLES (Unchanged) --- */
+        /* --- PLAYER SCREEN STYLES --- */
 
         #player-screen {
-            width: 100vw;
-            height: 100vh;
-            display: flex; 
-            flex-direction: column; 
+            display: none; /* Hidden by default, shown after unlock */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000; /* Black background for player */
             justify-content: center;
             align-items: center;
-            text-align: center; 
         }
-        
+
         #movie-iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-        
+
         #player-error {
-            color: #dc3545; /* Error message color remains bright red for visibility */
-            font-size: 1.2em;
+            color: #dc3545;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    
-    <a href="javascript:history.back()" class="back-button" aria-label="Go back">
+
+    <a href="#" class="back-button" id="backButton">
         <i class="bi bi-arrow-left"></i>
     </a>
-    
+
+    <div id="logo-container">
+        <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo">
+    </div>
+
     <div id="unlock-screen">
-        <div class="container">
-            <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo"> 
-            <h2>Enter the unlock PIN</h2>
-            <div class="code-input-container" id="codeInputContainer">
-                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-            </div>
-            <button class="join-button" id="unlockButton" disabled>Unlock Access</button>
-            <div id="error-message"></div>
+        <h1>Enter PIN to Access Player</h1>
+        
+        <div class="code-inputs">
+            <input type="password" maxlength="1" class="code-input" data-index="0" inputmode="numeric">
+            <input type="password" maxlength="1" class="code-input" data-index="1" inputmode="numeric">
+            <input type="password" maxlength="1" class="code-input" data-index="2" inputmode="numeric">
+            <input type="password" maxlength="1" class="code-input" data-index="3" inputmode="numeric">
         </div>
+        
+        <button id="unlockButton" disabled>Unlock Player</button>
+        
+        <p id="error-message"></p>
     </div>
 
     <div id="player-screen">
-        <p>Loading content...</p>
-    </div>
+        </div>
 
     <script>
         (function() { 
@@ -231,30 +208,48 @@
             const inputs = document.querySelectorAll('.code-input');
             const unlockButton = document.getElementById('unlockButton');
             const errorMessage = document.getElementById('error-message');
-            const backButton = document.querySelector('.back-button'); 
-            const logo = document.getElementById('logo'); // Added reference for the logo
+            const backButton = document.getElementById('backButton'); // Changed to use ID
+            const logo = document.getElementById('logo'); 
 
             let lockoutInterval = null;
             let afkTimer; 
             
             // =================================================================
-            // === 1. USER ACTIVITY HANDLER (Unchanged) ========================
+            // === 1. USER ACTIVITY HANDLER & FULLSCREEN CHECK (Updated) =======
             // =================================================================
 
+            /**
+             * Checks if the document is currently in fullscreen mode.
+             * @returns {boolean} True if in fullscreen, false otherwise.
+             */
+            function isDocumentInFullscreen() {
+                // Check for standard and vendor-prefixed fullscreen elements
+                return document.fullscreenElement || 
+                       document.webkitFullscreenElement || 
+                       document.mozFullScreenElement || 
+                       document.msFullscreenElement;
+            }
+
+            /** Hides the back button by adding the AFK fade class. */
             function hideBackButton() {
-                if (playerScreen.style.display !== 'none') {
+                // Only hide if the player screen is visible AND we are NOT in fullscreen
+                if (playerScreen.style.display !== 'none' && !isDocumentInFullscreen()) {
                      backButton.classList.add('afk-fade');
                 }
             }
 
+            /** Shows the back button and resets the AFK timer. */
             function showBackButton() {
-                backButton.classList.remove('afk-fade');
-                clearTimeout(afkTimer);
-                if (playerScreen.style.display !== 'none') {
+                // Only show/manage timer if the player screen is visible AND we are NOT in fullscreen
+                if (playerScreen.style.display !== 'none' && !isDocumentInFullscreen()) {
+                    backButton.style.display = 'inline-flex'; // Ensure visibility style is correct
+                    backButton.classList.remove('afk-fade');
+                    clearTimeout(afkTimer);
                     afkTimer = setTimeout(hideBackButton, AFK_TIMEOUT_MS);
                 }
             }
             
+            /** Handles mouse/key activity to show controls. */
             function handleUserActivity() {
                 showBackButton();
             }
@@ -304,6 +299,7 @@
                     const iframe = document.createElement('iframe');
                     iframe.setAttribute('id', 'movie-iframe');
                     iframe.setAttribute('src', fullEmbedUrl);
+                    // Crucial for allowing fullscreen to be triggered from inside the iframe
                     iframe.setAttribute('allowfullscreen', 'true');
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
                     
@@ -314,13 +310,11 @@
             }
 
             // =================================================================
-            // === 3. UNLOCK & DISPLAY MANAGER (Modified for Logo Update) ======
+            // === 3. UNLOCK & DISPLAY MANAGER (Unchanged) =====================
             // =================================================================
             
             function updateLogo(isUnlockScreen) {
-                // The logo should always be the white version in this dark-themed player.
-                logo.src = "./static/thiraiwhite.png"; 
-                // The visibility/presence of the logo is handled by the overall screen display logic
+                logo.src = "./static/thiraiwhite.png";
             }
 
             function showPlayer() {
@@ -328,6 +322,8 @@
                 playerScreen.style.display = 'flex';
                 loadEmbed();
                 
+                // Show the back button and start the AFK timer
+                backButton.style.display = 'inline-flex';
                 showBackButton(); 
                 updateLogo(false); // Player screen
             }
@@ -336,6 +332,9 @@
                 playerScreen.style.display = 'none';
                 unlockScreen.style.display = 'flex';
                 checkLockoutStatus();
+                
+                // Ensure the back button is visible on the unlock screen (no AFK fade)
+                backButton.style.display = 'inline-flex';
                 backButton.classList.remove('afk-fade');
                 clearTimeout(afkTimer);
                 updateLogo(true); // Unlock screen
@@ -473,10 +472,30 @@
             });
             
             // =================================================================
-            // === 4. INITIALIZATION & AFK SETUP ===============================
+            // === 4. INITIALIZATION & AFK SETUP (Updated for Fullscreen) ======
             // =================================================================
 
+            /**
+             * Handler for the global fullscreenchange event.
+             * Hides the back button when entering fullscreen, shows it when exiting.
+             */
+            function handleFullscreenChange() {
+                if (isDocumentInFullscreen()) {
+                    // Hide the back button when entering fullscreen
+                    backButton.style.display = 'none';
+                    clearTimeout(afkTimer); // Stop AFK timer in fullscreen
+                } else {
+                    // Show the back button when exiting fullscreen
+                    backButton.style.display = 'inline-flex';
+                    // Restart the AFK timer only if the player screen is currently active
+                    if (playerScreen.style.display !== 'none') {
+                        showBackButton(); 
+                    }
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', () => {
+                // Initial check for unlock status
                 const isUnlocked = localStorage.getItem('isUnlocked');
                 
                 if (isUnlocked === 'true') {
@@ -489,6 +508,19 @@
                 document.addEventListener('mousemove', handleUserActivity);
                 document.addEventListener('keypress', handleUserActivity);
                 document.addEventListener('click', handleUserActivity);
+
+                // Add event listener for fullscreen changes (with vendor prefixes for better compatibility)
+                document.addEventListener('fullscreenchange', handleFullscreenChange);
+                document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+                document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+                document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+                
+                // Add click listener for the back button (if you want it to go back)
+                backButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Example: Navigate back one page in history
+                    window.history.back(); 
+                });
             });
         })();
     </script>
