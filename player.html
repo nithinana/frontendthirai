@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thirai - Video Player</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
         /* Base Styles for the entire page */
@@ -14,21 +13,21 @@
             overflow: hidden; 
             height: 100%;
             width: 100%;
-            /* UPDATED FONT-FAMILY TO MATCH BOOTSTRAP'S DEFAULT/MODERN LOOK */
-            font-family: var(--bs-font-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+            font-family: Arial, sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease; /* Added transition */
         }
 
-        /* --- Global Styles --- */
+        /* --- Global Styles: PERMANENT DARK MODE --- */
 
         body {
-            background-color: #f8f9fa;
-            color: #212529;
+            background-color: #121212; /* Dark mode background */
+            color: #e0e0e0; /* Dark mode text color */
             display: flex;
             justify-content: center;
             align-items: center;
         }
         
-        /* --- BACK BUTTON STYLES (Kept your recent, preferred styling) --- */
+        /* --- BACK BUTTON STYLES (MATCHED DARK MODE) --- */
         .back-button {
             position: fixed;
             top: 20px;
@@ -42,16 +41,18 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Stronger shadow for contrast */
             
-            background-color: rgba(33, 37, 41, 0.4); 
-            color: #ffffff; 
+            /* Dark grey, semi-transparent look */
+            background-color: rgba(33, 37, 41, 0.7); /* Slightly darker/more opaque than before */
+            color: #ffffff; /* White icon/text */
             opacity: 1; 
-            transition: opacity 0.5s ease-in-out, background-color 0.2s ease; 
+            transition: opacity 0.5s ease-in-out, background-color 0.2s ease, box-shadow 0.5s ease; 
         }
 
         .back-button:hover {
-            background-color: rgba(33, 37, 41, 0.7); 
+            /* Hover feedback with darker color */
+            background-color: rgba(51, 51, 51, 0.9); /* #333 with high opacity */
             opacity: 1; 
         }
         
@@ -60,7 +61,7 @@
             pointer-events: none; 
         }
         
-        /* --- UNLOCK SCREEN STYLES --- */
+        /* --- UNLOCK SCREEN STYLES (UPDATED FOR DARK MODE) --- */
 
         #unlock-screen {
             display: none; 
@@ -71,28 +72,32 @@
             flex-direction: column;
             position: absolute; 
             top: 0; left: 0;
-            background-color: inherit; 
+            background-color: #121212; /* Match body background */
             z-index: 999; 
         }
         
         .container {
             text-align: center;
-            /* Match the light "card" theme of Bootstrap */
-            background-color: var(--bs-body-bg, #fff);
-            color: var(--bs-body-color, #212529);
+            background-color: #111; /* Match join.html container background */
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Match join.html shadow */
             max-width: 90%;
             width: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease; /* Added transition */
         }
         
         #logo {
             max-width: 175px;
             margin-bottom: 12px;
+        }
+
+        /* Ensure heading is visible */
+        #unlock-screen h2 {
+            color: #ffffff;
         }
 
         .code-input-container {
@@ -108,19 +113,32 @@
             text-align: center;
             font-size: 1.8em;
             font-weight: bold;
-            color: var(--bs-body-color, #212529);
-            background-color: var(--bs-tertiary-bg, #e9ecef);
-            border: 2px solid var(--bs-border-color, #ccc);
+            color: #fff; /* White text */
+            background-color: #222; /* Dark input background */
+            border: 2px solid #333; /* Darker border */
             border-radius: 8px;
             outline: none;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.2s ease, background-color 0.5s ease, color 0.5s ease;
         }
         
+        .code-input:focus {
+            border-color: #0d6efd;
+        }
+
+        /* --- Input Autofill Styling for Dark Mode --- */
+        input::-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #222 inset !important; /* Match input background */
+            -webkit-text-fill-color: #fff !important; /* Match input text color */
+        }
+        
+        /* Join Button styles remain for good contrast */
         .join-button {
             width: 100%;
             padding: 15px;
-            /* Using Bootstrap primary color variable */
-            background-color: var(--bs-primary, #0d6efd); 
+            background-color: #0d6efd;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -129,22 +147,25 @@
             transition: background-color 0.2s ease;
             margin-bottom: 25px;
         }
+        
+        .join-button:hover {
+            background-color: #0b5ed7; /* Darken slightly on hover */
+        }
 
         .join-button:disabled {
-            background-color: var(--bs-btn-disabled-bg, #6c757d);
+            background-color: #555;
             cursor: not-allowed;
         }
 
         #error-message {
-            /* Using Bootstrap danger color variable */
-            color: var(--bs-danger, #dc3545);
+            color: #dc3545;
             font-size: 0.9em;
             display: none;
             margin-top: 25px;
             text-align: center;
         }
         
-        /* --- PLAYER SCREEN STYLES --- */
+        /* --- PLAYER SCREEN STYLES (Unchanged) --- */
 
         #player-screen {
             width: 100vw;
@@ -163,7 +184,7 @@
         }
         
         #player-error {
-            color: var(--bs-danger, #dc3545);
+            color: #dc3545; /* Error message color remains bright red for visibility */
             font-size: 1.2em;
         }
     </style>
@@ -176,7 +197,7 @@
     
     <div id="unlock-screen">
         <div class="container">
-            <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
+            <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo"> 
             <h2>Enter the unlock PIN</h2>
             <div class="code-input-container" id="codeInputContainer">
                 <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
@@ -211,12 +232,13 @@
             const unlockButton = document.getElementById('unlockButton');
             const errorMessage = document.getElementById('error-message');
             const backButton = document.querySelector('.back-button'); 
+            const logo = document.getElementById('logo'); // Added reference for the logo
 
             let lockoutInterval = null;
             let afkTimer; 
             
             // =================================================================
-            // === 1. USER ACTIVITY HANDLER ====================================
+            // === 1. USER ACTIVITY HANDLER (Unchanged) ========================
             // =================================================================
 
             function hideBackButton() {
@@ -238,7 +260,7 @@
             }
 
             // =================================================================
-            // === 2. PLAYER EMBED LOGIC =======================================
+            // === 2. PLAYER EMBED LOGIC (Unchanged) ===========================
             // =================================================================
 
             function displayPlayerError(message) {
@@ -292,8 +314,15 @@
             }
 
             // =================================================================
-            // === 3. UNLOCK & DISPLAY MANAGER =================================
+            // === 3. UNLOCK & DISPLAY MANAGER (Modified for Logo Update) ======
             // =================================================================
+            
+            function updateLogo(isUnlockScreen) {
+                // If on the unlock screen (which is now permanently dark theme), show the white logo.
+                // The player screen covers the whole area, so the logo won't be visible there anyway, 
+                // but we set it just in case.
+                logo.src = isUnlockScreen ? "./static/thiraiwhite.png" : "./static/thiraiwhite.png";
+            }
 
             function showPlayer() {
                 unlockScreen.style.display = 'none';
@@ -301,6 +330,7 @@
                 loadEmbed();
                 
                 showBackButton(); 
+                updateLogo(false); // Player screen
             }
 
             function showUnlock() {
@@ -309,7 +339,10 @@
                 checkLockoutStatus();
                 backButton.classList.remove('afk-fade');
                 clearTimeout(afkTimer);
+                updateLogo(true); // Unlock screen
             }
+            
+            // ... (checkInputs, isLockedOut, checkLockoutStatus, and event listeners remain the same)
             
             function checkInputs() {
                 let allFilled = true;
@@ -447,6 +480,8 @@
             // =================================================================
 
             document.addEventListener('DOMContentLoaded', () => {
+                // The unlock check logic remains, ensuring the PIN must be entered 
+                // unless previously unlocked in this session.
                 const isUnlocked = localStorage.getItem('isUnlocked');
                 
                 if (isUnlocked === 'true') {
@@ -455,6 +490,7 @@
                     showUnlock();
                 }
 
+                // Setup the global event listeners for AFK check
                 document.addEventListener('mousemove', handleUserActivity);
                 document.addEventListener('keypress', handleUserActivity);
                 document.addEventListener('click', handleUserActivity);
