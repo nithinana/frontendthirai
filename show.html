@@ -217,7 +217,7 @@
         
         #show-banner {
             background-color: var(--show-banner-bg);
-            background-image: none !important;
+            /* FIX 1: REMOVED "background-image: none !important;" so JS can set the image */
             background-size: cover;
             background-position: center top; 
             padding: 0;
@@ -229,26 +229,28 @@
             overflow: hidden;
         }
 
-        /* FIX: Reduced the darkest gradient opacity to let the image show through */
+        /* FIX 2: Ensure the gradient covers the whole height and provides contrast for the content at the bottom */
         #show-banner::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            /* Changed 1.0 to 0.9 and 0.8 to 0.7 for better visibility of dark backgrounds */
-            background: linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 20%, rgba(0,0,0,0.4) 40%, transparent 80%),
-                        linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 15%, transparent 70%);
+            /* Tweak the gradient stops: */
+            /* - Horizontal gradient for the logo side (left): Darkest stop (0.7) and fade out (40-80%) */
+            /* - Vertical gradient for content contrast (bottom): Darkest stop (1.0) and fade out (15-70%) */
+            background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 40%, transparent 80%),
+                        linear-gradient(to top, rgba(0,0,0,1.0) 0%, rgba(0,0,0,0.8) 15%, transparent 70%);
             z-index: 1;
             opacity: 1; 
         }
         
-        /* Wrapper for content background contrast (Unchanged) */
+        /* FIX 3: REMOVE the separate horizontal gradient from the content wrapper so it doesn't cut off */
         #show-content-wrapper {
             position: relative;
             z-index: 2;
             padding-top: 5rem;
             padding-bottom: 5rem;
             width: 100%;
-            background: linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 40%, transparent 100%);
+            background: transparent; /* Changed from linear-gradient(to right, rgba(0, 0, 0, 0.7)... */
         }
 
         #show-banner .container {
