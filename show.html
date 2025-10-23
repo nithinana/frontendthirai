@@ -480,17 +480,9 @@
             </div>
             <div class="d-flex align-items: center ms-auto">
                 <div class="dropdown">
-                    <button class="settings-btn" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Settings">
-                        <i class="bi bi-gear-fill"></i>
+                    <button class="settings-btn" type="button" id="aboutButton" title="About">
+                        <i class="bi bi-info-circle-fill"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
-                        <li><h6 class="dropdown-header">Appearance</h6></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" id="aboutButton">About</a></li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -577,7 +569,7 @@
         const TMDB_IMG_BASE_URL = 'https://image.tmdb.org/t/p/w500';
         const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/original'; 
 
-        // --- Element Selectors (Unchanged) ---
+        // --- Element Selectors (Modified) ---
         const body = document.body;
         const faviconLink = document.getElementById('faviconLink');
         const headerLogo = document.getElementById('headerLogo');
@@ -586,7 +578,7 @@
         const slowNetworkMessage = document.getElementById('slowNetworkMessage');
         let initialLoadComplete = false;
         const logoLink = document.getElementById('logoLink');
-        const themeOptions = document.querySelectorAll('.theme-option');
+        // REMOVED: const themeOptions = document.querySelectorAll('.theme-option');
         const accordionContainer = document.getElementById('seasons-accordion');
         const seasonDropdown = document.getElementById('season-dropdown');
 
@@ -597,65 +589,39 @@
             }
         }, 7000);
         
-        // --- THEME/UI LOGIC (Unchanged) ---
-        function updateLogoHeight() {
+        // --- THEME/UI LOGIC (MODIFIED: FORCED DARK MODE) ---
+        
+        // Simplified functions for logo/favicon now that theme is fixed
+        function updateThemeAssets() {
+            const darkLogo = '/static/thiraiwhite.png';
+            
+            // Set assets for dark mode
+            faviconLink.href = '/static/favicon.png'; 
+            headerLogo.src = darkLogo;
+            overlayLogo.src = darkLogo;
+        }
+
+        function forceDarkMode() {
+            // 1. Force dark mode class
+            body.classList.add('dark-mode');
+            // 2. Update logos/favicon to their dark mode versions
+            updateThemeAssets();
+            // 3. Ensure the logo height is applied
             const logoHeight = headerLogo.getAttribute('data-height');
             if (logoHeight) {
                 headerLogo.style.height = `${logoHeight}px`;
             }
         }
         
-        function updateThemeAssets(isDarkMode) {
-            const lightLogo = '/static/thiraiblack.png';
-            const darkLogo = '/static/thiraiwhite.png';
-            
-            faviconLink.href = isDarkMode ? '/static/favicon.png' : '/static/faviconlight.png';
-            headerLogo.src = isDarkMode ? darkLogo : lightLogo;
-            overlayLogo.src = isDarkMode ? darkLogo : lightLogo;
-        }
-
-        function applyTheme(theme) {
-            let isDarkMode;
-            if (theme === 'dark') {
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-                isDarkMode = true;
-            } else if (theme === 'light') {
-                body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
-                isDarkMode = false;
-            } else { // System default
-                localStorage.removeItem('theme');
-                isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDarkMode) {
-                    body.classList.add('dark-mode');
-                } else {
-                    body.classList.remove('dark-mode');
-                }
-            }
-            updateThemeAssets(isDarkMode);
-        }
-
+        // This DOMContentLoaded block is now much simpler
         document.addEventListener('DOMContentLoaded', function() {
-            applyTheme(localStorage.getItem('theme') || 'system');
-            updateLogoHeight();
+            // Call the function to set dark mode permanently
+            forceDarkMode(); 
+            
+            // REMOVED: All previous theme-related event listeners and media queries.
         });
         
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (!localStorage.getItem('theme')) {
-                    applyTheme('system');
-                }
-            });
-        }
-        
-        themeOptions.forEach(option => {
-            option.addEventListener('click', (event) => {
-                event.preventDefault();
-                applyTheme(event.currentTarget.dataset.theme);
-            });
-        });
-        
+        // The 'About' button is now the only one in the header's right corner
         document.getElementById('aboutButton').addEventListener('click', function (event) {
             event.preventDefault();
             const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
@@ -719,7 +685,7 @@
             `;
         }
 
-        // --- MAIN SHOW LOADING (FIXED) ---
+        // --- MAIN SHOW LOADING (Unchanged) ---
         async function loadShowDetails(showId) {
             const mainContainer = document.querySelector('main');
             let allSeasons = [];
@@ -734,7 +700,7 @@
                 // Store seasons for later use
                 allSeasons = show.seasons.filter(s => s.season_number !== 0);
 
-                // --- Step 2: Populate the Banner (FIXED) ---
+                // --- Step 2: Populate the Banner (Unchanged) ---
                 document.title = `${show.name} - Thirai`; 
                 
                 const bannerElement = document.getElementById('show-banner');
