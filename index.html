@@ -59,7 +59,7 @@
             padding-bottom: 2rem;
             display: none;
         }
-        /* Defaulting to dark mode */
+        /* ADDED: Base dark mode styles, now controlled by JS */
         body.dark-mode {
             background-color: #121212;
             color: #e0e0e0;
@@ -354,7 +354,7 @@
         }
     </script>
 </head>
-<body class="bg-gray-100 dark-mode"> <a href="./premium.html" id="premiumButton" aria-label="Go to Premium Page" title="Go to Premium Page">
+<body class="bg-gray-100"> <a href="./premium.html" id="premiumButton" aria-label="Go to Premium Page" title="Go to Premium Page">
         <i id="premiumIcon" class="bi bi-gem"></i>
     </a>
 
@@ -392,6 +392,7 @@
     </p>
 
     <script>
+        const body = document.body; // ADDED: Used for theme management
         const logo = document.getElementById('logo'); 
         const installAppButton = document.getElementById('installAppButton');
         const searchForm = document.getElementById('searchForm');
@@ -402,6 +403,44 @@
         const languageGrid = document.getElementById('languageGrid');
         const languageSelect = document.getElementById('languageSelect');
         const languages = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+        
+        // --- ADDED: Theme Management Functions (Copied from language.html) ---
+        function updateThemeAssets(isDarkMode) {
+            const lightLogo = './static/thiraiblack.png';
+            const darkLogo = './static/thiraiwhite.png';
+            logo.src = isDarkMode ? darkLogo : lightLogo;
+        }
+
+        function applyTheme(theme) {
+            let isDarkMode;
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                isDarkMode = true;
+            } else if (theme === 'light') {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                isDarkMode = false;
+            } else { // System default
+                localStorage.removeItem('theme');
+                isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDarkMode) body.classList.add('dark-mode');
+                else body.classList.remove('dark-mode');
+            }
+            updateThemeAssets(isDarkMode);
+        }
+        
+        // Apply theme immediately on script load
+        applyTheme(localStorage.getItem('theme') || 'system');
+        
+        // Add listener for system preference change if not a fixed theme
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!localStorage.getItem('theme')) applyTheme('system');
+            });
+        }
+        // --- END: Theme Management Functions ---
+
 
         // --- Function to wake up the server ---
         async function wakeServer() {
