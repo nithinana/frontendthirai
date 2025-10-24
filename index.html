@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
 
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -53,18 +52,20 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <style>
         body {
-            transition: background-color 0.5s ease, color 0.5s ease;
+            /* Removed transition: background-color 0.5s ease, color 0.5s ease; */
             padding-top: 3rem;
             padding-left: 2rem;
             padding-right: 2rem;
             padding-bottom: 2rem;
             display: none;
         }
+        /* Defaulting to dark mode */
         body.dark-mode {
             background-color: #121212;
             color: #e0e0e0;
         }
         .lang-link {
+            /* Default appearance is light */
             background-color: white;
             color: #212529;
             transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
@@ -76,6 +77,7 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
+        /* Dark mode specific lang-link styles */
         body.dark-mode .lang-link {
             background-color: #1e1e1e;
             color: #e0e0e0;
@@ -92,12 +94,14 @@
         body.dark-mode h1 {
             color: #ffffff;
         }
-        #toggleDarkMode {
+
+        /* Premium Button Styles */
+        #premiumButton {
             position: fixed;
             top: 1rem;
             right: 1rem;
-            background-color: #333;
-            color: white;
+            background-color: #ffc107; /* Gold/Yellow color for Premium */
+            color: #333;
             border: none;
             border-radius: 0.375rem;
             padding: 0.5rem;
@@ -111,12 +115,13 @@
             z-index: 1000;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        #toggleDarkMode:hover {
-            background-color: #555;
+        #premiumButton:hover {
+            background-color: #e0a800; /* Darker gold on hover */
         }
-        #modeIcon {
+        #premiumIcon { 
             font-size: 1.25rem;
         }
+
         .search-box {
             max-width: 500px;
             margin: 0 auto 30px;
@@ -155,6 +160,7 @@
         .btn-primary:hover {
             background-color: #0b5ed7;
         }
+        /* Dark mode form styles */
         body.dark-mode .form-control-lg,
         body.dark-mode .form-select-lg {
             background-color: #333;
@@ -170,6 +176,7 @@
         body.dark-mode .btn-primary:hover {
             background-color: #0b5ed7;
         }
+
         .form-select-lg {
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
@@ -179,9 +186,11 @@
             width: 150px;
             flex-shrink: 0;
         }
+        /* Dark mode select styles */
         body.dark-mode .form-select-lg {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
         }
+
         @media (max-width: 767px) {
             .input-group {
                 flex-direction: column;
@@ -206,7 +215,7 @@
             body {
                 padding: 1rem;
             }
-            #toggleDarkMode {
+            #premiumButton {
                 right: 0.5rem;
                 top: 0.5rem;
             }
@@ -237,6 +246,7 @@
             background-color: #0d6efd;
             color: white;
         }
+        /* Dark mode outlined button styles */
         body.dark-mode .outlined-button {
             border-color: #0d6efd;
             color: #0d6efd;
@@ -274,6 +284,7 @@
         #exploreAllButton:hover {
             background-color: #0b5ed7;
         }
+        /* Dark mode explore all button styles */
         body.dark-mode #exploreAllButton {
             background-color: #0d6efd;
         }
@@ -287,6 +298,7 @@
         #watchPartyButton:hover {
             background-color: #218838;
         }
+        /* Dark mode watch party button styles */
         body.dark-mode #watchPartyButton {
             background-color: #28a745;
         }
@@ -300,6 +312,7 @@
         #installAppButton:hover {
             background-color: #218838;
         }
+        /* Dark mode install app button styles */
         body.dark-mode #installAppButton {
             background-color: #28a745;
         }
@@ -314,6 +327,7 @@
             border-top: 1px solid #e0e0e0;
             color: #6c757d;
         }
+        /* Dark mode footer-note styles */
         body.dark-mode .footer-note {
             color: #adb5bd;
             border-top: 1px solid #495057;
@@ -340,12 +354,11 @@
         }
     </script>
 </head>
-<body class="bg-gray-100">
-    <button id="toggleDarkMode" aria-label="Toggle dark mode" title="Toggle dark mode">
-        <i id="modeIcon" class="bi bi-moon-fill"></i>
-    </button>
+<body class="bg-gray-100 dark-mode"> <a href="./premium.html" id="premiumButton" aria-label="Go to Premium Page" title="Go to Premium Page">
+        <i id="premiumIcon" class="bi bi-gem"></i>
+    </a>
 
-    <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
+    <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo">
 
     <h1 class="text-3xl font-bold text-center mb-6">Choose a Language</h1>
 
@@ -379,10 +392,7 @@
     </p>
 
     <script>
-        const toggleButton = document.getElementById('toggleDarkMode');
-        const body = document.body;
-        const modeIcon = document.getElementById('modeIcon');
-        const logo = document.getElementById('logo');
+        const logo = document.getElementById('logo'); 
         const installAppButton = document.getElementById('installAppButton');
         const searchForm = document.getElementById('searchForm');
         const movieTitleInput = document.getElementById('movieTitleInput');
@@ -393,7 +403,7 @@
         const languageSelect = document.getElementById('languageSelect');
         const languages = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
 
-        // --- NEW: Function to wake up the server ---
+        // --- Function to wake up the server ---
         async function wakeServer() {
             try {
                 // The URL of the server to wake up
@@ -415,48 +425,12 @@
             }
         }
         
-        function updateLogo(isDarkMode) {
-            logo.src = isDarkMode ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
-        }
 
-        function updateIcon(isDarkMode) {
-            if (isDarkMode) {
-                modeIcon.classList.remove('bi-moon-fill');
-                modeIcon.classList.add('bi-sun-fill');
-            } else {
-                modeIcon.classList.remove('bi-sun-fill');
-                modeIcon.classList.add('bi-moon-fill');
-            }
-        }
-
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-            } else if (theme === 'light') {
-                body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
-            } else { // System default
-                localStorage.removeItem('theme');
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    body.classList.add('dark-mode');
-                } else {
-                    body.classList.remove('dark-mode');
-                }
-            }
-            updateIcon(body.classList.contains('dark-mode'));
-            updateLogo(body.classList.contains('dark-mode'));
-        }
-
-        // Apply theme as soon as the DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             // Call the wakeServer function on page load
             wakeServer();
 
-            const savedTheme = localStorage.getItem('theme');
-            applyTheme(savedTheme || 'system');
-
-            // --- NEW: Populate dynamic content ---
+            // --- Populate dynamic content ---
             languages.forEach(lang => {
                 // Capitalize first letter for display
                 const capitalizedLang = lang.charAt(0).toUpperCase() + lang.slice(1);
@@ -476,18 +450,6 @@
             });
         });
 
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (!localStorage.getItem('theme')) {
-                    applyTheme('system');
-                }
-            });
-        }
-
-        toggleButton.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme');
-            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
-        });
 
         // --- Search Validation Logic ---
         searchForm.addEventListener('submit', (e) => {
