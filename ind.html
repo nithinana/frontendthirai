@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HKV7GQ766F');
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9536316259656764"
+     crossorigin="anonymous"></script>
+  
+    <meta property="og:title" content="Thirai">
+    <meta property="og:description" content="Access South-Asian movies online on your device.">
+    <meta property="og:image" content="./static/favicon.png">
+    <meta property="og:url" content="https://thirai.onrender.com/">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Thirai">
+    <meta name="twitter:description" content="Access South-Asian movies online on your device.">
+    <meta name="twitter:image" content="./static/favicon.png">
+
+    <link rel="manifest" href="./static/manifest.json">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thirai">
+
+    <link rel="apple-touch-icon" href="./static/ios/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./static/ios/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./static/ios/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="./static/ios/icon-167x167.png">
+
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="./static/splash/launch-750x1334.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="./static/splash/launch-1242x2208.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="./static/splash/launch-1125x2436.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="./static/splash/launch-828x1792.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="./static/splash/launch-1242x2688.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="./static/splash/launch-1080x2340.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="./static/splash/launch-1170x2532.png">
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="./static/splash/launch-1284x2778.png">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thirai</title>
+    <link rel="icon" type="image/png" href="./static/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <style>
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+            padding-top: 3rem;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            padding-bottom: 2rem;
+            display: none;
+        }
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .lang-link {
+            background-color: white;
+            color: #212529;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .lang-link:hover {
+            background-color: #333;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .lang-link {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        body.dark-mode .lang-link:hover {
+            background-color: #343a40;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        body.dark-mode .error-text {
+            color: #ffc107;
+        }
+        body.dark-mode h1 {
+            color: #ffffff;
+        }
+        #toggleDarkMode {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            width: 2.5rem;
+            height: 2.5rem;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #toggleDarkMode:hover {
+            background-color: #555;
+        }
+        #modeIcon {
+            font-size: 1.25rem;
+        }
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+        .input-group {
+            display: flex;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+        .form-control-lg, .form-select-lg {
+            padding: 0.75rem 1.25rem;
+            font-size: 1.25rem;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            flex-grow: 1;
+        }
+        .form-control-lg.highlight-red {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+        body.dark-mode .form-control-lg.highlight-red {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.25rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            white-space: nowrap;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        body.dark-mode .form-control-lg,
+        body.dark-mode .form-select-lg {
+            background-color: #333;
+            color: #e0e0e0;
+            border-color: #555;
+        }
+        body.dark-mode .form-control-lg::placeholder {
+            color: #aaa;
+        }
+        body.dark-mode .btn-primary {
+            background-color: #0d6efd;
+        }
+        body.dark-mode .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .form-select-lg {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            width: 150px;
+            flex-shrink: 0;
+        }
+        body.dark-mode .form-select-lg {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        }
+        @media (max-width: 767px) {
+            .input-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .form-control-lg, .form-select-lg, .btn-primary {
+                width: 100%;
+                font-size: 1rem;
+                padding: 0.6rem 1rem;
+            }
+            .form-select-lg {
+                width: 100%;
+                background-position: right 1rem center;
+            }
+            .search-box {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            body {
+                padding: 1rem;
+            }
+            #toggleDarkMode {
+                right: 0.5rem;
+                top: 0.5rem;
+            }
+        }
+        #logo {
+            display: block;
+            margin: 0 auto 1.5rem;
+            max-width: 250px;
+            height: auto;
+        }
+        #installAppButton {
+            display: none;
+        }
+        .outlined-button {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 1.5rem;
+            padding: 0.5rem 1rem;
+            border: 2px solid #0d6efd;
+            border-radius: 0.375rem;
+            color: #0d6efd;
+            background-color: transparent;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .outlined-button:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+        body.dark-mode .outlined-button {
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+        body.dark-mode .outlined-button:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+        #buttonContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn-fixed-size {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            text-align: center;
+            min-width: 140px;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #exploreAllButton {
+            background-color: #0d6efd;
+            color: white;
+        }
+        #exploreAllButton:hover {
+            background-color: #0b5ed7;
+        }
+        body.dark-mode #exploreAllButton {
+            background-color: #0d6efd;
+        }
+        body.dark-mode #exploreAllButton:hover {
+            background-color: #0b5ed7;
+        }
+        #watchPartyButton {
+            background-color: #28a745;
+            color: white;
+        }
+        #watchPartyButton:hover {
+            background-color: #218838;
+        }
+        body.dark-mode #watchPartyButton {
+            background-color: #28a745;
+        }
+        body.dark-mode #watchPartyButton:hover {
+            background-color: #218838;
+        }
+        #installAppButton {
+            background-color: #28a745;
+            color: white;
+        }
+        #installAppButton:hover {
+            background-color: #218838;
+        }
+        body.dark-mode #installAppButton {
+            background-color: #28a745;
+        }
+        body.dark-mode #installAppButton:hover {
+            background-color: #218838;
+        }
+
+        /* NEW: Styles for the premium button */
+        .btn-premium {
+            background-color: #FFC107; /* Yellow background */
+            color: white; /* White text/icon */
+        }
+        .btn-premium:hover {
+            background-color: #E0A800; /* Darker yellow on hover */
+        }
+        /* END NEW styles */
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            color: #6c757d;
+        }
+        body.dark-mode .footer-note {
+            color: #adb5bd;
+            border-top: 1px solid #495057;
+        }
+    </style>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+            rel="stylesheet"
+    />
+    <script>
+        // Auto-redirect if a preferred language exists - moved to HEAD for early execution
+        const preferredLanguage = localStorage.getItem('preferred-language');
+        const currentPath = window.location.pathname;
+
+        // Only redirect if on the root path and a preferred language is set
+        if (preferredLanguage && (currentPath === '/' || currentPath.endsWith('/index'))) {
+            // MODIFIED: Point to the static language.html file with a query parameter
+            window.location.replace(`./language?lang=${preferredLanguage}`);
+        } else {
+            // If no redirect, make the body visible
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <button id="toggleDarkMode" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <i id="modeIcon" class="bi bi-moon-fill"></i>
+    </button>
+
+    <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
+
+    <h1 class="text-3xl font-bold text-center mb-6">Choose a Language</h1>
+
+    <div class="search-box">
+        <form action="./language" method="GET" class="mb-4" id="searchForm">
+            <div class="input-group">
+                <select name="lang" id="languageSelect" class="form-select-lg">
+                    </select>
+                <input type="text" name="q" id="movieTitleInput" class="form-control form-control-lg"
+                       placeholder="Search movies...">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="languageGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        </div>
+
+    <div id="buttonContainer" class="flex justify-center items-center gap-4 mt-6">
+        <a href="./all" id="exploreAllButton" class="btn-fixed-size" style="background-color: #0d6efd; color: white;">Explore All</a>
+        <a href="./actors" id="exploreAllButton" class="btn-fixed-size" style="background-color: #BE48F0; color: white;">Collections</a>
+        
+        <a href="./premium.html" id="premiumButton" class="btn-fixed-size btn-premium" style="min-width: 50px;">
+            <i class="bi bi-crown"></i>
+        </a>
+        <button id="installAppButton" class="btn-fixed-size" style="display: none;">
+            <i class="bi bi-download mr-2"></i> Install App
+        </button>
+    </div>
+
+    <p class="footer-note">
+        ⓘ Thirai is still in development, so browsing may experience longer loading times and bugs. Media embedded is hosted by 3rd parties.
+    </p>
+
+    <script>
+        const toggleButton = document.getElementById('toggleDarkMode');
+        const body = document.body;
+        const modeIcon = document.getElementById('modeIcon');
+        const logo = document.getElementById('logo');
+        const installAppButton = document.getElementById('installAppButton');
+        const searchForm = document.getElementById('searchForm');
+        const movieTitleInput = document.getElementById('movieTitleInput');
+        let deferredPrompt;
+
+        // --- NEW: Elements and data for dynamic content ---
+        const languageGrid = document.getElementById('languageGrid');
+        const languageSelect = document.getElementById('languageSelect');
+        const languages = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+
+        // --- NEW: Function to wake up the server ---
+        async function wakeServer() {
+            try {
+                // The URL of the server to wake up
+                const serverUrl = 'https://thirai-watch.onrender.com/';
+                console.log('Attempting to wake up the server at:', serverUrl);
+
+                // Send a simple GET request
+                const response = await fetch(serverUrl, {
+                    method: 'GET',
+                    mode: 'no-cors' // Use 'no-cors' mode for a simple ping
+                });
+
+                // Since we're using 'no-cors', we can't check for a successful status code.
+                // We just check if the fetch operation itself didn't fail.
+                console.log('Server wake-up request sent.');
+
+            } catch (error) {
+                console.error('Failed to send wake-up request:', error);
+            }
+        }
+        
+        function updateLogo(isDarkMode) {
+            logo.src = isDarkMode ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
+        }
+
+        function updateIcon(isDarkMode) {
+            if (isDarkMode) {
+                modeIcon.classList.remove('bi-moon-fill');
+                modeIcon.classList.add('bi-sun-fill');
+            } else {
+                modeIcon.classList.remove('bi-sun-fill');
+                modeIcon.classList.add('bi-moon-fill');
+            }
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else if (theme === 'light') {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            } else { // System default
+                localStorage.removeItem('theme');
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    body.classList.add('dark-mode');
+                } else {
+                    body.classList.remove('dark-mode');
+                }
+            }
+            updateIcon(body.classList.contains('dark-mode'));
+            updateLogo(body.classList.contains('dark-mode'));
+        }
+
+        // Apply theme as soon as the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Call the wakeServer function on page load
+            wakeServer();
+
+            const savedTheme = localStorage.getItem('theme');
+            applyTheme(savedTheme || 'system');
+
+            // --- NEW: Populate dynamic content ---
+            languages.forEach(lang => {
+                // Capitalize first letter for display
+                const capitalizedLang = lang.charAt(0).toUpperCase() + lang.slice(1);
+
+                // Create and append language link to the grid
+                const link = document.createElement('a');
+                link.href = `./language?lang=${lang}&category=recent`;
+                link.className = 'block text-center lang-link p-4 rounded shadow capitalize font-semibold';
+                link.textContent = lang;
+                languageGrid.appendChild(link);
+
+                // Create and append option to the select dropdown
+                const option = document.createElement('option');
+                option.value = lang;
+                option.textContent = capitalizedLang;
+                languageSelect.appendChild(option);
+            });
+        });
+
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!localStorage.getItem('theme')) {
+                    applyTheme('system');
+                }
+            });
+        }
+
+        toggleButton.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme');
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        // --- Search Validation Logic ---
+        searchForm.addEventListener('submit', (e) => {
+            if (movieTitleInput.value.trim() === '') {
+                e.preventDefault();
+                movieTitleInput.classList.add('highlight-red');
+                movieTitleInput.focus();
+            } else {
+                movieTitleInput.classList.remove('highlight-red');
+            }
+        });
+
+        movieTitleInput.addEventListener('input', () => {
+            if (movieTitleInput.value.trim() !== '') {
+                movieTitleInput.classList.remove('highlight-red');
+            }
+        });
+
+        // --- PWA Installation Logic ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./static/service-worker.js')
+                    .then(registration => console.log('Service Worker registered.'))
+                    .catch(error => console.error('Service Worker registration failed:', error));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installAppButton.style.display = 'inline-flex';
+        });
+
+        installAppButton.addEventListener('click', (e) => {
+            if (deferredPrompt) {
+                installAppButton.style.display = 'none';
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        installAppButton.style.display = 'inline-flex';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+          installAppButton.style.display = 'none';
+          console.log('PWA was installed');
+        });
+    </script>
+</body>
+</html>
