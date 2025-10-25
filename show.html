@@ -297,6 +297,33 @@
             max-width: 800px; 
             color: #ddd;
         }
+        
+        /* === NEW: Action Button Styles === */
+        .action-button {
+            /* Transparent Gray Background */
+            background-color: rgba(108, 117, 125, 0.3); 
+            color: #fff; /* White text/icon */
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.75rem 2rem;
+            border-radius: 50px; /* Curved corners */
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Text shadow for visibility */
+            margin-top: 2rem; /* Spacing from cast */
+        }
+
+        .action-button:hover {
+            background-color: rgba(108, 117, 125, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
 
         /* Responsive Banner */
         @media (max-width: 767.98px) {
@@ -350,6 +377,12 @@
             
             .show-poster-col {
                 display: none !important;
+            }
+            
+            .action-button {
+                margin-top: 1rem; /* Adjust margin for mobile */
+                padding: 0.6rem 1.5rem;
+                font-size: 1rem;
             }
         }
         
@@ -511,6 +544,10 @@
                             <h5 class="mt-4">Starring</h5>
                             <p id="show-cast" class="text-muted">Loading...</p>
                             
+                            <div id="action-button-container">
+                                <button class="btn btn-lg action-button" disabled>Loading...</button>
+                            </div>
+                            
                             <img id="show-poster" src="https://via.placeholder.com/300x450?text=Loading..." alt="Show Poster" class="img-fluid" style="display: none;">
                         </div>
                     </div>
@@ -577,6 +614,8 @@
         const logoLink = document.getElementById('logoLink');
         const accordionContainer = document.getElementById('seasons-accordion');
         const seasonDropdown = document.getElementById('season-dropdown');
+        // NEW: Action button container
+        const actionButtonContainer = document.getElementById('action-button-container');
 
         // Loading timer (Unchanged)
         const loadingTimer = setTimeout(() => {
@@ -585,7 +624,7 @@
             }
         }, 7000);
         
-        // --- THEME/UI LOGIC (MODIFIED: FORCED DARK MODE) ---
+        // --- THEME/UI LOGIC (MODIFIED: FORCED DARK MODE) (Unchanged) ---
         
         // Simplified functions for logo/favicon now that theme is fixed
         function updateThemeAssets() {
@@ -624,15 +663,36 @@
             aboutModal.show();
         });
 
-        // REMOVED: Search form logic, as the search bar was removed from HTML
-        /*
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchForm = document.getElementById('searchForm');
-            const searchInput = document.getElementById('searchInput');
-            // ... search validation logic removed ...
-        });
-        */
+        // --- NEW: Action Button Logic ---
+        function isUnlocked() {
+            return localStorage.getItem('premium_isUnlocked') === 'true' || 
+                   localStorage.getItem('isUnlocked') === 'true';
+        }
 
+        function renderActionButton(showId, firstSeasonNumber) {
+            const isUserUnlocked = isUnlocked();
+            const playerUrl = `/player.html?tv=${showId}/${firstSeasonNumber}/1`; // Assuming first episode is Episode 1
+            
+            let buttonContent;
+            let buttonClass;
+            let icon;
+            
+            if (isUserUnlocked) {
+                buttonContent = 'Play First Episode';
+                icon = '<i class="bi bi-play-circle-fill me-2"></i>';
+            } else {
+                buttonContent = 'Unlock Now';
+                icon = '<i class="bi bi-lock-fill me-2"></i>';
+            }
+            
+            actionButtonContainer.innerHTML = `
+                <a href="${playerUrl}" class="btn action-button">
+                    ${icon}
+                    ${buttonContent}
+                </a>
+            `;
+        }
+        
         // --- EPISODE RENDERING (Unchanged) ---
         function renderEpisodes(seasonData, showId) {
             const episodesHtml = seasonData.episodes.map(ep => {
@@ -660,7 +720,7 @@
             `;
         }
 
-        // --- MAIN SHOW LOADING (Unchanged) ---
+        // --- MAIN SHOW LOADING (MODIFIED: call renderActionButton) ---
         async function loadShowDetails(showId) {
             const mainContainer = document.querySelector('main');
             let allSeasons = [];
@@ -728,12 +788,16 @@
                     </option>
                 `).join('');
                 
-                // --- Step 4/5: Load and Display Episodes (Unchanged) ---
+                // --- Step 4/5: Load and Display Episodes ---
                 if (allSeasons.length > 0) {
                     const firstSeasonNumber = allSeasons[0].season_number;
+                    // NEW: Render the action button immediately after determining the first season number
+                    renderActionButton(showId, firstSeasonNumber); 
                     await loadSeasonEpisodes(showId, firstSeasonNumber);
                 } else {
                      accordionContainer.innerHTML = '<p class="text-muted">No episodes found for this series.</p>';
+                     // NEW: Display a disabled button or clear container if no seasons
+                     actionButtonContainer.innerHTML = '';
                 }
                 
                 seasonDropdown.addEventListener('change', (e) => {
