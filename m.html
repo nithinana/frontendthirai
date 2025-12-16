@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thirai - Mobile App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==============================================
+           1. CORE VARIABLES & RESET
+           ============================================== */
+        :root {
+            --bg-body: #080808;
+            --bg-card: #121212;
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+            --accent: #e50914; /* Original Accent (Red) */
+            --header-height: 70px;
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            padding-bottom: 70px; /* Space for bottom nav */
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
+        }
+
+        a { text-decoration: none; color: inherit; }
+        .visually-hidden { display: none !important; }
+
+        /* ==============================================
+           2. HEADER (Mobile Focused)
+           ============================================== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 20px; /* Mobile Padding */
+            /* Ensure the header is partially transparent and sits above the hero */
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0) 100%);
+            z-index: 100;
+            transition: background 0.3s ease;
+        }
+        
+        .header.scrolled {
+            background-color: #000000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .logo { height: 24px; cursor: pointer; display: block; margin: 0 auto; }
+        .logo-container { flex-grow: 1; text-align: center; } /* Center the logo */
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 101; /* Ensure it's above everything */
+            padding: 5px;
+        }
+
+        /* ==============================================
+           3. HERO SECTION (Starts from the very top)
+           ============================================== */
+        #view-home { 
+            padding-top: 0; /* Important: Allows hero to start at the top */
+        }
+
+        .hero {
+            width: 100%; height: 60vh; max-height: 550px; position: relative; margin-bottom: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        }
+        .hero-bg {
+            position: absolute; inset: 0; background-size: cover; background-position: top center;
+            z-index: 1;
+        }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(0deg, var(--bg-body) 0%, rgba(8,8,8,0.6) 50%, rgba(8,8,8,0.3) 100%);
+            z-index: 2;
+        }
+        .hero-content {
+            position: relative; z-index: 3; padding: 0 20px 40px; text-align: center; width: 100%;
+        }
+        .hero-logo { width: 70%; max-width: 250px; height: auto; margin-bottom: 20px; display: block; margin: 0 auto 20px;}
+        
+        /* New Watch Now Button Style */
+        .btn-play {
+            display: inline-flex; align-items: center; gap: 10px;
+            background-color: #ffffff; 
+            color: #000000; /* Black text */
+            padding: 10px 25px;
+            border-radius: 4px; font-weight: 700; font-size: 1rem; border: none;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+        }
+        .btn-play i { color: #000000; } /* Black icon */
+
+        /* Wrapper for home page rows to separate them from hero */
+        .home-content-wrapper {
+            padding-top: 20px;
+        }
+
+        /* Padding for non-home views which start at the top of the viewport */
+        .view-padded {
+            padding-top: var(--header-height);
+        }
+
+
+        /* ==============================================
+           4. FEATURED SLIDESHOW (Custom Carousel)
+           ============================================== */
+        .featured-header {
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; margin-top: 20px; margin-bottom: 15px;
+        }
+        .toggle-switch {
+            display: flex; background: #222; border-radius: 20px; padding: 3px; position: relative;
+        }
+        .toggle-btn {
+            padding: 6px 16px; font-size: 0.85rem; font-weight: 600; z-index: 2; cursor: pointer; color: #888; transition: color 0.3s;
+        }
+        .toggle-btn.active { color: #fff; }
+        .toggle-bg {
+            position: absolute; top: 3px; left: 3px; width: 50%; height: calc(100% - 6px);
+            background: #444; border-radius: 18px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1;
+        }
+
+        .featured-slider {
+            display: flex; 
+            overflow-x: scroll; /* Use scroll */
+            scroll-snap-type: x mandatory; 
+            padding: 0 0 30px; 
+            gap: 15px; 
+            scrollbar-width: none;
+            /* Faded sides effect: only works on some browsers, JS helps ensure visual effect */
+            mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+        .featured-slider::-webkit-scrollbar { display: none; }
+        
+        .featured-card {
+            flex: 0 0 70%; /* Size of the card, approx 70% of screen width */
+            margin-left: 15%; /* Initial offset to center the first one */
+            max-width: 300px;
+            aspect-ratio: 2/3;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            scroll-snap-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: scale(0.85); /* Blurred/faded side scale */
+            opacity: 0.5; /* Faded opacity for sides */
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+            cursor: pointer;
+        }
+        /* Override for the first/last elements to align the content properly at the ends */
+        .featured-card:first-child { margin-left: 15%; } 
+        .featured-card:last-child { margin-right: 15%; } 
+        
+        .featured-card img { width: 100%; height: 100%; object-fit: cover; }
+        .featured-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 40px 20px 20px;
+        }
+        .featured-name { font-size: 1.5rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+        /* Class added by JS to the currently centered slide */
+        .featured-card.active-slide {
+            transform: scale(1.0);
+            opacity: 1.0;
+        }
+
+
+        /* ==============================================
+           5. STANDARD ROWS & GRIDS
+           ============================================== */
+        .section-title { padding: 0 20px; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
+        
+        .row-container {
+            display: flex; gap: 10px; overflow-x: auto; padding: 0 20px 20px;
+            scroll-behavior: smooth; scrollbar-width: none;
+        }
+        .row-container::-webkit-scrollbar { display: none; }
+
+        .card {
+            flex: 0 0 auto; width: 100px; border-radius: var(--radius); overflow: hidden;
+            position: relative; background: #1a1a1a; cursor: pointer; aspect-ratio: 2/3;
+        }
+        .card img { width: 100%; height: 100%; object-fit: cover; background: #222; }
+
+        .grid-layout {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px; padding: 0 20px 30px;
+        }
+        .grid-layout .card { width: 100%; }
+
+        .filter-tabs { display: flex; gap: 10px; padding: 0 20px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
+        .filter-tab {
+            padding: 8px 16px; border-radius: 20px; background: #222; color: #aaa; 
+            font-size: 0.9rem; white-space: nowrap; cursor: pointer; border: 1px solid #333;
+        }
+        .filter-tab.active { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
+
+        /* Search Box */
+        .search-area { padding: 0 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .search-controls { position: relative; width: 100%; display: flex; gap: 10px; }
+
+        .search-input {
+            flex: 1; background: #1c1c1c; border: none; border-radius: 8px;
+            padding: 12px 15px 12px 15px; color: white; font-size: 1rem;
+        }
+        
+        .lang-select {
+            background: #1c1c1c; border: none; color: white; padding: 0 15px;
+            border-radius: 8px; font-size: 0.9rem; outline: none; -webkit-appearance: none;
+        }
+        
+        .btn-search-trigger {
+            background: var(--accent); color: white; border: none; border-radius: 8px;
+            padding: 12px 15px; font-size: 1rem; cursor: pointer;
+        }
+
+        /* Load More Button (Standard style for Search/Actor Details) */
+        .load-more-btn {
+            display: block; width: calc(100% - 40px); margin: 20px auto 40px;
+            padding: 12px 20px; background: #222; color: white; border: none;
+            border-radius: 8px; font-size: 1rem; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .load-more-btn:hover { background: #333; }
+        
+        /* New Refresh Button Style (for Home Screen) */
+        .refresh-button {
+            display: flex; justify-content: center; margin: 30px auto 30px;
+        }
+        .btn-refresh-circle {
+            background-color: var(--accent);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4);
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .btn-refresh-circle:active {
+            transform: scale(0.95);
+        }
+        .btn-refresh-circle.loading i {
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+        /* ==============================================
+           6. MOBILE BOTTOM NAV
+           ============================================== */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
+            display: flex; justify-content: space-around; align-items: center;
+            background-color: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.05); z-index: 200;
+        }
+        .bottom-nav .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #666; font-size: 0.7rem; font-weight: 500; width: 33%; height: 100%;
+        }
+        .bottom-nav .nav-item.active { color: white; }
+        .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="header" id="main-header">
+        <i class="fas fa-arrow-left back-button visually-hidden" id="back-button" onclick="goBack()"></i>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
+            </div>
+            <div style="width: 24px;"></div>
+        </div>
+    </header>
+
+    <div id="view-home">
+        <div class="hero">
+            <div id="hero-bg" class="hero-bg"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div id="hero-logo-container"></div>
+                <a id="hero-link" href="#" class="btn-play visually-hidden"><i class="fas fa-play"></i> Watch Now</a>
+            </div>
+        </div>
+
+        <div class="home-content-wrapper">
+            <div class="section-title">Tamil Hits</div>
+            <div class="row-container" id="row-tamil"></div>
+
+            <div class="section-title">Malayalam Hits</div>
+            <div class="row-container" id="row-malayalam"></div>
+
+            <div class="section-title">Hindi Blockbusters</div>
+            <div class="row-container" id="row-hindi"></div>
+
+            <div class="section-title">Telugu Essentials</div>
+            <div class="row-container" id="row-telugu"></div>
+
+            <div class="refresh-button" id="home-refresh-container">
+                <button class="btn-refresh-circle" onclick="refreshHomeContent(this)">
+                    <i class="fas fa-redo-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-collections" class="visually-hidden view-padded">
+        
+        <div class="featured-header">
+            <div style="font-size:1.1rem; font-weight:700;">Featured</div>
+            <div class="toggle-switch" onclick="toggleFeatured()">
+                <div class="toggle-bg" id="feat-toggle-bg"></div>
+                <div class="toggle-btn active" id="btn-actors">Actors</div>
+                <div class="toggle-btn" id="btn-actresses">Actresses</div>
+            </div>
+        </div>
+
+        <div class="featured-slider" id="featured-slider">
+            </div>
+
+        <div class="section-title">Browse by Language</div>
+        <div class="filter-tabs" id="lang-filter-tabs">
+            <div class="filter-tab active" data-lang="tamil" onclick="filterGrid('tamil', this)">Tamil</div>
+            <div class="filter-tab" data-lang="hindi" onclick="filterGrid('hindi', this)">Hindi</div>
+            <div class="filter-tab" data-lang="malayalam" onclick="filterGrid('malayalam', this)">Malayalam</div>
+            <div class="filter-tab" data-lang="telugu" onclick="filterGrid('telugu', this)">Telugu</div>
+            <div class="filter-tab" data-lang="kannada" onclick="filterGrid('kannada', this)">Kannada</div>
+            <div class="filter-tab" data-lang="marathi" onclick="filterGrid('marathi', this)">Marathi</div>
+            <div class="filter-tab" data-lang="punjabi" onclick="filterGrid('punjabi', this)">Punjabi</div>
+        </div>
+        
+        <div class="grid-layout" id="grid-actors">
+            </div>
+    </div>
+
+    <div id="view-search" class="visually-hidden view-padded">
+        <div class="search-area">
+            <div class="search-controls">
+                <input type="text" class="search-input" id="search-input" placeholder="Search movies...">
+                <select id="lang-select" class="lang-select">
+                    <option value="tamil">Tamil</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="malayalam">Malayalam</option>
+                    <option value="telugu">Telugu</option>
+                    <option value="kannada">Kannada</option>
+                    <option value="marathi">Marathi</option>
+                    <option value="punjabi">Punjabi</option>
+                </select>
+                <button class="btn-search-trigger" onclick="doSearch(1, true)">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="grid-layout" id="search-results"></div>
+        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="doSearch(searchState.page + 1, false)">Load More</button>
+    </div>
+
+    <div id="view-actor-details" class="visually-hidden view-padded">
+        <div class="section-title" id="actor-details-title" style="margin-top: 0;">Movies</div>
+        <div class="grid-layout" id="actor-movies-grid"></div>
+        <button class="load-more-btn visually-hidden" id="load-more-actor" onclick="loadNextActorPage()">Load More</button>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home')" id="btm-home">
+            <i class="fas fa-home"></i> <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('collections')" id="btm-collections">
+            <i class="fas fa-layer-group"></i> <span>Collections</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('search')" id="btm-search">
+            <i class="fas fa-search"></i> <span>Search</span>
+        </div>
+    </div>
+
+    <script>
+        // ===============================================
+        // DATA EMBEDDED FROM UPLOADED JSON FILES
+        // ===============================================
+        const API_KEY = '926e94b0f70b5bed8417b679652366ab'; // TMDB API Key for movie posters/backdrops
+        const TMDB_BASE = 'https://api.themoviedb.org/3';
+        const API_BASE = 'https://backendthirai-test.onrender.com';
+
+        const actorsData = {"castData": {"featured": {"actors": [{"name": "Vijay", "actor_code": "3TKYioHCAF", "image_url": "https://sund-images.sunnxt.com/100587/250x375_Vijay_100587_224cc6a7-3c61-4e10-bde1-22dc80d0473b.jpg"}, {"name": "Dhanush", "actor_code": "5vCobOqDDx", "image_url": "https://sund-images.sunnxt.com/101546/250x375_Dhanush_101546_2680c0f6-aa8e-4358-bcfd-a545c794f1f1.jpg"}, {"name": "Mohanlal", "actor_code": "1Uv6Det8Ej", "image_url": "https://sund-images.sunnxt.com/101560/250x375_Mohanlal_101560_4a4618e2-faff-4156-bbfd-723f34346e06.jpg"}, {"name": "Mammootty", "actor_code": "1WaoBhSG80", "image_url": "https://sund-images.sunnxt.com/101561/250x375_Mammootty_101561_0dd71a8d-9e60-4c77-86ef-bb773bc98038.jpg"}, {"name": "Vijay Sethupathi", "actor_code": "1yADiX9kkO", "image_url": "https://sund-images.sunnxt.com/138708/250x375_VijaySethupathi_138708_d8b98537-1c46-4b2d-8d49-6a53594ee332.jpg"}, {"name": "Rajinikanth", "actor_code": "ijsq87BV3Y", "image_url": "https://sund-images.sunnxt.com/94511/250x375_Rajinikanth_94511_1202521b-b7e0-421b-80f2-ac5034a57930.jpg"}], "actresses": [{"name": "Trisha", "actor_code": "F1cHse9jWW", "image_url": "https://sund-images.sunnxt.com/131408/250x375_TrishaKrishnan_131408_d8af3600-7fdd-4bc0-b723-4be0ced8f2e4.jpg"}, {"name": "Samantha", "actor_code": "6WfqAcxel5", "image_url": "https://sund-images.sunnxt.com/131409/250x375_Samantha_131409_65c2f409-f020-4360-969a-b9f741232ccf.jpg"}, {"name": "Nayanthara", "actor_code": "7tFt1Le1Ep", "image_url": "https://sund-images.sunnxt.com/131441/250x375_Nayanthara_131441_76f534d9-19d3-4a02-a01a-03669dcd21c1.jpg"}, {"name": "Pooja Hegde", "actor_code": "14CoLSwEXV", "image_url": "https://sund-images.sunnxt.com/138711/250x375_PoojaHegde_138711_b484d386-2c3d-408b-89db-88177887ab8a.jpg"}, {"name": "Nithya Menen", "actor_code": "3AQ1iONzZQ", "image_url": "https://sund-images.sunnxt.com/131443/250x375_NithyaMenen_131443_db5be06a-7a6a-4b30-80b4-380506464b56.jpg"}]}, "tmdb": {"actors": [{"name": "Vijay", "tmdb_id": "91547", "actor_code": "3TKYioHCAF", "language": "tamil"}, {"name": "Dhanush", "tmdb_id": "550165", "actor_code": "5vCobOqDDx", "language": "tamil"}, {"name": "Kamal Haasan", "tmdb_id": "93193", "actor_code": "5Ix02sIDeA", "language": "tamil"}, {"name": "Vijay Sethupathi", "tmdb_id": "1123766", "actor_code": "1yADiX9kkO", "language": "tamil"}, {"name": "Rajinikanth", "tmdb_id": "91555", "actor_code": "ijsq87BV3Y", "language": "tamil"}, {"name": "Vikram", "tmdb_id": "93191", "actor_code": "5uf7csvvAf", "language": "tamil"}, {"name": "Ajith Kumar", "tmdb_id": "148360", "actor_code": "4pDqQD0LPJ", "language": "tamil"}, {"name": "Shah Rukh Khan", "tmdb_id": "35742", "actor_code": "b4tCNsNP3r", "language": "hindi"}, {"name": "Ranbir Kapoor", "tmdb_id": "85034", "actor_code": "2cKAcgtako", "language": "hindi"}, {"name": "Mohanlal", "tmdb_id": "82732", "actor_code": "1Uv6Det8Ej", "language": "malayalam"}, {"name": "Mammootty", "tmdb_id": "124111", "actor_code": "1WaoBhSG80", "language": "malayalam"}, {"name": "Prabhas", "tmdb_id": "237045", "actor_code": "7IcT9rmeui", "language": "telugu"}, {"name": "Allu Arjun", "tmdb_id": "108215", "actor_code": "7ug2FmruQr", "language": "telugu"}, {"name": "Anushka Shetty", "tmdb_id": "88167", "actor_code": "2ldhTbiGgU", "language": "tamil"}, {"name": "Hansika Motwani", "tmdb_id": "237967", "actor_code": "3FGflYSCcj", "language": "tamil"}, {"name": "Kajal Aggarwal", "tmdb_id": "55061", "actor_code": "7GLAgNWiq2", "language": "hindi"}, {"name": "Shruti Haasan", "tmdb_id": "85883", "actor_code": "7fCylLNfVi", "language": "tamil"}, {"name": "Deepika Padukone", "tmdb_id": "53975", "actor_code": "7Iwku12HLv", "language": "hindi"}, {"name": "Kareena Kapoor", "tmdb_id": "37233", "actor_code": "6cC1dMrY40", "language": "hindi"}]}}};
+        const tamilData = {"category": "popular", "language": "tamil", "has_more": true, "movies": [{"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2223-7856.jpg", "page_url": "https://einthusan.tv/movie/watch/2223/?lang=tamil", "title": "Raja Rani"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2786-70f7.jpg", "page_url": "https://einthusan.tv/movie/watch/2786/?lang=tamil", "title": "Thani Oruvan"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2937-2069.jpg", "page_url": "https://einthusan.tv/movie/watch/2937/?lang=tamil", "title": "Theri"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/1327-224f.jpg", "page_url": "https://einthusan.tv/movie/watch/1327/?lang=tamil", "title": "Thuppakki"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/3QoX-3033.jpg", "page_url": "https://einthusan.tv/movie/watch/3QoX/?lang=tamil", "title": "Mersal"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/5Wrt-2d4e.jpg", "page_url": "https://einthusan.tv/movie/watch/5Wrt/?lang=tamil", "title": "Vikram Vedha"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/559E-7360.jpg", "page_url": "https://einthusan.tv/movie/watch/559E/?lang=tamil", "title": "Sarkar"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/ZHGp-6038.jpg", "page_url": "https://einthusan.tv/movie/watch/ZHGp/?lang=tamil", "title": "Maari 2"}]};
+        const malayalamData = {"category": "popular", "language": "malayalam", "has_more": true, "movies": [{"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2473-2cf9.jpg", "page_url": "https://einthusan.tv/movie/watch/2473/?lang=malayalam", "title": "Bangalore Days"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/3175-1154.jpg", "page_url": "https://einthusan.tv/movie/watch/3175/?lang=malayalam", "title": "Premam"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2384-f1d0.jpg", "page_url": "https://einthusan.tv/movie/watch/2384/?lang=malayalam", "title": "Drishyam"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2185-d05d.jpg", "page_url": "https://einthusan.tv/movie/watch/2185/?lang=malayalam", "title": "Ohm Shanthi Oshaana"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2809-77f5.jpg", "page_url": "https://einthusan.tv/movie/watch/2809/?lang=malayalam", "title": "Charlie"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2988-8120.jpg", "page_url": "https://einthusan.tv/movie/watch/2988/?lang=malayalam", "title": "Maheshinte Prathikaaram"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2148-d60b.jpg", "page_url": "https://einthusan.tv/movie/watch/2148/?lang=malayalam", "title": "Mumbai Police"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2502-a490.jpg", "page_url": "https://einthusan.tv/movie/watch/2502/?lang=malayalam", "title": "Vikramadithyan"}]};
+        const hindiData = {"category": "popular", "language": "hindi", "has_more": true, "movies": [{"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2728-6ddc.jpg", "page_url": "https://einthusan.tv/movie/watch/2728/?lang=hindi", "title": "Dil Dhadakne Do"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2277-b511.jpg", "page_url": "https://einthusan.tv/movie/watch/2277/?lang=hindi", "title": "Goliyon Ki Raasleela Ram Leela"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/9032-007c.jpg", "page_url": "https://einthusan.tv/movie/watch/9032/?lang=hindi", "title": "Sultan"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2887-0159.jpg", "page_url": "https://einthusan.tv/movie/watch/2887/?lang=hindi", "title": "Bajirao Mastani"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2737-3b94.jpg", "page_url": "https://einthusan.tv/movie/watch/2737/?lang=hindi", "title": "Bajrangi Bhaijaan"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2626-0a35.jpg", "page_url": "https://einthusan.tv/movie/watch/2626/?lang=hindi", "title": "Dum Laga Ke Haisha"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2504-f4c1.jpg", "page_url": "https://einthusan.tv/movie/watch/2504/?lang=hindi", "title": "Happy New Year"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2738-6806.jpg", "page_url": "https://einthusan.tv/movie/watch/2738/?lang=hindi", "title": "Baahubali: The Beginning"}]};
+        const teluguData = {"category": "popular", "language": "telugu", "has_more": true, "movies": [{"img_url": "https://img.einthusan.io/etv/s3/moviecovers/1RPl-17d0.jpg", "page_url": "https://einthusan.tv/movie/watch/1RPl/?lang=telugu", "title": "Arjun Reddy"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2555-9162.jpg", "page_url": "https://einthusan.tv/movie/watch/2555/?lang=telugu", "title": "Manam"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2RmX-c102.jpg", "page_url": "https://einthusan.tv/movie/watch/2RmX/?lang=telugu", "title": "Geetha Govindham"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/2858-ec05.jpg", "page_url": "https://einthusan.tv/movie/watch/2858/?lang=telugu", "title": "Son Of Satyamurthy"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/9050-2d38.jpg", "page_url": "https://einthusan.tv/movie/watch/9050/?lang=telugu", "title": "A Aa"}, {"img_url": "https://img.einthusan.io/etv/s3/moviecovers/9020-6dee.jpg", "page_url": "https://einthusan.tv/movie/watch/9020/?lang=telugu", "title": "Fidaa"}]};
+        
+        // State management for pagination
+        let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
+        let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
+
+        // ===============================================
+        // UTILS
+        // ===============================================
+        function getRedirectUrl(einthusanUrl) {
+            // Extracts ID from: https://einthusan.tv/movie/watch/2223/?lang=tamil
+            // Returns: https://thirai.me/watch?film=2223
+            const match = einthusanUrl.match(/\/watch\/([a-zA-Z0-9]+)\//);
+            if(match && match[1]) {
+                return `https://thirai.me/watch?film=${match[1]}`;
+            }
+            return einthusanUrl;
+        }
+
+        function createCard(item) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `<img src="${item.img_url}" loading="lazy" alt="${item.title}">`;
+            div.onclick = () => window.location.href = getRedirectUrl(item.page_url);
+            return div;
+        }
+
+        function setLoading(elementId, isLoading, append = false) {
+            const el = document.getElementById(elementId);
+            if (isLoading) {
+                if (!append) el.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Loading...</p>';
+            } else if (!append) {
+                 el.innerHTML = '';
+            }
+        }
+
+        // ===============================================
+        // VIEW/NAVIGATION LOGIC
+        // ===============================================
+        let historyStack = ['home'];
+
+        function switchTab(tab) {
+            const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details');
+            const navItems = document.querySelectorAll('.nav-link, .nav-item');
+            const backBtn = document.getElementById('back-button');
+
+            // 1. Manage History
+            const currentTab = historyStack[historyStack.length - 1];
+            if (tab !== currentTab) {
+                if (tab === 'home' || tab === 'collections' || tab === 'search') {
+                    historyStack = [tab]; // Start new main path
+                } else {
+                    historyStack.push(tab); // Push secondary view (like actor-details)
+                }
+            }
+            
+            // 2. Manage Views and Back Button
+            views.forEach(e => e.classList.add('visually-hidden'));
+            navItems.forEach(e => e.classList.remove('active'));
+            
+            document.getElementById(`view-${tab}`).classList.remove('visually-hidden');
+            
+            if(document.getElementById(`btm-${tab}`)) document.getElementById(`btm-${tab}`).classList.add('active');
+
+            // Show back button for secondary views (anything that isn't a main bottom-nav tab)
+            if (historyStack.length > 1) {
+                backBtn.classList.remove('visually-hidden');
+            } else {
+                backBtn.classList.add('visually-hidden');
+            }
+
+            // 3. Init Collections on first load
+            if(tab === 'collections' && document.getElementById('grid-actors').children.length === 0) {
+                renderFeatured();
+                filterGrid('tamil', document.querySelector('.filter-tab[data-lang="tamil"]'));
+            }
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop(); // Remove current view
+                const prevTab = historyStack[historyStack.length - 1];
+                historyStack.pop(); // Will be pushed back by switchTab if needed
+                switchTab(prevTab);
+            } else if (historyStack.length === 1 && historyStack[0] !== 'home') {
+                 // Fallback: If on collections/search, go to home
+                switchTab('home');
+            }
+        }
+        
+        // ===============================================
+        // FEATURED SLIDESHOW LOGIC (Blurred Carousel)
+        // ===============================================
+        let currentFeaturedMode = 'actors';
+
+        function renderFeatured() {
+            const list = actorsData.castData.featured[currentFeaturedMode];
+            const slider = document.getElementById('featured-slider');
+            slider.innerHTML = '';
+
+            list.forEach(actor => {
+                const div = document.createElement('div');
+                div.className = 'featured-card';
+                div.innerHTML = `
+                    <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
+                    <div class="featured-overlay">
+                        <div class="featured-name">${actor.name}</div>
+                    </div>
+                `;
+                div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
+                slider.appendChild(div);
+            });
+
+            // Re-attach scroll listener to update active slide
+            slider.removeEventListener('scroll', handleFeaturedScroll);
+            slider.addEventListener('scroll', handleFeaturedScroll);
+            handleFeaturedScroll(); // Initial call to set active slide
+        }
+        
+        function handleFeaturedScroll() {
+            const slider = document.getElementById('featured-slider');
+            const cards = slider.querySelectorAll('.featured-card');
+            const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
+
+            cards.forEach(card => {
+                const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+                const distance = Math.abs(scrollCenter - cardCenter);
+
+                // Determine if the card is close enough to the center to be "active"
+                const tolerance = card.offsetWidth * 0.4; 
+
+                if (distance < tolerance) {
+                    card.classList.add('active-slide');
+                } else {
+                    card.classList.remove('active-slide');
+                }
+            });
+        }
+
+        function toggleFeatured() {
+            currentFeaturedMode = currentFeaturedMode === 'actors' ? 'actresses' : 'actors';
+            const bg = document.getElementById('feat-toggle-bg');
+            const btn1 = document.getElementById('btn-actors');
+            const btn2 = document.getElementById('btn-actresses');
+
+            if(currentFeaturedMode === 'actresses') {
+                bg.style.transform = 'translateX(100%)';
+                btn1.classList.remove('active');
+                btn2.classList.add('active');
+            } else {
+                bg.style.transform = 'translateX(0)';
+                btn1.classList.add('active');
+                btn2.classList.remove('active');
+            }
+            renderFeatured();
+        }
+
+        // ===============================================
+        // ACTOR DETAILS & PAGINATION
+        // ===============================================
+        async function openActorDetails(actorCode, lang, actorName) {
+            switchTab('actor-details');
+            
+            // Set initial state
+            actorState = { 
+                actorCode: actorCode, 
+                lang: lang, 
+                actorName: actorName, 
+                page: 1, 
+                hasMore: false 
+            };
+            document.getElementById('actor-details-title').textContent = `${actorName} Movies`;
+            
+            // Clear previous results and load page 1
+            document.getElementById('actor-movies-grid').innerHTML = '';
+            document.getElementById('load-more-actor').classList.add('visually-hidden');
+            await fetchActorPage(1, true);
+        }
+
+        async function fetchActorPage(pageNumber, clear = false) {
+            const { actorCode, lang } = actorState;
+            const grid = document.getElementById('actor-movies-grid');
+            const loadMoreBtn = document.getElementById('load-more-actor');
+
+            loadMoreBtn.disabled = true;
+
+            if(clear) {
+                setLoading('actor-movies-grid', true, false);
+            } else {
+                loadMoreBtn.textContent = 'Loading...';
+            }
+
+            try {
+                const url = `${API_BASE}/actors/${lang}/${actorCode}?page=${pageNumber}`;
+                const r = await fetch(url);
+                const d = await r.json();
+
+                if (clear) grid.innerHTML = '';
+                
+                if(d.movies && d.movies.length > 0) {
+                    d.movies.forEach(m => {
+                        grid.appendChild(createCard(m));
+                    });
+                    
+                    // Update state
+                    actorState.page = pageNumber;
+                    actorState.hasMore = d.has_more || false;
+                } else if (clear) {
+                    grid.innerHTML = '<p style="color:#777; width:100%; text-align:center;">No movies found.</p>';
+                }
+
+            } catch(e) {
+                if (clear) grid.innerHTML = '<p style="color:red; width:100%; text-align:center;">Error loading movies.</p>';
+            } finally {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'Load More';
+                if(actorState.hasMore) {
+                    loadMoreBtn.classList.remove('visually-hidden');
+                } else {
+                    loadMoreBtn.classList.add('visually-hidden');
+                }
+            }
+        }
+        
+        function loadNextActorPage() {
+            if (actorState.hasMore) {
+                fetchActorPage(actorState.page + 1, false);
+            }
+        }
+
+        // ===============================================
+        // ACTOR GRID (Collections Tab)
+        // ===============================================
+        async function filterGrid(lang, btn) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const grid = document.getElementById('grid-actors');
+            setLoading('grid-actors', true, false);
+
+            const actors = actorsData.castData.tmdb.actors.filter(a => a.language === lang);
+            
+            grid.innerHTML = '';
+            for(const actor of actors) {
+                // Simplified card, TMDB ID is used for poster fetch only
+                let img = 'https://via.placeholder.com/150';
+                try {
+                    const r = await fetch(`${TMDB_BASE}/person/${actor.tmdb_id}/images?api_key=${API_KEY}`);
+                    const d = await r.json();
+                    if(d.profiles && d.profiles.length) img = `https://image.tmdb.org/t/p/w185${d.profiles[0].file_path}`;
+                } catch(e){}
+
+                const div = document.createElement('div');
+                div.style.textAlign = 'center';
+                div.style.cursor = 'pointer';
+                div.innerHTML = `
+                    <div style="width:100px; height:100px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:2px solid #333;">
+                        <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                    </div>
+                    <div style="font-size:0.85rem; color:#ccc;">${actor.name}</div>
+                `;
+                // On click, use actor_code and language
+                div.onclick = () => openActorDetails(actor.actor_code, actor.language, actor.name);
+                grid.appendChild(div);
+            }
+        }
+
+        // ===============================================
+        // SEARCH LOGIC (Dedicated Button)
+        // ===============================================
+        async function doSearch(pageNumber, isNewSearch) {
+            const q = document.getElementById('search-input').value.trim();
+            const lang = document.getElementById('lang-select').value;
+            const grid = document.getElementById('search-results');
+            const loadMoreBtn = document.getElementById('load-more-search');
+
+            if (q.length < 3) {
+                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 3 characters to search.</p>';
+                loadMoreBtn.classList.add('visually-hidden');
+                return;
+            }
+
+            if (isNewSearch) {
+                // Start new search
+                searchState.query = q;
+                searchState.lang = lang;
+                searchState.page = 1;
+                searchState.hasMore = false;
+                grid.innerHTML = ''; // Clear old results
+                setLoading('search-results', true, false);
+                loadMoreBtn.classList.add('visually-hidden');
+            } else {
+                // Load more
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.textContent = 'Loading...';
+            }
+
+            try {
+                const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
+                const r = await fetch(url);
+                const d = await r.json();
+
+                if (isNewSearch) grid.innerHTML = ''; // Clear "Loading..."
+
+                if(d.movies && d.movies.length > 0) {
+                    d.movies.forEach(m => {
+                        grid.appendChild(createCard(m));
+                    });
+                    
+                    // Update state and pagination
+                    searchState.page = pageNumber;
+                    searchState.hasMore = d.has_more || false;
+                } else if (isNewSearch) {
+                    grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in ${lang}.</p>`;
+                }
+            } catch(e) {
+                if (isNewSearch) grid.innerHTML = '<p style="color:red; width:100%; text-align:center;">Search failed.</p>';
+            } finally {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'Load More';
+                if(searchState.hasMore) {
+                    loadMoreBtn.classList.remove('visually-hidden');
+                } else {
+                    loadMoreBtn.classList.add('visually-hidden');
+                }
+            }
+        }
+
+        // ===============================================
+        // HOME REFRESH/PAGINATION LOGIC (New Request)
+        // ===============================================
+        
+        async function refreshHomeContent(button) {
+            button.classList.add('loading');
+            button.disabled = true;
+            document.getElementById('home-refresh-container').classList.add('loading');
+
+            // Simulating network delay for next page content load
+            await new Promise(resolve => setTimeout(resolve, 1000)); 
+
+            // Append the existing movies list to simulate loading 'next page' content.
+            renderRows(true); 
+
+            button.classList.remove('loading');
+            button.disabled = false;
+            document.getElementById('home-refresh-container').classList.remove('loading');
+        }
+
+
+        // ===============================================
+        // BANNER & HOME ROWS LOGIC
+        // ===============================================
+        async function initBanner() {
+            const allMovies = [...tamilData.movies, ...hindiData.movies, ...malayalamData.movies, ...teluguData.movies];
+            const shuffled = allMovies.sort(() => 0.5 - Math.random());
+            tryBanner(shuffled, 0);
+        }
+
+        async function tryBanner(moviesList, index) {
+            if (index >= moviesList.length || index > 10) return; 
+
+            const movie = moviesList[index];
+            try {
+                const s = await fetch(`${TMDB_BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(movie.title)}`);
+                const sd = await s.json();
+                const tmdbItem = sd.results && sd.results[0];
+
+                if(tmdbItem && tmdbItem.backdrop_path) {
+                    const l = await fetch(`${TMDB_BASE}/movie/${tmdbItem.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
+                    const ld = await l.json();
+                    const logo = ld.logos.find(img => img.iso_639_1 === 'en') || ld.logos[0];
+
+                    if(logo) {
+                        renderBanner(tmdbItem, logo, movie.page_url);
+                    } else {
+                        // Skip if no logo/banner
+                        tryBanner(moviesList, index + 1);
+                    }
+                } else {
+                    tryBanner(moviesList, index + 1);
+                }
+            } catch(e) {
+                tryBanner(moviesList, index + 1);
+            }
+        }
+
+        function renderBanner(item, logo, originalUrl) {
+            const finalUrl = getRedirectUrl(originalUrl);
+            const bg = `https://image.tmdb.org/t/p/original${item.backdrop_path}`;
+            const logoUrl = `https://image.tmdb.org/t/p/w500${logo.file_path}`;
+
+            document.getElementById('hero-bg').style.backgroundImage = `url('${bg}')`;
+            document.getElementById('hero-logo-container').innerHTML = `<img src="${logoUrl}" class="hero-logo" alt="${item.title} Logo">`;
+            
+            const heroLink = document.getElementById('hero-link');
+            heroLink.href = finalUrl;
+            heroLink.classList.remove('visually-hidden');
+        }
+        
+        function renderRows(append = false) {
+            const rowData = [
+                ['row-tamil', tamilData.movies],
+                ['row-malayalam', malayalamData.movies],
+                ['row-hindi', hindiData.movies],
+                ['row-telugu', teluguData.movies]
+            ];
+            
+            rowData.forEach(([id, list]) => {
+                const el = document.getElementById(id);
+                // The refresh button simulates loading the next page (whilst still showing the previous one)
+                // We achieve this by appending the entire list again to show 'more content'
+                const contentToRender = append ? list : list;
+                contentToRender.forEach(item => el.appendChild(createCard(item)));
+            });
+        }
+
+        // ===============================================
+        // INIT & EVENT LISTENERS
+        // ===============================================
+        function init() {
+            renderRows(false); // Initial render
+            initBanner();
+        }
+
+        window.addEventListener('scroll', () => {
+            const h = document.getElementById('main-header');
+            if(window.scrollY > 50) h.classList.add('scrolled');
+            else h.classList.remove('scrolled');
+        });
+
+        init();
+    </script>
+</body>
+</html>
