@@ -542,5 +542,58 @@
           console.log('PWA was installed');
         });
     </script>
+
+<!-- MOBILE INSTALL FIXES (ADDED ONLY) -->
+<style>
+@media (max-width: 767px) {
+    #buttonContainer {
+        flex-direction: column;
+        width: 100%;
+    }
+    .btn-fixed-size {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+</style>
+
+<div id="iosTutorial" class="max-w-xl mx-auto mt-10 p-4 rounded-lg border text-center hidden">
+    <h2 class="text-xl font-bold mb-2">📲 Install on iPhone / iPad</h2>
+    <p class="mb-3 text-sm">
+        Safari doesn’t show an install button.<br>
+        Follow these steps to add Thirai to your Home Screen:
+    </p>
+    <ol class="text-left text-sm list-decimal list-inside mb-4">
+        <li>Open this site in <strong>Safari</strong></li>
+        <li>Tap the <strong>Share</strong> button</li>
+        <li>Select <strong>“Add to Home Screen”</strong></li>
+        <li>Tap <strong>Add</strong></li>
+    </ol>
+    <img src="https://www.tapsmart.com/wp-content/uploads/2015/05/create-new-app-icons-1024x704.png"
+         class="rounded-lg shadow mx-auto"
+         alt="Add to Home Screen tutorial">
+</div>
+
+<script>
+function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    if (!isMobileDevice()) return;
+    e.preventDefault();
+    deferredPrompt = e;
+    installAppButton.style.display = 'inline-flex';
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true;
+    if (isIOS && !isStandalone) {
+        document.getElementById('iosTutorial').classList.remove('hidden');
+    }
+});
+</script>
+
 </body>
 </html>
