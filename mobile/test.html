@@ -336,10 +336,18 @@
             background-color: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255,255,255,0.05); z-index: 200;
         }
-        .bottom-nav .nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #666; font-size: 0.7rem; font-weight: 500; width: 33%; height: 100%;
-        }
+.bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 0.7rem;
+    font-weight: 500;
+    /* width: 33%; */ /* REMOVE THIS */
+    flex: 1;        /* ADD THIS */
+    height: 100%;
+}
         .bottom-nav .nav-item.active { color: white; }
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
     </style>
@@ -450,11 +458,13 @@
         <div class="nav-item" onclick="switchTab('collections')" id="btm-collections">
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
-        <div class="nav-item" onclick="switchTab('search')" id="btm-search">
-            <i class="fas fa-search"></i> <span>Search</span>
-        
-        <div class="nav-item visually-hidden" id="btm-install">
-            <i class="fas fa-download"></i> <span>Install</span>
+<div class="nav-item" onclick="switchTab('search')" id="btm-search">
+    <i class="fas fa-search"></i> <span>Search</span>
+</div>
+
+<div class="nav-item visually-hidden" id="btm-install">
+    <i class="fas fa-download"></i> <span>Install</span>
+</div>
         </div>
 
     </div>
