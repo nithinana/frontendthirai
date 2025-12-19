@@ -519,7 +519,7 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installAppButton.style.display = 'inline-flex';
+            if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
         });
 
         installAppButton.addEventListener('click', (e) => {
@@ -530,7 +530,7 @@
                     if (choiceResult.outcome === 'accepted') {
                         console.log('User accepted the A2HS prompt');
                     } else {
-                        installAppButton.style.display = 'inline-flex';
+                        if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
                     }
                     deferredPrompt = null;
                 });
@@ -557,7 +557,10 @@
 }
 </style>
 
-<div id="iosTutorial" class="max-w-xl mx-auto mt-10 p-4 rounded-lg border text-center hidden">
+<div id="iosModalOverlay" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+    <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+    <div id="iosTutorial" class="relative max-w-xl mx-auto p-4 rounded-lg bg-white dark:bg-gray-800 text-center z-10">
+    <button id="closeIosModal" class="absolute top-2 right-2 text-xl">&times;</button>
     <h2 class="text-xl font-bold mb-2">📲 Install on iPhone / iPad</h2>
     <p class="mb-3 text-sm">
         Safari doesn’t show an install button.<br>
@@ -573,26 +576,42 @@
          class="rounded-lg shadow mx-auto"
          alt="Add to Home Screen tutorial">
 </div>
+</div>
 
 <script>
 function isMobileDevice() {
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
     if (!isMobileDevice()) return;
     e.preventDefault();
     deferredPrompt = e;
-    installAppButton.style.display = 'inline-flex';
+    if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     const isStandalone = window.navigator.standalone === true;
+    const overlay = document.getElementById('iosModalOverlay');
+    const closeBtn = document.getElementById('closeIosModal');
+
     if (isIOS && !isStandalone) {
-        document.getElementById('iosTutorial').classList.remove('hidden');
+        if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
+        installAppButton.addEventListener('click', () => {
+            overlay.classList.remove('hidden');
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            overlay.classList.add('hidden');
+        });
     }
 });
+
 </script>
 
 </body>
