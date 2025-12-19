@@ -34,8 +34,8 @@
         a { text-decoration: none; color: inherit; }
         .visually-hidden { display: none !important; }
 
-        /* ==============================================
-           2. HEADER (PC: Logo | Nav | Search)
+/* ==============================================
+           2. HEADER (Fixed Fading & Positioning)
            ============================================== */
         .header {
             position: fixed;
@@ -46,15 +46,17 @@
             display: flex;
             align-items: center;
             padding: 0 40px;
-            /* Default PC Header Background */
-            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-            z-index: 100;
-            transition: background 0.4s ease, background-color 0.4s ease;
+            z-index: 1000;
+            /* Smooth background and height transitions */
+            transition: background-color 0.4s ease, height 0.3s ease, backdrop-filter 0.4s ease;
+            /* Default PC Background: Soft gradient */
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
         }
         
+        /* Transition to solid black when scrolling */
         .header.scrolled {
-            background-color: #000000; /* Bold black on scroll */
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: #000000 !important;
+            height: 70px; 
         }
         
         .header-content {
@@ -64,9 +66,62 @@
             max-width: 1500px;
             margin: 0 auto;
             justify-content: flex-start;
-            gap: 25px; 
             position: relative;
-            z-index: 2;
+            z-index: 1001;
+            padding-top: 10px; /* Slight offset for PC visibility */
+            transition: padding 0.3s ease;
+        }
+
+        /* Default: Hide back button on PC */
+        .back-btn { display: none; }
+
+        /* --- MOBILE HEADER OVERRIDES --- */
+        @media screen and (max-width: 768px) {
+            .header {
+                padding: 0 20px;
+                height: 85px; /* Taller initial height for mobile status bars */
+                justify-content: center;
+                background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            }
+
+            .header.scrolled {
+                height: 65px !important;
+                padding-top: 0;
+            }
+
+            .header-content {
+                justify-content: center;
+                width: 100% !important;
+                padding-top: 15px; /* Brings logo/button down from the top edge */
+                height: 100%;
+            }
+
+            .header.scrolled .header-content {
+                padding-top: 0; /* Snaps content to center when scrolled */
+            }
+
+            .logo { 
+                height: 20px !important; /* Smaller logo for mobile elegance */
+                width: auto;
+                transition: height 0.3s ease;
+            }
+
+            .back-btn {
+                display: flex;
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.2rem;
+                color: #ffffff;
+                padding: 10px;
+                z-index: 100;
+            }
+            
+            /* Hide PC elements on mobile */
+            .nav-menu, .pc-search-container {
+                display: none;
+            }
         }
 
         .logo { 
@@ -78,7 +133,7 @@
         .nav-menu {
             display: flex;
             gap: 20px; 
-            margin: 0 25px 0 0; /* Add space for PC search bar */
+            margin: 0 25px 0 0;
         }
 
         .nav-link {
@@ -97,20 +152,19 @@
             font-weight: 700;
         }
 
-        /* --- PC SEARCH INPUT STYLES (Always visible on PC) --- */
+        /* PC Search Container */
         .pc-search-container {
             position: relative;
             width: 100%; 
             max-width: 300px;
-            margin-left: auto; /* Push to the right */
+            margin-left: auto;
         }
         
         .pc-search-container .search-icon {
             left: 15px;
         }
 
-
-        /* --- SEARCH BAR BASE STYLES (Used by both PC and Mobile Search View) --- */
+        /* --- SEARCH BAR BASE STYLES --- */
         .search-container {
             position: relative;
             width: 100%; 
@@ -126,34 +180,31 @@
             color: #aaa;
             font-size: 0.9rem;
             pointer-events: none;
-            z-index: 3; /* Above the input */
+            z-index: 3;
         }
 
         .search-input {
             width: 100%;
-            /* Cleaner and Curved Style */
             background-color: #1c1c1c; 
             border: none; 
-            border-radius: 30px; /* Fully curved */
-            padding: 10px 15px 10px 40px; /* Increased left padding for icon */
+            border-radius: 30px; 
+            padding: 10px 15px 10px 40px;
             color: white;
             font-family: inherit;
             font-size: 1.1rem; 
             height: 40px;
             transition: background-color 0.2s, box-shadow 0.2s;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle inner border */
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
 
         .search-input:focus {
             background-color: #242424;
-            box-shadow: 0 0 0 2px var(--text-main), inset 0 0 0 1px var(--text-main); /* White ring on focus */
+            box-shadow: 0 0 0 2px var(--text-main), inset 0 0 0 1px var(--text-main);
         }
         
         .search-input::placeholder {
             color: #777;
         }
-
-
         /* ==============================================
            3. HERO SECTION (PC Slideshow)
            ============================================== */
@@ -606,11 +657,15 @@
 </head>
 <body>
 
-    <header class="header" id="main-header">
-        <div class="header-content">
-            <a href="https://thirai.me/">
-                <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo">
-            </a>
+<header class="header" id="main-header">
+    <div class="header-content">
+        <a href="https://thirai.me/mobile/" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+
+        <a href="https://thirai.me/">
+            <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo">
+        </a>
             
             <nav class="nav-menu">
                 <div class="nav-link active" onclick="switchTab('movies')" id="tab-movies">Movies</div>
