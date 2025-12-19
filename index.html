@@ -333,6 +333,26 @@
             border-top: 1px solid #495057;
         }
     </style>
+
+<style>
+#iosModalOverlay {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#iosModalOverlay.show {
+    opacity: 1;
+}
+#iosTutorial {
+    transform: scale(0.95);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+#iosModalOverlay.show #iosTutorial {
+    transform: scale(1);
+    opacity: 1;
+}
+</style>
+
     <link
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
             rel="stylesheet"
@@ -580,8 +600,9 @@
 
 <script>
 function isMobileDevice() {
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const ua = navigator.userAgent;
+    const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    return /Android|iPhone|iPad|iPod/i.test(ua) || isIpadOS;
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -601,13 +622,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isIOS && !isStandalone) {
         if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
         installAppButton.addEventListener('click', () => {
-            overlay.classList.remove('hidden');
+            overlay.classList.remove('hidden'); requestAnimationFrame(()=>overlay.classList.add('show'));
         });
     }
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
-            overlay.classList.add('hidden');
+            overlay.classList.remove('show'); setTimeout(()=>overlay.classList.add('hidden'), 300);
         });
     }
 });
