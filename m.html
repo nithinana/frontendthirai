@@ -69,25 +69,40 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
         
-        .header-content {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            justify-content: space-between;
-        }
+/* Updated Header Layout for better mobile scaling */
+.header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px; /* Adds space between the back button and logo area */
+}
 
-        .logo { height: 24px; cursor: pointer; display: block; margin: 0 auto; }
-        .logo-container { flex-grow: 1; text-align: center; } /* Center the logo */
+.logo-container {
+    flex: 1; /* Allows the container to grow/shrink based on screen width */
+    display: flex;
+    justify-content: center;
+}
 
-        .back-button {
-            position: absolute;
-            left: 20px;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 101; /* Ensure it's above everything */
-            padding: 5px;
-        }
+.logo {
+    height: 22px; /* Slightly smaller for mobile */
+    cursor: pointer;
+    display: block;
+}
+
+.back-button-wrapper, .header-right-placeholder {
+    width: 32px; /* Fixed width for both sides to keep logo perfectly centered */
+    display: flex;
+    justify-content: center;
+}
+
+/* Updated Back Button to not overlap logo */
+.back-button {
+    position: static; /* Changed from absolute to flow naturally in flexbox */
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+}
 
         /* ==============================================
            3. HERO SECTION (Starts from the very top)
@@ -244,23 +259,53 @@
         .filter-tab.active { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
 
         /* Search Box */
-        .search-area { padding: 0 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .search-controls { position: relative; width: 100%; display: flex; gap: 10px; }
+/* Updated Search Controls to prevent button hiding */
+.search-area { 
+    padding: 0 15px; /* Slightly tighter padding */
+    margin-bottom: 20px; 
+}
 
-        .search-input {
-            flex: 1; background: #1c1c1c; border: none; border-radius: 8px;
-            padding: 12px 15px 12px 15px; color: white; font-size: 1rem;
-        }
+.search-controls { 
+    position: relative; 
+    width: 100%; 
+    display: flex; 
+    gap: 8px; /* Tighter gap for small screens */
+    align-items: center;
+}
+
+.search-input {
+    flex: 2; /* Takes up most space */
+    min-width: 0; /* Prevents input from forcing other items out */
+    background: #1c1c1c; 
+    border: none; 
+    border-radius: 8px;
+    padding: 12px; 
+    color: white; 
+    font-size: 0.9rem;
+}
+
+.lang-select {
+    flex: 1;
+    max-width: 90px; /* Limits language box width */
+    background: #1c1c1c; 
+    border: none; 
+    color: white; 
+    padding: 10px 5px;
+    border-radius: 8px; 
+    font-size: 0.85rem; 
+    text-align: center;
+}
+
+.btn-search-trigger {
+    flex-shrink: 0; /* IMPORTANT: Prevents the button from shrinking/hiding */
+    background: var(--accent); 
+    color: white; 
+    border: none; 
+    border-radius: 8px;
+    padding: 12px 15px; 
+    font-size: 1rem; 
+}
         
-        .lang-select {
-            background: #1c1c1c; border: none; color: white; padding: 0 15px;
-            border-radius: 8px; font-size: 0.9rem; outline: none; -webkit-appearance: none;
-        }
-        
-        .btn-search-trigger {
-            background: var(--accent); color: white; border: none; border-radius: 8px;
-            padding: 12px 15px; font-size: 1rem; cursor: pointer;
-        }
 
         /* Load More Button (Standard style for Search/Actor Details) */
         .load-more-btn {
@@ -290,15 +335,19 @@
 </head>
 <body>
 
-    <header class="header" id="main-header">
-        <i class="fas fa-arrow-left back-button visually-hidden" id="back-button" onclick="goBack()"></i>
-        <div class="header-content">
-            <div class="logo-container">
-                <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
-            </div>
-            <div style="width: 24px;"></div>
+<header class="header" id="main-header">
+    <div class="header-content">
+        <div class="back-button-wrapper">
+            <i class="fas fa-arrow-left back-button visually-hidden" id="back-button" onclick="goBack()"></i>
         </div>
-    </header>
+
+        <div class="logo-container">
+            <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
+        </div>
+
+        <div class="header-right-placeholder"></div>
+    </div>
+</header>
 
     <div id="view-home">
         <div class="hero">
