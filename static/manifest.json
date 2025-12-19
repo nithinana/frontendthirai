@@ -2,7 +2,7 @@
   "name": "Thirai",
   "short_name": "Thirai",
   "description": "A web application.",
-  "start_url": "/",
+  "start_url": "/mobile/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
@@ -49,3 +49,4 @@
     }
   ]
 }
+
