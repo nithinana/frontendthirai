@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thirai - Video Player</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        /* Base Styles for the entire page */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease; /* Added transition */
+        }
+
+        /* --- Global Styles: PERMANENT DARK MODE --- */
+
+        body {
+            background-color: #121212; /* Dark mode background */
+            color: #e0e0e0; /* Dark mode text color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* --- BACK BUTTON STYLES (MATCHED DARK MODE) --- */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Stronger shadow for contrast */
+            
+            /* Dark grey, semi-transparent look */
+            background-color: rgba(33, 37, 41, 0.7); /* Slightly darker/more opaque than before */
+            color: #ffffff; /* White icon/text */
+            opacity: 1; 
+            transition: opacity 0.5s ease-in-out, background-color 0.2s ease, box-shadow 0.5s ease; 
+        }
+
+        .back-button:hover {
+            /* Hover feedback with darker color */
+            background-color: rgba(51, 51, 51, 0.9); /* #333 with high opacity */
+            opacity: 1; 
+        }
+        
+        .back-button.afk-fade {
+            opacity: 0; 
+            pointer-events: none; 
+        }
+        
+        /* --- UNLOCK SCREEN STYLES (UPDATED FOR DARK MODE) --- */
+
+        #unlock-screen {
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            flex-direction: column;
+            position: absolute; 
+            top: 0; left: 0;
+            background-color: #121212; /* Match body background */
+            z-index: 999; 
+        }
+        
+        .container {
+            text-align: center;
+            background-color: #111; /* Match join.html container background */
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Match join.html shadow */
+            max-width: 90%;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease; /* Added transition */
+        }
+        
+        #logo {
+            max-width: 175px;
+            margin-bottom: 12px;
+        }
+
+        /* Ensure heading is visible */
+        #unlock-screen h2 {
+            color: #ffffff;
+        }
+
+        .code-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .code-input {
+            width: 40px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #fff; /* White text */
+            background-color: #222; /* Dark input background */
+            border: 2px solid #333; /* Darker border */
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s ease, background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        .code-input:focus {
+            border-color: #0d6efd;
+        }
+
+        /* --- Input Autofill Styling for Dark Mode --- */
+        input::-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #222 inset !important; /* Match input background */
+            -webkit-text-fill-color: #fff !important; /* Match input text color */
+        }
+        
+        /* Join Button styles remain for good contrast */
+        .join-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-bottom: 25px;
+        }
+        
+        .join-button:hover {
+            background-color: #0b5ed7; /* Darken slightly on hover */
+        }
+
+        .join-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        #error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            display: none;
+            margin-top: 25px;
+            text-align: center;
+        }
+        
+        /* --- PLAYER SCREEN STYLES (Unchanged) --- */
+
+        #player-screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            text-align: center; 
+        }
+        
+        #movie-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        #player-error {
+            color: #dc3545; /* Error message color remains bright red for visibility */
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    
+    <a href="javascript:history.back()" class="back-button" aria-label="Go back">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    
+    <div id="unlock-screen">
+        <div class="container">
+            <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo"> 
+            <h2>Enter the unlock PIN</h2>
+            <div class="code-input-container" id="codeInputContainer">
+                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
+                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
+                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
+                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
+            </div>
+            <button class="join-button" id="unlockButton" disabled>Unlock Access</button>
+            <div id="error-message"></div>
+        </div>
+    </div>
+
+    <div id="player-screen">
+        <p>Loading content...</p>
+    </div>
+
+    <script>
+        (function() { 
+            // --- CONSTANTS ---
+            const CORRECT_PIN = "1451"; 
+            const MAX_ATTEMPTS = 5;
+            const LOCKOUT_DURATION_MS = 15 * 60 * 1000; 
+            const AFK_TIMEOUT_MS = 3000; // 3 seconds for inactivity fade
+            const TV_PREFIX = 'tv=';
+            const BASE_MOVIE_EMBED_URL = "https://www.vidking.net/embed/movie/";
+            const BASE_TV_EMBED_URL = "https://www.vidking.net/embed/tv/";
+
+            // --- DOM ELEMENTS ---
+            const unlockScreen = document.getElementById('unlock-screen');
+            const playerScreen = document.getElementById('player-screen');
+            const inputs = document.querySelectorAll('.code-input');
+            const unlockButton = document.getElementById('unlockButton');
+            const errorMessage = document.getElementById('error-message');
+            const backButton = document.querySelector('.back-button'); 
+            const logo = document.getElementById('logo'); // Added reference for the logo
+
+            let lockoutInterval = null;
+            let afkTimer; 
+            
+            // =================================================================
+            // === 1. USER ACTIVITY HANDLER (Unchanged) ========================
+            // =================================================================
+
+            function hideBackButton() {
+                if (playerScreen.style.display !== 'none') {
+                     backButton.classList.add('afk-fade');
+                }
+            }
+
+            function showBackButton() {
+                backButton.classList.remove('afk-fade');
+                clearTimeout(afkTimer);
+                if (playerScreen.style.display !== 'none') {
+                    afkTimer = setTimeout(hideBackButton, AFK_TIMEOUT_MS);
+                }
+            }
+            
+            function handleUserActivity() {
+                showBackButton();
+            }
+
+            // =================================================================
+            // === 2. PLAYER EMBED LOGIC (Unchanged) ===========================
+            // =================================================================
+
+            function displayPlayerError(message) {
+                playerScreen.innerHTML = `<h1>Error: Missing or Invalid Data</h1><p id="player-error">${message}</p>`;
+                console.error(message);
+            }
+
+            function loadEmbed() {
+                const queryString = window.location.search.substring(1);
+                let fullEmbedUrl = null;
+                let contentType = null;
+
+                if (!queryString) {
+                    displayPlayerError('No ID provided in the URL. Please use: `?12345` for a movie or `?tv=12345/1/5` for a TV show.');
+                    return;
+                }
+
+                if (queryString.startsWith(TV_PREFIX)) {
+                    contentType = 'TV Show';
+                    const tvDetails = queryString.substring(TV_PREFIX.length); 
+                    const parts = tvDetails.split('/'); 
+
+                    if (parts.length === 3 && parts.every(p => p)) {
+                        const [id, season, episode] = parts;
+                        fullEmbedUrl = `${BASE_TV_EMBED_URL}${id}/${season}/${episode}`;
+                    } else {
+                        displayPlayerError('Invalid TV show format. Please use: `?tv=**ID/SEASON/EPISODE**`. Example: `?tv=12345/1/5`');
+                    }
+                } else {
+                    contentType = 'Movie';
+                    const movieId = queryString; 
+                    
+                    if (movieId) {
+                        fullEmbedUrl = `${BASE_MOVIE_EMBED_URL}${movieId}`;
+                    } else {
+                        displayPlayerError('Movie ID is missing. Please use: `?**12345**`');
+                    }
+                }
+
+                if (fullEmbedUrl) {
+                    const iframe = document.createElement('iframe');
+                    iframe.setAttribute('id', 'movie-iframe');
+                    iframe.setAttribute('src', fullEmbedUrl);
+                    iframe.setAttribute('allowfullscreen', 'true');
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+                    
+                    playerScreen.innerHTML = '';
+                    playerScreen.appendChild(iframe);
+                    console.log(`Successfully embedded ${contentType} from URL: ${fullEmbedUrl}`);
+                }
+            }
+
+            // =================================================================
+            // === 3. UNLOCK & DISPLAY MANAGER (Modified for Logo Update) ======
+            // =================================================================
+            
+            function updateLogo(isUnlockScreen) {
+                // If on the unlock screen (which is now permanently dark theme), show the white logo.
+                // The player screen covers the whole area, so the logo won't be visible there anyway, 
+                // but we set it just in case.
+                logo.src = isUnlockScreen ? "./static/thiraiwhite.png" : "./static/thiraiwhite.png";
+            }
+
+            function showPlayer() {
+                unlockScreen.style.display = 'none';
+                playerScreen.style.display = 'flex';
+                loadEmbed();
+                
+                showBackButton(); 
+                updateLogo(false); // Player screen
+            }
+
+            function showUnlock() {
+                playerScreen.style.display = 'none';
+                unlockScreen.style.display = 'flex';
+                checkLockoutStatus();
+                backButton.classList.remove('afk-fade');
+                clearTimeout(afkTimer);
+                updateLogo(true); // Unlock screen
+            }
+            
+            // ... (checkInputs, isLockedOut, checkLockoutStatus, and event listeners remain the same)
+            
+            function checkInputs() {
+                let allFilled = true;
+                inputs.forEach(input => {
+                    if (input.value.length === 0 || !/^\d$/.test(input.value)) {
+                        allFilled = false;
+                    }
+                });
+                const isLocked = isLockedOut();
+                unlockButton.disabled = !allFilled || isLocked;
+                
+                if (allFilled && !isLocked) {
+                    errorMessage.style.display = 'none';
+                }
+            }
+            
+            function isLockedOut() {
+                const lockoutTimestamp = localStorage.getItem('lockoutTimestamp');
+                if (lockoutTimestamp) {
+                    const now = new Date().getTime();
+                    const lockoutEnd = parseInt(lockoutTimestamp) + LOCKOUT_DURATION_MS;
+                    
+                    if (now < lockoutEnd) {
+                        const remainingTimeMs = lockoutEnd - now;
+                        const totalSeconds = Math.ceil(remainingTimeMs / 1000);
+                        const remainingMinutes = Math.floor(totalSeconds / 60);
+                        const remainingSeconds = totalSeconds % 60;
+
+                        errorMessage.textContent = `Too many failed attempts. Try again in ${remainingMinutes}:${remainingSeconds.toString().padStart(2, '0')}.`;
+                        errorMessage.style.display = 'block';
+                        return true;
+                    } else {
+                        localStorage.removeItem('lockoutTimestamp');
+                        localStorage.setItem('attemptCount', '0');
+                        clearInterval(lockoutInterval);
+                        lockoutInterval = null;
+                        errorMessage.style.display = 'none';
+                        return false;
+                    }
+                }
+                return false;
+            }
+            
+            function checkLockoutStatus() {
+                if (isLockedOut()) {
+                    unlockButton.disabled = true;
+                    if (!lockoutInterval) {
+                        lockoutInterval = setInterval(checkLockoutStatus, 1000); 
+                    }
+                } else {
+                    if (lockoutInterval) {
+                        clearInterval(lockoutInterval);
+                        lockoutInterval = null;
+                    }
+                    checkInputs(); 
+                }
+            }
+
+            // --- Event Listeners for Unlock Form (Unchanged) ---
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener('keyup', (e) => {
+                    if (e.key === 'Backspace' && input.value === '') {
+                        if (index > 0) inputs[index - 1].focus();
+                    }
+                    checkInputs();
+                });
+                
+                input.addEventListener('input', () => {
+                    let value = input.value.replace(/[^0-9]/g, '').charAt(0);
+                    input.value = value;
+                    
+                    if (input.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else if (index === inputs.length - 1) {
+                         unlockButton.focus(); 
+                    }
+                    checkInputs();
+                });
+                
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pasteCode = (e.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '').slice(0, 4);
+
+                    for (let i = 0; i < pasteCode.length; i++) {
+                        if (inputs[i]) inputs[i].value = pasteCode[i];
+                    }
+
+                    const lastFilledIndex = pasteCode.length > 0 ? pasteCode.length - 1 : 0;
+                    if (inputs[lastFilledIndex + 1]) {
+                        inputs[lastFilledIndex + 1].focus();
+                    } else if (inputs[lastFilledIndex]) {
+                        inputs[lastFilledIndex].blur();
+                    }
+                    checkInputs();
+                });
+            });
+
+            unlockButton.addEventListener('click', () => {
+                if (isLockedOut()) return;
+                
+                let enteredPin = Array.from(inputs).map(input => input.value).join('');
+
+                if (enteredPin === CORRECT_PIN) {
+                    // --- SUCCESS ---
+                    localStorage.setItem('isUnlocked', 'true'); 
+                    localStorage.setItem('premium_isUnlocked', 'true'); 
+                    localStorage.setItem('attemptCount', '0');
+                    localStorage.removeItem('lockoutTimestamp');
+                    
+                    showPlayer();
+                } else {
+                    // --- FAILURE ---
+                    let currentAttempts = parseInt(localStorage.getItem('attemptCount') || '0');
+                    currentAttempts++;
+                    localStorage.setItem('attemptCount', currentAttempts.toString());
+                    
+                    if (currentAttempts >= MAX_ATTEMPTS) {
+                        localStorage.setItem('lockoutTimestamp', new Date().getTime().toString());
+                        errorMessage.textContent = `Maximum attempts reached (${MAX_ATTEMPTS}). Access locked.`;
+                        checkLockoutStatus(); 
+                    } else {
+                        const remaining = MAX_ATTEMPTS - currentAttempts;
+                        errorMessage.textContent = `Incorrect PIN. ${remaining} attempts remaining.`;
+                        errorMessage.style.display = 'block';
+                    }
+                    
+                    inputs.forEach(input => input.value = '');
+                    inputs[0].focus();
+                    unlockButton.disabled = true;
+                }
+            });
+            
+            // =================================================================
+            // === 4. INITIALIZATION & AFK SETUP ===============================
+            // =================================================================
+
+            document.addEventListener('DOMContentLoaded', () => {
+                // The unlock check logic remains, ensuring the PIN must be entered 
+                // unless previously unlocked in this session.
+                const isUnlocked = localStorage.getItem('isUnlocked');
+                
+                if (isUnlocked === 'true') {
+                    showPlayer();
+                } else {
+                    showUnlock();
+                }
+
+                // Setup the global event listeners for AFK check
+                document.addEventListener('mousemove', handleUserActivity);
+                document.addEventListener('keypress', handleUserActivity);
+                document.addEventListener('click', handleUserActivity);
+            });
+        })();
+    </script>
+</body>
+</html>
