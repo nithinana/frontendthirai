@@ -749,7 +749,7 @@
             div.className = 'card';
             div.innerHTML = `<img src="${IMG_POSTER}${item.poster_path}" loading="lazy" alt="${item.title || item.name}">`;
             div.addEventListener('click', () => {
-                const url = mediaType === 'movie' ? `${APP_URL}player.html?${item.id}` : `${APP_URL}show.html?${item.id}`;
+                const url = mediaType === 'movie' ? `${APP_URL}mobile/player.html?${item.id}` : `${APP_URL}mobile/show.html?${item.id}`;
                 window.location.href = url;
             });
             return div;
@@ -822,7 +822,7 @@
             const contentBox = document.getElementById('pc-hero-content-box');
             contentBox.style.opacity = 0;
             const logoPath = await getMovieLogo(item.id, type);
-            const targetUrl = type === 'movie' ? `${APP_URL}player.html?${item.id}` : `${APP_URL}show.html?${item.id}`;
+            const targetUrl = type === 'movie' ? `${APP_URL}mobile/player.html?${item.id}` : `${APP_URL}mobile/show.html?${item.id}`;
             
             setTimeout(() => {
                 const titleContainer = document.getElementById('hero-title-container');
@@ -852,7 +852,7 @@
             slideContainer.style.opacity = 0;
 
             const logoPath = await getMovieLogo(item.id, type);
-            const targetUrl = type === 'movie' ? `${APP_URL}player.html?${item.id}` : `${APP_URL}show.html?${item.id}`;
+            const targetUrl = type === 'movie' ? `${APP_URL}mobile/player.html?${item.id}` : `${APP_URL}mobile/show.html?${item.id}`;
             const imagePath = item.backdrop_path || item.poster_path;
 
             setTimeout(() => {
@@ -1015,3 +1015,4 @@
     </script>
 </body>
 </html>
+
