@@ -2182,7 +2182,21 @@ const teluguData = {
                  // Fallback: If on collections/search, go to home
                 switchTab('home');
             }
-        }
+
+            // 3. Init Collections on first load
+            if(tab === 'collections' && document.getElementById('grid-actors').children.length === 0) {
+                renderFeatured();
+                filterGrid('tamil', document.querySelector('.filter-tab[data-lang="tamil"]'));
+            }
+
+            // --- ADD THIS PART HERE ---
+            if (tab === 'search') {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        } // This is the end of switchTab
         
         // ===============================================
         // FEATURED SLIDESHOW LOGIC (Blurred Carousel)
