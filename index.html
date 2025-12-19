@@ -527,113 +527,96 @@
             }
         });
 
-        // --- PWA Installation Logic ---
+<script>
+        // --- CONSOLIDATED PWA LOGIC ---
+        
+        // 1. Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./static/service-worker.js')
-                    .then(registration => console.log('Service Worker registered.'))
-                    .catch(error => console.error('Service Worker registration failed:', error));
+                navigator.worker.register('./static/service-worker.js')
+                    .then(() => console.log('Service Worker registered.'))
+                    .catch(err => console.error('SW failed:', err));
             });
         }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
-        });
+        // 2. Detection Helpers
+        function isMobileDevice() {
+            const ua = navigator.userAgent;
+            const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            return /Android|iPhone|iPad|iPod/i.test(ua) || isIpadOS;
+        }
 
-        installAppButton.addEventListener('click', (e) => {
-            if (deferredPrompt) {
-                installAppButton.style.display = 'none';
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the A2HS prompt');
-                    } else {
-                        if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
-                    }
-                    deferredPrompt = null;
+        // 3. Handle Installation
+        document.addEventListener('DOMContentLoaded', () => {
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isStandalone = window.navigator.standalone === true;
+            const overlay = document.getElementById('iosModalOverlay');
+            const closeBtn = document.getElementById('closeIosModal');
+
+            // Listen for the browser's install prompt (Android & Desktop)
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Show the button for Desktop and Android
+                installAppButton.style.display = 'inline-flex';
+            });
+
+            // Handle Button Click
+            installAppButton.addEventListener('click', () => {
+                if (isIOS && !isStandalone) {
+                    // Show iOS Tutorial
+                    overlay.classList.remove('hidden'); 
+                    requestAnimationFrame(() => overlay.classList.add('show'));
+                } else if (deferredPrompt) {
+                    // Trigger Native Prompt (Android/Desktop)
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choice) => {
+                        if (choice.outcome === 'accepted') installAppButton.style.display = 'none';
+                        deferredPrompt = null;
+                    });
+                }
+            });
+
+            // Close iOS Modal
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    overlay.classList.remove('show'); 
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
                 });
+            }
+
+            // Fallback: Show button on iOS Safari specifically
+            if (isIOS && !isStandalone) {
+                installAppButton.style.display = 'inline-flex';
             }
         });
 
         window.addEventListener('appinstalled', () => {
-          installAppButton.style.display = 'none';
-          console.log('PWA was installed');
+            installAppButton.style.display = 'none';
         });
     </script>
 
-<!-- MOBILE INSTALL FIXES (ADDED ONLY) -->
-<style>
-@media (max-width: 767px) {
-    #buttonContainer {
-        flex-direction: column;
-        width: 100%;
+    <style>
+    @media (max-width: 767px) {
+        #buttonContainer { flex-direction: column; width: 100%; }
+        .btn-fixed-size { width: 100%; max-width: 320px; }
     }
-    .btn-fixed-size {
-        width: 100%;
-        max-width: 320px;
-    }
-}
-</style>
+    </style>
 
-<div id="iosModalOverlay" class="fixed inset-0 z-50 hidden flex items-center justify-center">
-    <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-    <div id="iosTutorial" class="relative max-w-xl mx-auto p-4 rounded-lg bg-white dark:bg-gray-800 text-center z-10">
-    <button id="closeIosModal" class="absolute top-2 right-2 text-xl">&times;</button>
-    <h2 class="text-xl font-bold mb-2">📲 Install on iPhone / iPad</h2>
-    <p class="mb-3 text-sm">
-        Safari doesn’t show an install button.<br>
-        Follow these steps to add Thirai to your Home Screen:
-    </p>
-    <ol class="text-left text-sm list-decimal list-inside mb-4">
-        <li>Open this site in <strong>Safari</strong></li>
-        <li>Tap the <strong>Share</strong> button</li>
-        <li>Select <strong>“Add to Home Screen”</strong></li>
-        <li>Tap <strong>Add</strong></li>
-    </ol>
-    <img src="https://www.tapsmart.com/wp-content/uploads/2015/05/create-new-app-icons-1024x704.png"
-         class="rounded-lg shadow mx-auto"
-         alt="Add to Home Screen tutorial">
-</div>
-</div>
-
-<script>
-function isMobileDevice() {
-    const ua = navigator.userAgent;
-    const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    return /Android|iPhone|iPad|iPod/i.test(ua) || isIpadOS;
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    if (!isMobileDevice()) return;
-    e.preventDefault();
-    deferredPrompt = e;
-    if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone === true;
-    const overlay = document.getElementById('iosModalOverlay');
-    const closeBtn = document.getElementById('closeIosModal');
-
-    if (isIOS && !isStandalone) {
-        if (isMobileDevice()) installAppButton.style.display = 'inline-flex';
-        installAppButton.addEventListener('click', () => {
-            overlay.classList.remove('hidden'); requestAnimationFrame(()=>overlay.classList.add('show'));
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            overlay.classList.remove('show'); setTimeout(()=>overlay.classList.add('hidden'), 300);
-        });
-    }
-});
-
-</script>
-
+    <div id="iosModalOverlay" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+        <div id="iosTutorial" class="relative max-w-xl mx-auto p-4 rounded-lg bg-white dark:bg-gray-800 text-center z-10">
+            <button id="closeIosModal" class="absolute top-2 right-2 text-xl">&times;</button>
+            <h2 class="text-xl font-bold mb-2">📲 Install on iPhone / iPad</h2>
+            <p class="mb-3 text-sm">Follow these steps to add Thirai to your Home Screen:</p>
+            <ol class="text-left text-sm list-decimal list-inside mb-4">
+                <li>Open this site in <strong>Safari</strong></li>
+                <li>Tap the <strong>Share</strong> button</li>
+                <li>Select <strong>“Add to Home Screen”</strong></li>
+                <li>Tap <strong>Add</strong></li>
+            </ol>
+            <img src="https://www.tapsmart.com/wp-content/uploads/2015/05/create-new-app-icons-1024x704.png" class="rounded-lg shadow mx-auto" alt="Tutorial">
+        </div>
+    </div>
 </body>
 </html>
