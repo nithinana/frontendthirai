@@ -662,7 +662,7 @@
 
         function renderActionButton(showId, firstSeasonNumber) {
             const isUserUnlocked = isUnlocked();
-            const playerUrl = `/player.html?tv=${showId}/${firstSeasonNumber}/1`; // Assuming first episode is Episode 1
+            const playerUrl = `/mobile/player.html?tv=${showId}/${firstSeasonNumber}/1`; // Assuming first episode is Episode 1
             
             let buttonContent;
             let buttonClass;
@@ -687,7 +687,7 @@
         // --- EPISODE RENDERING (Unchanged) ---
         function renderEpisodes(seasonData, showId) {
             const episodesHtml = seasonData.episodes.map(ep => {
-                const playerUrl = `/player.html?tv=${showId}/${ep.season_number}/${ep.episode_number}`;
+                const playerUrl = `/mobile/player.html?tv=${showId}/${ep.season_number}/${ep.episode_number}`;
                 const episodeThumbnailUrl = ep.still_path ? `${TMDB_IMG_BASE_URL}${ep.still_path}` : 'https://via.placeholder.com/150x85?text=No+Image';
 
                 return `
