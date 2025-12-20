@@ -2282,7 +2282,7 @@ const teluguData = {
             renderFeatured();
         }
 
-        // ===============================================
+// ===============================================
         // ACTOR DETAILS & PAGINATION
         // ===============================================
         async function openActorDetails(actorCode, lang, actorName) {
@@ -2318,9 +2318,19 @@ const teluguData = {
             }
 
             try {
-                const url = `${API_BASE}/actors/${lang}/${actorCode}?page=${pageNumber}`;
-                const r = await fetch(url);
-                const d = await r.json();
+                let d;
+                // ✅ Only for Vijay: Load all at once from local JSON
+                if (actorCode === '3TKYioHCAF') {
+                    const r = await fetch('/mobile/vijay.json');
+                    d = await r.json();
+                    d.has_more = false; // Disable pagination as all movies are loaded
+                } 
+                // ✅ All other actors continue to use the normal API
+                else {
+                    const url = `${API_BASE}/actors/${lang}/${actorCode}?page=${pageNumber}`;
+                    const r = await fetch(url);
+                    d = await r.json();
+                }
 
                 if (clear) grid.innerHTML = '';
                 
