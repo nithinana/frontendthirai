@@ -2319,12 +2319,15 @@ const teluguData = {
 
             try {
                 let d;
-                // ✅ Only for Vijay: Load all at once from local JSON
-                if (actorCode === '3TKYioHCAF') {
-                    const r = await fetch('/mobile/vijay.json');
-                    d = await r.json();
-                    d.has_more = false; // Disable pagination as all movies are loaded
-                } 
+if (actorCode === '3TKYioHCAF') {
+    const r = await fetch('/mobile/vijay.json');
+    d = await r.json();
+    d.has_more = false; 
+} else if (actorCode === '5vCobOqDDx') {
+    const r = await fetch('/mobile/Dhanush.json');
+    d = await r.json();
+    d.has_more = false;
+}
                 // ✅ All other actors continue to use the normal API
                 else {
                     const url = `${API_BASE}/actors/${lang}/${actorCode}?page=${pageNumber}`;
