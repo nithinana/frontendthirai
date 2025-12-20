@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thirai Mobile</title>
+    <title>Thirai</title>
     <link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#080808">
 
@@ -2532,9 +2532,9 @@ async function init() {
     try {
         const response = await fetch('https://thirai-watch.onrender.com');
         const status = await response.text();
-        console.log("Wakeup Status:", status.trim()); // Should log "ok"
+        console.log("api reading:", status.trim()); // Should log "ok"
     } catch (error) {
-        console.error("Wakeup failed:", error);
+        console.error("api reading:", error);
     }
 }
 
