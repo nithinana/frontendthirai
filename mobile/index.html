@@ -2521,13 +2521,27 @@ const teluguData = {
             });
         }
 
-        // ===============================================
-        // INIT & EVENT LISTENERS
-        // ===============================================
-        function init() {
-            renderRows(false); // Initial render
-            initBanner();
+// ===============================================
+// INIT & EVENT LISTENERS
+// ===============================================
+async function init() {
+    // API Wake-up Call
+    try {
+        const wakeResponse = await fetch('https://thirai-watch.onrender.com/');
+        const status = await wakeResponse.text();
+        
+        if (status.trim() === 'ok') {
+            console.log("Movie service is ready.");
         }
+    } catch (err) {
+        // If it's still spinning up, we just log a quiet message
+        console.log("Wake-up call sent to movie service...");
+    }
+
+    renderRows(false); // Initial render
+    initBanner();      //
+}
+
 
         window.addEventListener('scroll', () => {
             const h = document.getElementById('main-header');
