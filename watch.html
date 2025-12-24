@@ -10,6 +10,28 @@
 
   gtag('config', 'G-HKV7GQ766F');
 </script>
+<script>
+  window.onload = function() {
+    // 1. Get the code from your URL (e.g., thirai.me/watch.html?ABC)
+    // This removes the '?' and gets 'ABC'
+    const movieCode = window.location.search.substring(1);
+
+    if (movieCode) {
+      // 2. YOUR SPECIFIC FORM DETAILS
+      const formID = "131wADoSOLENK5Ej-Ak6EdSvKf85vt7DlOskJaeiPBwI";
+      
+      // IMPORTANT: Replace 'entry.00000000' with the actual ID from your pre-filled link
+      const entryID = "entry.00000000"; 
+
+      const trackingURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${movieCode}&submit=Submit`;
+
+      // 3. Send the data silently
+      fetch(trackingURL, { mode: 'no-cors' })
+        .then(() => console.log("View logged successfully: " + movieCode))
+        .catch((err) => console.error("Logging failed", err));
+    }
+  };
+</script>
  
 <!-- Script to automatically shorten the 'url' parameter to 'film' and remove 'title' -->
 <script>
@@ -930,6 +952,7 @@
     </script>
 </body>
 </html>
+
 
 
 
