@@ -16,32 +16,34 @@
             --btn-text: #000000;
         }
 
-        /* Base styles */
         html, body {
-            height: 100%;
+            min-height: 100%;
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
             font-family: 'Inter', -apple-system, sans-serif;
             color: var(--text-main);
-            /* Default to no scroll, JS will toggle this */
-            overflow: hidden; 
+            overflow-x: hidden;
         }
 
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center; /* Initial center */
         }
 
         .container {
             width: 90%;
             max-width: 400px;
-            padding: 2rem 1rem; /* Added vertical padding for when it scrolls */
+            padding: 2rem 1rem;
             text-align: center;
-            transform-origin: center center;
+            /* Using margin: auto handles the centering in a flex container 
+               even when content overflows and we switch to top-alignment */
+            margin: auto; 
             will-change: transform;
             transition: transform 0.2s ease-out;
+            transform-origin: center center;
         }
 
         /* --- UI Elements --- */
@@ -134,33 +136,33 @@
     const androidBox = document.getElementById('android-box');
     let deferredPrompt;
 
-    // --- Dynamic Resizing + Smart Scroll Logic ---
     function fitToScreen() {
-        const padding = 20; 
+        const padding = 40; 
         const vh = window.innerHeight - padding;
         const vw = window.innerWidth - padding;
         
-        // Reset to measure actual size
-        container.style.transform = `scale(1)`;
-        document.body.style.alignItems = 'center';
-        document.documentElement.style.overflowY = 'hidden';
+        // Reset to measure
+        container.style.transform = 'scale(1)';
+        document.body.style.justifyContent = 'center';
 
         const contentHeight = container.offsetHeight;
         const contentWidth = container.offsetWidth;
 
-        // Minimum scale allowed before we force scrolling (80% size)
-        const minScaleLimit = 0.8;
         let scale = Math.min(vh / contentHeight, vw / contentWidth, 1);
+        const minScaleLimit = 0.75;
 
         if (scale < minScaleLimit) {
-            // If content is too big even for minScale, allow scrolling
+            // SCROLL MODE
             scale = minScaleLimit;
             document.documentElement.style.overflowY = 'auto';
-            document.body.style.alignItems = 'flex-start'; // Align to top so user can scroll down
+            // Align to top so it's scrollable, margin: auto handles the horizontal center
+            document.body.style.justifyContent = 'flex-start';
+            container.style.transformOrigin = 'top center';
         } else {
-            // Content fits, hide scrollbar
+            // CENTER MODE
             document.documentElement.style.overflowY = 'hidden';
-            document.body.style.alignItems = 'center';
+            document.body.style.justifyContent = 'center';
+            container.style.transformOrigin = 'center center';
         }
         
         container.style.transform = `scale(${scale})`;
@@ -196,7 +198,8 @@
         }
     });
 
-    setTimeout(fitToScreen, 100); 
+    fitToScreen();
+    setTimeout(fitToScreen, 200); 
 </script>
 
 </body>
