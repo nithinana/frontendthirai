@@ -10,25 +10,28 @@
 
   gtag('config', 'G-HKV7GQ766F');
 </script>
-<script>
+
+ <script>
   window.onload = function() {
-    // 1. Get the code from your URL (e.g., thirai.me/watch.html?ABC)
-    // This removes the '?' and gets 'ABC'
+    // 1. Get the code from your URL (e.g., thirai.me/watch.html?MOVIE123)
     const movieCode = window.location.search.substring(1);
 
     if (movieCode) {
-      // 2. YOUR SPECIFIC FORM DETAILS
-      const formID = "131wADoSOLENK5Ej-Ak6EdSvKf85vt7DlOskJaeiPBwI";
-      
-      // IMPORTANT: Replace 'entry.00000000' with the actual ID from your pre-filled link
-      const entryID = "entry.00000000"; 
+      // Your specific Form ID and Entry ID
+      const publicFormID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
+      const entryID = "entry.402011311"; 
 
-      const trackingURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${movieCode}&submit=Submit`;
+      // Construct the submission URL
+      const trackingURL = `https://docs.google.com/forms/d/e/${publicFormID}/formResponse?${entryID}=${encodeURIComponent(movieCode)}&submit=Submit`;
 
-      // 3. Send the data silently
+      // 2. Send the data silently in the background
       fetch(trackingURL, { mode: 'no-cors' })
-        .then(() => console.log("View logged successfully: " + movieCode))
-        .catch((err) => console.error("Logging failed", err));
+        .then(() => {
+          console.log("Logged view for code: " + movieCode);
+        })
+        .catch((err) => {
+          console.error("Logging failed", err);
+        });
     }
   };
 </script>
@@ -952,6 +955,7 @@
     </script>
 </body>
 </html>
+
 
 
 
