@@ -83,58 +83,117 @@
             color: var(--muted-text-color) !important;
         }
 
-        /* --- Header and Navigation (Reused) --- */
+/* --- Optimized Header for Mobile & Desktop --- */
+:root {
+    --header-height-mobile: 130px;
+    --header-height-desktop: 80px;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding-top: var(--header-height-mobile); /* Default for mobile */
+}
+
+@media (min-width: 992px) {
+    body {
+        padding-top: var(--header-height-desktop); /* Shorter for desktop */
+    }
+}
+
+/* --- Header and Navigation (Optimized) --- */
         .app-header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
-            padding: 1rem 1rem;
+            padding: 0.75rem 1rem;
             background-color: var(--header-bg);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow);
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        /* UPDATED: Removed height from CSS to let JS control it */
-        .header-logo { width: auto; }
-        .nav-link {
-            color: var(--text-color); font-weight: 500; padding: 0.5rem 1rem;
-            border-radius: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease;
+
+        /* Fixed: Flex-wrap allows two rows on mobile */
+        .app-header .container-fluid {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            justify-content: space-between;
         }
-        .nav-link:hover { background-color: var(--card-bg-color); }
-        .nav-link.active { color: var(--primary-color); font-weight: 600; }
+
+        .header-logo { height: 30px; width: auto; }
+
+        /* Fixed: Uniform height and alignment for search elements */
+/* Fixed: Centered Search Bar on PC & Dark Mode Select Box */
         .header-search {
             display: flex;
-            align-items: center;
-            gap: 8px; /* Spacing between input and button */
+            align-items: stretch;
+            gap: 6px; 
+            width: 100%;
         }
+
+        .header-search .form-select,
+        .header-search .form-control,
+        .header-search .btn {
+            height: 42px;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+        }
+
         .header-search .form-control {
             background-color: var(--input-bg-color);
             color: var(--text-color);
-            border: 1px solid var(--input-border-color); border-radius: 0.5rem;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-        .header-search .form-control::placeholder {
-            color: var(--muted-text-color);
-        }
-        .header-search .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
-            border-color: var(--primary-color);
+            border: 1px solid var(--input-border-color);
+            flex-grow: 1;
+            min-width: 0; 
         }
 
-        /* --- NEW: Styles for Language Selector --- */
+        /* NEW: Fix for the white background in the select dropdown */
         .header-search .form-select {
             background-color: var(--input-bg-color);
             color: var(--text-color);
             border: 1px solid var(--input-border-color);
-            border-radius: 0.5rem;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
-        body.dark-mode .header-search .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        /* NEW: Force options inside the dropdown to be dark in dark mode */
+        body.dark-mode .header-search .form-select option {
+            background-color: #1e1e1e; /* Matches your --card-bg-color */
+            color: #e0e0e0;
         }
 
-        .header-search .form-select:focus {
-            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
-            border-color: var(--primary-color);
+        /* Mobile View: Search Bar on Row 2 */
+        .header-main-content {
+            order: 3;
+            width: 100%;
+            margin-top: 0.75rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Desktop View: Single Row Layout with Centering */
+        @media (min-width: 992px) {
+            .app-header { padding: 0.8rem 1.5rem; }
+            .app-header .container-fluid { 
+                flex-wrap: nowrap; 
+                display: grid; 
+                grid-template-columns: auto 1fr auto; /* Grid ensures true center */
+                align-items: center;
+            }
+            .header-main-content {
+                order: 2;
+                width: 100%;
+                margin-top: 0;
+                display: flex;
+                justify-content: center; /* This centers the search bar in the middle column */
+            }
+            .header-search {
+                max-width: 600px;
+            }
+            body { padding-top: 85px; }
+        }
+
+        /* Padding for content below the 2-row mobile header */
+        @media (max-width: 991.98px) {
+            body { padding-top: 135px; }
         }
         /* --- END NEW --- */
         
@@ -633,40 +692,21 @@
         </div>
     </div>
     
-    <header class="app-header">
-        <div class="container-fluid d-flex flex-nowrap align-items-center">
-            <a href="/" class="d-flex align-items-center me-2 me-lg-4" id="logoLink">
+<header class="app-header">
+        <div class="container-fluid">
+            <a href="/" class="d-flex align-items-center" id="logoLink">
                 <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
             </a>
 
-            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
-                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
-                    <select name="selected_language" id="languageSelect" class="form-select w-auto">
-                        <option value="tamil">Tamil</option>
-                        <option value="hindi">Hindi</option>
-                        <option value="telugu">Telugu</option>
-                        <option value="malayalam">Malayalam</option>
-                        <option value="kannada">Kannada</option>
-                        <option value="bengali">Bengali</option>
-                        <option value="marathi">Marathi</option>
-                        <option value="punjabi">Punjabi</option>
-                    </select>
-                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
-                    <button type="submit" class="btn btn-primary" title="Search">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </form>
-            </div>
-
-            <div class="d-flex align-items-center ms-auto">
+            <div class="d-flex align-items-center ms-auto order-lg-3">
                 <a href="/install.html" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Install App" style="text-decoration: none; width: 40px; height: 40px;">
                     <i class="bi bi-download"></i>
                 </a>
                 <div class="dropdown">
-                    <button class="settings-btn" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Settings" style="width: 40px; height: 40px;">
+                    <button class="settings-btn" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 40px; height: 40px;">
                         <i class="bi bi-gear-fill"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">Preferred Language</h6></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="all">All Languages</a></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
@@ -687,6 +727,25 @@
                         <li><a class="dropdown-item" href="#" id="aboutButton">About</a></li>
                     </ul>
                 </div>
+            </div>
+
+            <div class="header-main-content">
+                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
+                    <select name="selected_language" id="languageSelect" class="form-select w-auto">
+                        <option value="tamil">Tamil</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="telugu">Telugu</option>
+                        <option value="malayalam">Malayalam</option>
+                        <option value="kannada">Kannada</option>
+                        <option value="bengali">Bengali</option>
+                        <option value="marathi">Marathi</option>
+                        <option value="punjabi">Punjabi</option>
+                    </select>
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder=" ">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
             </div>
         </div>
     </header>
