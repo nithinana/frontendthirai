@@ -12,31 +12,36 @@
 </script>
 
 <script>
-  (function() {
-    // 1. This handles ?film=2937 regardless of the folder or filename
+  window.addEventListener('DOMContentLoaded', (event) => {
+    // 1. Get 'film' from the URL
     const urlParams = new URLSearchParams(window.location.search);
-    const movieCode = urlParams.get('film'); 
+    const movieCode = urlParams.get('film');
 
     if (movieCode) {
-      const publicFormID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
-      const entryID = "entry.402011311"; 
-
-      // 2. We also capture the 'path' so you can see if they are on /mobile/ or /watch/
-      const currentPath = window.location.pathname;
-
-      // Construct the URL (we are sending the movie code to your form)
-      const trackingURL = `https://docs.google.com/forms/d/e/${publicFormID}/formResponse?${entryID}=${encodeURIComponent(movieCode)}&submit=Submit`;
-
-      // 3. Send the data silently
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(trackingURL);
-      } else {
-        fetch(trackingURL, { mode: 'no-cors' });
-      }
+      const formID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
       
-      console.log("Logged: " + movieCode + " from path: " + currentPath);
+      // DOUBLE CHECK THIS NUMBER:
+      const entryID = "402011311"; 
+
+      // We use the full "formResponse" URL
+      const trackingURL = "https://docs.google.com/forms/d/e/" + formID + "/formResponse";
+      
+      // We use FormData to ensure Google sees it as a real submission
+      const formData = new FormData();
+      formData.append("entry." + entryID, movieCode);
+
+      // Send it
+      fetch(trackingURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      }).then(() => {
+        console.log("Sent successfully: " + movieCode);
+      }).catch((e) => {
+        console.error("Error sending:", e);
+      });
     }
-  })();
+  });
 </script>
  
 <!-- Script to automatically shorten the 'url' parameter to 'film' and remove 'title' -->
@@ -958,6 +963,7 @@
     </script>
 </body>
 </html>
+
 
 
 
