@@ -1540,55 +1540,55 @@
             }
         });
 
+// --- INSTALL LOGIC START ---
         let deferredPrompt;
-const installAppContainer = document.getElementById('installAppContainer');
-const installAppButton = document.getElementById('installAppButton');
-const iosOverlay = document.getElementById('iosModalOverlay');
-const closeIosBtn = document.getElementById('closeIosModal');
+        const installAppContainer = document.getElementById('installAppContainer');
+        const installAppButton = document.getElementById('installAppButton');
+        const iosOverlay = document.getElementById('iosModalOverlay');
+        const closeIosBtn = document.getElementById('closeIosModal');
 
-function isMobileDevice() {
-    const ua = navigator.userAgent;
-    const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    return /Android|iPhone|iPad|iPod/i.test(ua) || isIpadOS;
-}
+        function isMobileDevice() {
+            const ua = navigator.userAgent;
+            const isIpadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            return /Android|iPhone|iPad|iPod/i.test(ua) || isIpadOS;
+        }
 
-// Android/Chrome logic
-window.addEventListener('beforeinstallprompt', (e) => {
-    if (!isMobileDevice()) return;
-    e.preventDefault();
-    deferredPrompt = e;
-    installAppContainer.style.display = 'block';
-});
-
-installAppButton.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') installAppContainer.style.display = 'none';
-        deferredPrompt = null;
-    }
-});
-
-// iOS Logic (Popup Modal)
-document.addEventListener('DOMContentLoaded', () => {
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone === true;
-
-    if (isIOS && !isStandalone) {
-        installAppContainer.style.display = 'block';
-        installAppButton.addEventListener('click', () => {
-            iosOverlay.style.display = 'block';
+        // Android / Chrome Logic
+        window.addEventListener('beforeinstallprompt', (e) => {
+            if (!isMobileDevice()) return;
+            e.preventDefault();
+            deferredPrompt = e;
+            installAppContainer.style.display = 'block';
         });
-    }
 
-    if (closeIosBtn) {
-        closeIosBtn.addEventListener('click', () => {
-            iosOverlay.style.display = 'none';
+        installAppButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') installAppContainer.style.display = 'none';
+                deferredPrompt = null;
+            }
         });
-    }
-});
 
+        // iOS Logic (Mini Popup)
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isStandalone = window.navigator.standalone === true;
 
+        if (isIOS && !isStandalone) {
+            installAppContainer.style.display = 'block';
+            installAppButton.addEventListener('click', () => {
+                iosOverlay.style.display = 'flex';
+            });
+        }
+
+        if (closeIosBtn) {
+            closeIosBtn.addEventListener('click', () => {
+                iosOverlay.style.display = 'none';
+            });
+        }
+        // --- INSTALL LOGIC END ---
+
+        
     </script>
 </body>
 </html>
