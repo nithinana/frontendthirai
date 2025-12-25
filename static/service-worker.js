@@ -4,6 +4,9 @@ const urlsToCache = [
     '/', // Your root URL
     '/index.html', // This might need to be '/templates/index.html' if your Flask app serves it that way, or rely on Flask's routing for root. For PWA, the browser sees the rendered HTML as the root.
     '/static/manifest.json', // Now in static folder
+    '/oldindex.html',
+    '/mobile/index.html',
+    '/mobile/',
     '/static/ios/icon-72x72.png',
     '/static/ios/icon-96x96.png',
     '/static/ios/icon-128x128.png',
