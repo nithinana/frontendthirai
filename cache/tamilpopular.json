@@ -1,4 +1,4 @@
-const tamilData = {
+{
   "category": "popular",
   "language": "tamil",
   "has_more": true,
