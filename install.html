@@ -16,15 +16,16 @@
             --btn-text: #000000;
         }
 
-        /* Prevent scrolling on body and html */
+        /* Base styles */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Removes scroll */
             background-color: var(--bg-color);
             font-family: 'Inter', -apple-system, sans-serif;
             color: var(--text-main);
+            /* Default to no scroll, JS will toggle this */
+            overflow: hidden; 
         }
 
         body {
@@ -33,50 +34,31 @@
             align-items: center;
         }
 
-        /* Container now has a transform-origin for JS scaling */
         .container {
             width: 90%;
             max-width: 400px;
-            padding: 1rem;
+            padding: 2rem 1rem; /* Added vertical padding for when it scrolls */
             text-align: center;
             transform-origin: center center;
             will-change: transform;
+            transition: transform 0.2s ease-out;
         }
 
-        /* --- Animations --- */
+        /* --- UI Elements --- */
         .reveal {
             opacity: 0;
             transform: translateY(20px);
             animation: slideFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
-        @keyframes slideFade {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes slideFade { to { opacity: 1; transform: translateY(0); } }
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
 
-        .logo {
-            width: 120px;
-            height: auto;
-            margin-bottom: 0.5rem;
-        }
-
-        .description {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            margin-bottom: 1rem;
-        }
-
-        .phone-img {
-            width: 100%;
-            max-width: 160px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            margin-bottom: 1.5rem;
-        }
+        .logo { width: 120px; height: auto; margin-bottom: 0.5rem; }
+        .description { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 1rem; }
+        .phone-img { width: 100%; max-width: 160px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); margin-bottom: 1.5rem; }
 
         #install-button {
             display: none;
@@ -101,35 +83,9 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-        }
-
-        .step-num {
-            background: #333;
-            color: #fff;
-            min-width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        .helper-img {
-            width: 100%;
-            border-radius: 10px;
-            margin-top: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
+        .step { display: flex; align-items: center; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-dim); }
+        .step-num { background: #333; color: #fff; min-width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 10px; font-size: 0.7rem; font-weight: bold; }
+        .helper-img { width: 100%; border-radius: 10px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); }
         b { color: #fff; }
     </style>
 </head>
@@ -178,19 +134,34 @@
     const androidBox = document.getElementById('android-box');
     let deferredPrompt;
 
-    // 1. Dynamic Resizing Logic
+    // --- Dynamic Resizing + Smart Scroll Logic ---
     function fitToScreen() {
-        const padding = 40; // Safety margin
+        const padding = 20; 
         const vh = window.innerHeight - padding;
         const vw = window.innerWidth - padding;
         
-        // Reset scale to measure natural height
+        // Reset to measure actual size
         container.style.transform = `scale(1)`;
+        document.body.style.alignItems = 'center';
+        document.documentElement.style.overflowY = 'hidden';
+
         const contentHeight = container.offsetHeight;
         const contentWidth = container.offsetWidth;
 
-        // Calculate scale needed to fit both height and width
-        const scale = Math.min(vh / contentHeight, vw / contentWidth, 1);
+        // Minimum scale allowed before we force scrolling (80% size)
+        const minScaleLimit = 0.8;
+        let scale = Math.min(vh / contentHeight, vw / contentWidth, 1);
+
+        if (scale < minScaleLimit) {
+            // If content is too big even for minScale, allow scrolling
+            scale = minScaleLimit;
+            document.documentElement.style.overflowY = 'auto';
+            document.body.style.alignItems = 'flex-start'; // Align to top so user can scroll down
+        } else {
+            // Content fits, hide scrollbar
+            document.documentElement.style.overflowY = 'hidden';
+            document.body.style.alignItems = 'center';
+        }
         
         container.style.transform = `scale(${scale})`;
     }
@@ -198,9 +169,8 @@
     window.addEventListener('resize', fitToScreen);
     window.addEventListener('load', fitToScreen);
 
-    // 2. Installation Logic
+    // --- Installation Logic ---
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
     if (isIos) {
         iosBox.style.display = 'block';
     } else {
@@ -213,7 +183,7 @@
         iosBox.style.display = 'none';
         androidBox.style.display = 'none';
         installBtn.style.display = 'block';
-        fitToScreen(); // Re-run fit because layout changed
+        fitToScreen();
     });
 
     installBtn.addEventListener('click', async () => {
@@ -226,7 +196,6 @@
         }
     });
 
-    // Initial fit
     setTimeout(fitToScreen, 100); 
 </script>
 
