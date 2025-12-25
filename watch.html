@@ -11,29 +11,32 @@
   gtag('config', 'G-HKV7GQ766F');
 </script>
 
- <script>
-  window.onload = function() {
-    // 1. Get the code from your URL (e.g., thirai.me/watch.html?MOVIE123)
-    const movieCode = window.location.search.substring(1);
+<script>
+  (function() {
+    // 1. This handles ?film=2937 regardless of the folder or filename
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieCode = urlParams.get('film'); 
 
     if (movieCode) {
-      // Your specific Form ID and Entry ID
       const publicFormID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
       const entryID = "entry.402011311"; 
 
-      // Construct the submission URL
+      // 2. We also capture the 'path' so you can see if they are on /mobile/ or /watch/
+      const currentPath = window.location.pathname;
+
+      // Construct the URL (we are sending the movie code to your form)
       const trackingURL = `https://docs.google.com/forms/d/e/${publicFormID}/formResponse?${entryID}=${encodeURIComponent(movieCode)}&submit=Submit`;
 
-      // 2. Send the data silently in the background
-      fetch(trackingURL, { mode: 'no-cors' })
-        .then(() => {
-          console.log("Logged view for code: " + movieCode);
-        })
-        .catch((err) => {
-          console.error("Logging failed", err);
-        });
+      // 3. Send the data silently
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(trackingURL);
+      } else {
+        fetch(trackingURL, { mode: 'no-cors' });
+      }
+      
+      console.log("Logged: " + movieCode + " from path: " + currentPath);
     }
-  };
+  })();
 </script>
  
 <!-- Script to automatically shorten the 'url' parameter to 'film' and remove 'title' -->
@@ -955,6 +958,7 @@
     </script>
 </body>
 </html>
+
 
 
 
