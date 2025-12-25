@@ -30,16 +30,36 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Initial center */
+            justify-content: center;
+        }
+
+        /* --- Back Button --- */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            text-decoration: none;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .container {
             width: 90%;
             max-width: 400px;
-            padding: 2rem 1rem;
+            padding: 4rem 1rem 2rem 1rem; /* Increased top padding to clear fixed back button */
             text-align: center;
-            /* Using margin: auto handles the centering in a flex container 
-               even when content overflows and we switch to top-alignment */
             margin: auto; 
             will-change: transform;
             transition: transform 0.2s ease-out;
@@ -93,6 +113,10 @@
 </head>
 <body>
 
+<a href="/" class="back-btn" aria-label="Go back">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+</a>
+
 <div class="container" id="main-container">
     <img src="https://raw.githubusercontent.com/nithinana/frontendthirai/refs/heads/main/static/thiraiwhite.png" alt="Thirai" class="logo reveal delay-1">
     <p class="description reveal delay-1">same stuff but for mobile</p>
@@ -137,11 +161,10 @@
     let deferredPrompt;
 
     function fitToScreen() {
-        const padding = 40; 
+        const padding = 60; // Slightly more padding to account for the back button
         const vh = window.innerHeight - padding;
         const vw = window.innerWidth - padding;
         
-        // Reset to measure
         container.style.transform = 'scale(1)';
         document.body.style.justifyContent = 'center';
 
@@ -152,14 +175,11 @@
         const minScaleLimit = 0.75;
 
         if (scale < minScaleLimit) {
-            // SCROLL MODE
             scale = minScaleLimit;
             document.documentElement.style.overflowY = 'auto';
-            // Align to top so it's scrollable, margin: auto handles the horizontal center
             document.body.style.justifyContent = 'flex-start';
             container.style.transformOrigin = 'top center';
         } else {
-            // CENTER MODE
             document.documentElement.style.overflowY = 'hidden';
             document.body.style.justifyContent = 'center';
             container.style.transformOrigin = 'center center';
@@ -171,7 +191,6 @@
     window.addEventListener('resize', fitToScreen);
     window.addEventListener('load', fitToScreen);
 
-    // --- Installation Logic ---
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (isIos) {
         iosBox.style.display = 'block';
