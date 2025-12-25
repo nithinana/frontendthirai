@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Thirai</title>
+    <link rel="manifest" href="static/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212; 
+            --card-bg: #1c1c1e;
+            --text-main: #ffffff;
+            --text-dim: #9ca3af;
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        /* --- Animations --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes slideFade {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        /* --- UI Elements --- */
+        .logo {
+            width: 140px;
+            height: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+        }
+
+        .phone-img {
+            width: 100%;
+            max-width: 180px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            margin-bottom: 2rem;
+        }
+
+        /* Install Button */
+        #install-button {
+            display: none; /* Only via JS */
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Instruction Cards */
+        .instruction-card {
+            display: none; /* Shown based on device */
+            text-align: left;
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .step-num {
+            background: #333;
+            color: #fff;
+            min-width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .helper-img {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        b { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://raw.githubusercontent.com/nithinana/frontendthirai/refs/heads/main/static/thiraiwhite.png" alt="Thirai" class="logo reveal delay-1">
+    <p class="description reveal delay-1">Install for a full-screen experience.</p>
+
+    <div class="reveal delay-2">
+        <img src="https://raw.githubusercontent.com/nithinana/frontendthirai/refs/heads/main/static/mobile.png" alt="Preview" class="phone-img">
+    </div>
+
+    <button id="install-button" class="reveal delay-3">Install Now</button>
+
+    <div id="ios-box" class="instruction-card reveal delay-3">
+        <b style="display:block; margin-bottom:12px;">Install on iPhone:</b>
+        <div class="step">
+            <span class="step-num">1</span>
+            <span>Tap the <b>Share</b> icon in Safari.</span>
+        </div>
+        <div class="step">
+            <span class="step-num">2</span>
+            <span>Choose <b>'Add to Home Screen'</b>.</span>
+        </div>
+        <img src="https://www.tapsmart.com/wp-content/uploads/2015/05/create-new-app-icons-1024x704.png" class="helper-img" alt="iOS Guide">
+    </div>
+
+    <div id="android-box" class="instruction-card reveal delay-3">
+        <b style="display:block; margin-bottom:12px;">How to Install:</b>
+        <div class="step">
+            <span class="step-num">1</span>
+            <span>Tap the browser menu <b>(⋮)</b>.</span>
+        </div>
+        <div class="step">
+            <span class="step-num">2</span>
+            <span>Select <b>'Install App'</b>.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const installBtn = document.getElementById('install-button');
+    const iosBox = document.getElementById('ios-box');
+    const androidBox = document.getElementById('android-box');
+    let deferredPrompt;
+
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    // Show appropriate instructions immediately to avoid layout jump
+    if (isIos) {
+        iosBox.style.display = 'block';
+    } else {
+        androidBox.style.display = 'block';
+    }
+
+    // If the browser supports the native install prompt (Android/Chrome)
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Hide the manual instructions and show the high-priority button instead
+        iosBox.style.display = 'none';
+        androidBox.style.display = 'none';
+        installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') installBtn.style.display = 'none';
+            deferredPrompt = null;
+        }
+    });
+</script>
+
+</body>
+</html>
