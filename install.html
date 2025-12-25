@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Install Thirai</title>
     <link rel="manifest" href="static/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -16,23 +16,31 @@
             --btn-text: #000000;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+        /* Prevent scrolling on body and html */
+        html, body {
+            height: 100%;
             margin: 0;
+            padding: 0;
+            overflow: hidden; /* Removes scroll */
+            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text-main);
+        }
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
         }
 
+        /* Container now has a transform-origin for JS scaling */
         .container {
             width: 90%;
             max-width: 400px;
-            padding: 2rem 1rem;
+            padding: 1rem;
             text-align: center;
+            transform-origin: center center;
+            will-change: transform;
         }
 
         /* --- Animations --- */
@@ -50,30 +58,28 @@
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
 
-        /* --- UI Elements --- */
         .logo {
-            width: 140px;
+            width: 120px;
             height: auto;
             margin-bottom: 0.5rem;
         }
 
         .description {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--text-dim);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .phone-img {
             width: 100%;
-            max-width: 180px;
+            max-width: 160px;
             border-radius: 24px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* Install Button */
         #install-button {
-            display: none; /* Only via JS */
+            display: none;
             background: var(--btn-bg);
             color: var(--btn-text);
             border: none;
@@ -83,15 +89,14 @@
             font-weight: 700;
             cursor: pointer;
             width: 100%;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
-        /* Instruction Cards */
         .instruction-card {
-            display: none; /* Shown based on device */
+            display: none;
             text-align: left;
             background: var(--card-bg);
-            padding: 1.25rem;
+            padding: 1rem;
             border-radius: 18px;
             border: 1px solid rgba(255,255,255,0.05);
         }
@@ -99,29 +104,29 @@
         .step {
             display: flex;
             align-items: center;
-            margin-bottom: 12px;
-            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
             color: var(--text-dim);
         }
 
         .step-num {
             background: #333;
             color: #fff;
-            min-width: 24px;
-            height: 24px;
+            min-width: 20px;
+            height: 20px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-right: 12px;
-            font-size: 0.75rem;
+            margin-right: 10px;
+            font-size: 0.7rem;
             font-weight: bold;
         }
 
         .helper-img {
             width: 100%;
-            border-radius: 12px;
-            margin-top: 10px;
+            border-radius: 10px;
+            margin-top: 8px;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
@@ -130,7 +135,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="main-container">
     <img src="https://raw.githubusercontent.com/nithinana/frontendthirai/refs/heads/main/static/thiraiwhite.png" alt="Thirai" class="logo reveal delay-1">
     <p class="description reveal delay-1">same stuff but for mobile</p>
 
@@ -141,10 +146,10 @@
     <button id="install-button" class="reveal delay-3">Install Now</button>
 
     <div id="ios-box" class="instruction-card reveal delay-3">
-        <b style="display:block; margin-bottom:12px;">Install on iPhone:</b>
+        <b style="display:block; margin-bottom:10px;">Install on iPhone:</b>
         <div class="step">
             <span class="step-num">1</span>
-            <span>Tap the <b>Share</b> icon in Safari.</span>
+            <span>Tap <b>Share</b> in Safari.</span>
         </div>
         <div class="step">
             <span class="step-num">2</span>
@@ -154,42 +159,61 @@
     </div>
 
     <div id="android-box" class="instruction-card reveal delay-3">
-        <b style="display:block; margin-bottom:12px;">how to install:</b>
+        <b style="display:block; margin-bottom:10px;">how to install:</b>
         <div class="step">
             <span class="step-num">1</span>
-            <span>tap the three buttons <b>(⋮)</b>.</span>
+            <span>tap the three dots <b>(⋮)</b>.</span>
         </div>
         <div class="step">
             <span class="step-num">2</span>
-            <span>select <b>'install app'</b>.</span>
+            <span>select <b>'add to home screen'</b>.</span>
         </div>
     </div>
 </div>
 
 <script>
+    const container = document.getElementById('main-container');
     const installBtn = document.getElementById('install-button');
     const iosBox = document.getElementById('ios-box');
     const androidBox = document.getElementById('android-box');
     let deferredPrompt;
 
+    // 1. Dynamic Resizing Logic
+    function fitToScreen() {
+        const padding = 40; // Safety margin
+        const vh = window.innerHeight - padding;
+        const vw = window.innerWidth - padding;
+        
+        // Reset scale to measure natural height
+        container.style.transform = `scale(1)`;
+        const contentHeight = container.offsetHeight;
+        const contentWidth = container.offsetWidth;
+
+        // Calculate scale needed to fit both height and width
+        const scale = Math.min(vh / contentHeight, vw / contentWidth, 1);
+        
+        container.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('resize', fitToScreen);
+    window.addEventListener('load', fitToScreen);
+
+    // 2. Installation Logic
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // Show appropriate instructions immediately to avoid layout jump
     if (isIos) {
         iosBox.style.display = 'block';
     } else {
         androidBox.style.display = 'block';
     }
 
-    // If the browser supports the native install prompt (Android/Chrome)
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        
-        // Hide the manual instructions and show the high-priority button instead
         iosBox.style.display = 'none';
         androidBox.style.display = 'none';
         installBtn.style.display = 'block';
+        fitToScreen(); // Re-run fit because layout changed
     });
 
     installBtn.addEventListener('click', async () => {
@@ -198,8 +222,12 @@
             const { outcome } = await deferredPrompt.userChoice;
             if (outcome === 'accepted') installBtn.style.display = 'none';
             deferredPrompt = null;
+            fitToScreen();
         }
     });
+
+    // Initial fit
+    setTimeout(fitToScreen, 100); 
 </script>
 
 </body>
