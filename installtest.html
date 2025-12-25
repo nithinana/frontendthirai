@@ -688,28 +688,6 @@
         </div>
     </header>
 
-<div id="installAppContainer" class="container-fluid mb-4" style="display: none;">
-    <div class="d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm" 
-         style="background-color: var(--card-bg-color); border: 1px solid var(--border-color);">
-        <span class="fw-bold" style="color: var(--text-color);">Available on mobile</span>
-        <button id="installAppButton" class="btn btn-primary d-inline-flex align-items-center gap-2">
-            <i class="bi bi-download"></i> Install
-        </button>
-    </div>
-</div>
-
-<div id="iosModalOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999;">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full relative" style="background: var(--card-bg-color); margin: 20% auto; padding: 20px; border-radius: 15px; max-width: 320px; color: var(--text-color); text-align: center;">
-        <button id="closeIosModal" class="absolute top-4 right-4 text-gray-400" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; color: var(--muted-text-color);">&times;</button>
-        <h3 class="text-xl font-bold mb-4">Install Thirai</h3>
-        <ol class="text-left space-y-3 mb-6" style="text-align: left; padding: 15px 0;">
-            <li>1. Tap the <strong>Share</strong> button <i class="bi bi-share"></i></li>
-            <li>2. Scroll down and tap <strong>Add to Home Screen</strong></li>
-        </ol>
-        <img src="https://www.tapsmart.com/wp-content/uploads/2015/05/create-new-app-icons-1024x704.png" class="rounded-lg shadow mx-auto" style="width: 100%; border-radius: 10px;" alt="Tutorial">
-    </div>
-</div>
-
     <main class="container-fluid mt-4">
         <div class="promo-banner">
             <img src="https://image.tmdb.org/t/p/original/6xoVGz8HWkR9KGEnWaARRFbiiLl.png" alt="Movie Logo" class="movie-logo">
@@ -717,6 +695,28 @@
                 <i class="bi bi-play-fill"></i> Watch Now
             </a>
         </div>
+
+        <div id="installAppContainer" class="container-fluid mb-4" style="display: none;">
+        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm" 
+             style="background-color: var(--card-bg-color); border: 1px solid var(--border-color);">
+            <span class="fw-bold" style="color: var(--text-color);">Available on mobile</span>
+            <button id="installAppButton" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                <i class="bi bi-download"></i> Install
+            </button>
+        </div>
+    </div>
+
+    <div id="iosModalOverlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--card-bg-color); padding: 25px; border-radius: 20px; max-width: 340px; width: 100%; position: relative; text-align: center; color: var(--text-color); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <button id="closeIosModal" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; color: var(--muted-text-color); cursor: pointer;">&times;</button>
+            <h3 style="font-weight: bold; margin-bottom: 15px;">Install Thirai</h3>
+            <div style="text-align: left; margin-bottom: 20px; font-size: 15px;">
+                <p style="margin-bottom: 10px;">1. Tap the <strong>Share</strong> button <i class="bi bi-share"></i> at the bottom of the screen.</p>
+                <p>2. Scroll down and tap <strong>Add to Home Screen</strong> <i class="bi bi-plus-square"></i>.</p>
+            </div>
+            <img src="https://www.tapsmart.com/wp-content/uploads/2015/05/create-new-app-icons-1024x704.png" style="width: 100%; border-radius: 12px;" alt="Tutorial">
+        </div>
+    </div>
 
         <div class="language-section" id="section-collections">
             <div class="language-header">
@@ -1588,7 +1588,7 @@
         }
         // --- INSTALL LOGIC END ---
 
-        
+
     </script>
 </body>
 </html>
