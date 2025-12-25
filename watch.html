@@ -12,36 +12,25 @@
 </script>
 
 <script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    // 1. Get 'film' from the URL
+  (function() {
     const urlParams = new URLSearchParams(window.location.search);
     const movieCode = urlParams.get('film');
 
     if (movieCode) {
       const formID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
-      
-      // DOUBLE CHECK THIS NUMBER:
-      const entryID = "402011311"; 
+      // This matches the entry ID from your latest link
+      const entryID = "entry.132457679"; 
 
-      // We use the full "formResponse" URL
-      const trackingURL = "https://docs.google.com/forms/d/e/" + formID + "/formResponse";
-      
-      // We use FormData to ensure Google sees it as a real submission
-      const formData = new FormData();
-      formData.append("entry." + entryID, movieCode);
+      const finalURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${encodeURIComponent(movieCode)}&submit=Submit`;
 
-      // Send it
-      fetch(trackingURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-      }).then(() => {
-        console.log("Sent successfully: " + movieCode);
-      }).catch((e) => {
-        console.error("Error sending:", e);
-      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(finalURL);
+      } else {
+        fetch(finalURL, { mode: 'no-cors' });
+      }
+      console.log("Tracking sent: " + movieCode);
     }
-  });
+  })();
 </script>
  
 <!-- Script to automatically shorten the 'url' parameter to 'film' and remove 'title' -->
@@ -963,6 +952,7 @@
     </script>
 </body>
 </html>
+
 
 
 
