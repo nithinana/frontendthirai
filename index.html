@@ -1112,15 +1112,16 @@
             });
         }
 
-        // NEW: Function to update the logo's href based on the preferred language
-        function updateLogoLink() {
-            const preferredLanguage = localStorage.getItem('preferred-language');
-            if (preferredLanguage && preferredLanguage !== 'all') {
-                logoLink.href = `/language/${preferredLanguage}`;
-            } else {
-                logoLink.href = '/';
-            }
-        }
+// NEW: Function to update the logo's href based on the preferred language
+function updateLogoLink() {
+    const preferredLanguage = localStorage.getItem('preferred-language');
+    // Change the template literal to use the query parameter format
+    if (preferredLanguage && preferredLanguage !== 'all') {
+        logoLink.href = `/language?lang=${preferredLanguage}`;
+    } else {
+        logoLink.href = '/';
+    }
+}
 
         document.addEventListener('DOMContentLoaded', function() {
             // Check on page load and set active class
