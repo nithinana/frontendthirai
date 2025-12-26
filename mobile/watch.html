@@ -1,8 +1,8 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 
-   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -10,9 +10,29 @@
 
   gtag('config', 'G-HKV7GQ766F');
 </script>
- 
 
-<!-- Script to automatically shorten the 'url' parameter to 'film' and remove 'title' -->
+<script>
+  (function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieCode = urlParams.get('film');
+
+    if (movieCode) {
+      const formID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
+      // This matches the entry ID from your latest link
+      const entryID = "entry.132457679"; 
+
+      const finalURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${encodeURIComponent(movieCode)}&submit=Submit`;
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(finalURL);
+      } else {
+        fetch(finalURL, { mode: 'no-cors' });
+      }
+      console.log("Tracking sent: " + movieCode);
+    }
+  })();
+</script>
+ 
 <script>
     (function() {
         try {
@@ -57,7 +77,7 @@
     })();
 </script>
 
-
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
     <meta name="screen-orientation" content="landscape">
     <link rel="manifest" href="/manifest.json">
@@ -379,6 +399,9 @@
                 </a>
                 <button id="magnificationButton" class="top-button">
                     <i class="bi bi-zoom-in"></i> </button>
+                <button id="castButton" class="top-button" style="display: none;">
+                    <i class="bi bi-cast"></i>
+                </button>
             </div>
 
             <div class="center-controls">
@@ -432,6 +455,10 @@
         const magnificationButton = document.getElementById('magnificationButton');
         const magnificationIcon = magnificationButton.querySelector('i');
         let zoomLevel = 1; // 0: Slightly zoomed out, 1: Full screen, 2: More zoomed in
+        // --- END NEW ---
+        
+        // --- NEW: Cast Button Element ---
+        const castButton = document.getElementById('castButton');
         // --- END NEW ---
 
         let isDraggingProgressBar = false;
@@ -735,6 +762,52 @@
         });
         // --- END NEW ---
 
+        // --- NEW: Cast Logic (AirPlay & Chromecast) ---
+        
+        // 1. AirPlay Support (Safari/iOS)
+        if (window.WebKitPlaybackTargetAvailabilityEvent) {
+            moviePlayer.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
+                switch (event.availability) {
+                    case "available":
+                        castButton.style.display = 'flex'; // Show button
+                        castButton.onclick = function() {
+                            moviePlayer.webkitShowPlaybackTargetPicker();
+                        };
+                        break;
+                    case "not-available":
+                        // Keep hidden if Chromecast is not available either
+                        if (!window.chrome || !window.chrome.cast || !window.chrome.cast.isAvailable) {
+                             castButton.style.display = 'none';
+                        }
+                        break;
+                }
+            });
+        }
+
+        // 2. Google Cast Support (Chrome/Android)
+        window['__onGCastApiAvailable'] = function(isAvailable) {
+            if (isAvailable) {
+                // Initialize Cast Context
+                cast.framework.CastContext.getInstance().setOptions({
+                    receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+                });
+
+                // Show button if Cast API is ready
+                castButton.style.display = 'flex';
+                
+                // Add click listener for Chromecast
+                castButton.addEventListener('click', function() {
+                    // Check if AirPlay is also available (AirPlay takes precedence on Apple devices usually)
+                    // But here we can use the Cast API if AirPlay didn't claim the click
+                    if (!moviePlayer.webkitShowPlaybackTargetPicker) {
+                         cast.framework.CastContext.getInstance().requestSession();
+                    }
+                });
+            }
+        };
+        // --- END NEW ---
+
         // --- Mobile Tap Functionality Refined ---
         document.addEventListener('touchend', (event) => {
             const clickedOnControl = event.target.closest('.control-button') ||
@@ -931,8 +1004,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
