@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HKV7GQ766F');
+</script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirai</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thirai">
+    <link rel="apple-touch-icon" href="./static/ios/icon-192x192.png">
+    <link rel="icon" type="image/png" href="./static/favicon.png" id="faviconLink"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* CSS Variables for a Themed, Modern UI */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-border-color: #ced4da;
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        /* Make close button visible in dark mode */
+        body.dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        /* Base Body Styles */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden; /* PREVENT HORIZONTAL SCROLLING */
+        }
+        
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        /* --- Header and Navigation --- */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            padding: 1rem 1rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--header-shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .header-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        /* --- Styles for Logo Dropdown --- */
+        .logo-dropdown-container {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .logo-dropdown-toggle {
+            color: var(--text-color);
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        .logo-dropdown-toggle:hover {
+            color: var(--text-color);
+            opacity: 1;
+        }
+        .logo-dropdown-toggle::after {
+            display: none;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: var(--card-bg-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* --- Search Bar in Header --- */
+        .header-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-search .form-control {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            height: calc(1.5em + 1rem + 2px); 
+        }
+
+        .header-search .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            border-color: var(--primary-color);
+        }
+        
+        body.dark-mode .header-search .form-control::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+        
+        .header-search .btn-primary {
+            padding: 0; 
+            height: calc(1.5em + 1rem + 2px);
+            width: calc(1.5em + 1rem + 2px); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .dropdown-menu {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 0.5rem;
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        body.dark-mode .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        /* --- Main Content & Movie Grid --- */
+        .movie-grid {
+            padding: 1.5rem 0;
+        }
+        
+        .movie-card .movie-title {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: normal;
+            word-break: break-word;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            height: 4.0em;
+            text-align: center;
+        }
+
+        .movie-card {
+            background-color: var(--card-bg-color);
+            border-radius: 0.75rem;
+            border: none;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .movie-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .movie-img {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            background-color: var(--bg-color);
+        }
+        
+        /* --- Load More & Spinner --- */
+        .load-more-container {
+            display: flex; /* MODIFIED: Use flexbox for centering */
+            flex-direction: column; /* MODIFIED: Stack items vertically */
+            align-items: center; /* MODIFIED: Center items horizontally */
+            padding: 2rem 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover-color);
+            border-color: var(--primary-hover-color);
+        }
+
+        #loadingSpinner {
+            display: none;
+        }
+        
+        /* --- START: Loading Screen --- */
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        #loadingOverlay img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: pulse-logo 1.5s infinite ease-in-out;
+        }
+        
+        #slowNetworkMessage {
+            max-width: 80%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        @keyframes pulse-logo {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        /* --- END: Loading Screen --- */
+
+        /* --- Modal Styling --- */
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            border-bottom: none;
+        }
+
+        .modal-header h5 {
+            font-weight: bold;
+        }
+
+        .modal-body .list-group-item {
+            cursor: pointer;
+            color: var(--text-color);
+            background-color: transparent;
+            border-color: var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-body .list-group-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        body.dark-mode .modal-body .list-group-item.active {
+            background-color: var(--input-border-color);
+            color: var(--text-color);
+            border-color: var(--input-border-color);
+        }
+
+        .modal-body .list-group-item:hover {
+            background-color: var(--border-color);
+        }
+
+        body.dark-mode .modal-body .list-group-item:hover {
+            background-color: var(--input-bg-color);
+        }
+
+        .modal-body .btn-secondary[data-bs-dismiss="modal"] {
+            border-color: #dc3545;
+            color: #dc3545;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .modal-body .btn-secondary[data-bs-dismiss="modal"]:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* --- Responsive Header Layout --- */
+        @media (min-width: 992px) {
+            .header-main-content {
+                flex-grow: 1;
+                justify-content: center;
+            }
+            .header-search {
+                max-width: 500px;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .header-main-content {
+                order: 3;
+                width: 100%;
+                margin-top: 1rem;
+            }
+            .header-search {
+                flex-grow: 1;
+            }
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 575.98px) {
+            .app-header .container-fluid {
+                padding: 0.75rem 0.5rem;
+            }
+            .header-center-nav .nav-link {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Responsive grid */
+        .movie-grid .row {
+            --bs-gutter-x: 0.75rem;
+            --bs-gutter-y: 0.75rem;
+        }
+        .movie-grid .col {
+            padding: var(--bs-gutter-y) var(--bs-gutter-x);
+        }
+
+        @media (max-width: 575.98px) {
+            .movie-grid .col {
+                width: 33.33%;
+            }
+            .movie-card .movie-title {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+                height: 3.5em;
+            }
+        }
+        
+    </style>
+</head>
+<body class="dark-mode">
+
+    <div id="loadingOverlay">
+        <img src="/static/thiraiblack.png" alt="Thirai Logo" id="overlayLogo">
+        <div id="slowNetworkMessage" style="display: none;">
+            <i class="bi bi-info-circle"></i> <span>Reducing clutter. Hang tight!</span>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <div class="container-fluid d-flex align-items-center">
+            <div class="logo-dropdown-container">
+                <a href="/" class="d-flex align-items-center me-1">
+                    <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+                </a>
+                <a class="dropdown-toggle logo-dropdown-toggle" href="#" role="button" id="logoDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="logoDropdown">
+                    <li><a class="dropdown-item" href="/">Home</a></li>
+                    <li><a class="dropdown-item" href="/actors">Actors</a></li>
+                </ul>
+            </div>
+
+            <div class="header-main-content d-flex">
+                <form id="searchForm" action="" method="GET" class="header-search">
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="ms-auto">
+                <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--text-color); font-size: 1.5rem;">
+                    <i class="bi bi-gear-fill"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" id="settingsDropdownMenu">
+                    </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="container-fluid" style="padding-top: 100px;">
+        <div class="movie-grid">
+            <h2 id="pageTitle" class="mb-4 text-center"></h2>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6" id="movieGrid">
+                </div>
+            
+            <div class="load-more-container">
+                <div id="loadingSpinner" class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <button id="loadMoreBtn" class="btn btn-primary" style="display: none;">Load More</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6>Theme</h6>
+                        <div class="list-group">
+                            <button type="button" class="list-group-item list-group-item-action theme-option" data-theme="light">Light</button>
+                            <button type="button" class="list-group-item list-group-item-action theme-option" data-theme="dark">Dark</button>
+                            <button type="button" class="list-group-item list-group-item-action theme-option" data-theme="system">System Default</button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary" id="aboutButtonInModal">About Thirai</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="/static/thiraiblack.png" alt="Thirai Logo" class="mb-3" style="max-width: 150px;">
+                    <p>Thirai is your ultimate destination for high-quality streaming content. Explore a vast collection of movies and series in various languages.</p>
+                    <p class="text-muted small">© 2024 Thirai. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = 'https://einthusan.app/api';
+        const movieGrid = document.getElementById('movieGrid');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const pageTitle = document.getElementById('pageTitle');
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const headerLogo = document.getElementById('headerLogo');
+        const overlayLogo = document.getElementById('overlayLogo');
+
+        let currentPage = 1;
+        let isSearch = false;
+
+        // --- Loading Screen Logic ---
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
+        const startTime = Date.now();
+
+        const networkTimer = setTimeout(() => {
+            slowNetworkMessage.style.display = 'flex';
+        }, 5000);
+
+        function hideLoadingScreen() {
+            clearTimeout(networkTimer);
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, 500 - elapsedTime);
+
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    document.body.classList.remove('no-scroll');
+                }, 500);
+            }, remainingTime);
+        }
+
+        // --- Theme Logic ---
+        function applyTheme(theme) {
+            if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+                headerLogo.src = '/static/thiraiwhite.png';
+                overlayLogo.src = '/static/thiraiwhite.png';
+            } else {
+                document.body.classList.remove('dark-mode');
+                headerLogo.src = '/static/thiraiblack.png';
+                overlayLogo.src = '/static/thiraiblack.png';
+            }
+            updateActiveThemeOption(theme);
+        }
+
+        function updateActiveThemeOption(theme) {
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-theme') === theme);
+            });
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'system';
+        applyTheme(savedTheme);
+
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.getAttribute('data-theme');
+                localStorage.setItem('theme', theme);
+                applyTheme(theme);
+            });
+        });
+
+        // --- Movie Fetching and Rendering ---
+        function fetchAndRenderMovies(url, append = false) {
+            loadingSpinner.style.display = 'block';
+            loadMoreBtn.style.display = 'none';
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (!append) movieGrid.innerHTML = '';
+                    
+                    if (data.movies && data.movies.length > 0) {
+                        data.movies.forEach(movie => {
+                            const movieCol = document.createElement('div');
+                            movieCol.className = 'col';
+                            movieCol.innerHTML = `
+                                <div class="movie-card">
+                                    <a href="/watch?url=${encodeURIComponent(movie.url)}&title=${encodeURIComponent(movie.title)}" class="movie-link" 
+                                       onclick="handleMovieClick('${movie.id}', '${movie.title.replace(/'/g, "\\'")}', '${movie.image}', '${movie.url}')">
+                                        <img src="${movie.image}" alt="${movie.title}" class="movie-img" loading="lazy">
+                                        <div class="movie-title">${movie.title}</div>
+                                    </a>
+                                </div>
+                            `;
+                            movieGrid.appendChild(movieCol);
+                        });
+                        
+                        currentPage++;
+                        loadMoreBtn.style.display = 'block';
+                    } else if (!append) {
+                        movieGrid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">No movies found.</p></div>';
+                    }
+                    
+                    if (data.movies && data.movies.length < 24) {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching movies:', error);
+                    if (!append) movieGrid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Failed to load movies. Please try again later.</p></div>';
+                })
+                .finally(() => {
+                    loadingSpinner.style.display = 'none';
+                    hideLoadingScreen();
+                });
+        }
+
+        // --- NEW: Movie Click Caching Logic (from gurch.html) ---
+        function handleMovieClick(id, title, image, url) {
+            const movieData = { id, title, image, url, timestamp: new Date().getTime() };
+            let continueWatching = JSON.parse(localStorage.getItem('continueWatching') || '[]');
+            
+            // Remove the movie if it already exists to avoid duplicates and re-add it to the top
+            continueWatching = continueWatching.filter(m => m.id !== id);
+            continueWatching.unshift(movieData);
+            
+            // Limit the cache size (e.g., last 20 movies)
+            if (continueWatching.length > 20) continueWatching.pop();
+            
+            localStorage.setItem('continueWatching', JSON.stringify(continueWatching));
+        }
+
+        // --- URL and Search Handling ---
+        function initPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang');
+            const category = urlParams.get('category') || 'recent';
+            const query = urlParams.get('q');
+            
+            if (query) {
+                isSearch = true;
+                pageTitle.textContent = `Search results for "${query}"`;
+                searchInput.value = query;
+                searchForm.action = `/language/${lang}`;
+                const url = `${API_BASE_URL}/search/${lang}?q=${encodeURIComponent(query)}&page=${currentPage}`;
+                fetchAndRenderMovies(url);
+            } else if (lang) {
+                isSearch = false;
+                pageTitle.textContent = `${lang.charAt(0).toUpperCase() + lang.slice(1)} Movies`;
+                searchForm.action = `/language/${lang}`;
+                const url = `${API_BASE_URL}/language/${lang}?category=${category}&page=${currentPage}`;
+                fetchAndRenderMovies(url);
+            } else {
+                window.location.href = '/';
+            }
+            
+            updateSettingsDropdown(lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+
+        // --- Helper Functions ---
+        function adjustBodyPadding() {
+            const header = document.querySelector('.app-header');
+            const headerHeight = header.offsetHeight;
+            document.querySelector('main').style.paddingTop = `${headerHeight + 20}px`;
+        }
+
+        function updateSettingsDropdown(currentLang) {
+            const settingsDropdownMenu = document.getElementById('settingsDropdownMenu');
+            settingsDropdownMenu.innerHTML = `
+                <li><h6 class="dropdown-header">Categories</h6></li>
+                <li><a class="dropdown-item ${new URLSearchParams(window.location.search).get('category') === 'recent' ? 'active' : ''}" href="/language/${currentLang}?category=recent">Recent</a></li>
+                <li><a class="dropdown-item ${new URLSearchParams(window.location.search).get('category') === 'popular' ? 'active' : ''}" href="/language/${currentLang}?category=popular">Popular</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
+        }
+
+        // --- Event Listeners ---
+        window.addEventListener('resize', adjustBodyPadding);
+
+        loadMoreBtn.addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang');
+            const category = urlParams.get('category') || 'recent';
+            
+            const url = `${API_BASE_URL}/language/${lang}?category=${category}&page=${currentPage}`;
+            fetchAndRenderMovies(url, true);
+        });
+
+        searchForm.addEventListener('submit', function(event) {
+            if (searchInput.value.trim() === '') {
+                event.preventDefault(); 
+                searchInput.focus();
+            }
+        });
+
+        const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+        const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        document.getElementById('aboutButtonInModal').addEventListener('click', function (event) {
+            event.preventDefault();
+            settingsModal.hide();
+            aboutModal.show();
+        });
+        document.getElementById('aboutModal').addEventListener('hidden.bs.modal', function () {
+            settingsModal.show();
+        });
+
+    </script>
+</body>
+</html>
