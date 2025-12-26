@@ -1628,27 +1628,30 @@ function updateLogoLink() {
         }
 
         // Add event listeners for the scroll buttons
-        scrollButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const lang = button.id.split('-').pop();
-                const scrollContainer = document.getElementById(`movies-row-${lang}`);
-                
-                if (!scrollContainer) return;
+// PASTE THIS NEW BLOCK:
+scrollButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Find the parent section first
+        const section = button.closest('.language-section');
+        // Find the specific movies-row inside that section
+        const scrollContainer = section.querySelector('.movies-row');
+        
+        if (!scrollContainer) return;
 
-                const movieCard = scrollContainer.querySelector('.movie-card');
-                if (!movieCard) return;
+        const movieCard = scrollContainer.querySelector('.movie-card');
+        if (!movieCard) return;
 
-                // Calculate the width of three movie cards plus their margins
-                const movieCardWidth = movieCard.offsetWidth;
-                const scrollAmount = movieCardWidth * 3 + (16 * 3); // 16px is the margin-right of movie-card
+        // Scroll by 3 cards at a time
+        const movieCardWidth = movieCard.offsetWidth;
+        const scrollAmount = movieCardWidth * 3 + (16 * 3); 
 
-                if (button.classList.contains('scroll-btn-prev')) {
-                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                } else if (button.classList.contains('scroll-btn-next')) {
-                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                }
-            });
-        });
+        if (button.classList.contains('scroll-btn-prev')) {
+            scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        } else if (button.classList.contains('scroll-btn-next')) {
+            scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    });
+});
 
         // Update the scroll button visibility on initial page load and on scroll
         const allSections = document.querySelectorAll('.language-section'); // Updated to include Collections
