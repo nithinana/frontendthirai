@@ -724,6 +724,7 @@ body {
                         <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
                         <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
                         <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="clearHistoryButton">Clear Watch History</a></li>
                         <li><a class="dropdown-item" href="#" id="aboutButton">About</a></li>
                     </ul>
                 </div>
@@ -756,29 +757,6 @@ body {
             <a href="/watch?url=https%3A//einthusan.tv/movie/watch/6GAx/%3Flang%3Dtamil&title=Viduthalai" class="btn">
                 <i class="bi bi-play-fill"></i> Watch Now
             </a>
-        </div>
-
-        <div class="language-section" id="section-continue-watching" style="display: none;">
-            <div class="language-header">
-                <h2 class="language-title">Continue Watching</h2>
-                <button class="btn btn-sm text-muted" id="clear-continue-watching" title="Clear History">
-                    <i class="bi bi-trash"></i> Clear
-                </button>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-continue-watching" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-continue-watching">
-                            </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-continue-watching" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
         </div>
 
         <div class="language-section" id="section-collections">
@@ -1097,73 +1075,27 @@ body {
       </div>
     </div>
 
+    <div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-labelledby="clearHistoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="clearHistoryModalLabel">Clear Watch History</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to clear your entire watch history? This action cannot be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmClearHistory">Clear History</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE_URL = 'https://thiraibackend.onrender.com';
-
-        // --- NEW: CONTINUE WATCHING LOGIC ---
-        const CACHE_KEY = 'thirai_continue_watching';
-        
-        function saveToContinueWatching(movie) {
-            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            // Remove duplicate if it exists to move it to the front
-            history = history.filter(item => item.url !== movie.url);
-            history.unshift(movie);
-            // Limit to top 20 items
-            if (history.length > 20) history.pop();
-            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-        }
-
-        function renderContinueWatching() {
-            const container = document.getElementById('movies-row-continue-watching');
-            const section = document.getElementById('section-continue-watching');
-            const history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-
-            if (history.length === 0) {
-                section.style.display = 'none';
-                return;
-            }
-
-            section.style.display = 'block';
-            container.innerHTML = history.map(movie => `
-                <div class="col">
-                    <div class="movie-card">
-                        <a href="${movie.url}" class="movie-link">
-                            <img src="${movie.img}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
-                            <div class="movie-title-text">${movie.title}</div>
-                        </a>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Trigger scroll visibility check
-            const prevBtn = document.getElementById('prev-btn-continue-watching');
-            const nextBtn = document.getElementById('next-btn-continue-watching');
-            updateScrollButtonsVisibility(container, prevBtn, nextBtn);
-        }
-
-        // Global click listener to catch movie card clicks
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('.movie-link');
-            if (link) {
-                const url = link.getAttribute('href');
-                // Only log links that go to the watch page
-                if (url && url.includes('/watch')) {
-                    const card = link.closest('.movie-card');
-                    const title = card.querySelector('.movie-title-text').textContent;
-                    const img = card.querySelector('.movie-img').src;
-                    saveToContinueWatching({ title, img, url });
-                }
-            }
-        });
-
-        document.getElementById('clear-continue-watching')?.addEventListener('click', () => {
-            if (confirm('Clear your watching history?')) {
-                localStorage.removeItem(CACHE_KEY);
-                renderContinueWatching();
-            }
-        });
-        // --- END CONTINUE WATCHING LOGIC ---
 
         // --- Element Selectors ---
         const body = document.body;
@@ -1232,7 +1164,6 @@ body {
             applyTheme(localStorage.getItem('theme') || 'system');
             updateLogoHeight();
             updateLogoLink();
-            renderContinueWatching(); // Load Continue Watching on startup
         });
         
         // Listen for system theme changes
@@ -1310,6 +1241,39 @@ function updateLogoLink() {
             event.preventDefault();
             const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
             aboutModal.show();
+        });
+
+        // --- CLEAR HISTORY MODAL LOGIC ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const clearHistoryBtn = document.getElementById('clearHistoryButton');
+            const confirmClearBtn = document.getElementById('confirmClearHistory');
+            const clearModalEl = document.getElementById('clearHistoryModal');
+            const clearModal = new bootstrap.Modal(clearModalEl);
+
+            if (clearHistoryBtn) {
+                clearHistoryBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    clearModal.show();
+                });
+            }
+
+            if (confirmClearBtn) {
+                confirmClearBtn.addEventListener('click', function() {
+                    // Logic to clear watch history from storage
+                    localStorage.removeItem('watchHistory');
+                    
+                    // Provide visual feedback
+                    this.innerHTML = '<i class="bi bi-check-lg"></i> Cleared';
+                    this.disabled = true;
+
+                    setTimeout(() => {
+                        clearModal.hide();
+                        // Reset button for future use
+                        this.innerHTML = 'Clear History';
+                        this.disabled = false;
+                    }, 1000);
+                });
+            }
         });
 
         // --- START: MODIFIED SEARCH LOGIC ---
@@ -1394,7 +1358,7 @@ function updateLogoLink() {
               { "name": "Shruti Haasan", "image_url": "https://sund-images.sunnxt.com/131431/250x375_ShrutiHaasan_131431_78778c01-540b-4576-a883-699ec7224571.jpg", "actor_code": "7fCylLNfVi" },
               { "name": "Priyamani", "image_url": "https://sund-images.sunnxt.com/131415/250x375_Priyamani_131415_7a92265f-5432-4e9e-a38c-46e2200c522c.jpg", "actor_code": "1mh1dheOZR" },
               { "name": "Simran", "image_url": "https://sund-images.sunnxt.com/131407/250x375_Simran_131407_a9b95132-9205-420d-9f5f-9e6a8bba22e0.jpg", "actor_code": "33rNUL3JZx" },
-              { "name": "Aishwarya Rajesh", "image_url": "https://sund-images.sunnxt.com/131411/250x375_AishwaryaRajesh_131411_c7758ce1-6327-41b1-bd5c-7f84ac947bf3.jpg", "actor_code": "CeT6162PqU" }
+              { "name": "Aishwarya Rajesh", "image_url": "https://sund-images.sunnxt.com/131411/250x375_AishwaryaRajesh_131411_c7758ce1-6327-41_b1-bd5c-7f84ac947bf3.jpg", "actor_code": "CeT6162PqU" }
         ];
 
         function renderCollections(type) {
@@ -1458,7 +1422,7 @@ function updateLogoLink() {
 
 
         // --- MOVIE LOADING LOGIC ---
-        const languageSections = document.querySelectorAll('.language-section:not(#section-collections):not(#section-continue-watching)');
+        const languageSections = document.querySelectorAll('.language-section:not(#section-collections)');
         const languagePages = {};
 
         async function loadMovies(language, category, pageToLoad) {
