@@ -1,49 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-HKV7GQ766F');
+    </script>
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-HKV7GQ766F');
-</script>
-
-<script>
-  (function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const movieCode = urlParams.get('film');
-
-    if (movieCode) {
-      const formID = "1FAIpQLSeg_JCKjxY_5W977CB5-hFqLpemBCw_o477qV-6vlDKFFJ_VQ";
-      const entryID = "entry.132457679"; 
-      const finalURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${encodeURIComponent(movieCode)}&submit=Submit`;
-
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(finalURL);
-      } else {
-        fetch(finalURL, { mode: 'no-cors' });
-      }
-    }
-  })();
-</script>
- 
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-
-    <meta name="screen-orientation" content="landscape">
-    <link rel="manifest" href="/manifest.json">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Thirai">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Sun TV - Thirai</title>
+    <title>Sun TV HDR - Thirai</title>
     <link rel="icon" type="image/png" href="/static/favicon.png"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    
     <style>
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -124,7 +97,7 @@
         <div class="custom-controls-overlay" id="customControlsOverlay">
             <div class="top-controls">
                 <button id="backButton" class="top-button"><i class="bi bi-arrow-left"></i></button>
-                <div class="movie-title-display" id="movieTitleDisplay">Sun TV Live</div>
+                <div class="movie-title-display" id="movieTitleDisplay">Sun TV HDR Live</div>
                 <button id="magnificationButton" class="top-button"><i class="bi bi-zoom-in"></i></button>
                 <button id="castButton" class="top-button" style="display: none;"><i class="bi bi-cast"></i></button>
             </div>
@@ -132,8 +105,8 @@
             <div class="center-controls">
                 <button id="rewindButton" class="control-button"><i class="bi bi-arrow-counterclockwise"></i></button>
                 <button id="playPauseButton" class="control-button">
-                    <i class="bi bi-play-fill"></i>
-                    <div class="spinner-border" role="status" style="display: none;"></div>
+                    <i class="bi bi-play-fill" id="playIcon"></i>
+                    <div class="spinner-border" id="loadingSpinner" role="status" style="display: none;"></div>
                 </button>
                 <button id="forwardButton" class="control-button"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
@@ -152,8 +125,8 @@
         const moviePlayer = document.getElementById('moviePlayer');
         const customControlsOverlay = document.getElementById('customControlsOverlay');
         const playPauseButton = document.getElementById('playPauseButton');
-        const playPauseIcon = playPauseButton.querySelector('i');
-        const loadingSpinner = playPauseButton.querySelector('.spinner-border');
+        const playIcon = document.getElementById('playIcon');
+        const loadingSpinner = document.getElementById('loadingSpinner');
         const rewindButton = document.getElementById('rewindButton');
         const forwardButton = document.getElementById('forwardButton');
         const progressBarContainer = document.getElementById('progressBarContainer');
@@ -162,42 +135,69 @@
         const backButton = document.getElementById('backButton');
         const videoPlayerWrapper = document.getElementById('videoPlayerWrapper');
         const fullscreenButton = document.getElementById('fullscreenButton');
-        const fullscreenIcon = fullscreenButton.querySelector('i');
-        const movieTitleDisplay = document.getElementById('movieTitleDisplay');
         const magnificationButton = document.getElementById('magnificationButton');
         const magnificationIcon = magnificationButton.querySelector('i');
 
         let zoomLevel = 1;
-        let isDraggingProgressBar = false;
         let controlsTimeout;
         const FADE_TIMEOUT_SECONDS = 7;
         const SEEK_TIME = 10;
 
-        // Direct Link Integration
-        const LIVE_LINK = "https://livestream10.sunnxt.com/DolbyVision/SunTV_HDR/SunTV_HDR_Endpoints/SunTV-HDR10-IN-index.m3u8"
+        // NEW STREAM LINK
+        const LIVE_LINK = "https://livestream10.sunnxt.com/DolbyVision/SunTV_HDR/SunTV_HDR_Endpoints/SunTV-HDR10-IN-index.m3u8";
 
         function showControls() {
             customControlsOverlay.classList.add('visible');
             clearTimeout(controlsTimeout);
-            if (!moviePlayer.paused) controlsTimeout = setTimeout(() => customControlsOverlay.classList.remove('visible'), FADE_TIMEOUT_SECONDS * 1000);
+            if (!moviePlayer.paused) {
+                controlsTimeout = setTimeout(() => customControlsOverlay.classList.remove('visible'), FADE_TIMEOUT_SECONDS * 1000);
+            }
         }
 
-        function toggleControls() { customControlsOverlay.classList.contains('visible') ? customControlsOverlay.classList.remove('visible') : showControls(); }
+        function toggleControls() {
+            customControlsOverlay.classList.contains('visible') ? customControlsOverlay.classList.remove('visible') : showControls();
+        }
 
-        // Event Listeners
+        // Initialize Video with HLS support
+        function loadStream() {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(LIVE_LINK);
+                hls.attachMedia(moviePlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    moviePlayer.play().catch(() => showControls());
+                });
+            } 
+            else if (moviePlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                // For Safari/iOS native support
+                moviePlayer.src = LIVE_LINK;
+                moviePlayer.addEventListener('loadedmetadata', function() {
+                    moviePlayer.play().catch(() => showControls());
+                });
+            }
+        }
+
+        // Control Listeners
         playPauseButton.addEventListener('click', () => moviePlayer.paused ? moviePlayer.play() : moviePlayer.pause());
         rewindButton.addEventListener('click', () => moviePlayer.currentTime -= SEEK_TIME);
         forwardButton.addEventListener('click', () => moviePlayer.currentTime += SEEK_TIME);
         backButton.addEventListener('click', () => window.history.back());
         
+        moviePlayer.addEventListener('waiting', () => {
+            loadingSpinner.style.display = 'block';
+            playIcon.style.display = 'none';
+        });
+
         moviePlayer.addEventListener('playing', () => {
             loadingSpinner.style.display = 'none';
-            playPauseIcon.style.display = 'block';
-            playPauseIcon.className = 'bi bi-pause-fill';
+            playIcon.style.display = 'block';
+            playIcon.className = 'bi bi-pause-fill';
+            showControls();
         });
 
         moviePlayer.addEventListener('pause', () => {
-            playPauseIcon.className = 'bi bi-play-fill';
+            playIcon.className = 'bi bi-play-fill';
+            showControls();
         });
 
         moviePlayer.addEventListener('timeupdate', () => {
@@ -210,9 +210,16 @@
 
         magnificationButton.addEventListener('click', () => {
             zoomLevel = (zoomLevel + 1) % 3;
-            if(zoomLevel === 0) { moviePlayer.style.transform = 'scale(0.9)'; magnificationIcon.className = 'bi bi-zoom-out'; }
-            else if(zoomLevel === 1) { moviePlayer.style.transform = 'scale(1)'; magnificationIcon.className = 'bi bi-zoom-in'; }
-            else { moviePlayer.style.transform = 'scale(1.2)'; magnificationIcon.className = 'bi bi-search'; }
+            if(zoomLevel === 0) { 
+                moviePlayer.style.transform = 'scale(0.9)'; 
+                magnificationIcon.className = 'bi bi-zoom-out'; 
+            } else if(zoomLevel === 1) { 
+                moviePlayer.style.transform = 'scale(1)'; 
+                magnificationIcon.className = 'bi bi-zoom-in'; 
+            } else { 
+                moviePlayer.style.transform = 'scale(1.2)'; 
+                magnificationIcon.className = 'bi bi-search'; 
+            }
         });
 
         fullscreenButton.addEventListener('click', () => {
@@ -220,19 +227,13 @@
             else document.exitFullscreen();
         });
 
-        // Initialize Video Source
-        function fetchMovieSource() {
-            moviePlayer.src = LIVE_LINK;
-            moviePlayer.load();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchMovieSource();
-            showControls();
-        });
-
         videoPlayerWrapper.addEventListener('click', (e) => {
             if (!e.target.closest('.control-button, .top-button, .progress-bar-container')) toggleControls();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStream();
+            showControls();
         });
     </script>
 </body>
