@@ -375,12 +375,83 @@
             box-shadow: none; /* Remove shadow */
             padding: 0.5rem; /* Adjust padding for better fit */
             font-size: 1.8rem; /* Smaller icon size for the bottom bar */
+            order: 10; /* Make sure fullscreen is always last */
         }
 
         #fullscreenButton:hover:not(:disabled) {
             background: rgba(255, 255, 255, 0.1); /* Subtle hover for transparent button */
             transform: scale(1.1); /* Slightly enlarge on hover */
         }
+
+        /* --- NEW: Volume Control Styling --- */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            order: 4; /* Place after time display */
+            position: relative;
+        }
+
+        #volumeButton {
+            background: transparent;
+            box-shadow: none;
+            padding: 0.5rem;
+            font-size: 1.8rem; /* Match fullscreen size */
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        #volumeButton:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .volume-slider {
+            -webkit-appearance: none; /* Override default CSS styles */
+            appearance: none;
+            width: 0px; /* Hidden by default for clean UI */
+            height: 4px; /* Slim track */
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            outline: none;
+            opacity: 0;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+
+        .volume-container:hover .volume-slider,
+        .volume-slider:active,
+        .volume-slider:focus {
+            width: 70px; /* Expand on hover */
+            opacity: 1;
+        }
+
+        /* Slider Thumb Styling */
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: none;
+        }
+        /* --- END NEW --- */
+
     </style>
 </head>
 <body>
@@ -394,7 +465,7 @@
                     <i class="bi bi-arrow-left"></i>
                 </button>
                 <div class="movie-title-display" id="movieTitleDisplay">Thirai</div>
-                <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button">
+                <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button" style="display: none;">
                     <i class="bi bi-download"></i>
                 </a>
                 <button id="magnificationButton" class="top-button">
@@ -425,6 +496,13 @@
                     <div class="progress-bar-handle" id="progressBarHandle"></div>
                 </div>
                 <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+                
+                <div class="volume-container">
+                    <button id="volumeButton">
+                        <i class="bi bi-volume-up-fill"></i>
+                    </button>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1">
+                </div>
                 <button id="fullscreenButton" class="control-button">
                     <i class="bi bi-arrows-fullscreen"></i>
                 </button>
@@ -459,6 +537,13 @@
         
         // --- NEW: Cast Button Element ---
         const castButton = document.getElementById('castButton');
+        // --- END NEW ---
+        
+        // --- NEW: Volume Elements ---
+        const volumeButton = document.getElementById('volumeButton');
+        const volumeIcon = volumeButton.querySelector('i');
+        const volumeSlider = document.getElementById('volumeSlider');
+        let lastVolume = 1;
         // --- END NEW ---
 
         let isDraggingProgressBar = false;
@@ -523,7 +608,11 @@
 
         videoPlayerWrapper.addEventListener('click', (event) => {
             const currentTime = new Date().getTime();
-            const clickedOnControl = event.target.closest('.control-button') || event.target.closest('.top-button') || event.target.closest('.progress-bar-container') || event.target.closest('.movie-title-display');
+            const clickedOnControl = event.target.closest('.control-button') || 
+                                     event.target.closest('.top-button') || 
+                                     event.target.closest('.progress-bar-container') || 
+                                     event.target.closest('.movie-title-display') ||
+                                     event.target.closest('.volume-container'); // Include volume container
 
             if (!clickedOnControl && (currentTime - lastTapTime > DOUBLE_TAP_THRESHOLD_MS)) {
                 toggleControls();
@@ -552,6 +641,44 @@
                 showControls(); // Ensure controls stay visible or timer resets
             }
         });
+
+        // --- NEW: Volume Logic ---
+        function updateVolumeIcon(volume) {
+            volumeIcon.className = ''; // Clear existing
+            if (volume === 0 || moviePlayer.muted) {
+                volumeIcon.classList.add('bi', 'bi-volume-mute-fill');
+            } else if (volume < 0.5) {
+                volumeIcon.classList.add('bi', 'bi-volume-down-fill');
+            } else {
+                volumeIcon.classList.add('bi', 'bi-volume-up-fill');
+            }
+        }
+
+        volumeSlider.addEventListener('input', (e) => {
+            const volume = parseFloat(e.target.value);
+            moviePlayer.volume = volume;
+            moviePlayer.muted = volume === 0;
+            updateVolumeIcon(volume);
+            showControls();
+        });
+
+        volumeButton.addEventListener('click', () => {
+            if (moviePlayer.muted || moviePlayer.volume === 0) {
+                // Unmute
+                moviePlayer.muted = false;
+                moviePlayer.volume = lastVolume || 1;
+                volumeSlider.value = lastVolume || 1;
+            } else {
+                // Mute
+                lastVolume = moviePlayer.volume;
+                moviePlayer.muted = true;
+                moviePlayer.volume = 0;
+                volumeSlider.value = 0;
+            }
+            updateVolumeIcon(moviePlayer.volume);
+            showControls();
+        });
+        // --- END NEW ---
 
         // --- Loading/Buffering Logic ---
         moviePlayer.addEventListener('waiting', () => {
@@ -813,7 +940,8 @@
             const clickedOnControl = event.target.closest('.control-button') ||
                                      event.target.closest('.top-button') ||
                                      event.target.closest('.progress-bar-container') ||
-                                     event.target.closest('.movie-title-display');
+                                     event.target.closest('.movie-title-display') ||
+                                     event.target.closest('.volume-container');
 
             if (clickedOnControl) {
                 // If a control was tapped, prevent the main video wrapper tap logic from executing.
@@ -879,6 +1007,11 @@
                     event.preventDefault();
                     fullscreenButton.click();
                     break;
+                case 'm':
+                case 'M': // 'm' for mute
+                    event.preventDefault();
+                    volumeButton.click();
+                    break;
             }
         });
         
@@ -916,6 +1049,11 @@
                         moviePlayer.src = data.video_url;
                         moviePlayer.load();
                         downloadButton.href = data.video_url;
+                        
+                        // --- NEW: Show download button now that URL is ready ---
+                        downloadButton.style.display = 'flex';
+                        // --- END NEW ---
+                        
                         movieTitleDisplay.textContent = data.title;
                         // NEW: Update the document title (tab name)
                         document.title = data.title;
