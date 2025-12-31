@@ -901,7 +901,40 @@
         });
 
     </script>
+
+<script>
+    // --- CONTINUE WATCHING CACHE LOGIC (FROM gurch.html) ---
+    const CACHE_KEY = 'thirai_continue_watching';
+
+    function saveToContinueWatching(movie) {
+        let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+        history = history.filter(item => item.url !== movie.url);
+        history.unshift(movie);
+        if (history.length > 20) history.pop();
+        localStorage.setItem(CACHE_KEY, JSON.stringify(history));
+    }
+
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('.movie-link');
+        if (!link) return;
+
+        const url = link.getAttribute('href');
+        if (url && url.includes('watch')) {
+            const card = link.closest('.movie-card');
+            if (!card) return;
+
+            const title =
+                card.querySelector('.movie-title-text')?.textContent ||
+                card.querySelector('.movie-title')?.textContent ||
+                '';
+
+            const img = card.querySelector('.movie-img')?.src || '';
+            saveToContinueWatching({ title, img, url });
+        }
+    });
+    // --- END CONTINUE WATCHING CACHE LOGIC ---
+</script>
+
 </body>
 
 </html>
-
