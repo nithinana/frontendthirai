@@ -714,6 +714,8 @@
 
             const tryFetch = async (baseUrl) => {
                 const fullUrl = `${baseUrl}${endpoint}`;
+                // --- Log which API is being attempted ---
+                console.log(`Using API: ${baseUrl}`);
                 const res = await fetch(fullUrl);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return await res.json();
@@ -726,7 +728,8 @@
                     data = await tryFetch(PRIMARY_API_URL);
                     currentApiBase = PRIMARY_API_URL;
                 } catch (primaryError) {
-                    console.warn('Primary API failed, trying fallback...', primaryError);
+                    // --- Log warning for Primary API failure ---
+                    console.warn(`Primary API (${PRIMARY_API_URL}) failed. Error: ${primaryError.message}. Attempting fallback...`);
                     // Try Fallback API
                     data = await tryFetch(FALLBACK_API_URL);
                     currentApiBase = FALLBACK_API_URL;
