@@ -2,125 +2,13 @@
 <html lang="en">
 <head>
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F">
-// Confirm clear history from modal
-document.getElementById('confirmClearHistory')?.addEventListener('click', () => {
-    localStorage.removeItem(CACHE_KEY);
-    renderContinueWatching();
-    bootstrap.Modal.getInstance(document.getElementById('clearHistoryModal')).hide();
-});
-
-
-// --- FIX: Scroll buttons functionality ---
-function attachScrollControls(rowId, prevId, nextId) {
-    const row = document.getElementById(rowId);
-    const prev = document.getElementById(prevId);
-    const next = document.getElementById(nextId);
-    if (!row || !prev || !next) return;
-
-    const scrollAmount = () => row.clientWidth * 0.8;
-
-    prev.addEventListener('click', () => {
-        row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', () => {
-        row.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    [
-        ['movies-row-continue-watching','prev-btn-continue-watching','next-btn-continue-watching'],
-        ['movies-row-collections','prev-btn-collections','next-btn-collections'],
-        ['movies-row-tamil','prev-btn-tamil','next-btn-tamil'],
-        ['movies-row-hindi','prev-btn-hindi','next-btn-hindi'],
-        ['movies-row-telugu','prev-btn-telugu','next-btn-telugu'],
-        ['movies-row-malayalam','prev-btn-malayalam','next-btn-malayalam'],
-        ['movies-row-kannada','prev-btn-kannada','next-btn-kannada'],
-        ['movies-row-bengali','prev-btn-bengali','next-btn-bengali'],
-        ['movies-row-marathi','prev-btn-marathi','next-btn-marathi'],
-        ['movies-row-punjabi','prev-btn-punjabi','next-btn-punjabi']
-    ].forEach(ids => attachScrollControls(...ids));
-});
-
-
-// Remove individual continue-watching item
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.poster-close');
-    if (!btn) return;
-    const card = btn.closest('.movie-card');
-    const link = card?.querySelector('.movie-link');
-    if (!link) return;
-    const url = link.getAttribute('href');
-    let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-    history = history.filter(item => item.url !== url);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    renderContinueWatching();
-});
-
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'G-HKV7GQ766F');
-
-// Confirm clear history from modal
-document.getElementById('confirmClearHistory')?.addEventListener('click', () => {
-    localStorage.removeItem(CACHE_KEY);
-    renderContinueWatching();
-    bootstrap.Modal.getInstance(document.getElementById('clearHistoryModal')).hide();
-});
-
-
-// --- FIX: Scroll buttons functionality ---
-function attachScrollControls(rowId, prevId, nextId) {
-    const row = document.getElementById(rowId);
-    const prev = document.getElementById(prevId);
-    const next = document.getElementById(nextId);
-    if (!row || !prev || !next) return;
-
-    const scrollAmount = () => row.clientWidth * 0.8;
-
-    prev.addEventListener('click', () => {
-        row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', () => {
-        row.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    [
-        ['movies-row-continue-watching','prev-btn-continue-watching','next-btn-continue-watching'],
-        ['movies-row-collections','prev-btn-collections','next-btn-collections'],
-        ['movies-row-tamil','prev-btn-tamil','next-btn-tamil'],
-        ['movies-row-hindi','prev-btn-hindi','next-btn-hindi'],
-        ['movies-row-telugu','prev-btn-telugu','next-btn-telugu'],
-        ['movies-row-malayalam','prev-btn-malayalam','next-btn-malayalam'],
-        ['movies-row-kannada','prev-btn-kannada','next-btn-kannada'],
-        ['movies-row-bengali','prev-btn-bengali','next-btn-bengali'],
-        ['movies-row-marathi','prev-btn-marathi','next-btn-marathi'],
-        ['movies-row-punjabi','prev-btn-punjabi','next-btn-punjabi']
-    ].forEach(ids => attachScrollControls(...ids));
-});
-
-
-// Remove individual continue-watching item
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.poster-close');
-    if (!btn) return;
-    const card = btn.closest('.movie-card');
-    const link = card?.querySelector('.movie-link');
-    if (!link) return;
-    const url = link.getAttribute('href');
-    let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-    history = history.filter(item => item.url !== url);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    renderContinueWatching();
-});
-
 </script>
     
     <meta charset="UTF-8">
@@ -479,6 +367,7 @@ body {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             height: 100%;
             margin-right: 1rem;
+            position: relative; /* Essential for the remove button */
         }
         .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
         .movie-link { text-decoration: none; color: inherit; }
@@ -489,6 +378,35 @@ body {
         .movie-title-text {
             padding: 0.75rem 1rem; font-weight: 600; font-size: 0.9rem;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        /* NEW: Remove Item Button (X) */
+        .remove-watch-item {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20; /* Higher than card link */
+            color: #fff;
+            font-weight: 900;
+            font-size: 14px;
+            line-height: 1;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .remove-watch-item:hover {
+            background-color: #dc3545; /* Red on hover */
+            transform: scale(1.1);
+            border-color: #dc3545;
         }
 
         /* NEW: Styles for the new reload button */
@@ -624,6 +542,14 @@ body {
         }
         body.dark-mode .btn-close {
             --bs-btn-close-color: #fff;
+        }
+        
+        /* NEW: Backdrop Blur for Modals */
+        .modal-backdrop.show {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background-color: rgba(0,0,0,0.5); /* Semi-transparent black */
+            opacity: 1 !important; /* Force opacity to handle the blur visible */
         }
         
         /* NEW: Styles for the scroll buttons */
@@ -794,34 +720,9 @@ body {
             }
         }
 
-    
-/* NEW: Poster close button */
-.poster-close {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(4px);
-    border: none;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    cursor: pointer;
-}
-.poster-close:hover {
-    background: rgba(0,0,0,0.55);
-}
-.movie-card {
-    position: relative;
-}
-
-</style>
+    </style>
 </head>
+  
 <body>
     <div id="loadingOverlay">
         <img id="overlayLogo" src="/static/thiraiblack.png" alt="Thirai Logo">
@@ -889,16 +790,75 @@ body {
     </header>
 
     <main class="container-fluid mt-2">
-        <div class="promo-banner">
-            <img src="https://image.tmdb.org/t/p/original/6xoVGz8HWkR9KGEnWaARRFbiiLl.png" alt="Movie Logo" class="movie-logo">
-            <a href="/watch?url=https%3A//einthusan.tv/movie/watch/6GAx/%3Flang%3Dtamil&title=Viduthalai" class="btn">
-                <i class="bi bi-play-fill"></i> Watch Now
-            </a>
-        </div>
+        <div class="promo-banner" id="dynamicBanner"></div>
+
+        <style>
+        .promo-banner{
+          width:100%;
+          height:300px;
+          position:relative;
+          border-radius:15px;
+          overflow:hidden;
+          margin-bottom:3rem;
+          background-size:cover;
+          background-position:center;
+          box-shadow:0 4px 8px rgba(0,0,0,.25);
+        }
+        .promo-banner::after{
+          content:"";
+          position:absolute;
+          inset:0;
+          background:linear-gradient(to top,var(--bg-color) 5%,rgba(0,0,0,0.35) 45%,rgba(0,0,0,0.2));
+        }
+        .banner-content{
+          position:absolute;
+          bottom:20px;
+          left:5%;
+          z-index:2;
+        }
+        .banner-logo{
+          max-width:300px;
+          margin-bottom:14px;
+        }
+        @media(max-width:768px){
+          .promo-banner{height:150px}
+          .banner-logo{max-width:150px}
+        }
+        </style>
+
+        <script>
+        const TMDB_KEY = '926e94b0f70b5bed8417b679652366ab';
+        const IMG = 'https://image.tmdb.org/t/p/original';
+
+        async function loadTamilBanner(){
+          const res = await fetch('/cache/tamilpopular.json');
+          const list = await res.json();
+
+          for(const m of list){
+            try{
+              const d = await fetch(`https://api.themoviedb.org/3/movie/${m.tmdb_id}?api_key=${TMDB_KEY}&append_to_response=images`).then(r=>r.json());
+              const logo = d.images.logos?.find(l=>l.iso_639_1==='ta'||l.iso_639_1==='en');
+              if(!logo || !d.backdrop_path) continue;
+
+              const banner = document.getElementById('dynamicBanner');
+              banner.style.backgroundImage = `url(${IMG}${d.backdrop_path})`;
+              banner.innerHTML = `
+                <div class="banner-content">
+                  <img class="banner-logo" src="${IMG}${logo.file_path}" alt="${d.title}">
+                  <a href="${m.watch_url}" class="btn">
+                    <i class="bi bi-play-fill"></i> Play Now
+                  </a>
+                </div>`;
+              break;
+            }catch(e){continue}
+          }
+        }
+        loadTamilBanner();
+        </script>
 
         <div class="language-section" id="section-continue-watching" style="display: none;">
             <div class="language-header">
-                <h2 class="language-title">Continue Watching</h2>
+                <h2 class="language-title">Continue</h2>
                 <button class="btn btn-sm text-muted" id="clear-continue-watching" title="Clear History">
                     <i class="bi bi-trash"></i> Clear
                 </button>
@@ -1214,6 +1174,12 @@ body {
             </div>
         </div>
     </main>
+
+  <footer class="container-fluid text-center py-4 mt-5 border-top" style="border-color: var(--border-color) !important;">
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+            ⓘ Thirai does not store any media on its servers, and only embeds content hosted by 3rd party services.
+        </p>
+    </footer>
     
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -1234,64 +1200,25 @@ body {
         </div>
       </div>
     </div>
+    
+    <div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-labelledby="clearHistoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="clearHistoryModalLabel">Clear History</h5>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to clear your watching history?
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            <button type="button" class="btn btn-danger" id="confirmClearHistoryBtn">Okay</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
-// Confirm clear history from modal
-document.getElementById('confirmClearHistory')?.addEventListener('click', () => {
-    localStorage.removeItem(CACHE_KEY);
-    renderContinueWatching();
-    bootstrap.Modal.getInstance(document.getElementById('clearHistoryModal')).hide();
-});
-
-
-// --- FIX: Scroll buttons functionality ---
-function attachScrollControls(rowId, prevId, nextId) {
-    const row = document.getElementById(rowId);
-    const prev = document.getElementById(prevId);
-    const next = document.getElementById(nextId);
-    if (!row || !prev || !next) return;
-
-    const scrollAmount = () => row.clientWidth * 0.8;
-
-    prev.addEventListener('click', () => {
-        row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', () => {
-        row.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    [
-        ['movies-row-continue-watching','prev-btn-continue-watching','next-btn-continue-watching'],
-        ['movies-row-collections','prev-btn-collections','next-btn-collections'],
-        ['movies-row-tamil','prev-btn-tamil','next-btn-tamil'],
-        ['movies-row-hindi','prev-btn-hindi','next-btn-hindi'],
-        ['movies-row-telugu','prev-btn-telugu','next-btn-telugu'],
-        ['movies-row-malayalam','prev-btn-malayalam','next-btn-malayalam'],
-        ['movies-row-kannada','prev-btn-kannada','next-btn-kannada'],
-        ['movies-row-bengali','prev-btn-bengali','next-btn-bengali'],
-        ['movies-row-marathi','prev-btn-marathi','next-btn-marathi'],
-        ['movies-row-punjabi','prev-btn-punjabi','next-btn-punjabi']
-    ].forEach(ids => attachScrollControls(...ids));
-});
-
-
-// Remove individual continue-watching item
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.poster-close');
-    if (!btn) return;
-    const card = btn.closest('.movie-card');
-    const link = card?.querySelector('.movie-link');
-    if (!link) return;
-    const url = link.getAttribute('href');
-    let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-    history = history.filter(item => item.url !== url);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    renderContinueWatching();
-});
-
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE_URL = 'https://thiraibackend.onrender.com';
 
@@ -1308,6 +1235,7 @@ document.addEventListener('click', (e) => {
             localStorage.setItem(CACHE_KEY, JSON.stringify(history));
         }
 
+        // UPDATED: Render function with "X" buttons
         function renderContinueWatching() {
             const container = document.getElementById('movies-row-continue-watching');
             const section = document.getElementById('section-continue-watching');
@@ -1321,7 +1249,8 @@ document.addEventListener('click', (e) => {
             section.style.display = 'block';
             container.innerHTML = history.map(movie => `
                 <div class="col">
-                    <div class="movie-card"><button class="poster-close" title="Remove"><i class="bi bi-x"></i></button>
+                    <div class="movie-card">
+                        <div class="remove-watch-item" data-url="${movie.url}" title="Remove">✕</div>
                         <a href="${movie.url}" class="movie-link">
                             <img src="${movie.img}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
                             <div class="movie-title-text">${movie.title}</div>
@@ -1338,6 +1267,15 @@ document.addEventListener('click', (e) => {
 
         // Global click listener to catch movie card clicks
         document.addEventListener('click', (e) => {
+            // NEW: Handle remove item click
+            if (e.target.classList.contains('remove-watch-item')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const urlToRemove = e.target.getAttribute('data-url');
+                removeSingleWatchItem(urlToRemove);
+                return;
+            }
+
             const link = e.target.closest('.movie-link');
             if (link) {
                 const url = link.getAttribute('href');
@@ -1351,14 +1289,32 @@ document.addEventListener('click', (e) => {
             }
         });
 
+        // NEW: Function to remove a single item
+        function removeSingleWatchItem(url) {
+            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+            history = history.filter(item => item.url !== url);
+            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
+            renderContinueWatching();
+        }
+
+        // UPDATED: Clear button now triggers Modal
         document.getElementById('clear-continue-watching')?.addEventListener('click', () => {
             const clearModal = new bootstrap.Modal(document.getElementById('clearHistoryModal'));
             clearModal.show();
-            return;
-                localStorage.removeItem(CACHE_KEY);
-                renderContinueWatching();
+        });
+
+        // NEW: Confirm Clear Button Action
+        document.getElementById('confirmClearHistoryBtn').addEventListener('click', () => {
+            localStorage.removeItem(CACHE_KEY);
+            renderContinueWatching();
+            // Hide the modal
+            const modalEl = document.getElementById('clearHistoryModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
             }
         });
+
         // --- END CONTINUE WATCHING LOGIC ---
 
         // --- Element Selectors ---
@@ -1824,27 +1780,30 @@ function updateLogoLink() {
         }
 
         // Add event listeners for the scroll buttons
-        scrollButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const lang = button.id.split('-').pop();
-                const scrollContainer = document.getElementById(`movies-row-${lang}`);
-                
-                if (!scrollContainer) return;
+// PASTE THIS NEW BLOCK:
+scrollButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Find the parent section first
+        const section = button.closest('.language-section');
+        // Find the specific movies-row inside that section
+        const scrollContainer = section.querySelector('.movies-row');
+        
+        if (!scrollContainer) return;
 
-                const movieCard = scrollContainer.querySelector('.movie-card');
-                if (!movieCard) return;
+        const movieCard = scrollContainer.querySelector('.movie-card');
+        if (!movieCard) return;
 
-                // Calculate the width of three movie cards plus their margins
-                const movieCardWidth = movieCard.offsetWidth;
-                const scrollAmount = movieCardWidth * 3 + (16 * 3); // 16px is the margin-right of movie-card
+        // Scroll by 3 cards at a time
+        const movieCardWidth = movieCard.offsetWidth;
+        const scrollAmount = movieCardWidth * 3 + (16 * 3); 
 
-                if (button.classList.contains('scroll-btn-prev')) {
-                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                } else if (button.classList.contains('scroll-btn-next')) {
-                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                }
-            });
-        });
+        if (button.classList.contains('scroll-btn-prev')) {
+            scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        } else if (button.classList.contains('scroll-btn-next')) {
+            scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    });
+});
 
         // Update the scroll button visibility on initial page load and on scroll
         const allSections = document.querySelectorAll('.language-section'); // Updated to include Collections
@@ -1870,63 +1829,7 @@ function updateLogoLink() {
                 observer.observe(scrollContainer, { childList: true });
             }
         });
-    
-// Confirm clear history from modal
-document.getElementById('confirmClearHistory')?.addEventListener('click', () => {
-    localStorage.removeItem(CACHE_KEY);
-    renderContinueWatching();
-    bootstrap.Modal.getInstance(document.getElementById('clearHistoryModal')).hide();
-});
-
-
-// --- FIX: Scroll buttons functionality ---
-function attachScrollControls(rowId, prevId, nextId) {
-    const row = document.getElementById(rowId);
-    const prev = document.getElementById(prevId);
-    const next = document.getElementById(nextId);
-    if (!row || !prev || !next) return;
-
-    const scrollAmount = () => row.clientWidth * 0.8;
-
-    prev.addEventListener('click', () => {
-        row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', () => {
-        row.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    [
-        ['movies-row-continue-watching','prev-btn-continue-watching','next-btn-continue-watching'],
-        ['movies-row-collections','prev-btn-collections','next-btn-collections'],
-        ['movies-row-tamil','prev-btn-tamil','next-btn-tamil'],
-        ['movies-row-hindi','prev-btn-hindi','next-btn-hindi'],
-        ['movies-row-telugu','prev-btn-telugu','next-btn-telugu'],
-        ['movies-row-malayalam','prev-btn-malayalam','next-btn-malayalam'],
-        ['movies-row-kannada','prev-btn-kannada','next-btn-kannada'],
-        ['movies-row-bengali','prev-btn-bengali','next-btn-bengali'],
-        ['movies-row-marathi','prev-btn-marathi','next-btn-marathi'],
-        ['movies-row-punjabi','prev-btn-punjabi','next-btn-punjabi']
-    ].forEach(ids => attachScrollControls(...ids));
-});
-
-
-// Remove individual continue-watching item
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.poster-close');
-    if (!btn) return;
-    const card = btn.closest('.movie-card');
-    const link = card?.querySelector('.movie-link');
-    if (!link) return;
-    const url = link.getAttribute('href');
-    let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-    history = history.filter(item => item.url !== url);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    renderContinueWatching();
-});
-
-</script>
+    </script>
 
 <script>
 let deferredPromptInline;
@@ -1945,82 +1848,7 @@ document.getElementById('installAppButtonInline')?.addEventListener('click', () 
     deferredPromptInline.prompt();
   }
 });
-
-// Confirm clear history from modal
-document.getElementById('confirmClearHistory')?.addEventListener('click', () => {
-    localStorage.removeItem(CACHE_KEY);
-    renderContinueWatching();
-    bootstrap.Modal.getInstance(document.getElementById('clearHistoryModal')).hide();
-});
-
-
-// --- FIX: Scroll buttons functionality ---
-function attachScrollControls(rowId, prevId, nextId) {
-    const row = document.getElementById(rowId);
-    const prev = document.getElementById(prevId);
-    const next = document.getElementById(nextId);
-    if (!row || !prev || !next) return;
-
-    const scrollAmount = () => row.clientWidth * 0.8;
-
-    prev.addEventListener('click', () => {
-        row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', () => {
-        row.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    [
-        ['movies-row-continue-watching','prev-btn-continue-watching','next-btn-continue-watching'],
-        ['movies-row-collections','prev-btn-collections','next-btn-collections'],
-        ['movies-row-tamil','prev-btn-tamil','next-btn-tamil'],
-        ['movies-row-hindi','prev-btn-hindi','next-btn-hindi'],
-        ['movies-row-telugu','prev-btn-telugu','next-btn-telugu'],
-        ['movies-row-malayalam','prev-btn-malayalam','next-btn-malayalam'],
-        ['movies-row-kannada','prev-btn-kannada','next-btn-kannada'],
-        ['movies-row-bengali','prev-btn-bengali','next-btn-bengali'],
-        ['movies-row-marathi','prev-btn-marathi','next-btn-marathi'],
-        ['movies-row-punjabi','prev-btn-punjabi','next-btn-punjabi']
-    ].forEach(ids => attachScrollControls(...ids));
-});
-
-
-// Remove individual continue-watching item
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.poster-close');
-    if (!btn) return;
-    const card = btn.closest('.movie-card');
-    const link = card?.querySelector('.movie-link');
-    if (!link) return;
-    const url = link.getAttribute('href');
-    let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-    history = history.filter(item => item.url !== url);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    renderContinueWatching();
-});
-
 </script>
-
-<div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Clear history?</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        This will remove all items from Continue Watching.
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmClearHistory">Clear</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 </body>
 
 </html>
