@@ -455,21 +455,23 @@ body {
         }
 
         /* Banner styles from language.html */
-        .promo-banner {
-            width: 100%;
-            height: 300px;
-            background-image: url('https://m.media-amazon.com/images/S/pv-target-images/ff8e7b971d6595dba41c868ec44405753bf76184134ca197bccebc35ab15e638.jpg');
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 3rem;
-            display: flex; /* Use flexbox for positioning */
-            flex-direction: column;
-            align-items: flex-start; /* Align content to the left */
-            justify-content: center;
-            padding-left: 5%; /* Add padding on the left side */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
+/* Modified Promo Banner */
+.promo-banner {
+    width: 100%;
+    height: 300px;
+    /* Added a linear gradient overlay for the fade effect */
+    background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://image.tmdb.org/t/p/original/rx9kyO6YJLpXfFrU934C6i4yYMj.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding-left: 5%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
 
         .promo-banner .movie-logo {
             max-width: 300px; /* Increased logo size */
@@ -791,7 +793,7 @@ body {
 
     <main class="container-fluid mt-2">
         <div class="promo-banner">
-            <img src="https://image.tmdb.org/t/p/original/6xoVGz8HWkR9KGEnWaARRFbiiLl.png" alt="Movie Logo" class="movie-logo">
+            <img src="https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png" alt="Movie Logo" class="movie-logo">
             <a href="/watch?url=https%3A//einthusan.tv/movie/watch/6GAx/%3Flang%3Dtamil&title=Viduthalai" class="btn">
                 <i class="bi bi-play-fill"></i> Watch Now
             </a>
