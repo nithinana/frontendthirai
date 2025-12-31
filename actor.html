@@ -513,7 +513,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_BASE_URL = 'https://backendthirai-test.onrender.com/';
+        // API Base URL with Fallback Logic
+        const PRIMARY_API_URL = 'https://thiraiapi.onrender.com/';
+        const FALLBACK_API_URL = 'https://backendthirai-test.onrender.com/';
+        let API_BASE_URL = PRIMARY_API_URL;
+
         const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
 
         // --- Element Selectors ---
@@ -577,7 +581,7 @@
             }
         }
 
-        // --- Theme Management (retained from language.html) ---
+        // --- Theme Management ---
         function updateThemeAssets(isDarkMode) {
             const lightLogo = './static/thiraiblack.png';
             const darkLogo = './static/thiraiwhite.png';
@@ -627,7 +631,7 @@
             });
         }
 
-        // --- Preferred Language (retained from language.html) ---
+        // --- Preferred Language ---
         function updateDisableBtnVisibility() {
             disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
         }
@@ -673,7 +677,7 @@
             });
         }
 
-        // --- Movie Rendering (retained from language.html) ---
+        // --- Movie Rendering ---
         function renderMovies(movies, append = true) {
             if (!append) moviesContainer.innerHTML = '';
             
@@ -702,7 +706,7 @@
             moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
         }
 
-        // --- Data Fetching (MODIFIED) ---
+        // --- Data Fetching (MODIFIED for Fallback Logic) ---
         async function fetchAndRenderMovies(lang, actorId, startPage, append = true) {
             if (isLoading) return;
             isLoading = true;
@@ -718,9 +722,31 @@
 
                 for (let i = 0; i < pagesToFetch && hasMore; i++) {
                     const pageToFetch = startPage + i;
-                    const url = `${API_BASE_URL}/actors/${lang}/${actorId}?page=${pageToFetch}`;
+                    const endpoint = `${API_BASE_URL}/actors/${lang}/${actorId}?page=${pageToFetch}`;
 
-                    const res = await fetch(url);
+                    let res;
+                    try {
+                        res = await fetch(endpoint);
+                        
+                        // Fallback trigger: If response is not OK and we are on primary, switch
+                        if (!res.ok && API_BASE_URL === PRIMARY_API_URL) {
+                            console.warn('Primary API failed, trying fallback...');
+                            API_BASE_URL = FALLBACK_API_URL;
+                            const fallbackEndpoint = `${API_BASE_URL}/actors/${lang}/${actorId}?page=${pageToFetch}`;
+                            res = await fetch(fallbackEndpoint);
+                        }
+                    } catch (fetchErr) {
+                        // Network error trigger: If primary fails completely, switch
+                        if (API_BASE_URL === PRIMARY_API_URL) {
+                            console.warn('Network error on primary, switching to fallback.');
+                            API_BASE_URL = FALLBACK_API_URL;
+                            const fallbackEndpoint = `${API_BASE_URL}/actors/${lang}/${actorId}?page=${pageToFetch}`;
+                            res = await fetch(fallbackEndpoint);
+                        } else {
+                            throw fetchErr;
+                        }
+                    }
+
                     if (!res.ok) throw new Error(`HTTP error! status: ${res.status} on page ${pageToFetch}`);
                     const data = await res.json();
                     
@@ -729,7 +755,6 @@
                     
                     if (!actorName && data.actor_name) {
                         actorName = data.actor_name;
-                        // document.title remains static "Thirai"
                         document.title = "Thirai";
                     }
                 }
@@ -737,7 +762,7 @@
                 renderMovies(allMovies, append);
                 
                 if (hasMore) {
-                    currentPage = startPage + pagesToFetch; 
+                    currentPage = startPage + pagesToFetch;
                     loadMoreBtn.style.display = 'inline-block';
                 } else {
                     loadMoreBtn.style.display = 'none';
@@ -759,18 +784,18 @@
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                         body.classList.remove('no-scroll');
-                        adjustBodyPadding(); 
+                        adjustBodyPadding();
                     }, 500);
                 }
             }
         }
         
-        // --- Page Initialization (MODIFIED) ---
+        // --- Page Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
             wakeServer();
 
             // 'no-scroll' is temporary, 'adjustBodyPadding' is called later
-            body.classList.add('no-scroll'); 
+            body.classList.add('no-scroll');
             applyTheme(localStorage.getItem('theme') || 'system');
             updateActiveThemeOption(localStorage.getItem('theme') || 'system');
 
@@ -785,7 +810,7 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang');
-            const actorId = urlParams.get('actor_id'); 
+            const actorId = urlParams.get('actor_id');
 
             if (!lang || !ALL_LANGUAGES.includes(lang) || !actorId) {
                 moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language or actor ID specified in URL.</p>';
@@ -846,20 +871,20 @@
             languageDropdownMenu.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
         }
 
-        // --- Event Listeners (RETAINED) ---
+        // --- Event Listeners ---
         window.addEventListener('resize', adjustBodyPadding);
 
         loadMoreBtn.addEventListener('click', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang');
-            const actorId = urlParams.get('actor_id'); 
+            const actorId = urlParams.get('actor_id');
             
             fetchAndRenderMovies(lang, actorId, currentPage, true);
         });
 
         searchForm.addEventListener('submit', function(event) {
             if (searchInput.value.trim() === '') {
-                event.preventDefault(); 
+                event.preventDefault();
                 searchInput.focus();
             }
         });
@@ -879,6 +904,3 @@
 </body>
 
 </html>
-
-
-
