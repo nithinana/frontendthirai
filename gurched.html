@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* CSS Variables for a Themed, Modern UI */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -38,7 +37,7 @@
             --input-border-color: #ced4da;
             --primary-color: #007bff;
             --primary-hover-color: #0056b3;
-            --header-bg: rgba(248, 249, 250, 0.85); /* Semi-transparent for a modern effect */
+            --header-bg: rgba(248, 249, 250, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
@@ -54,24 +53,22 @@
             --header-bg: rgba(22, 22, 22, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
         }
-        /* Make close button visible in dark mode */
+
         body.dark-mode .btn-close {
             filter: invert(1) grayscale(100%) brightness(200%);
         }
 
-        /* Base Body Styles */
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden; /* PREVENT HORIZONTAL SCROLLING */
+            overflow-x: hidden;
         }
         
         body.no-scroll {
             overflow: hidden;
         }
 
-        /* --- Header and Navigation --- */
         .app-header {
             position: fixed;
             top: 0;
@@ -92,7 +89,6 @@
             width: auto;
         }
 
-        /* --- Styles for Logo Dropdown --- */
         .logo-dropdown-container {
             display: flex;
             align-items: center;
@@ -128,13 +124,13 @@
             font-weight: 600;
         }
         
-        /* --- Search Bar in Header --- */
         .header-search {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
+        /* REMOVE BLUE GLOW ON FOCUS */
         .header-search .form-control {
             background-color: var(--input-bg-color);
             color: var(--text-color);
@@ -142,11 +138,14 @@
             border-radius: 0.5rem;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
             height: calc(1.5em + 1rem + 2px); 
+            outline: none !important;
+            box-shadow: none !important;
         }
 
         .header-search .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
-            border-color: var(--primary-color);
+            border-color: var(--input-border-color);
+            box-shadow: none !important;
+            outline: none !important;
         }
         
         body.dark-mode .header-search .form-control::placeholder {
@@ -183,7 +182,6 @@
             background-color: rgba(255,255,255,0.05);
         }
         
-        /* --- Main Content & Movie Grid --- */
         .movie-grid {
             padding: 1.5rem 0;
         }
@@ -231,11 +229,10 @@
             background-color: var(--bg-color);
         }
         
-        /* --- Load More & Spinner --- */
         .load-more-container {
-            display: flex; /* MODIFIED: Use flexbox for centering */
-            flex-direction: column; /* MODIFIED: Stack items vertically */
-            align-items: center; /* MODIFIED: Center items horizontally */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 2rem 0;
         }
         
@@ -257,7 +254,6 @@
             display: none;
         }
         
-        /* --- START: Loading Screen --- */
         #loadingOverlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -289,16 +285,10 @@
         }
 
         @keyframes pulse-logo {
-            0%, 100% {
-                opacity: 0.5;
-            }
-            50% {
-                opacity: 1;
-            }
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
-        /* --- END: Loading Screen --- */
 
-        /* --- Modal Styling --- */
         .modal-content {
             background-color: var(--card-bg-color);
             color: var(--text-color);
@@ -306,13 +296,8 @@
             border: 1px solid var(--border-color);
         }
 
-        .modal-header {
-            border-bottom: none;
-        }
-
-        .modal-header h5 {
-            font-weight: bold;
-        }
+        .modal-header { border-bottom: none; }
+        .modal-header h5 { font-weight: bold; }
 
         .modal-body .list-group-item {
             cursor: pointer;
@@ -350,7 +335,6 @@
             color: white;
         }
 
-        /* --- Responsive Header Layout --- */
         @media (min-width: 992px) {
             .header-main-content { flex-grow: 1; justify-content: center; }
             .header-search { max-width: 500px; width: 100%; }
@@ -361,68 +345,28 @@
             .header-search { flex-grow: 1; }
         }
 
-        /* Mobile-specific adjustments */
         @media (max-width: 575.98px) {
-            .app-header .container-fluid {
-                padding: 0.75rem 0.5rem;
-            }
-            .header-center-nav .nav-link {
-                padding: 0.5rem 0.5rem;
-                font-size: 0.85rem;
-            }
+            .app-header .container-fluid { padding: 0.75rem 0.5rem; }
+            .header-center-nav .nav-link { padding: 0.5rem 0.5rem; font-size: 0.85rem; }
         }
         
-        /* Responsive grid */
-        .movie-grid .row {
-            --bs-gutter-x: 0.75rem;
-            --bs-gutter-y: 0.75rem;
-        }
-        .movie-grid .col {
-            padding: var(--bs-gutter-y) var(--bs-gutter-x);
-        }
+        .movie-grid .row { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
+        .movie-grid .col { padding: var(--bs-gutter-y) var(--bs-gutter-x); }
 
         @media (max-width: 575.98px) {
-            .movie-grid .row {
-                --bs-gutter-x: 0.5rem;
-                --bs-gutter-y: 0.5rem;
-            }
-            .movie-grid .col {
-                width: 33.333333%;
-                flex: 0 0 auto;
-            }
+            .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
         }
         
         @media (min-width: 576px) and (max-width: 767.98px) {
-            .movie-grid .row {
-                --bs-gutter-x: 0.75rem;
-                --bs-gutter-y: 0.75rem;
-            }
-            .movie-grid .col {
-                width: 25%;
-                flex: 0 0 auto;
-            }
+            .movie-grid .col { width: 25%; flex: 0 0 auto; }
         }
 
         @media (min-width: 768px) and (max-width: 991.98px) {
-            .movie-grid .row {
-                --bs-gutter-x: 1rem;
-                --bs-gutter-y: 1rem;
-            }
-            .movie-grid .col {
-                width: 20%;
-                flex: 0 0 auto;
-            }
+            .movie-grid .col { width: 20%; flex: 0 0 auto; }
         }
         
         @media (min-width: 992px) {
-            .movie-grid .row {
-                --bs-gutter-x: 1.5rem;
-                --bs-gutter-y: 1.5rem;
-            }
-            .movie-grid .col {
-                width: 16.666667%;
-                flex: 0 0 auto;
-            }
+            .movie-grid .col { width: 16.666667%; flex: 0 0 auto; }
         }
     </style>
 </head>
@@ -444,18 +388,17 @@
                 <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-chevron-down"></i>
                 </a>
-                <ul class="dropdown-menu" id="languageDropdownMenu">
-                    </ul>
+                <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
             </div>
             <div class="d-flex justify-content-center flex-grow-1 header-main-content">
                 <form id="searchForm" action="./language" method="GET" class="header-search">
-                    <input type="hidden" name="lang" id="searchLangInput"> <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
+                    <input type="hidden" name="lang" id="searchLangInput">
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
                     <button type="submit" class="btn btn-primary" title="Search">
                         <i class="bi bi-search"></i>
                     </button>
                 </form>
             </div>
-
             <div class="d-flex align-items-center ms-auto">
                 <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav me-3">
                     <a id="recentLink" class="nav-link" href="#">Recent</a>
@@ -467,7 +410,6 @@
 
     <main class="container movie-grid">
         <div class="row" id="moviesContainer"></div>
-
         <div class="load-more-container">
             <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
             <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status">
@@ -491,8 +433,7 @@
                         <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System Default</a>
                     </div>
                     <p class="h6 mb-3">Preferred Language</p>
-                    <div id="preferredLangList" class="list-group mb-4">
-                        </div>
+                    <div id="preferredLangList" class="list-group mb-4"></div>
                     <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
                     <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
                     <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
@@ -523,7 +464,6 @@
 
         const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
 
-        // --- Element Selectors ---
         const body = document.body;
         const moviesContainer = document.getElementById('moviesContainer');
         const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -540,46 +480,27 @@
         const themeOptions = document.querySelectorAll('.theme-option');
         const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
         const logoLink = document.getElementById('logoLink');
-        
         const loadingOverlay = document.getElementById('loadingOverlay');
         const overlayLogo = document.getElementById('overlayLogo');
         const slowNetworkMessage = document.getElementById('slowNetworkMessage');
+        
         let initialLoadComplete = false;
         let loadingTimer;
-
         let currentPage = 1;
         let isLoading = false;
-        
-        // --- NEW: Function to wake up the server ---
+
         async function wakeServer() {
             try {
                 const serverUrl = 'https://thirai-watch.onrender.com/';
-                console.log('Attempting to wake up the server at:', serverUrl);
-
-                await fetch(serverUrl, {
-                    method: 'GET',
-                    mode: 'no-cors'
-                });
-
-                console.log('Server wake-up request sent.');
-
-            } catch (error) {
-                console.error('Failed to send wake-up request:', error);
-            }
+                await fetch(serverUrl, { method: 'GET', mode: 'no-cors' });
+            } catch (error) { console.error('Wake-up failed:', error); }
         }
 
-        /**
-         * Mobile Header Overlap Fix
-         */
         function adjustBodyPadding() {
             const header = document.querySelector('.app-header');
-            if (header) {
-                const headerHeight = header.offsetHeight;
-                body.style.paddingTop = `${headerHeight}px`;
-            }
+            if (header) body.style.paddingTop = `${header.offsetHeight}px`;
         }
 
-        // --- Theme Management ---
         function updateThemeAssets(isDarkMode) {
             const lightLogo = './static/thiraiblack.png';
             const darkLogo = './static/thiraiwhite.png';
@@ -598,7 +519,7 @@
                 body.classList.remove('dark-mode');
                 localStorage.setItem('theme', 'light');
                 isDarkMode = false;
-            } else { // System default
+            } else {
                 localStorage.removeItem('theme');
                 isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (isDarkMode) body.classList.add('dark-mode');
@@ -606,320 +527,135 @@
             }
             updateThemeAssets(isDarkMode);
         }
-        
-        function updateActiveThemeOption(theme) {
-            themeOptions.forEach(option => {
-                option.classList.remove('active');
-                if (option.dataset.theme === theme) option.classList.add('active');
-            });
-        }
-        
-        themeOptions.forEach(option => {
-            option.addEventListener('click', (event) => {
-                event.preventDefault();
-                const selectedTheme = event.currentTarget.dataset.theme;
-                applyTheme(selectedTheme);
-                updateActiveThemeOption(selectedTheme);
-            });
-        });
-        
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (!localStorage.getItem('theme')) applyTheme('system');
-            });
-        }
 
-        // --- Preferred Language ---
-        function updateDisableBtnVisibility() {
-            disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
-        }
-
-        function updateActiveLanguageOption(language) {
-            document.querySelectorAll('.preferred-lang-option').forEach(option => {
-                option.classList.remove('active');
-                if (option.dataset.language === language) option.classList.add('active');
-            });
-        }
-
-        function updateLogoLink(language) {
-            if (language && language !== 'all') {
-                logoLink.href = `./language?lang=${language}`;
-            } else {
-                 logoLink.href = './index';
-            }
-        }
-        
-        function setupPreferredLanguage() {
-             const storedLanguage = localStorage.getItem('preferred-language');
-             updateDisableBtnVisibility();
-             updateActiveLanguageOption(storedLanguage);
-             updateLogoLink(storedLanguage);
-
-            document.querySelectorAll('.preferred-lang-option').forEach(option => {
-                option.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const selectedLanguage = event.currentTarget.dataset.language;
-                    localStorage.setItem('preferred-language', selectedLanguage);
-                    updateDisableBtnVisibility();
-                    updateActiveLanguageOption(selectedLanguage);
-                    updateLogoLink(selectedLanguage);
-                });
-            });
-
-            disablePreferredLanguageBtn.addEventListener('click', (event) => {
-                event.preventDefault();
-                localStorage.removeItem('preferred-language');
-                updateDisableBtnVisibility();
-                updateActiveLanguageOption(null);
-                updateLogoLink(null);
-            });
-        }
-
-        // --- Movie Rendering ---
         function renderMovies(movies, append = true) {
             if (!append) moviesContainer.innerHTML = '';
-            
             if (!movies || movies.length === 0) {
                 if (!append) moviesContainer.innerHTML = '<p class="text-center text-muted col-12">No movies found.</p>';
                 loadMoreBtn.style.display = 'none';
                 return;
             }
-
             const moviesHtml = movies.map(movie => {
-                const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
-                const movieTitleEncoded = encodeURIComponent(movie.title);
                 const imageUrl = movie.img_url.startsWith('http') ? movie.img_url : currentApiBase + movie.img_url;
-
                 return `
                     <div class="col">
                         <div class="movie-card">
-                            <a href="./watch?url=${moviePageUrlEncoded}&title=${movieTitleEncoded}" class="movie-link">
+                            <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
                                 <img src="${imageUrl}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
                                 <div class="movie-title">${movie.title}</div>
                             </a>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
             moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
         }
 
-        // --- Data Fetching ---
-        async function fetchAndRenderMovies(endpoint, append = true, pagesToLoad = 1) {
+        async function fetchAndRenderMovies(baseEndpoint, append = true, pagesToLoad = 1) {
             if (isLoading) return;
             isLoading = true;
             loadMoreBtn.style.display = 'none';
             spinner.style.display = 'block';
 
-            const tryFetch = async (baseUrl, currentEndpoint) => {
-                const fullUrl = `${baseUrl}${currentEndpoint}`;
-                const res = await fetch(fullUrl);
+            const tryFetch = async (baseUrl, endpoint) => {
+                const res = await fetch(`${baseUrl}${endpoint}`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return await res.json();
             };
 
             try {
-                let pagesFetched = 0;
-                let currentPath = endpoint;
+                let fetchedCount = 0;
+                let currentUrl = baseEndpoint;
 
-                while (pagesFetched < pagesToLoad) {
+                while (fetchedCount < pagesToLoad) {
                     let data;
                     try {
-                        data = await tryFetch(PRIMARY_API_URL, currentPath);
+                        data = await tryFetch(PRIMARY_API_URL, currentUrl);
                         currentApiBase = PRIMARY_API_URL;
-                    } catch (primaryError) {
-                        data = await tryFetch(FALLBACK_API_URL, currentPath);
+                    } catch (e) {
+                        data = await tryFetch(FALLBACK_API_URL, currentUrl);
                         currentApiBase = FALLBACK_API_URL;
                     }
-                    
-                    renderMovies(data.movies, append || pagesFetched > 0);
+
+                    renderMovies(data.movies, append || fetchedCount > 0);
+                    currentPage = data.next_page;
                     
                     if (data.has_more) {
-                        currentPage = data.next_page;
-                        
-                        // Prep for next page in the batch
-                        const urlObj = new URL(currentPath, 'https://dummy.com');
+                        fetchedCount++;
+                        const urlObj = new URL(currentUrl, 'https://dummy.com');
                         urlObj.searchParams.set('page', currentPage);
-                        currentPath = urlObj.pathname + urlObj.search;
-                        
+                        currentUrl = urlObj.pathname + urlObj.search;
                         loadMoreBtn.style.display = 'inline-block';
-                        pagesFetched++;
                     } else {
                         loadMoreBtn.style.display = 'none';
                         break;
                     }
                 }
             } catch (error) {
-                console.error('Error loading movies:', error);
-                if (!append) moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Failed to load movies. Please try again later.</p>';
+                console.error('Error:', error);
+                if (!append) moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Failed to load movies.</p>';
             } finally {
                 spinner.style.display = 'none';
                 isLoading = false;
-                
                 if (!initialLoadComplete) {
                     initialLoadComplete = true;
                     clearTimeout(loadingTimer);
                     loadingOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        body.classList.remove('no-scroll');
-                    }, 500);
+                    setTimeout(() => { loadingOverlay.style.display = 'none'; body.classList.remove('no-scroll'); }, 500);
                 }
             }
         }
-        
-        // --- Page Initialization ---
+
         document.addEventListener('DOMContentLoaded', function() {
             wakeServer();
             adjustBodyPadding();
             body.classList.add('no-scroll');
             applyTheme(localStorage.getItem('theme') || 'system');
-            updateActiveThemeOption(localStorage.getItem('theme') || 'system');
-
-            populateLanguageMenus();
-            setupPreferredLanguage();
-
-            loadingTimer = setTimeout(() => {
-                if (!initialLoadComplete) {
-                    slowNetworkMessage.style.display = 'flex';
-                }
-            }, 7000);
-
+            
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang');
             const category = urlParams.get('category') || 'recent';
             const searchQuery = urlParams.get('q');
 
-            if (lang === 'all') {
-                window.location.replace('./all');
-                return;
-            }
-            
+            if (lang === 'all') { window.location.replace('./all'); return; }
             if (!lang || !ALL_LANGUAGES.includes(lang)) {
-                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language specified in URL.</p>';
-                loadMoreBtn.style.display = 'none';
-                if (!initialLoadComplete) {
-                    initialLoadComplete = true;
-                    clearTimeout(loadingTimer);
-                    loadingOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        body.classList.remove('no-scroll');
-                    }, 500);
-                }
-                document.title = "Error - Thirai";
+                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid language.</p>';
+                loadingOverlay.style.display = 'none'; body.classList.remove('no-scroll');
                 return;
             }
 
-            const capitalizedLang = lang.charAt(0).toUpperCase() + lang.slice(1);
-            document.title = `Thirai - ${capitalizedLang}`;
-            searchInput.placeholder = `Search ${capitalizedLang} movies...`;
-            searchLangInput.value = lang;
             recentLink.href = `./language?lang=${lang}&category=recent`;
             popularLink.href = `./language?lang=${lang}&category=popular`;
-            
+            searchLangInput.value = lang;
+
             if (searchQuery) {
-                document.title = `Search for "${searchQuery}" - Thirai`;
-                searchInput.value = searchQuery;
-                categoryNav.style.display = 'none';
-                loadMoreBtn.style.display = 'none';
-                const searchEndpoint = `/search/${lang}?q=${encodeURIComponent(searchQuery)}`;
-                fetchAndRenderMovies(searchEndpoint, false, 1);
+                fetchAndRenderMovies(`/search/${lang}?q=${encodeURIComponent(searchQuery)}`, false, 1);
             } else {
                 if (category === 'popular') popularLink.classList.add('active');
                 else recentLink.classList.add('active');
                 
-                // Batch load 3 pages by default
-                const initialEndpoint = `/language/${lang}?category=${category}&page=1`;
-                fetchAndRenderMovies(initialEndpoint, false, 3);
+                // LOAD 3 PAGES BY DEFAULT FOR BOTH POPULAR AND RECENT
+                fetchAndRenderMovies(`/language/${lang}?category=${category}&page=1`, false, 3);
             }
+            populateLanguageMenus();
         });
-        
-        function populateLanguageMenus() {
-            languageDropdownMenu.innerHTML = '<li><h6 class="dropdown-header">Languages</h6></li>';
-            preferredLangList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
-
-            ALL_LANGUAGES.forEach(lang => {
-                const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
-                
-                const li = document.createElement('li');
-                li.innerHTML = `<a class="dropdown-item" href="./language?lang=${lang}&category=popular">${capitalized}</a>`;
-                languageDropdownMenu.appendChild(li);
-
-                const prefLink = document.createElement('a');
-                prefLink.className = 'list-group-item list-group-item-action preferred-lang-option';
-                prefLink.href = '#';
-                prefLink.dataset.language = lang;
-                prefLink.textContent = capitalized;
-                preferredLangList.appendChild(prefLink);
-            });
-            languageDropdownMenu.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
-        }
-
-        // --- Event Listeners ---
-        window.addEventListener('resize', adjustBodyPadding);
 
         loadMoreBtn.addEventListener('click', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang');
             const category = urlParams.get('category') || 'recent';
             
-            const endpoint = `/language/${lang}?category=${category}&page=${currentPage}`;
-            // Load another 3 pages
-            fetchAndRenderMovies(endpoint, true, 3);
+            // LOAD 3 MORE PAGES ON CLICK
+            fetchAndRenderMovies(`/language/${lang}?category=${category}&page=${currentPage}`, true, 3);
         });
 
-        searchForm.addEventListener('submit', function(event) {
-            if (searchInput.value.trim() === '') {
-                event.preventDefault(); 
-                searchInput.focus();
-            }
-        });
-
-        const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-        const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-        document.getElementById('aboutButtonInModal').addEventListener('click', function (event) {
-            event.preventDefault();
-            settingsModal.hide();
-            aboutModal.show();
-        });
-        document.getElementById('aboutModal').addEventListener('hidden.bs.modal', function () {
-            settingsModal.show();
-        });
-
-    </script>
-
-<script>
-    // --- CONTINUE WATCHING CACHE LOGIC ---
-    const CACHE_KEY = 'thirai_continue_watching';
-
-    function saveToContinueWatching(movie) {
-        let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-        history = history.filter(item => item.url !== movie.url);
-        history.unshift(movie);
-        if (history.length > 20) history.pop();
-        localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    }
-
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('.movie-link');
-        if (!link) return;
-
-        const url = link.getAttribute('href');
-        if (url && url.includes('watch')) {
-            const card = link.closest('.movie-card');
-            if (!card) return;
-
-            const title =
-                card.querySelector('.movie-title-text')?.textContent ||
-                card.querySelector('.movie-title')?.textContent ||
-                '';
-
-            const img = card.querySelector('.movie-img')?.src || '';
-            saveToContinueWatching({ title, img, url });
+        function populateLanguageMenus() {
+            languageDropdownMenu.innerHTML = '<li><h6 class="dropdown-header">Languages</h6></li>';
+            ALL_LANGUAGES.forEach(lang => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a class="dropdown-item" href="./language?lang=${lang}&category=popular">${lang.charAt(0).toUpperCase() + lang.slice(1)}</a>`;
+                languageDropdownMenu.appendChild(li);
+            });
         }
-    });
-</script>
-
+    </script>
 </body>
 </html>
