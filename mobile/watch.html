@@ -944,7 +944,7 @@
             
             if (movieUrl) {
                 try {
-                    const response = await fetch(`https://thirai-watch.onrender.com/watch?url=${encodeURIComponent(movieUrl)}`);
+                    const response = await fetch(`https://thiraiapi.onrender.com/watch?url=${encodeURIComponent(movieUrl)}`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     
