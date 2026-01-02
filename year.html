@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirai - Browse by Year/Decade</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thirai">
+    <link rel="apple-touch-icon" href="./static/ios/icon-192x192.png">
+    <link rel="icon" type="image/png" href="./static/favicon.png" id="faviconLink"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* Exact styles from actor.html for UI consistency */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-border-color: #ced4da;
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --header-bg: rgba(248, 249, 250, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        body {
+            padding-top: 75px; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+        
+        body.no-scroll { overflow: hidden; }
+
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            padding: 1rem 1rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--header-shadow);
+        }
+
+        .header-logo { height: 30px; width: auto; }
+        .logo-dropdown-toggle { color: var(--text-color); opacity: 0.6; }
+        .logo-dropdown-toggle::after { display: none; }
+        
+        .nav-link { color: var(--text-color); font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.5rem; }
+        .nav-link.active { color: var(--primary-color); font-weight: 600; }
+        
+        .header-search { display: flex; align-items: center; gap: 8px; }
+        .header-search .form-control {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 0.5rem;
+            height: calc(1.5em + 1rem + 2px); 
+        }
+
+        .movie-grid { padding: 1rem 0; }
+        .movie-card {
+            background-color: var(--card-bg-color);
+            border-radius: 0.75rem;
+            border: none;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
+        .movie-img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: var(--bg-color); }
+        .movie-card .movie-title {
+            padding: 0.75rem 1rem;
+            font-weight: 600; font-size: 0.9rem;
+            height: 4.0em; text-align: center;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Loading Screen */
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+        #loadingOverlay img { max-width: 250px; animation: pulse-logo 1.5s infinite ease-in-out; }
+        @keyframes pulse-logo { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 575.98px) {
+            .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
+        }
+        @media (min-width: 992px) {
+            .movie-grid .col { width: 16.666667%; flex: 0 0 auto; }
+            .header-search { max-width: 500px; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">
+        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading...">
+        <div id="slowNetworkMessage" style="display: none; margin-top: 10px;">
+            <i class="bi bi-info-circle"></i> <span>Our server is waking up, please be patient.</span>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <div class="container-fluid d-flex flex-wrap align-items-center">
+            <div class="dropdown d-flex align-items-center me-lg-4">
+                <a id="logoLink" href="./index">
+                    <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+                </a>
+                <a href="#" class="dropdown-toggle logo-dropdown-toggle ms-1" data-bs-toggle="dropdown">
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+                <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
+            </div>
+            <div class="d-flex justify-content-center flex-grow-1">
+                <form id="searchForm" action="./language" method="GET" class="header-search">
+                    <input type="hidden" name="lang" id="searchLangInput"> 
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+            <div id="categoryNav" class="d-flex align-items-center ms-auto gap-2">
+                <a id="homeCategoryLink" class="nav-link" href="./all.html">Home</a>
+                <a id="recentCategoryLink" class="nav-link" href="#">Recent</a>
+                <a id="popularCategoryLink" class="nav-link" href="#">Popular</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container movie-grid">
+        <h4 id="pageHeading" class="mb-4 text-center" style="display:none;"></h4>
+        <div class="row" id="moviesContainer"></div>
+        <div class="text-center mt-4 mb-5">
+            <button id="loadMoreBtn" class="btn btn-primary" style="display:none;">Load More</button>
+            <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display:none;"></div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5>Settings</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <p class="h6">Appearance</p>
+                    <div class="list-group mb-3">
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="light">Light</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="dark">Dark</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = 'https://api.thirai.me';
+        const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+
+        let currentPage = 1;
+        let isLoading = false;
+        let initialLoadComplete = false;
+
+        // UI Selectors
+        const moviesContainer = document.getElementById('moviesContainer');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const spinner = document.getElementById('loadingSpinner');
+        const pageHeading = document.getElementById('pageHeading');
+
+        async function fetchMovies(append = true) {
+            if (isLoading) return;
+            isLoading = true;
+            loadMoreBtn.style.display = 'none';
+            spinner.style.display = 'inline-block';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang');
+            const year = urlParams.get('year');
+            const decade = urlParams.get('decade');
+
+            // Determine which endpoint to hit
+            let endpoint = "";
+            if (year) {
+                endpoint = `${API_BASE_URL}/year/${lang}/${year}?page=${currentPage}`;
+                pageHeading.textContent = `${year} ${lang.charAt(0).toUpperCase() + lang.slice(1)} Movies`;
+            } else if (decade) {
+                endpoint = `${API_BASE_URL}/decade/${lang}/${decade}?page=${currentPage}`;
+                pageHeading.textContent = `${decade}s ${lang.charAt(0).toUpperCase() + lang.slice(1)} Movies`;
+            }
+
+            try {
+                const res = await fetch(endpoint);
+                const data = await res.json();
+                
+                renderMovies(data.movies, append);
+                
+                if (data.has_more && data.movies.length > 0) {
+                    loadMoreBtn.style.display = 'inline-block';
+                    currentPage++;
+                }
+            } catch (err) {
+                console.error(err);
+                if (!append) moviesContainer.innerHTML = '<p class="text-center">Error loading results.</p>';
+            } finally {
+                isLoading = false;
+                spinner.style.display = 'none';
+                pageHeading.style.display = 'block';
+                hideOverlay();
+            }
+        }
+
+        function renderMovies(movies, append) {
+            if (!append) moviesContainer.innerHTML = '';
+            const html = movies.map(m => `
+                <div class="col mb-4">
+                    <div class="movie-card">
+                        <a href="./watch?url=${encodeURIComponent(m.page_url)}&title=${encodeURIComponent(m.title)}" class="movie-link text-decoration-none color-inherit">
+                            <img src="${m.img_url}" class="movie-img" alt="${m.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'">
+                            <div class="movie-title text-dark-emphasis">${m.title}</div>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            moviesContainer.insertAdjacentHTML('beforeend', html);
+        }
+
+        function hideOverlay() {
+            if (!initialLoadComplete) {
+                initialLoadComplete = true;
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => { 
+                    overlay.style.display = 'none'; 
+                    document.body.classList.remove('no-scroll');
+                }, 500);
+            }
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang') || 'tamil';
+            
+            document.getElementById('searchLangInput').value = lang;
+            document.getElementById('recentCategoryLink').href = `./language?lang=${lang}&category=recent`;
+            document.getElementById('popularCategoryLink').href = `./language?lang=${lang}&category=popular`;
+
+            // Theme logic (standard from your script)
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            applyTheme(savedTheme);
+
+            fetchMovies(false);
+        });
+
+        loadMoreBtn.addEventListener('click', () => fetchMovies(true));
+
+        function applyTheme(theme) {
+            const body = document.body;
+            if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+        }
+    </script>
+</body>
+</html>
