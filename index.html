@@ -1170,7 +1170,7 @@ body {
 
 function normalizeWatchUrl(url) {
     if (!url) return url;
-    if (url.startsWith('./watch')) return url.replace('./watch', '/watch');
+    if (url.startsWith('/watch')) return url.replace('/watch', './watch');
     return url;
 }
 
