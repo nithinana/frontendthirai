@@ -1167,6 +1167,13 @@ body {
 
         // --- NEW: CONTINUE WATCHING LOGIC ---
         const CACHE_KEY = 'thirai_continue_watching';
+
+function normalizeWatchUrl(url) {
+    if (!url) return url;
+    if (url.startsWith('./watch')) return url.replace('./watch', '/watch');
+    return url;
+}
+
       
       function saveToContinueWatching(movie) {
             let history = [];
@@ -1219,7 +1226,7 @@ body {
                 <div class="col">
                     <div class="movie-card">
                         <div class="remove-watch-item" data-url="${movie.url}" title="Remove">✕</div>
-                        <a href="${movie.url}" class="movie-link">
+                        <a href="${normalizeWatchUrl(movie.url)}" class="movie-link">
                             <img src="${movie.img}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
                             <div class="movie-title-text">${movie.title}</div>
                         </a>
@@ -1246,7 +1253,8 @@ body {
 
             const link = e.target.closest('.movie-link');
             if (link) {
-                const url = link.getAttribute('href');
+                let url = link.getAttribute('href');
+                url = normalizeWatchUrl(url);
                 // Only log links that go to the watch page
                 if (url && url.includes('/watch')) {
                     const card = link.closest('.movie-card');
