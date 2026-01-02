@@ -1167,19 +1167,16 @@ body {
 
         // --- NEW: CONTINUE WATCHING LOGIC ---
         const CACHE_KEY = 'thirai_continue_watching';
-        
-function saveToContinueWatching(movie) {
-    // Stop saving movies to the local cache
-    return; 
-
-    // The code below will no longer run
-    /* let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-    history = history.filter(item => item.url !== movie.url);
-    history.unshift(movie);
-    if (history.length > 20) history.pop();
-    localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    */
-}
+      
+      function saveToContinueWatching(movie) {
+            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+            // Remove duplicate if it exists to move it to the front
+            history = history.filter(item => item.url !== movie.url);
+            history.unshift(movie);
+            // Limit to top 20 items
+            if (history.length > 20) history.pop();
+            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
+        }
 
         // UPDATED: Render function with "X" buttons
         function renderContinueWatching() {
