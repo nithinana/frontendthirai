@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -14,22 +14,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thirai</title>
-    
-    <link rel="manifest" href="./manifest.json">
+
+    <link rel="manifest" href="static/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Thirai">
-    <link rel="apple-touch-icon" href="./static/ios/icon-192x192.png">
-    <link rel="icon" type="image/png" href="./static/favicon.png" id="faviconLink"/>
+    <link rel="apple-touch-icon" href="/static/ios/icon-192x192.png">
+    <link rel="icon" type="image/png" href="/static/favicon.png" id="faviconLink"/>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
     <style>
         /* CSS Variables for a Themed, Modern UI */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
+            --muted-text-color: #6c757d;
             --card-bg-color: #ffffff;
             --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
             --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
@@ -40,11 +41,13 @@
             --primary-hover-color: #0056b3;
             --header-bg: rgba(248, 249, 250, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --scrollbar-thumb-color: #ccc;
         }
 
         body.dark-mode {
             --bg-color: #121212;
             --text-color: #e0e0e0;
+            --muted-text-color: #adb5bd;
             --card-bg-color: #1e1e1e;
             --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
@@ -53,213 +56,632 @@
             --input-border-color: #444;
             --header-bg: rgba(22, 22, 22, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-        }
-        body.dark-mode .btn-close {
-            filter: invert(1) grayscale(100%) brightness(200%);
+            --scrollbar-thumb-color: #555;
         }
 
+        /* Base Body Styles */
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden;
+            padding-top: 80px;
         }
-        
+
+        /* NEW: Prevent body from scrolling while overlay is active */
         body.no-scroll {
             overflow: hidden;
         }
 
+        /* NEW: Responsive padding for main content to prevent header overlap */
+        @media (max-width: 991.98px) {
+            main {
+                padding-top: 2rem !important; /* Adjust this value as needed */
+            }
+        }
+        
+        .text-muted {
+            color: var(--muted-text-color) !important;
+        }
+
+/* --- Optimized Header for Mobile & Desktop --- */
+:root {
+    --header-height-mobile: 30px;
+    --header-height-desktop: 40px;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding-top: var(--header-height-mobile); /* Default for mobile */
+}
+
+@media (min-width: 992px) {
+    body {
+        padding-top: var(--header-height-desktop); /* Shorter for desktop */
+    }
+}
+
+/* --- Header and Navigation (Optimized) --- */
         .app-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1030;
-            padding: 1rem 1rem;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            padding: 0.75rem 1rem;
             background-color: var(--header-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--header-shadow);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow);
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
-        .header-logo {
-            height: 30px;
-            width: auto;
-        }
-
-        .logo-dropdown-container {
+        /* Fixed: Flex-wrap allows two rows on mobile */
+        .app-header .container-fluid {
             display: flex;
+            flex-wrap: wrap; 
             align-items: center;
-            gap: 0.25rem;
-        }
-        .logo-dropdown-toggle {
-            color: var(--text-color);
-            opacity: 0.6;
-            transition: opacity 0.2s ease;
-        }
-        .logo-dropdown-toggle:hover {
-            color: var(--text-color);
-            opacity: 1;
-        }
-        .logo-dropdown-toggle::after {
-            display: none;
-        }
-        
-        .nav-link {
-            color: var(--text-color);
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            justify-content: space-between;
         }
 
-        .nav-link:hover {
-            background-color: var(--card-bg-color);
-        }
+        .header-logo { height: 30px; width: auto; }
 
-        .nav-link.active {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
+        /* Fixed: Uniform height and alignment for search elements */
+/* Fixed: Centered Search Bar on PC & Dark Mode Select Box */
         .header-search {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            align-items: stretch;
+            gap: 6px; 
+            width: 100%;
+        }
+
+        .header-search .form-select,
+        .header-search .form-control,
+        .header-search .btn {
+            height: 42px;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .header-search .form-control {
             background-color: var(--input-bg-color);
             color: var(--text-color);
             border: 1px solid var(--input-border-color);
-            border-radius: 0.5rem;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            height: calc(1.5em + 1rem + 2px); 
+            flex-grow: 1;
+            min-width: 0; 
         }
 
-        .header-search .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
-            border-color: var(--primary-color);
-        }
-        
-        body.dark-mode .header-search .form-control::placeholder {
-            color: #888;
-            opacity: 1;
-        }
-        
-        .header-search .btn-primary {
-            padding: 0; 
-            height: calc(1.5em + 1rem + 2px);
-            width: calc(1.5em + 1rem + 2px); 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-        
-        .dropdown-menu {
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-            border-radius: 0.5rem;
-        }
-
-        .dropdown-item {
+        /* NEW: Fix for the white background in the select dropdown */
+        .header-search .form-select {
+            background-color: var(--input-bg-color);
             color: var(--text-color);
+            border: 1px solid var(--input-border-color);
         }
 
-        .dropdown-item:hover {
-            background-color: rgba(0,0,0,0.05);
-        }
-        
-        body.dark-mode .dropdown-item:hover {
-            background-color: rgba(255,255,255,0.05);
-        }
-        
-        .movie-grid {
-            padding: 1.5rem 0;
-        }
-        
-        .movie-card .movie-title {
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            white-space: normal;
-            word-break: break-word;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            height: 4.0em;
-            text-align: center;
+        /* NEW: Force options inside the dropdown to be dark in dark mode */
+        body.dark-mode .header-search .form-select option {
+            background-color: #1e1e1e; /* Matches your --card-bg-color */
+            color: #e0e0e0;
         }
 
-        .movie-card {
-            background-color: var(--card-bg-color);
-            border-radius: 0.75rem;
-            border: none;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--card-hover-shadow);
-        }
-        
-        .movie-link {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .movie-img {
+        /* Mobile View: Search Bar on Row 2 */
+        .header-main-content {
+            order: 3;
             width: 100%;
-            aspect-ratio: 2 / 3;
-            object-fit: cover;
-            background-color: var(--bg-color);
-        }
-
-        .lang-section-header {
-            margin-top: 2rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            font-weight: bold;
-        }
-        
-        .load-more-container {
+            margin-top: 0.75rem;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Desktop View: Single Row Layout with Centering */
+        @media (min-width: 992px) {
+            .app-header { padding: 0.8rem 1.5rem; }
+            .app-header .container-fluid { 
+                flex-wrap: nowrap; 
+                display: grid; 
+                grid-template-columns: auto 1fr auto; /* Grid ensures true center */
+                align-items: center;
+            }
+            .header-main-content {
+                order: 2;
+                width: 100%;
+                margin-top: 0;
+                display: flex;
+                justify-content: center; /* This centers the search bar in the middle column */
+            }
+            .header-search {
+                max-width: 600px;
+            }
+            body { padding-top: 85px; }
+        }
+
+        /* Padding for content below the 2-row mobile header */
+        @media (max-width: 991.98px) {
+            body { padding-top: 135px; }
+        }
+        /* --- END NEW --- */
+        
+        .settings-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; }
+        .dropdown-menu {
+            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow); border-radius: 0.5rem;
+        }
+        .dropdown-item { color: var(--text-color); }
+        .dropdown-item:hover { background-color: rgba(0,0,0,0.05); }
+        body.dark-mode .dropdown-item:hover { background-color: rgba(255,255,255,0.05); }
+
+        /* NEW: Styles for the new header layout */
+        /* This will allow the search bar to be centered on medium and larger screens */
+        @media (min-width: 992px) {
+            .header-main-content { flex-grow: 1; justify-content: center; }
+            .header-search { max-width: 600px; width: 100%; }
+        }
+        @media (max-width: 991.98px) {
+            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
+            .header-search { flex-grow: 1; }
+        }
+
+        /* --- NEW: Language Section Styling --- */
+        .language-section {
+            position: relative;
+            margin-bottom: 2.5rem;
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .language-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 2rem 0;
+            margin-bottom: 1rem;
+        }
+        .language-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+             display: flex;
+            align-items: center;
+        }
+
+        /* Styles for the "Explore All" Link */
+        .explore-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.1rem 0.2rem;
+            border-radius: 0.5rem;
+            margin-left: 0.2rem;
+        }
+
+        .explore-link:hover {
+            background-color: rgba(var(--primary-color), 0.1);
+            transform: translateX(5px);
+        }
+
+        .explore-text {
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.3s ease, margin-left 0.3s ease;
+            font-size: 0.9rem;
+            margin-left: 0;
+        }
+
+        .explore-link:hover .explore-text {
+            max-width: 150px; /* Adjust as needed */
+            margin-left: 0.5rem;
         }
         
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+        /* Adjust the load more button layout */
+        .language-header .d-flex {
+            gap: 0.5rem;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover-color);
-            border-color: var(--primary-hover-color);
+        /* NEW: Collection Toggle Switch Styles */
+        .collection-toggle {
+            display: flex;
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 50px;
+            padding: 2px;
+            position: relative;
+            overflow: hidden;
         }
 
-        #loadingSpinner {
+        .collection-toggle input[type="radio"] {
             display: none;
         }
+
+        .collection-toggle label {
+            cursor: pointer;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1;
+            transition: color 0.3s ease;
+            color: var(--muted-text-color);
+            border-radius: 50px;
+        }
+
+        .collection-toggle input[type="radio"]:checked + label {
+            color: #fff;
+            background-color: var(--primary-color);
+        }
+
+        /* End Collection Toggle */
+
+
+        .movies-scroller {
+            position: relative;
+        }
+
+        /* Update the existing CSS for movies-row to hide the scrollbar on desktop */
+        .movies-row {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb-color) var(--bg-color);
+            padding-left: 1rem; /* Added padding to make space for the blur effect */
+            padding-right: 1rem; /* Added padding to make space for the blur effect */
+        }
+
+        /* Hide the scrollbar for webkit browsers (Chrome, Safari, etc.) on larger screens */
+        @media (min-width: 992px) {
+            .movies-row::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        /* Hide the scrollbar for Firefox on larger screens */
+        @media (min-width: 992px) {
+            .movies-row {
+                scrollbar-width: none;
+            }
+        }
         
+        .movies-row > .col {
+            flex: 0 0 auto;
+            width: 33.33%;
+        }
+        @media (min-width: 576px) {
+            .movies-row > .col {
+                width: 20%;
+            }
+        }
+        @media (min-width: 768px) {
+            .movies-row > .col {
+                width: 16.66%;
+            }
+        }
+        @media (min-width: 1200px) {
+            .movies-row > .col {
+                width: 10%;
+            }
+        }
+
+        /* --- Reused Movie Card Styling --- */
+        .movie-card {
+            background-color: var(--card-bg-color); border-radius: 0.75rem;
+            border: none; overflow: hidden; box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            margin-right: 1rem;
+            position: relative; /* Essential for the remove button */
+        }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
+        .movie-link { text-decoration: none; color: inherit; }
+        .movie-img {
+            width: 100%; aspect-ratio: 2 / 3; object-fit: cover;
+            background-color: var(--bg-color);
+        }
+        .movie-title-text {
+            padding: 0.75rem 1rem; font-weight: 600; font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        /* NEW: Remove Item Button (X) */
+        .remove-watch-item {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20; /* Higher than card link */
+            color: #fff;
+            font-weight: 900;
+            font-size: 14px;
+            line-height: 1;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .remove-watch-item:hover {
+            background-color: #dc3545; /* Red on hover */
+            transform: scale(1.1);
+            border-color: #dc3545;
+        }
+
+        /* NEW: Styles for the new reload button */
+        .load-more-arrow {
+            cursor: pointer;
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .load-more-arrow:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .load-more-arrow:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* NEW: Styles for the loading spinner */
+        .spinner-border-sm {
+            display: none;
+            color: var(--primary-color);
+            border-color: currentColor;
+            border-right-color: transparent;
+        }
+        
+        /* New style for highlighted input (from index.html) */
+        .highlight-red {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+        body.dark-mode .highlight-red {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
+        }
+
+        /* Banner styles from language.html */
+/* Modified Promo Banner */
+.promo-banner {
+    width: 100%;
+    height: 300px;
+    /* Added a linear gradient overlay for the fade effect */
+    background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://image.tmdb.org/t/p/original/rx9kyO6YJLpXfFrU934C6i4yYMj.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding-left: 5%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+        .promo-banner .movie-logo {
+            max-width: 300px; /* Increased logo size */
+            height: auto;
+            margin-bottom: 15px; /* Increased margin for spacing */
+            border-radius: 5px;
+        }
+
+        .promo-banner .btn {
+            font-size: 1.25rem; /* Larger font size */
+            padding: 10px 24px; /* Larger padding for a bigger button */
+            border-radius: 50px;
+            background-color: rgba(108, 117, 125, 0.5);
+            color: white;
+            font-weight: bold;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .promo-banner .btn:hover {
+            background-color: rgba(108, 117, 125, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Mobile banner adjustments */
+        @media (max-width: 767.98px) {
+            .promo-banner {
+                height: 150px;
+                margin-bottom: 2rem;
+                padding-left: 3%; /* Adjust padding for mobile */
+                border-radius: 10px;
+                align-items: flex-start; /* Align to the left on mobile */
+                justify-content: center; /* Center vertically for a clean look */
+            }
+
+            .promo-banner .movie-logo {
+                max-width: 150px; /* Adjusted logo size for mobile */
+                margin-bottom: 10px;
+            }
+
+            .promo-banner .btn {
+                font-size: 0.9rem;
+                padding: 6px 15px;
+            }
+        }
+
+        /* --- MODAL STYLES FOR THEME SUPPORT --- */
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+        .modal-header,
+        .modal-footer {
+            border-color: var(--border-color);
+        }
+        .modal-title,
+        .modal-body {
+            color: var(--text-color);
+        }
+        .btn-close {
+            filter: var(--bs-btn-close-color); /* Correctly references BS variable */
+            /* This is a fallback for dark mode */
+            --bs-btn-close-color: #000;
+        }
+        body.dark-mode .btn-close {
+            --bs-btn-close-color: #fff;
+        }
+        
+        /* NEW: Backdrop Blur for Modals */
+        .modal-backdrop.show {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background-color: rgba(0,0,0,0.5); /* Semi-transparent black */
+            opacity: 1 !important; /* Force opacity to handle the blur visible */
+        }
+        
+        /* NEW: Styles for the scroll buttons */
+        .scroll-btn {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            box-shadow: var(--card-shadow);
+            transition: all 0.2s ease;
+        }
+
+        .scroll-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: #fff;
+            /* No transform on hover to keep the button from moving */
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--primary-color);
+        }
+
+        .scroll-btn:disabled {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* NEW: Container for the movies and buttons */
+        .movies-scroller-container {
+            position: relative;
+            padding-right: 20px; /* Add space for the right button */
+            padding-left: 20px; /* Add space for the left button */
+        }
+
+        /* NEW: Wrapper for the fade effect */
+        .movies-scroller-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden; /* Hide overflow from the pseudo-elements */
+        }
+
+        /* NEW: Positioning of the buttons */
+        .scroll-btn-prev, .scroll-btn-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .scroll-btn-prev {
+            left: 10px;
+        }
+
+        .scroll-btn-next {
+            right: 10px;
+        }
+
+        /* NEW: Fade effect on the left and right sides */
+        .movies-scroller-wrapper::before,
+        .movies-scroller-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50px;
+            z-index: 10;
+            pointer-events: auto;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        /* NEW: Left fade */
+        .movies-scroller-wrapper::before {
+            left: 0;
+            background: linear-gradient(to right, var(--bg-color), transparent);
+        }
+        body.dark-mode .movies-scroller-wrapper::before {
+            background: linear-gradient(to right, var(--bg-color), transparent);
+        }
+
+        /* NEW: Right fade */
+        .movies-scroller-wrapper::after {
+            right: 0;
+            background: linear-gradient(to left, var(--bg-color), transparent);
+        }
+        body.dark-mode .movies-scroller-wrapper::after {
+            background: linear-gradient(to left, var(--bg-color), transparent);
+        }
+
+        /* NEW: Hide the fade effect when scrolled all the way to the side */
+        .movies-scroller-wrapper.is-at-start::before {
+            opacity: 0;
+        }
+
+        .movies-scroller-wrapper.is-at-end::after {
+            opacity: 0;
+        }
+
+        /* NEW: Show the buttons and fade effect on wider screens */
+        @media (min-width: 992px) {
+            .scroll-btn-prev, .scroll-btn-next {
+                display: flex;
+            }
+        }
+        @media (max-width: 991.98px) {
+            .movies-scroller-container {
+                padding-right: 0;
+                padding-left: 0;
+            }
+            .scroll-btn-prev, .scroll-btn-next {
+                display: none !important; /* Hide buttons on mobile */
+            }
+            .movies-scroller-wrapper::before,
+            .movies-scroller-wrapper::after {
+                content: none; /* Hide fade effect on mobile */
+            }
+        }
+        
+        /* NEW: Loading overlay styles */
         #loadingOverlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: var(--bg-color);
             z-index: 9999;
             display: flex;
@@ -269,556 +691,317 @@
             opacity: 1;
             transition: opacity 0.5s ease;
         }
-
+        #loadingOverlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
         #loadingOverlay img {
-            max-width: 250px;
+            max-width: 200px;
             height: auto;
             margin-bottom: 20px;
+            /* NEW: Apply the pulse animation */
             animation: pulse-logo 1.5s infinite ease-in-out;
         }
-        
         #slowNetworkMessage {
             max-width: 80%;
             text-align: center;
             display: flex;
             align-items: center;
             gap: 8px;
-            color: var(--text-color);
-            opacity: 0.7;
         }
 
+        /* NEW: Keyframe animation for the pulsating logo */
         @keyframes pulse-logo {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
         }
 
-        .modal-content {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-            border-radius: 0.75rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .modal-header { border-bottom: none; }
-        .modal-header h5 { font-weight: bold; }
-
-        .modal-body .list-group-item {
-            cursor: pointer;
-            color: var(--text-color);
-            background-color: transparent;
-            border-color: var(--border-color);
-            transition: background-color 0.2s ease;
-        }
-        .modal-body .list-group-item.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        body.dark-mode .modal-body .list-group-item.active {
-            background-color: var(--input-border-color);
-            color: var(--text-color);
-            border-color: var(--input-border-color);
-        }
-        .modal-body .list-group-item:hover {
-            background-color: var(--border-color);
-        }
-        
-        body.dark-mode .modal-body .list-group-item:hover {
-            background-color: var(--input-bg-color);
-        }
-        
-        .modal-body .btn-secondary[data-bs-dismiss="modal"] {
-            border-color: #dc3545;
-            color: #dc3545;
-            background-color: transparent;
-            transition: all 0.2s ease;
-        }
-        .modal-body .btn-secondary[data-bs-dismiss="modal"]:hover {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        @media (min-width: 992px) {
-            .header-main-content { flex-grow: 1; justify-content: center; }
-            .header-search { max-width: 500px; width: 100%; }
-        }
-
-        @media (max-width: 991.98px) {
-            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
-            .header-search { flex-grow: 1; }
-        }
-
-        @media (max-width: 575.98px) {
-            .app-header .container-fluid { padding: 0.75rem 0.5rem; }
-            .header-center-nav .nav-link { padding: 0.5rem 0.5rem; font-size: 0.85rem; }
-        }
-        
-        .movie-grid .row {
-            --bs-gutter-x: 0.75rem;
-            --bs-gutter-y: 0.75rem;
-        }
-
-        @media (max-width: 575.98px) {
-            .movie-grid .row-cols-custom > * { width: 33.333333%; flex: 0 0 auto; }
-        }
-        
-        @media (min-width: 576px) and (max-width: 767.98px) {
-            .movie-grid .row-cols-custom > * { width: 25%; flex: 0 0 auto; }
-        }
-
-        @media (min-width: 768px) and (max-width: 991.98px) {
-            .movie-grid .row-cols-custom > * { width: 20%; flex: 0 0 auto; }
-        }
-        
-        @media (min-width: 992px) {
-            .movie-grid .row-cols-custom > * { width: 16.666667%; flex: 0 0 auto; }
-        }
     </style>
 </head>
+  
 <body>
-
     <div id="loadingOverlay">
-        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading...">
-        <div id="slowNetworkMessage" style="display: none;">
-            <i class="bi bi-info-circle"></i> <span>Our server appears to be slow right now, please be patient.</span>
+        <img id="overlayLogo" src="/static/thiraiblack.png" alt="Thirai Logo">
+        <div id="slowNetworkMessage" class="text-muted" style="display: none;">
+            <i class="bi bi-info-circle"></i> <span>If our servers are slow, consider choosing a specific language or use the search bar at the main site to reduce loading times.</span>
         </div>
     </div>
+    
+<header class="app-header">
+        <div class="container-fluid">
+            <a href="/" class="d-flex align-items-center" id="logoLink">
+                <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
+            </a>
 
-    <header class="app-header">
-        <div class="container-fluid d-flex flex-wrap align-items-center">
-            <div class="dropdown logo-dropdown-container me-lg-4">
-                <a id="logoLink" href="./index">
-                    <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+            <div class="d-flex align-items-center ms-auto order-lg-3">
+                <a href="/install.html" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Install App" style="text-decoration: none; width: 40px; height: 40px;">
+                    <i class="bi bi-download"></i>
                 </a>
-                <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-chevron-down"></i>
-                </a>
-                <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
+                <div class="dropdown">
+                    <button class="settings-btn" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 40px; height: 40px;">
+                        <i class="bi bi-gear-fill"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Preferred Language</h6></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="all">All Languages</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="hindi">Hindi</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="telugu">Telugu</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="malayalam">Malayalam</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="kannada">Kannada</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="bengali">Bengali</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="marathi">Marathi</a></li>
+                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="punjabi">Punjabi</a></li>
+                        <li id="disableLangOptionLi" style="display: none;"><a class="dropdown-item text-danger" href="#" id="disablePreferredLanguage">Disable Preference</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Appearance</h6></li>
+                        <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
+                        <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
+                        <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="aboutButton">About</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
-                <form id="searchForm" action="./language" method="GET" class="header-search">
-                    <input type="hidden" name="lang" id="searchLangInput"> 
-                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
-                    <button type="submit" class="btn btn-primary" title="Search">
+
+            <div class="header-main-content">
+                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
+                    <select name="selected_language" id="languageSelect" class="form-select w-auto">
+                        <option value="tamil">Tamil</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="telugu">Telugu</option>
+                        <option value="malayalam">Malayalam</option>
+                        <option value="kannada">Kannada</option>
+                        <option value="bengali">Bengali</option>
+                        <option value="marathi">Marathi</option>
+                        <option value="punjabi">Punjabi</option>
+                    </select>
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder=" ">
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search"></i>
                     </button>
                 </form>
             </div>
-
-            <div class="d-flex align-items-center ms-auto">
-                <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav me-3">
-                    <a id="recentLink" class="nav-link" href="#">Recent</a>
-                    <a id="popularLink" class="nav-link" href="#">Popular</a>
-                </div>
-            </div>
         </div>
     </header>
 
-    <main class="container movie-grid">
-        <div id="resultsTitle" class="text-center mb-4"></div>
-        <div class="row row-cols-custom" id="moviesContainer"></div>
-
-        <div class="load-more-container">
-            <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
-            <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+    <main class="container-fluid mt-2">
+        <div class="promo-banner">
+            <img src="https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png" alt="Movie Logo" class="movie-logo">
+            <a href="/watch.html?film=3QoX" class="btn">
+                <i class="bi bi-play-fill"></i> Watch Now
+            </a>
         </div>
-    </main>
-    
-    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="h6 mb-3">Appearance</p>
-                    <div class="list-group mb-4">
-                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="light">Light</a>
-                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="dark">Dark</a>
-                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System Default</a>
+
+        <div class="language-section" id="section-continue-watching" style="display: none;">
+            <div class="language-header">
+                <h2 class="language-title">Continue</h2>
+                <button class="btn btn-sm text-muted" id="clear-continue-watching" title="Clear History">
+                    <i class="bi bi-trash"></i> Clear
+                </button>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-continue-watching" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-continue-watching">
+                            </div>
                     </div>
-                    <p class="h6 mb-3">Preferred Language</p>
-                    <div id="preferredLangList" class="list-group mb-4"></div>
-                    <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
-                    <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
                 </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-continue-watching" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+        <div class="language-section" id="section-collections">
+            <div class="language-header">
+                <h2 class="language-title">Collections
+                    <a href="/actors" class="explore-link" title="Explore All Actors">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
+                </h2>
+                <div class="collection-toggle">
+                    <input type="radio" id="toggle-stars" name="collection-type" value="actors" checked>
+                    <label for="toggle-stars">Actors</label>
+                    <input type="radio" id="toggle-actresses" name="collection-type" value="actresses">
+                    <label for="toggle-actresses">Actresses</label>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const PRIMARY_API_URL = 'https://thiraiapi.onrender.com';
-        const FALLBACK_API_URL = 'https://backendthirai-test.onrender.com';
-        let currentApiBase = PRIMARY_API_URL;
-
-        const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
-        const CATEGORIZED_ORDER = ['tamil', 'hindi', 'malayalam', 'telugu', 'kannada', 'marathi', 'punjabi', 'bengali'];
-
-        const body = document.body;
-        const moviesContainer = document.getElementById('moviesContainer');
-        const resultsTitle = document.getElementById('resultsTitle');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
-        const spinner = document.getElementById('loadingSpinner');
-        const searchInput = document.getElementById('searchInput');
-        const searchLangInput = document.getElementById('searchLangInput');
-        const recentLink = document.getElementById('recentLink');
-        const popularLink = document.getElementById('popularLink');
-        const categoryNav = document.getElementById('categoryNav');
-        const languageDropdownMenu = document.getElementById('languageDropdownMenu');
-        const preferredLangList = document.getElementById('preferredLangList');
-        const headerLogo = document.getElementById('headerLogo');
-        const faviconLink = document.getElementById('faviconLink');
-        const themeOptions = document.querySelectorAll('.theme-option');
-        const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
-        const logoLink = document.getElementById('logoLink');
-        
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const overlayLogo = document.getElementById('overlayLogo');
-        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
-        let initialLoadComplete = false;
-        let loadingTimer;
-
-        let currentPage = 1;
-        let isLoading = false;
-        
-        async function wakeServer() {
-            try {
-                const serverUrl = 'https://thirai-watch.onrender.com/';
-                await fetch(serverUrl, { method: 'GET', mode: 'no-cors' });
-            } catch (error) {
-                console.error('Failed wake-up:', error);
-            }
-        }
-
-        function adjustBodyPadding() {
-            const header = document.querySelector('.app-header');
-            if (header) {
-                body.style.paddingTop = `${header.offsetHeight}px`;
-            }
-        }
-
-        function updateThemeAssets(isDarkMode) {
-            faviconLink.href = isDarkMode ? './static/favicon.png' : './static/faviconlight.png';
-            headerLogo.src = isDarkMode ? './static/thiraiwhite.png' : './static/thiraiblack.png';
-            overlayLogo.src = isDarkMode ? './static/thiraiwhite.png' : './static/thiraiblack.png';
-        }
-
-        function applyTheme(theme) {
-            let isDarkMode;
-            if (theme === 'dark') {
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-                isDarkMode = true;
-            } else if (theme === 'light') {
-                body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
-                isDarkMode = false;
-            } else {
-                localStorage.removeItem('theme');
-                isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDarkMode) body.classList.add('dark-mode');
-                else body.classList.remove('dark-mode');
-            }
-            updateThemeAssets(isDarkMode);
-        }
-        
-        function updateActiveThemeOption(theme) {
-            themeOptions.forEach(option => {
-                option.classList.remove('active');
-                if (option.dataset.theme === theme) option.classList.add('active');
-            });
-        }
-        
-        themeOptions.forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.preventDefault();
-                const selectedTheme = e.currentTarget.dataset.theme;
-                applyTheme(selectedTheme);
-                updateActiveThemeOption(selectedTheme);
-            });
-        });
-
-        function updateDisableBtnVisibility() {
-            disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
-        }
-
-        function updateActiveLanguageOption(language) {
-            document.querySelectorAll('.preferred-lang-option').forEach(option => {
-                option.classList.remove('active');
-                if (option.dataset.language === language) option.classList.add('active');
-            });
-        }
-
-        function updateLogoLink(language) {
-            logoLink.href = (language && language !== 'all') ? `./language?lang=${language}` : './index';
-        }
-        
-        function setupPreferredLanguage() {
-             const storedLanguage = localStorage.getItem('preferred-language');
-             updateDisableBtnVisibility();
-             updateActiveLanguageOption(storedLanguage);
-             updateLogoLink(storedLanguage);
-
-            document.querySelectorAll('.preferred-lang-option').forEach(option => {
-                option.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const selectedLanguage = e.currentTarget.dataset.language;
-                    localStorage.setItem('preferred-language', selectedLanguage);
-                    updateDisableBtnVisibility();
-                    updateActiveLanguageOption(selectedLanguage);
-                    updateLogoLink(selectedLanguage);
-                });
-            });
-
-            disablePreferredLanguageBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('preferred-language');
-                updateDisableBtnVisibility();
-                updateActiveLanguageOption(null);
-                updateLogoLink(null);
-            });
-        }
-
-        function renderMovies(movies, append = true) {
-            if (!append) moviesContainer.innerHTML = '';
-            if (!movies || movies.length === 0) {
-                if (!append) moviesContainer.innerHTML = '<p class="text-center text-muted col-12">No movies found.</p>';
-                loadMoreBtn.style.display = 'none';
-                return;
-            }
-
-            const html = movies.map(movie => {
-                const imageUrl = movie.img_url.startsWith('http') ? movie.img_url : currentApiBase + movie.img_url;
-                return `
-                    <div class="col">
-                        <div class="movie-card">
-                            <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
-                                <img src="${imageUrl}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
-                                <div class="movie-title">${movie.title}</div>
-                            </a>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-collections" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-collections">
                         </div>
                     </div>
-                `;
-            }).join('');
-            moviesContainer.insertAdjacentHTML('beforeend', html);
-        }
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-collections" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
 
-        async function fetchAndRenderMovies(endpoint, append = true, pagesToLoad = 1) {
-            if (isLoading) return;
-            isLoading = true;
-            loadMoreBtn.style.display = 'none';
-            spinner.style.display = 'block';
+        <div class="language-section" id="section-tamil">
+            <div class="language-header">
+                <h2 class="language-title">Tamil
+                    <a href="/language?lang=tamil" class="explore-link" title="Explore All Tamil movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
+                </h2>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-tamil">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <button class="btn load-more-arrow" data-language="tamil" data-page="1" data-category="popular" title="Load More">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tamil" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-tamil">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-tamil" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
 
-            const tryFetch = async (baseUrl, path) => {
-                const res = await fetch(`${baseUrl}${path}`);
-                if (!res.ok) throw new Error();
-                return await res.json();
-            };
-
-            try {
-                let pagesFetched = 0;
-                let currentPath = endpoint;
-
-                while (pagesFetched < pagesToLoad) {
-                    let data;
-                    try {
-                        data = await tryFetch(PRIMARY_API_URL, currentPath);
-                        currentApiBase = PRIMARY_API_URL;
-                    } catch {
-                        data = await tryFetch(FALLBACK_API_URL, currentPath);
-                        currentApiBase = FALLBACK_API_URL;
-                    }
-                    
-                    renderMovies(data.movies, append || pagesFetched > 0);
-                    
-                    if (data.has_more) {
-                        currentPage = data.next_page;
-                        const urlObj = new URL(currentPath, 'https://dummy.com');
-                        urlObj.searchParams.set('page', currentPage);
-                        currentPath = urlObj.pathname + urlObj.search;
-                        loadMoreBtn.style.display = 'inline-block';
-                        pagesFetched++;
-                    } else {
-                        loadMoreBtn.style.display = 'none';
-                        break;
-                    }
-                }
-            } catch (error) {
-                if (!append) moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Failed to load movies.</p>';
-            } finally {
-                spinner.style.display = 'none';
-                isLoading = false;
-                hideOverlay();
-            }
-        }
-
-        async function fetchCategorizedResults(query) {
-            moviesContainer.innerHTML = '';
-            resultsTitle.innerHTML = `<h3>Search results for "${query}"</h3>`;
-            loadMoreBtn.style.display = 'none';
-
-            for (const lang of CATEGORIZED_ORDER) {
-                try {
-                    const res = await fetch(`${PRIMARY_API_URL}/search/${lang}?q=${encodeURIComponent(query)}`);
-                    const data = await res.json();
-                    
-                    if (data.movies && data.movies.length > 0) {
-                        const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
-                        const section = `
-                            <div class="col-12 lang-section-header"><h4>${capitalized}</h4></div>
-                            <div class="row row-cols-custom w-100 m-0" id="section-${lang}"></div>
-                        `;
-                        moviesContainer.insertAdjacentHTML('beforeend', section);
-                        
-                        const container = document.getElementById(`section-${lang}`);
-                        const movieHtml = data.movies.map(movie => {
-                            const imageUrl = movie.img_url.startsWith('http') ? movie.img_url : PRIMARY_API_URL + movie.img_url;
-                            return `
-                                <div class="col mt-3">
-                                    <div class="movie-card">
-                                        <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
-                                            <img src="${imageUrl}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
-                                            <div class="movie-title">${movie.title}</div>
-                                        </a>
-                                    </div>
+        <div class="language-section" id="section-decade">
+            <div class="language-header">
+                <h2 class="language-title">Decade</h2>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-decade" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-decade">
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=2020" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106170/960x540_2020sMovies_106170_28d54688-7827-4ab1-ae97-049f8958ba0b.jpg" class="movie-img" alt="2020s">
+                                        <div class="movie-title-text text-center">2020s</div>
+                                    </a>
                                 </div>
-                            `;
-                        }).join('');
-                        container.innerHTML = movieHtml;
-                    }
-                } catch (e) { console.error(`Failed ${lang}`, e); }
-            }
-            hideOverlay();
-        }
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=2010" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106171/960x540_2010sMovies_106171_cb4f7ab9-a278-46a6-b0d7-e253b1f42751.jpg" class="movie-img" alt="2010s">
+                                        <div class="movie-title-text text-center">2010s</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=2000" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106172/960x540_2000sMovies_106172_c7d29615-a3da-47ca-baf7-eb39d6101ac6.jpg" class="movie-img" alt="2000s">
+                                        <div class="movie-title-text text-center">2000s</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=1990" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106173/960x540_1990sMovies_106173_f8379542-00d3-40cf-9342-c78756057782.jpg" class="movie-img" alt="1990s">
+                                        <div class="movie-title-text text-center">1990s</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=1980" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106174/960x540_1980sMovies_106174_43dd27f8-7697-4a02-acee-4a4f91a14cc7.jpg" class="movie-img" alt="1980s">
+                                        <div class="movie-title-text text-center">1980s</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=1970" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106175/960x540_1970sMovies_106175_0f15e016-6a17-43d8-980a-8bd979267632.jpg" class="movie-img" alt="1970s">
+                                        <div class="movie-title-text text-center">1970s</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=1960" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106176/960x540_1960sMovies_106176_bce4783c-f544-428c-be31-8ce9831454a8.jpg" class="movie-img" alt="1960s">
+                                        <div class="movie-title-text text-center">1960s</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="movie-card">
+                                    <a href="/decade?lang=tamil&year=1950" class="movie-link">
+                                        <img src="https://sund-images.sunnxt.com/106177/960x540_1950sMovies_106177_6ff907a2-7840-4016-b298-5447eb049302.jpg" class="movie-img" alt="1950s">
+                                        <div class="movie-title-text text-center">1950s</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-decade" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
 
-        function hideOverlay() {
-            if (!initialLoadComplete) {
-                initialLoadComplete = true;
-                clearTimeout(loadingTimer);
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                    body.classList.remove('no-scroll');
-                }, 500);
-            }
-        }
+        <div class="language-section" id="section-hindi">
+            <div class="language-header">
+                <h2 class="language-title">Hindi
+                    <a href="/language?lang=hindi" class="explore-link" title="Explore All Hindi movies">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
+                </h2>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-hindi">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <button class="btn load-more-arrow" data-language="hindi" data-page="1" data-category="popular" title="Load More">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-hindi" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-hindi">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-hindi" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        ```
 
-        document.addEventListener('DOMContentLoaded', () => {
-            wakeServer();
-            adjustBodyPadding();
-            body.classList.add('no-scroll');
-            applyTheme(localStorage.getItem('theme') || 'system');
-            updateActiveThemeOption(localStorage.getItem('theme') || 'system');
-            populateLanguageMenus();
-            setupPreferredLanguage();
-
-            loadingTimer = setTimeout(() => {
-                if (!initialLoadComplete) slowNetworkMessage.style.display = 'flex';
-            }, 7000);
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang');
-            const searchQuery = urlParams.get('q');
-            const category = urlParams.get('category') || 'recent';
-
-            if (lang === 'all' && searchQuery) {
-                fetchCategorizedResults(searchQuery);
-                document.title = `Search: ${searchQuery} - Thirai`;
-                searchLangInput.value = 'all';
-                categoryNav.style.display = 'none';
-            } else if (!lang || (!ALL_LANGUAGES.includes(lang) && lang !== 'all')) {
-                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid language.</p>';
-                hideOverlay();
-            } else {
-                const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
-                document.title = `Thirai - ${capitalized}`;
-                searchLangInput.value = lang;
-                recentLink.href = `./language?lang=${lang}&category=recent`;
-                popularLink.href = `./language?lang=${lang}&category=popular`;
-                
-                if (searchQuery) {
-                    resultsTitle.innerHTML = `<h3>Search results for "${searchQuery}"</h3>`;
-                    fetchAndRenderMovies(`/search/${lang}?q=${encodeURIComponent(searchQuery)}`, false, 1);
-                } else {
-                    category === 'popular' ? popularLink.classList.add('active') : recentLink.classList.add('active');
-                    fetchAndRenderMovies(`/language/${lang}?category=${category}&page=1`, false, 3);
-                }
-            }
-        });
-        
-        function populateLanguageMenus() {
-            languageDropdownMenu.innerHTML = '<li><h6 class="dropdown-header">Languages</h6></li>';
-            preferredLangList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
-
-            ALL_LANGUAGES.forEach(lang => {
-                const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
-                languageDropdownMenu.insertAdjacentHTML('beforeend', `<li><a class="dropdown-item" href="./language?lang=${lang}&category=popular">${capitalized}</a></li>`);
-                preferredLangList.insertAdjacentHTML('beforeend', `<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="${lang}">${capitalized}</a>`);
-            });
-            languageDropdownMenu.insertAdjacentHTML('beforeend', `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`);
-        }
-
-        window.addEventListener('resize', adjustBodyPadding);
-
-        loadMoreBtn.addEventListener('click', () => {
-            const params = new URLSearchParams(window.location.search);
-            fetchAndRenderMovies(`/language/${params.get('lang')}?category=${params.get('category') || 'recent'}&page=${currentPage}`, true, 3);
-        });
-
-        searchForm.addEventListener('submit', (e) => {
-            if (searchInput.value.trim() === '') {
-                e.preventDefault();
-                searchInput.focus();
-            }
-        });
-
-        const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-        const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-        document.getElementById('aboutButtonInModal').addEventListener('click', (e) => {
-            e.preventDefault();
-            settingsModal.hide();
-            aboutModal.show();
-        });
-        document.getElementById('aboutModal').addEventListener('hidden.bs.modal', () => settingsModal.show());
-
-        const CACHE_KEY = 'thirai_continue_watching';
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('.movie-link');
-            if (!link) return;
-            const card = link.closest('.movie-card');
-            if (!card) return;
-            
-            const movie = {
-                title: card.querySelector('.movie-title')?.textContent || '',
-                img: card.querySelector('.movie-img')?.src || '',
-                url: link.getAttribute('href')
-            };
-            
-            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            history = history.filter(item => item.url !== movie.url);
-            history.unshift(movie);
-            if (history.length > 20) history.pop();
-            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-        });
-    </script>
-</body>
-</html>
+*(Note: To enable the scroll buttons for the new section, make sure to add `"decade"` to your JavaScript array that handles scroll visibility, usually located at the end of the file.)*
