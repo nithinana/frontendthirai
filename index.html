@@ -1118,52 +1118,57 @@ body {
         </div>
     </main>
 
+  <footer class="container-fluid text-center py-4 mt-5 border-top" style="border-color: var(--border-color) !important;">
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+            ⓘ Thirai does not store any media on its servers, and only embeds content hosted by 3rd party services.
+        </p>
+    </footer>
+    
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img src="/static/thiraiblack.png" alt="Thirai Logo" class="mb-4" style="max-width: 150px;">
-                    <p>Thirai is your ultimate destination for high-quality streaming of your favorite movies and series across multiple Indian languages.</p>
-                    <p class="text-muted">Version 1.0.0 (Beta)</p>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+            <p class="text-muted mt-3">
+                <i class="bi bi-filetype-py"></i> Powered by Python
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
+      </div>
     </div>
-
+    
     <div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-labelledby="clearHistoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="clearHistoryModalLabel">Clear History</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to clear your watching history?
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                    <button type="button" class="btn btn-danger" id="confirmClearHistoryBtn">Okay</button>
-                </div>
-            </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="clearHistoryModalLabel">Clear History</h5>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to clear your watching history?
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            <button type="button" class="btn btn-danger" id="confirmClearHistoryBtn">Okay</button>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
         const API_BASE_URL = 'https://thiraibackend.onrender.com';
 
         // --- NEW: CONTINUE WATCHING LOGIC ---
         const CACHE_KEY = 'thirai_continue_watching';
-
-        function saveToContinueWatching(movie) {
+      
+      function saveToContinueWatching(movie) {
             let history = [];
             try {
                 history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
@@ -1178,11 +1183,12 @@ body {
             
             // Add to the front
             history.unshift(movie);
-
+            
             // Limit to top 20 items
             if (history.length > 20) {
                 history = history.slice(0, 20);
             }
+            
             localStorage.setItem(CACHE_KEY, JSON.stringify(history));
         }
 
@@ -1220,25 +1226,16 @@ body {
                     </div>
                 </div>
             `).join('');
-
+            
             // Trigger scroll visibility check
             const prevBtn = document.getElementById('prev-btn-continue-watching');
             const nextBtn = document.getElementById('next-btn-continue-watching');
-            if (container && prevBtn && nextBtn) {
-                updateScrollButtonsVisibility(container, prevBtn, nextBtn);
-            }
+            updateScrollButtonsVisibility(container, prevBtn, nextBtn);
         }
 
-        function removeSingleWatchItem(urlToRemove) {
-            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            history = history.filter(item => item.url !== urlToRemove);
-            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-            renderContinueWatching();
-        }
-
-        // --- GLOBAL CLICK LISTENER (FIXED TO REMOVE LEADING DOT) ---
+        // Global click listener to catch movie card clicks
         document.addEventListener('click', (e) => {
-            // Handle remove item click
+            // NEW: Handle remove item click
             if (e.target.classList.contains('remove-watch-item')) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1249,16 +1246,9 @@ body {
 
             const link = e.target.closest('.movie-link');
             if (link) {
-                let url = link.getAttribute('href'); // Use let to allow modification
-                
+                const url = link.getAttribute('href');
                 // Only log links that go to the watch page
                 if (url && url.includes('/watch')) {
-                    
-                    // --- FIX: Prevent the "." from existing in the cached URL ---
-                    if (url.startsWith('.')) {
-                        url = url.substring(1);
-                    }
-
                     const card = link.closest('.movie-card');
                     const title = card.querySelector('.movie-title-text').textContent;
                     const img = card.querySelector('.movie-img').src;
@@ -1267,7 +1257,15 @@ body {
             }
         });
 
-        // NEW: Clear History logic
+        // NEW: Function to remove a single item
+        function removeSingleWatchItem(url) {
+            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+            history = history.filter(item => item.url !== url);
+            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
+            renderContinueWatching();
+        }
+
+        // UPDATED: Clear button now triggers Modal
         document.getElementById('clear-continue-watching')?.addEventListener('click', () => {
             const clearModal = new bootstrap.Modal(document.getElementById('clearHistoryModal'));
             clearModal.show();
@@ -1303,7 +1301,7 @@ body {
                 slowNetworkMessage.style.display = 'flex';
             }
         }, 7000);
-
+        
         const preferredLangOptions = document.querySelectorAll('.preferred-lang-option');
         const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguage');
         const disableLangOptionLi = document.getElementById('disableLangOptionLi');
@@ -1316,11 +1314,12 @@ body {
                 headerLogo.style.height = `${logoHeight}px`;
             }
         }
-
+        
         // --- THEME MANAGEMENT ---
         function updateThemeAssets(isDarkMode) {
             const lightLogo = '/static/thiraiblack.png';
             const darkLogo = '/static/thiraiwhite.png';
+            
             faviconLink.href = isDarkMode ? '/static/favicon.png' : '/static/faviconlight.png';
             headerLogo.src = isDarkMode ? darkLogo : lightLogo;
             overlayLogo.src = isDarkMode ? darkLogo : lightLogo;
@@ -1336,8 +1335,7 @@ body {
                 body.classList.remove('dark-mode');
                 localStorage.setItem('theme', 'light');
                 isDarkMode = false;
-            } else {
-                // System default
+            } else { // System default
                 localStorage.removeItem('theme');
                 isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (isDarkMode) {
@@ -1356,17 +1354,16 @@ body {
             updateLogoLink();
             renderContinueWatching(); // Load Continue Watching on startup
         });
-
+        
         // Listen for system theme changes
         if (window.matchMedia) {
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (!localStorage.getItem('theme')) {
-                    // Only apply if theme is 'system'
+                if (!localStorage.getItem('theme')) { // Only apply if theme is 'system'
                     applyTheme('system');
                 }
             });
         }
-
+        
         // Event listeners for theme options in dropdown
         themeOptions.forEach(option => {
             option.addEventListener('click', (event) => {
@@ -1378,33 +1375,29 @@ body {
         // --- PREFERRED LANGUAGE ---
         function updateDisableLangOptionVisibility() {
             // UPDATED: Show the disable button if any language preference is set.
-            const preferredLanguage = localStorage.getItem('preferred-language');
-            if (preferredLanguage && preferredLanguage !== 'all') {
-                disableLangOptionLi.style.display = 'block';
-            } else {
-                disableLangOptionLi.style.display = 'none';
-            }
+            disableLangOptionLi.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
         }
 
-        function updateActiveLanguageOption(selectedLanguage) {
+        // Function to set the active class on the correct language option
+        function updateActiveLanguageOption(language) {
             preferredLangOptions.forEach(option => {
                 option.classList.remove('active');
-                if (option.dataset.language === selectedLanguage) {
+                if (option.dataset.language === language) {
                     option.classList.add('active');
                 }
             });
         }
 
-        // NEW: Function to update the logo's href based on the preferred language
-        function updateLogoLink() {
-            const preferredLanguage = localStorage.getItem('preferred-language');
-            // Change the template literal to use the query parameter format
-            if (preferredLanguage && preferredLanguage !== 'all') {
-                logoLink.href = `/language?lang=${preferredLanguage}`;
-            } else {
-                logoLink.href = '/';
-            }
-        }
+// NEW: Function to update the logo's href based on the preferred language
+function updateLogoLink() {
+    const preferredLanguage = localStorage.getItem('preferred-language');
+    // Change the template literal to use the query parameter format
+    if (preferredLanguage && preferredLanguage !== 'all') {
+        logoLink.href = `/language?lang=${preferredLanguage}`;
+    } else {
+        logoLink.href = '/';
+    }
+}
 
         document.addEventListener('DOMContentLoaded', function() {
             // Check on page load and set active class
@@ -1431,7 +1424,7 @@ body {
             updateActiveLanguageOption(null); // Remove active class from all language options
             updateLogoLink(); // Update the logo link when the preference is disabled
         });
-
+        
         // --- ABOUT MODAL ---
         document.getElementById('aboutButton').addEventListener('click', function (event) {
             event.preventDefault();
@@ -1486,76 +1479,105 @@ body {
         });
         // --- END: MODIFIED SEARCH LOGIC ---
 
+
         // --- COLLECTIONS DATA AND LOGIC ---
         const featuredActorsData = [
-            { "name": "Vijay", "image_url": "https://sund-images.sunnxt.com/100587/250x375_Vijay_100587_224cc6a7-3c61-4e10-bde1-22dc80d0473b.jpg", "actor_code": "3TKYioHCAF" },
-            { "name": "Dhanush", "image_url": "https://sund-images.sunnxt.com/101546/250x375_Dhanush_101546_2680c0f6-aa8e-4358-bcfd-a545c794f1f1.jpg", "actor_code": "5vCobOqDDx" },
-            { "name": "Mohanlal", "image_url": "https://sund-images.sunnxt.com/101560/250x375_Mohanlal_101560_4a4618e2-faff-4156-bbfd-723f34341c2c.jpg", "actor_code": "5mY0hIDvD7" },
-            { "name": "Ravi Teja", "image_url": "https://sund-images.sunnxt.com/101555/250x375_RaviTeja_101555_d23d8c58-bc25-4528-912b-280d8f0774a3.jpg", "actor_code": "5x1WID7FfC" },
-            { "name": "Vikram", "image_url": "https://sund-images.sunnxt.com/101544/250x375_Vikram_101544_d6dcb2fb-330f-4850-b748-d503d5241704.jpg", "actor_code": "5uf7csvvAf" },
-            { "name": "Ajith Kumar", "image_url": "https://sund-images.sunnxt.com/101543/250x375_AjithKumar_101543_2a898516-1e0f-49f3-b570-8c5f4ecd8936.jpg", "actor_code": "4pDqQD0LPJ" },
-            { "name": "Fahadh Fassil", "image_url": "https://sund-images.sunnxt.com/101565/250x375_FahadhFaasil_101565_18dbdffc-4760-419a-a24c-d4280c6fe684.jpg", "actor_code": "5rqK8kvM2U" },
-            { "name": "Kamal Haasan", "image_url": "https://sund-images.sunnxt.com/101542/250x375_KamalHaasan_101542_13c3f9ea-ae22-4e5f-a49e-c0c709c2128f.jpg", "actor_code": "5Ix02sIDeA" },
-            { "name": "Prithviraj", "image_url": "https://sund-images.sunnxt.com/101562/250x375_PrithvirajSukumaran_101562_7617b864-4396-476e-83aa-83c27978139a.jpg", "actor_code": "4n085rJr74" },
-            { "name": "Vijayakanth", "image_url": "https://sund-images.sunnxt.com/101714/250x375_Vijayakanth_101714_108c0c0d-c124-43d5-8254-c83cb6a7a943.jpg", "actor_code": "8huiZv1bPB" },
-            { "name": "Prabhas", "image_url": "https://sund-images.sunnxt.com/101553/250x375_Prabhas_101553_5043283d-4812-4d2e-84e8-43313c1622f6.jpg", "actor_code": "7IcT9rmeui" },
-            { "name": "Nani", "image_url": "https://sund-images.sunnxt.com/101558/250x375_Nani_101558_2e17e335-c33b-410c-bc3c-e090a2be29e2.jpg", "actor_code": "4yI6pIDqDH" }
+              { "name": "Vijay", "image_url": "https://sund-images.sunnxt.com/100587/250x375_Vijay_100587_224cc6a7-3c61-4e10-bde1-22dc80d0473b.jpg", "actor_code": "3TKYioHCAF" },
+              { "name": "Dhanush", "image_url": "https://sund-images.sunnxt.com/101546/250x375_Dhanush_101546_2680c0f6-aa8e-4358-bcfd-a545c794f1f1.jpg", "actor_code": "5vCobOqDDx" },
+              { "name": "Mohanlal", "image_url": "https://sund-images.sunnxt.com/101560/250x375_Mohanlal_101560_4a4618e2-faff-4156-bbfd-723f34346e06.jpg", "actor_code": "1Uv6Det8Ej" },
+              { "name": "Mammootty", "image_url": "https://sund-images.sunnxt.com/101561/250x375_Mammootty_101561_0dd71a8d-9e60-4c77-86ef-bb773bc98038.jpg", "actor_code": "1WaoBhSG80" },
+              { "name": "Vijay Sethupathi", "image_url": "https://sund-images.sunnxt.com/138708/250x375_VijaySethupathi_138708_d8b98537-1c46-4b2d-8d49-6a53594ee332.jpg", "actor_code": "1yADiX9kkO" },
+              { "name": "Rajinikanth", "image_url": "https://sund-images.sunnxt.com/94511/250x375_Rajinikanth_94511_1202521b-b7e0-421b-80f2-ac5034a57930.jpg", "actor_code": "ijsq87BV3Y" },
+              { "name": "Karthi Sivakumar", "image_url": "https://sund-images.sunnxt.com/101549/250x375_KarthiSivakumar_101549_dd816cb1-d07d-4190-a025-9f183f1f5075.jpg", "actor_code": "5mHRERsgQU" },
+              { "name": "Sivakarthikeyan", "image_url": "https://sund-images.sunnxt.com/101548/250x375_Sivakarthikeyan_101548_969c4838-4b33-4b19-b2b0-76202e848226.jpg", "actor_code": "6ZDHHGuxxN" },
+              { "name": "Suriya", "image_url": "https://sund-images.sunnxt.com/101545/250x375_Surya_101545_27017026-a6bd-43fa-a65d-e7fa86cd0528.jpg", "actor_code": "2waH3hTKAe" },
+              { "name": "Vikram", "image_url": "https://sund-images.sunnxt.com/101544/250x375_Vikram_101544_d6dcb2fb-330f-4850-b748-d503d5241704.jpg", "actor_code": "5uf7csvvAf" },
+              { "name": "Ajith Kumar", "image_url": "https://sund-images.sunnxt.com/101543/250x375_AjithKumar_101543_2a898516-1e0f-49f3-b570-8c5f4ecd8936.jpg", "actor_code": "4pDqQD0LPJ" },
+              { "name": "Fahadh Fassil", "image_url": "https://sund-images.sunnxt.com/101565/250x375_FahadhFaasil_101565_18dbdffc-4760-419a-a24c-d4280c6fe684.jpg", "actor_code": "5rqK8kvM2U" },
+              { "name": "Kamal Haasan", "image_url": "https://sund-images.sunnxt.com/101542/250x375_KamalHaasan_101542_13c3f9ea-ae22-4e5f-a49e-c0c709c2128f.jpg", "actor_code": "5Ix02sIDeA" },
+              { "name": "Prithviraj", "image_url": "https://sund-images.sunnxt.com/101562/250x375_PrithvirajSukumaran_101562_7617b864-4396-476e-83aa-83c27978139a.jpg", "actor_code": "4n085rJr74" },
+              { "name": "Vijayakanth", "image_url": "https://sund-images.sunnxt.com/101714/250x375_Vijayakanth_101714_108c0c0d-c124-43d5-8254-c83cb6a7a943.jpg", "actor_code": "8huiZv1bPB" },
+              { "name": "Prabhas", "image_url": "https://sund-images.sunnxt.com/101553/250x375_Prabhas_101553_5043283d-4812-4d2e-84e8-43313c1622f6.jpg", "actor_code": "7IcT9rmeui" },
+              { "name": "Nani", "image_url": "https://sund-images.sunnxt.com/101558/250x375_Nani_101558_bf4ca935-5d41-450d-b3e1-94e4faf5e4a9.jpg", "actor_code": "3isSF2aCCr" },
+              { "name": "Prabhu", "image_url": "https://sund-images.sunnxt.com/101711/250x375_Prabhu_101711_2124675c-d79e-47c5-9ce4-2bdfffdc2a64.jpg", "actor_code": "5ycjeOX2Hm" }
         ];
 
         const featuredActressesData = [
-            { "name": "Jyothika", "image_url": "https://sund-images.sunnxt.com/101579/250x375_Jyothika_101579_59db1450-4886-4447-b892-e4e754593856.jpg", "actor_code": "5iYfXIDzE8" },
-            { "name": "Manju Warrier", "image_url": "https://sund-images.sunnxt.com/101625/250x375_ManjuWarrier_101625_001d164d-7a70-4d8e-9edc-37e42d634279.jpg", "actor_code": "7t0W9rmeur" },
-            { "name": "Trisha", "image_url": "https://sund-images.sunnxt.com/101584/250x375_TrishaKrishnan_101584_1167b6da-ec73-455b-8016-168a2d3b2a26.jpg", "actor_code": "5xMWID8FpA" },
-            { "name": "Anushka Shetty", "image_url": "https://sund-images.sunnxt.com/101594/250x375_AnushkaShetty_101594_89c31671-3312-40f9-ae7d-2b7e98d9c578.jpg", "actor_code": "5mY9rmeu80" },
-            { "name": "Nayanthara", "image_url": "https://sund-images.sunnxt.com/101581/250x375_Nayanthara_101581_4cfd1020-f421-4b10-8b94-442884a44f2d.jpg", "actor_code": "4pDsIDpLLG" },
-            { "name": "Shobana", "image_url": "https://sund-images.sunnxt.com/101620/250x375_Shobana_101620_918c5e60-4927-4402-a43b-2400b4629f63.jpg", "actor_code": "5vCmbOqDpP" },
-            { "name": "Amala Paul", "image_url": "https://sund-images.sunnxt.com/101588/250x375_AmalaPaul_101588_8ca56767-f316-43a0-b5ec-8be64757c919.jpg", "actor_code": "5v6kbOqDAn" },
-            { "name": "Simran", "image_url": "https://sund-images.sunnxt.com/101578/250x375_Simran_101578_3ebbe672-0051-40be-bd65-8b273b50c318.jpg", "actor_code": "4vIKpID8DH" },
-            { "name": "Tamannaah", "image_url": "https://sund-images.sunnxt.com/101586/250x375_TamannaahBhatia_101586_f9f06df1-e737-43f1-b1e6-231ccf773400.jpg", "actor_code": "5m68rmeu83" },
-            { "name": "Sai Pallavi", "image_url": "https://sund-images.sunnxt.com/101601/250x375_SaiPallavi_101601_9361869e-f00e-4363-be91-10c0e5a84093.jpg", "actor_code": "5v6pbOqDAy" },
-            { "name": "Keerthy Suresh", "image_url": "https://sund-images.sunnxt.com/101589/250x375_KeerthySuresh_101589_93998fdf-3f10-44be-9e79-8d7681ca040c.jpg", "actor_code": "5v6gbOqDAs" },
-            { "name": "Rashmika Mandanna", "image_url": "https://sund-images.sunnxt.com/101602/250x375_RashmikaMandanna_101602_6270d035-24f4-41d3-980b-04f87a329971.jpg", "actor_code": "5v6obOqDAz" }
+              { "name": "Trisha Krishnan", "image_url": "https://sund-images.sunnxt.com/131408/250x375_TrishaKrishnan_131408_d8af3600-7fdd-4bc0-b723-4be0ced8f2e4.jpg", "actor_code": "F1cHse9jWW" },
+              { "name": "Samantha", "image_url": "https://sund-images.sunnxt.com/131409/250x375_Samantha_131409_65c2f409-f020-4360-969a-b9f741232ccf.jpg", "actor_code": "6WfqAcxel5" },
+              { "name": "Nayanthara", "image_url": "https://sund-images.sunnxt.com/131441/250x375_Nayanthara_131441_76f534d9-19d3-4a02-a01a-03669dcd21c1.jpg", "actor_code": "7tFt1Le1Ep" },
+              { "name": "Pooja Hegde", "image_url": "https://sund-images.sunnxt.com/138711/250x375_PoojaHegde_138711_b484d386-2c3d-408b-89db-88177887ab8a.jpg", "actor_code": "14CoLSwEXV" },
+              { "name": "Nithya Menen", "image_url": "https://sund-images.sunnxt.com/131443/250x375_NithyaMenen_131443_db5be06a-7a6a-4b30-80b4-380506464b56.jpg", "actor_code": "3AQ1iONzZQ" },
+              { "name": "Anushka Shetty", "image_url": "https://sund-images.sunnxt.com/131445/250x375_AnushkaShetty_131445_df5b5e1e-50c3-4559-a946-1cb9ab77202e.jpg", "actor_code": "2ldhTbiGgU" },
+              { "name": "Hansika Motwani", "image_url": "https://sund-images.sunnxt.com/131424/250x375_HansikaMotwani_131424_d6c17c92-d0b1-4600-b353-45c2c47d53fd.jpg", "actor_code": "3FGflYSCcj" },
+              { "name": "Kajal Aggarwal", "image_url": "https://sund-images.sunnxt.com/131426/250x375_KajalAggarwal_131426_0ca0896b-bdef-4833-9dec-770e035b149c.jpg", "actor_code": "7GLAgNWiq2" },
+              { "name": "Shruti Haasan", "image_url": "https://sund-images.sunnxt.com/131431/250x375_ShrutiHaasan_131431_78778c01-540b-4576-a883-699ec7224571.jpg", "actor_code": "7fCylLNfVi" },
+              { "name": "Priyamani", "image_url": "https://sund-images.sunnxt.com/131415/250x375_Priyamani_131415_7a92265f-5432-4e9e-a38c-46e2200c522c.jpg", "actor_code": "1mh1dheOZR" },
+              { "name": "Simran", "image_url": "https://sund-images.sunnxt.com/131407/250x375_Simran_131407_a9b95132-9205-420d-9f5f-9e6a8bba22e0.jpg", "actor_code": "33rNUL3JZx" },
+              { "name": "Aishwarya Rajesh", "image_url": "https://sund-images.sunnxt.com/131411/250x375_AishwaryaRajesh_131411_c7758ce1-6327-41b1-bd5c-7f84ac947bf3.jpg", "actor_code": "CeT6162PqU" }
         ];
 
         function renderCollections(type) {
             const container = document.getElementById('movies-row-collections');
             const data = type === 'actors' ? featuredActorsData : featuredActressesData;
-            const exploreLink = document.querySelector('#section-collections .explore-link');
             
-            // Update explore link
-            exploreLink.href = type === 'actors' ? '/actors' : '/actresses';
-            exploreLink.title = type === 'actors' ? 'Explore All Actors' : 'Explore All Actresses';
-
-            container.innerHTML = data.map(person => `
-                <div class="col">
-                    <div class="movie-card">
-                        <a href="/actors/actor.html?actor=${person.actor_code}" class="movie-link">
-                            <img src="${person.image_url}" class="movie-img" alt="${person.name}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
-                            <div class="movie-title-text text-center">${person.name}</div>
-                        </a>
+            container.innerHTML = ''; // Clear existing
+            
+            const html = data.map(member => {
+                // Default to tamil if not present, consistent with actors.html logic
+                const lang = 'tamil'; 
+                return `
+                    <div class="col">
+                        <div class="movie-card">
+                            <a href="/actor?lang=${lang}&actor_id=${member.actor_code}" class="movie-link">
+                                <img src="${member.image_url}" class="movie-img" alt="${member.name}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
+                                <div class="movie-title-text">${member.name}</div>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-
-            // Trigger scroll visibility check
-            const prevBtn = document.getElementById('prev-btn-collections');
-            const nextBtn = document.getElementById('next-btn-collections');
-            if (container && prevBtn && nextBtn) {
-                updateScrollButtonsVisibility(container, prevBtn, nextBtn);
-            }
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
         }
 
-        // Toggle Event Listener
-        document.querySelectorAll('input[name="collection-type"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                renderCollections(e.target.value);
+        // Initialize Collections Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCollections('actors'); // Default view
+            
+            // Toggle Event Listeners
+            const actorToggle = document.getElementById('toggle-stars');
+            const actressToggle = document.getElementById('toggle-actresses');
+            
+            actorToggle.addEventListener('change', () => {
+                if(actorToggle.checked) renderCollections('actors');
             });
+            
+            actressToggle.addEventListener('change', () => {
+                if(actressToggle.checked) renderCollections('actresses');
+            });
+
+            // Update Scroll Buttons for the new Collection row
+            const collectionRow = document.getElementById('movies-row-collections');
+            const prevBtn = document.getElementById('prev-btn-collections');
+            const nextBtn = document.getElementById('next-btn-collections');
+            
+            // Add scroll listener
+             if (collectionRow) {
+                // Initial visibility check
+                setTimeout(() => updateScrollButtonsVisibility(collectionRow, prevBtn, nextBtn), 100);
+
+                // Update visibility whenever the container is scrolled
+                collectionRow.addEventListener('scroll', () => {
+                    updateScrollButtonsVisibility(collectionRow, prevBtn, nextBtn);
+                });
+            }
         });
+        
+        // --- END COLLECTIONS LOGIC ---
 
-        // Initial render
-        renderCollections('actors');
 
-        // --- MOVIES LOADING LOGIC ---
+        // --- MOVIE LOADING LOGIC ---
         const languageSections = document.querySelectorAll('.language-section:not(#section-collections):not(#section-continue-watching)');
         const languagePages = {};
 
@@ -1563,7 +1585,7 @@ body {
             const moviesContainer = document.getElementById(`movies-row-${language}`);
             const spinner = document.getElementById(`spinner-${language}`);
             const button = document.querySelector(`.load-more-arrow[data-language="${language}"]`);
-
+            
             if (button) button.style.display = 'none';
             if (spinner) spinner.style.display = 'inline-block';
 
@@ -1577,7 +1599,6 @@ body {
                         throw new Error('Network response was not ok.');
                     }
                     data = await res.json();
-                    
                     // Override has_more to false because we are loading a static dump
                     // and don't want the pagination logic to fetch the same file again.
                     data.has_more = false;
@@ -1599,10 +1620,12 @@ body {
                         emptyMessage.textContent = 'No movies found for this language.';
                         moviesContainer.appendChild(emptyMessage);
                     }
+                    
                     if(button) {
                         button.disabled = true;
                         button.innerHTML = '<i class="bi bi-check-lg"></i>';
                     }
+
                 } else {
                     const moviesHtml = data.movies.map(movie => {
                         const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
@@ -1619,38 +1642,34 @@ body {
                         `;
                     }).join('');
                     moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
-
+                    
+                    if (pageToLoad === languagePages[language]) {
+                        languagePages[language]++;
+                    }
+                    
                     if (button) {
-                        if (data.has_more) {
-                            button.disabled = false;
-                            button.style.display = 'inline-block';
-                        } else {
+                        if (!data.has_more) {
                             button.disabled = true;
                             button.innerHTML = '<i class="bi bi-check-lg"></i>';
-                            button.style.display = 'inline-block';
+                        } else {
+                            button.disabled = false;
+                            button.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
                         }
                     }
                 }
-
-                // Trigger scroll visibility check after loading movies
-                const prevBtn = document.getElementById(`prev-btn-${language}`);
-                const nextBtn = document.getElementById(`next-btn-${language}`);
-                if (moviesContainer && prevBtn && nextBtn) {
-                    updateScrollButtonsVisibility(moviesContainer, prevBtn, nextBtn);
-                }
-
             } catch (error) {
-                console.error(`Error loading ${language} movies:`, error);
-                const existingMessage = moviesContainer.querySelector('.empty-or-error-message');
-                if (existingMessage) {
-                    existingMessage.remove();
+                console.error(`Error loading movies for ${language}:`, error);
+                if (button) {
+                    button.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+                    button.disabled = true;
                 }
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'text-danger my-3 empty-or-error-message';
-                errorMessage.textContent = 'Failed to load movies. Please check your connection.';
+                errorMessage.textContent = `Could not load ${language} movies due to a network or server error. Please try again later.`;
                 moviesContainer.appendChild(errorMessage);
             } finally {
                 if (spinner) spinner.style.display = 'none';
+                if (button) button.style.display = 'flex'; // Show button again after loading
             }
         }
 
@@ -1667,7 +1686,6 @@ body {
                 if (completedLoads >= totalInitialLoads) {
                     initialLoadComplete = true;
                     clearTimeout(loadingTimer);
-                    
                     // Fade out and hide the loading overlay
                     loadingOverlay.style.opacity = '0';
                     setTimeout(() => {
@@ -1677,7 +1695,7 @@ body {
                     }, 500); // The duration of the CSS transition
                 }
             };
-
+            
             languageSections.forEach(section => {
                 const lang = section.id.replace('section-', '');
                 const category = 'popular';
@@ -1696,7 +1714,7 @@ body {
                 loadMovies(language, category, languagePages[language]);
             });
         });
-
+        
         // Add this new code to the existing script block at the end
         const scrollButtons = document.querySelectorAll('.scroll-btn');
 
@@ -1704,51 +1722,59 @@ body {
         function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
             if (!scrollContainer || !prevBtn || !nextBtn) return;
 
-            const scrollLeft = scrollContainer.scrollLeft;
-            const scrollWidth = scrollContainer.scrollWidth;
-            const clientWidth = scrollContainer.clientWidth;
             const wrapper = scrollContainer.closest('.movies-scroller-wrapper');
+            if (!wrapper) return;
 
-            // Set button visibility
-            prevBtn.disabled = scrollLeft <= 0;
-            nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 1;
+            const atStart = scrollContainer.scrollLeft <= 5;
+            const atEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 5;
+            const isScrollable = scrollContainer.scrollWidth > scrollContainer.clientWidth;
 
-            // Set wrapper classes for the fade effect
-            if (wrapper) {
-                if (scrollLeft <= 5) {
-                    wrapper.classList.add('is-at-start');
-                } else {
-                    wrapper.classList.remove('is-at-start');
-                }
+            // Control the disabled state of the buttons. This will trigger the CSS transition
+            prevBtn.disabled = atStart;
+            nextBtn.disabled = atEnd || !isScrollable;
 
-                if (scrollLeft + clientWidth >= scrollWidth - 5) {
-                    wrapper.classList.add('is-at-end');
-                } else {
-                    wrapper.classList.remove('is-at-end');
-                }
+            // Add/remove classes on the wrapper to control the fade effect
+            if (atStart || !isScrollable) {
+                wrapper.classList.add('is-at-start');
+            } else {
+                wrapper.classList.remove('is-at-start');
+            }
+
+            if (atEnd || !isScrollable) {
+                wrapper.classList.add('is-at-end');
+            } else {
+                wrapper.classList.remove('is-at-end');
             }
         }
 
-        scrollButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const direction = button.classList.contains('scroll-btn-prev') ? 'prev' : 'next';
-                const section = button.closest('.language-section');
-                const lang = section.id.replace('section-', '');
-                const scrollContainer = document.getElementById(`movies-row-${lang}`);
+        // Add event listeners for the scroll buttons
+// PASTE THIS NEW BLOCK:
+scrollButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Find the parent section first
+        const section = button.closest('.language-section');
+        // Find the specific movies-row inside that section
+        const scrollContainer = section.querySelector('.movies-row');
+        
+        if (!scrollContainer) return;
 
-                const scrollAmount = scrollContainer.clientWidth * 0.8;
+        const movieCard = scrollContainer.querySelector('.movie-card');
+        if (!movieCard) return;
 
-                if (button.classList.contains('scroll-btn-prev')) {
-                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                } else if (button.classList.contains('scroll-btn-next')) {
-                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                }
-            });
-        });
+        // Scroll by 3 cards at a time
+        const movieCardWidth = movieCard.offsetWidth;
+        const scrollAmount = movieCardWidth * 3 + (16 * 3); 
+
+        if (button.classList.contains('scroll-btn-prev')) {
+            scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        } else if (button.classList.contains('scroll-btn-next')) {
+            scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    });
+});
 
         // Update the scroll button visibility on initial page load and on scroll
         const allSections = document.querySelectorAll('.language-section'); // Updated to include Collections
-
         allSections.forEach(section => {
             const lang = section.id.replace('section-', '');
             const scrollContainer = document.getElementById(`movies-row-${lang}`);
