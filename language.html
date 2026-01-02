@@ -829,9 +829,9 @@
                 if (category === 'popular') popularLink.classList.add('active');
                 else recentLink.classList.add('active');
                 
-                // Batch load 3 pages by default
+                // Batch load 2 pages by default
                 const initialEndpoint = `/language/${lang}?category=${category}&page=1`;
-                fetchAndRenderMovies(initialEndpoint, false, 3);
+                fetchAndRenderMovies(initialEndpoint, false, 2);
             }
         });
         
