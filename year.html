@@ -747,9 +747,9 @@
                     if (!res.ok) throw new Error(`HTTP error! status: ${res.status} on page ${pageToFetch}`);
                     const data = await res.json();
                     
-                    allMovies.push(...data.movies);
-                    hasMore = data.has_more;
-                }
+if (data && data.movies) {
+    allMovies.push(...data.movies);
+}
                 
                 renderMovies(allMovies, append);
                 
