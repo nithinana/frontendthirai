@@ -996,20 +996,21 @@
             if (spinner) spinner.style.display = 'inline-block';
 
             try {
-                let endpoint = `${API_BASE_URL}/decades/${currentLanguage}/${decade}?page=${pageToLoad}`;
+                let endpoint = `${API_BASE_URL}/decade/${currentLanguage}/${decade}?page=${pageToLoad}`;
                 let res;
                 
                 try {
                     res = await fetch(endpoint);
-                    if (!res.ok && API_BASE_URL === PRIMARY_API_URL) {
+                    // Fallback logic check
+                     if (!res.ok && API_BASE_URL === PRIMARY_API_URL) {
                         API_BASE_URL = FALLBACK_API_URL;
-                        endpoint = `${API_BASE_URL}/decades/${currentLanguage}/${decade}?page=${pageToLoad}`;
+                        endpoint = `${API_BASE_URL}/decade/${currentLanguage}/${decade}?page=${pageToLoad}`;
                         res = await fetch(endpoint);
                     }
                 } catch(fetchErr) {
                     if (API_BASE_URL === PRIMARY_API_URL) {
                         API_BASE_URL = FALLBACK_API_URL;
-                        endpoint = `${API_BASE_URL}/decades/${currentLanguage}/${decade}?page=${pageToLoad}`;
+                        endpoint = `${API_BASE_URL}/decade/${currentLanguage}/${decade}?page=${pageToLoad}`;
                         res = await fetch(endpoint);
                     } else {
                         throw fetchErr;
@@ -1019,10 +1020,8 @@
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 
-                // Using results or movies depending on API response
-                const movies = data.results || data.movies || [];
-                
-                if (movies.length === 0 && pageToLoad === 1) {
+                // If it's the first page and no movies
+                if ((!data.movies || data.movies.length === 0) && pageToLoad === 1) {
                     const emptyMessage = document.createElement('div');
                     emptyMessage.className = 'text-muted my-3 empty-or-error-message';
                     emptyMessage.textContent = 'No movies found for this decade.';
@@ -1031,10 +1030,12 @@
                         button.disabled = true;
                         button.innerHTML = '<i class="bi bi-check-lg"></i>';
                     }
-                } else if (movies.length > 0) {
-                     const moviesHtml = movies.map(movie => {
+                } else if (data.movies && data.movies.length > 0) {
+                     const moviesHtml = data.movies.map(movie => {
                         const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
                         const movieTitleEncoded = encodeURIComponent(movie.title);
+                        // Ensure full image URL if needed, though backend usually sends full or partial.
+                        // Assuming standard handling here.
                         let imgUrl = movie.img_url;
                         if (!imgUrl.startsWith('http')) {
                             imgUrl = API_BASE_URL + imgUrl;
@@ -1123,6 +1124,8 @@
                 loadMovies(decade, 1).finally(checkCompletion);
             });
 
+            // Bind Load More Buttons (delegate since they are dynamic? No, we just created them)
+            // But we can delegate to body or just select them now since they exist in DOM
             const loadMoreButtons = document.querySelectorAll('.load-more-arrow');
             loadMoreButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1131,6 +1134,7 @@
                 });
             });
 
+            // Bind Scroll Buttons
             setupScrollButtons();
         });
 
@@ -1144,6 +1148,7 @@
                     if (!scrollContainer) return;
                     const movieCard = scrollContainer.querySelector('.movie-card');
                     
+                    // If no cards yet, can't measure, just arbitrary scroll
                     let scrollAmount = 200; 
                     if(movieCard) {
                         const movieCardWidth = movieCard.offsetWidth;
@@ -1158,6 +1163,7 @@
                 });
             });
 
+            // Initial Scroll Visibility Check
             const allSections = document.querySelectorAll('.language-section');
             allSections.forEach(section => {
                 const decade = section.id.replace('section-', '');
@@ -1166,10 +1172,12 @@
                 const nextBtn = document.getElementById(`next-btn-${decade}`);
 
                 if (scrollContainer) {
+                    // Update visibility whenever the container is scrolled
                     scrollContainer.addEventListener('scroll', () => {
                         updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
                     });
                     
+                    // Add observer for when items are added via API
                     const observer = new MutationObserver(() => {
                         updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
                     });
@@ -1212,6 +1220,9 @@ function isMobileDevice() {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPromptInline = e;
+  if (isMobileDevice()) {
+    // document.getElementById('mobileInstallNotice').style.display = 'flex'; // Not present in provided HTML
+  }
 });
 </script>
 </body>
