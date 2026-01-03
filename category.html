@@ -942,7 +942,7 @@
 
         // --- MAIN PAGE LOGIC: DECADES ---
         const decades = ['2020', '2010', '2000', '1990', '1980', '1970', '1960', '1950'];
-        let currentLanguage = 'tamil'; // Default
+        let currentLanguage = 'tamil'; // Default, will be updated by URL
         const decadePages = {};
 
         function createDecadeSection(decade, language) {
@@ -1035,7 +1035,6 @@
                         const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
                         const movieTitleEncoded = encodeURIComponent(movie.title);
                         // Ensure full image URL if needed, though backend usually sends full or partial.
-                        // Assuming standard handling here.
                         let imgUrl = movie.img_url;
                         if (!imgUrl.startsWith('http')) {
                             imgUrl = API_BASE_URL + imgUrl;
@@ -1082,11 +1081,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Check URL Params
+            // Check URL Params - UPDATE: Ensure currentLanguage is captured correctly before creating sections
             const urlParams = new URLSearchParams(window.location.search);
             const langParam = urlParams.get('language');
             if (langParam) {
-                currentLanguage = langParam;
+                currentLanguage = langParam.toLowerCase();
                 document.title = `Thirai - ${currentLanguage.charAt(0).toUpperCase() + currentLanguage.slice(1)} Decades`;
             }
 
@@ -1124,8 +1123,7 @@
                 loadMovies(decade, 1).finally(checkCompletion);
             });
 
-            // Bind Load More Buttons (delegate since they are dynamic? No, we just created them)
-            // But we can delegate to body or just select them now since they exist in DOM
+            // Bind Load More Buttons
             const loadMoreButtons = document.querySelectorAll('.load-more-arrow');
             loadMoreButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1148,7 +1146,6 @@
                     if (!scrollContainer) return;
                     const movieCard = scrollContainer.querySelector('.movie-card');
                     
-                    // If no cards yet, can't measure, just arbitrary scroll
                     let scrollAmount = 200; 
                     if(movieCard) {
                         const movieCardWidth = movieCard.offsetWidth;
@@ -1163,7 +1160,6 @@
                 });
             });
 
-            // Initial Scroll Visibility Check
             const allSections = document.querySelectorAll('.language-section');
             allSections.forEach(section => {
                 const decade = section.id.replace('section-', '');
@@ -1172,12 +1168,10 @@
                 const nextBtn = document.getElementById(`next-btn-${decade}`);
 
                 if (scrollContainer) {
-                    // Update visibility whenever the container is scrolled
                     scrollContainer.addEventListener('scroll', () => {
                         updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
                     });
                     
-                    // Add observer for when items are added via API
                     const observer = new MutationObserver(() => {
                         updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
                     });
@@ -1220,9 +1214,6 @@ function isMobileDevice() {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPromptInline = e;
-  if (isMobileDevice()) {
-    // document.getElementById('mobileInstallNotice').style.display = 'flex'; // Not present in provided HTML
-  }
 });
 </script>
 </body>
