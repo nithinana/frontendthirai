@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* CSS Variables and Styles mirrored from year.html */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -53,6 +52,8 @@
             overflow-x: hidden;
         }
 
+        body.no-scroll { overflow: hidden; }
+
         .app-header {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -74,6 +75,7 @@
             box-shadow: var(--card-shadow);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             height: 100%;
+            position: relative;
         }
 
         .movie-card:hover {
@@ -108,9 +110,26 @@
             background-color: var(--bg-color);
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             transition: opacity 0.5s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+
+        .badge-genre {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
         }
 
         @media (max-width: 575.98px) {
@@ -121,16 +140,19 @@
 <body class="no-scroll">
 
     <div id="loadingOverlay">
-        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading..." style="max-width: 250px;">
+        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Thirai" style="max-width: 250px; margin-bottom: 20px;">
     </div>
 
     <header class="app-header">
         <div class="container-fluid d-flex align-items-center">
             <a id="logoLink" href="./index">
-                <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+                <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai" class="header-logo">
             </a>
-            <div class="ms-auto">
-                <span id="genreLabel" class="badge bg-primary">Genre Filtering</span>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <span id="genreDisplay" class="badge-genre">Genre Search</span>
+                <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                    <i class="bi bi-gear-fill" style="font-size: 1.5rem; color: var(--text-color);"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -138,7 +160,7 @@
     <main class="container movie-grid py-4">
         <div class="row g-3" id="moviesContainer"></div>
 
-        <div class="load-more-container text-center mt-4">
+        <div class="text-center mt-5 mb-5">
             <button id="loadMoreBtn" class="btn btn-primary" style="display:none;">Load More</button>
             <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display:none;">
                 <span class="visually-hidden">Loading...</span>
@@ -146,26 +168,59 @@
         </div>
     </main>
 
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: var(--card-bg-color); color: var(--text-color);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--close-filter);"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span>Appearance</span>
+                        <select id="themeSelect" class="form-select w-auto">
+                            <option value="system">System</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <div class="text-center">
+                        <a href="#" id="openAboutInModal" class="text-decoration-none small text-muted">About Thirai</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // API Configuration
         const API_BASE_URL = 'https://api.thirai.me';
         let currentPage = 1;
         let isLoading = false;
 
-        // Theme Management
+        // --- THEME LOGIC ---
         function applyTheme() {
             const savedTheme = localStorage.getItem('theme') || 'system';
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) themeSelect.value = savedTheme;
+
             const isDark = savedTheme === 'dark' || 
-                          (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
             
-            if (isDark) document.body.classList.add('dark-mode');
-            document.getElementById('headerLogo').src = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
-            document.getElementById('overlayLogo').src = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
+            document.body.classList.toggle('dark-mode', isDark);
+            const logoPath = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
+            document.getElementById('headerLogo').src = logoPath;
+            document.getElementById('overlayLogo').src = logoPath;
+            document.getElementById('faviconLink').href = isDark ? './static/faviconwhite.png' : './static/favicon.png';
         }
 
-        // Fetch Logic for Genre Endpoint
-        async function fetchGenreMovies(page = 1) {
+        document.getElementById('themeSelect').addEventListener('change', (e) => {
+            localStorage.setItem('theme', e.target.value);
+            applyTheme();
+        });
+
+        // --- API DATA FETCHING ---
+        async function fetchMovies(page = 1) {
             if (isLoading) return;
             isLoading = true;
             
@@ -175,7 +230,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang') || 'tamil';
             
-            // Build query string based on your Go API requirements
+            // Build the specific query format required for /genre
             const queryParams = new URLSearchParams({
                 action: urlParams.get('action') || '0',
                 comedy: urlParams.get('comedy') || '0',
@@ -194,34 +249,34 @@
                     renderMovies(data.movies);
                     currentPage = page;
                     document.getElementById('loadMoreBtn').style.display = data.has_more ? 'inline-block' : 'none';
-                } else if (page === 1) {
-                    document.getElementById('moviesContainer').innerHTML = '<p class="text-center w-100">No movies found for these criteria.</p>';
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Fetch error:', error);
             } finally {
                 isLoading = false;
                 document.getElementById('loadingSpinner').style.display = 'none';
-                hideLoadingOverlay();
+                hideOverlay();
             }
         }
 
         function renderMovies(movies) {
             const container = document.getElementById('moviesContainer');
-            const html = movies.map(movie => `
-                <div class="col-6 col-md-4 col-lg-2">
+            movies.forEach(movie => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-2';
+                col.innerHTML = `
                     <div class="movie-card">
                         <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
                             <img src="${movie.img_url}" class="movie-img" alt="${movie.title}" loading="lazy">
                             <div class="movie-title">${movie.title}</div>
                         </a>
                     </div>
-                </div>
-            `).join('');
-            container.insertAdjacentHTML('beforeend', html);
+                `;
+                container.appendChild(col);
+            });
         }
 
-        function hideLoadingOverlay() {
+        function hideOverlay() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.style.opacity = '0';
             setTimeout(() => {
@@ -230,24 +285,42 @@
             }, 500);
         }
 
-        // Feature: Remove "api" from URL to go to normal site
+        // --- URL LOGIC: REMOVE "API" ---
         document.getElementById('logoLink').addEventListener('click', function(e) {
             const currentUrl = window.location.origin;
             if (currentUrl.includes('api.thirai.me')) {
                 e.preventDefault();
+                // Redirect to the non-api domain version of the homepage
                 window.location.href = currentUrl.replace('api.', '') + '/index';
             }
         });
 
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            applyTheme();
-            fetchGenreMovies(1);
+        // --- CONTINUE WATCHING CACHE LOGIC ---
+        const CACHE_KEY = 'thirai_continue_watching';
+        function saveToContinueWatching(movie) {
+            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+            history = history.filter(item => item.url !== movie.url);
+            history.unshift(movie);
+            if (history.length > 20) history.pop();
+            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
+        }
+
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('.movie-link');
+            if (!link) return;
+            const url = link.getAttribute('href');
+            if (url && url.includes('watch')) {
+                const card = link.closest('.movie-card');
+                const title = card.querySelector('.movie-title')?.textContent || '';
+                const img = card.querySelector('.movie-img')?.src || '';
+                saveToContinueWatching({ title, img, url });
+            }
         });
 
-        document.getElementById('loadMoreBtn').addEventListener('click', () => {
-            fetchGenreMovies(currentPage + 1);
-        });
+        // --- INITIALIZE ---
+        document.getElementById('loadMoreBtn').addEventListener('click', () => fetchMovies(currentPage + 1));
+        applyTheme();
+        fetchMovies(1);
     </script>
 </body>
 </html>
