@@ -1395,22 +1395,22 @@
 
 function go() {
     const lang = document.getElementById('ln').value;
-    const ratecount = document.getElementById('ratecount').value || 0;
-    
-    // Helper to get value from sliders or toggled buttons
-    // Assuming you have a way to store/get current values for these 5 attributes
-    const getVal = (id) => {
-        const el = document.getElementById(id);
-        return el ? el.value : 4; // Default to 4 if not found, or use your logic
+    const ratecount = document.getElementById('ratecount').value;
+
+    // Helper to get value only if "ANY" is NOT checked
+    const getVal = (cat) => {
+        const isAny = document.getElementById(`c-${cat}`).checked;
+        if (isAny) return 0; // Or whatever value your backend treats as "ignore"
+        return document.getElementById(`s-${cat}`).value;
     };
 
-    // Construct the new URL format
-    const url = `https://thirai.me/genre?lang=${lang}` +
-                `&action=${getVal('action')}` +
-                `&comedy=${getVal('comedy')}` +
-                `&romance=${getVal('romance')}` +
-                `&storyline=${getVal('storyline')}` +
-                `&performance=${getVal('performance')}` +
+    // Construct the URL using the correct IDs (s-prefix)
+    const url = `https://thirai.me/genre?lang=${lang}` + 
+                `&action=${getVal('action')}` + 
+                `&comedy=${getVal('comedy')}` + 
+                `&romance=${getVal('romance')}` + 
+                `&storyline=${getVal('storyline')}` + 
+                `&performance=${getVal('performance')}` + 
                 `&ratecount=${ratecount}`;
 
     window.location.href = url;
