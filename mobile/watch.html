@@ -12,6 +12,9 @@
 </script>
 
 <script>
+  // CAPTURE ORIGINAL URL BEFORE REWRITING
+  const ORIGINAL_SEARCH_PARAMS = window.location.search;
+
   (function() {
     const urlParams = new URLSearchParams(window.location.search);
     const movieCode = urlParams.get('film');
@@ -509,6 +512,19 @@
         const DOUBLE_TAP_THRESHOLD_MS = 300;
         const SEEK_TIME = 10;
         let movieKey;
+        
+        // --- CACHE / CONTINUE WATCHING CONSTANTS ---
+        const CACHE_KEY = 'thirai_continue_watching';
+
+        function saveToContinueWatching(movie) {
+            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+            // Remove existing entry with same URL to push it to top
+            history = history.filter(item => item.url !== movie.url);
+            history.unshift(movie);
+            // Limit to 20 items
+            if (history.length > 20) history.pop();
+            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
+        }
 
         function formatTime(seconds) {
             if (isNaN(seconds) || seconds < 0) return "00:00";
@@ -955,6 +971,16 @@
                         downloadButton.style.display = 'flex';
                         movieTitleDisplay.textContent = data.title;
                         document.title = data.title;
+                        
+                        // --- UPDATED: SAVE ORIGINAL URL TO CACHE ---
+                        const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
+                        const cacheObj = {
+                            title: data.title,
+                            img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image', 
+                            url: currentUrl
+                        };
+                        saveToContinueWatching(cacheObj);
+                        // ---------------------------------------------
                         
                         movieKey = `movie_progress_${data.title}`;
                         
