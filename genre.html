@@ -69,13 +69,14 @@
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             box-shadow: var(--header-shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .header-logo { height: 30px; width: auto; }
 
         .logo-dropdown-container { display: flex; align-items: center; gap: 0.25rem; }
         .logo-dropdown-toggle { color: var(--text-color); opacity: 0.6; transition: opacity 0.2s ease; }
-        .logo-dropdown-toggle:hover { opacity: 1; }
+        .logo-dropdown-toggle:hover { opacity: 1; color: var(--text-color); }
         .logo-dropdown-toggle::after { display: none; }
         
         .nav-link {
@@ -83,8 +84,10 @@
             font-weight: 500;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
+        .nav-link:hover { background-color: var(--card-bg-color); }
         .nav-link.active { color: var(--primary-color); font-weight: 600; }
         
         .header-search { display: flex; align-items: center; gap: 8px; }
@@ -93,10 +96,26 @@
             color: var(--text-color);
             border: 1px solid var(--input-border-color);
             border-radius: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
             height: calc(1.5em + 1rem + 2px); 
+        }
+
+        .header-search .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            border-color: var(--primary-color);
+        }
+
+        .header-search .btn-primary {
+            padding: 0; 
+            height: calc(1.5em + 1rem + 2px);
+            width: calc(1.5em + 1rem + 2px); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .movie-grid { padding: 1rem 0; }
+        .movie-grid .row { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
         
         .movie-card {
             background-color: var(--card-bg-color);
@@ -121,6 +140,9 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            word-break: break-word;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .load-more-container { display: flex; flex-direction: column; align-items: center; padding: 2rem 0; }
@@ -138,8 +160,16 @@
         }
 
         #loadingOverlay img { max-width: 250px; animation: pulse-logo 1.5s infinite ease-in-out; }
+        #slowNetworkMessage { text-align: center; display: flex; align-items: center; gap: 8px; color: var(--text-color); opacity: 0.7; margin-top: 15px; }
 
         @keyframes pulse-logo { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* Modal Enhancements */
+        .modal-content { background-color: var(--card-bg-color); color: var(--text-color); border-radius: 0.75rem; border: 1px solid var(--border-color); }
+        .modal-body .list-group-item { cursor: pointer; color: var(--text-color); background-color: transparent; border-color: var(--border-color); }
+        .modal-body .list-group-item.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .modal-body .btn-secondary[data-bs-dismiss="modal"] { border-color: #dc3545; color: #dc3545; background-color: transparent; transition: all 0.2s ease; }
+        .modal-body .btn-secondary[data-bs-dismiss="modal"]:hover { background-color: #dc3545; color: white; }
 
         @media (max-width: 575.98px) { .movie-grid .col { width: 33.333333%; flex: 0 0 auto; } }
         @media (min-width: 576px) and (max-width: 767.98px) { .movie-grid .col { width: 25%; flex: 0 0 auto; } }
@@ -151,7 +181,7 @@
 
     <div id="loadingOverlay">
         <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading...">
-        <div id="slowNetworkMessage" style="display: none; margin-top: 15px;">
+        <div id="slowNetworkMessage" style="display: none;">
             <i class="bi bi-info-circle"></i> <span>Our server appears to be slow right now, please be patient.</span>
         </div>
     </div>
@@ -187,7 +217,7 @@
         <div class="row" id="moviesContainer"></div>
         <div class="load-more-container">
             <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
-            <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status" style="display:none;">
+            <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
@@ -210,7 +240,22 @@
                     <p class="h6 mb-3">Preferred Language</p>
                     <div id="preferredLangList" class="list-group mb-4"></div>
                     <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
+                    <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
                     <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About Thirai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
                 </div>
             </div>
         </div>
@@ -227,12 +272,21 @@
         const loadMoreBtn = document.getElementById('loadMoreBtn');
         const spinner = document.getElementById('loadingSpinner');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
+        const searchLangInput = document.getElementById('searchLangInput');
+        const searchInput = document.getElementById('searchInput');
 
         let currentPage = 1;
         let isLoading = false;
         let initialLoadComplete = false;
+        let loadingTimer;
 
-        // Extracts all parameters from current URL for the Genre Scrape
+        async function wakeServer() {
+            try {
+                await fetch('https://thirai-watch.onrender.com/', { method: 'GET', mode: 'no-cors' });
+            } catch (e) {}
+        }
+
         function getGenreParams() {
             const urlParams = new URLSearchParams(window.location.search);
             return {
@@ -253,22 +307,39 @@
             spinner.style.display = 'block';
 
             const p = getGenreParams();
-            // Constructing endpoint strictly as requested
-            const endpoint = `${API_BASE_URL}/genre/${p.lang}?action=${p.action}&comedy=${p.comedy}&romance=${p.romance}&storyline=${p.storyline}&performance=${p.performance}&ratecount=${p.ratecount}&page=${currentPage}`;
+            const startPage = currentPage;
+            const pagesToFetch = 2;
+            let allMovies = [];
+            let hasMore = true;
 
             try {
-                const response = await fetch(endpoint);
-                if (!response.ok && API_BASE_URL === PRIMARY_API_URL) {
-                    API_BASE_URL = FALLBACK_API_URL;
-                    isLoading = false;
-                    return fetchAndRenderMovies(append);
+                for (let i = 0; i < pagesToFetch && hasMore; i++) {
+                    const pageToFetch = startPage + i;
+                    const endpoint = `${API_BASE_URL}/genre/${p.lang}?action=${p.action}&comedy=${p.comedy}&romance=${p.romance}&storyline=${p.storyline}&performance=${p.performance}&ratecount=${p.ratecount}&page=${pageToFetch}`;
+
+                    let res;
+                    try {
+                        res = await fetch(endpoint);
+                        if (!res.ok && API_BASE_URL === PRIMARY_API_URL) {
+                            API_BASE_URL = FALLBACK_API_URL;
+                            res = await fetch(endpoint.replace(PRIMARY_API_URL, FALLBACK_API_URL));
+                        }
+                    } catch (err) {
+                        if (API_BASE_URL === PRIMARY_API_URL) {
+                            API_BASE_URL = FALLBACK_API_URL;
+                            res = await fetch(endpoint.replace(PRIMARY_API_URL, FALLBACK_API_URL));
+                        } else throw err;
+                    }
+
+                    const data = await res.json();
+                    if (data.movies) allMovies.push(...data.movies);
+                    hasMore = data.has_more;
                 }
-                const data = await response.json();
                 
-                renderMovies(data.movies, append);
+                renderMovies(allMovies, append);
                 
-                if (data.has_more) {
-                    currentPage++;
+                if (hasMore) {
+                    currentPage = startPage + pagesToFetch;
                     loadMoreBtn.style.display = 'inline-block';
                 } else {
                     loadMoreBtn.style.display = 'none';
@@ -280,6 +351,7 @@
                 isLoading = false;
                 if (!initialLoadComplete) {
                     initialLoadComplete = true;
+                    clearTimeout(loadingTimer);
                     loadingOverlay.style.opacity = '0';
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
@@ -297,7 +369,7 @@
                 <div class="col">
                     <div class="movie-card">
                         <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
-                            <img src="${movie.img_url.startsWith('http') ? movie.img_url : API_BASE_URL + movie.img_url}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'">
+                            <img src="${movie.img_url.startsWith('http') ? movie.img_url : API_BASE_URL + movie.img_url}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
                             <div class="movie-title">${movie.title}</div>
                         </a>
                     </div>
@@ -306,22 +378,19 @@
             moviesContainer.insertAdjacentHTML('beforeend', html);
         }
 
-        // Initialize UI and Theme (Keeping year.html logic)
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.classList.add('no-scroll');
-            
-            const p = getGenreParams();
-            document.getElementById('searchLangInput').value = p.lang;
-            document.getElementById('recentCategoryLink').href = `./language?lang=${p.lang}&category=recent`;
-            document.getElementById('popularCategoryLink').href = `./language?lang=${p.lang}&category=popular`;
-            
-            fetchAndRenderMovies(false);
-            loadMoreBtn.addEventListener('click', () => fetchAndRenderMovies(true));
-            
-            // Theme Logic
-            const savedTheme = localStorage.getItem('theme') || 'system';
-            applyTheme(savedTheme);
-        });
+        function populateLanguageMenus() {
+            const dropdown = document.getElementById('languageDropdownMenu');
+            const prefList = document.getElementById('preferredLangList');
+            dropdown.innerHTML = '<li><h6 class="dropdown-header">Languages</h6></li>';
+            prefList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
+
+            ALL_LANGUAGES.forEach(lang => {
+                const cap = lang.charAt(0).toUpperCase() + lang.slice(1);
+                dropdown.innerHTML += `<li><a class="dropdown-item" href="./language?lang=${lang}&category=popular">${cap}</a></li>`;
+                prefList.innerHTML += `<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="${lang}">${cap}</a>`;
+            });
+            dropdown.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
+        }
 
         function applyTheme(theme) {
             const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -329,9 +398,46 @@
             const logo = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
             document.getElementById('headerLogo').src = logo;
             document.getElementById('overlayLogo').src = logo;
+            localStorage.setItem('theme', theme === 'system' ? 'system' : (isDark ? 'dark' : 'light'));
         }
 
-        // --- CONTINUE WATCHING CACHE LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            wakeServer();
+            document.body.classList.add('no-scroll');
+            populateLanguageMenus();
+            
+            const p = getGenreParams();
+            searchLangInput.value = p.lang;
+            searchInput.placeholder = `Search ${p.lang.charAt(0).toUpperCase() + p.lang.slice(1)} movies...`;
+            document.getElementById('recentCategoryLink').href = `./language?lang=${p.lang}&category=recent`;
+            document.getElementById('popularCategoryLink').href = `./language?lang=${p.lang}&category=popular`;
+            
+            loadingTimer = setTimeout(() => { if (!initialLoadComplete) slowNetworkMessage.style.display = 'flex'; }, 7000);
+            
+            fetchAndRenderMovies(false);
+            loadMoreBtn.addEventListener('click', () => fetchAndRenderMovies(true));
+            
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            applyTheme(savedTheme);
+
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    applyTheme(opt.dataset.theme);
+                });
+            });
+
+            // About Modal logic
+            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+            const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            document.getElementById('aboutButtonInModal').addEventListener('click', (e) => {
+                e.preventDefault();
+                settingsModal.hide();
+                aboutModal.show();
+            });
+        });
+
+        // --- CONTINUE WATCHING ---
         const CACHE_KEY = 'thirai_continue_watching';
         function saveToContinueWatching(movie) {
             let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
