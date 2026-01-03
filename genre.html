@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* Exact UI Styles from year.html */
+        /* CSS Variables for a Themed, Modern UI */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -30,7 +30,6 @@
             --primary-hover-color: #0056b3;
             --header-bg: rgba(248, 249, 250, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            --close-filter: none;
         }
 
         body.dark-mode {
@@ -44,7 +43,10 @@
             --input-border-color: #444;
             --header-bg: rgba(22, 22, 22, 0.85);
             --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-            --close-filter: invert(1);
+        }
+
+        body.dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
 
         body {
@@ -54,22 +56,48 @@
             transition: background-color 0.3s ease, color 0.3s ease;
             overflow-x: hidden;
         }
-
+        
         body.no-scroll { overflow: hidden; }
 
         .app-header {
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 1030;
-            padding: 1rem;
+            padding: 1rem 1rem;
             background-color: var(--header-bg);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             box-shadow: var(--header-shadow);
         }
 
         .header-logo { height: 30px; width: auto; }
 
+        .logo-dropdown-container { display: flex; align-items: center; gap: 0.25rem; }
+        .logo-dropdown-toggle { color: var(--text-color); opacity: 0.6; transition: opacity 0.2s ease; }
+        .logo-dropdown-toggle:hover { opacity: 1; }
+        .logo-dropdown-toggle::after { display: none; }
+        
+        .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .nav-link.active { color: var(--primary-color); font-weight: 600; }
+        
+        .header-search { display: flex; align-items: center; gap: 8px; }
+        .header-search .form-control {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 0.5rem;
+            height: calc(1.5em + 1rem + 2px); 
+        }
+        
+        .movie-grid { padding: 1rem 0; }
+        
         .movie-card {
             background-color: var(--card-bg-color);
             border-radius: 0.75rem;
@@ -77,76 +105,89 @@
             overflow: hidden;
             box-shadow: var(--card-shadow);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
         }
 
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--card-hover-shadow);
-        }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
+        .movie-link { text-decoration: none; color: inherit; }
+        .movie-img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: var(--bg-color); }
 
-        .movie-img {
-            width: 100%;
-            aspect-ratio: 2 / 3;
-            object-fit: cover;
-            background-color: var(--bg-color);
-        }
-
-        .movie-title {
-            padding: 0.75rem;
+        .movie-card .movie-title {
+            padding: 0.75rem 1rem;
             font-weight: 600;
             font-size: 0.9rem;
+            height: 4.0em;
             text-align: center;
-            height: 4em;
             display: flex;
             align-items: center;
             justify-content: center;
-            word-break: break-word;
+            overflow: hidden;
         }
 
-        .movie-link { text-decoration: none; color: inherit; }
-
+        .load-more-container { display: flex; flex-direction: column; align-items: center; padding: 2rem 0; }
+        
         #loadingOverlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--bg-color);
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             transition: opacity 0.5s ease;
         }
 
-        @media (max-width: 575.98px) {
-            .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
-        }
+        #loadingOverlay img { max-width: 250px; animation: pulse-logo 1.5s infinite ease-in-out; }
+
+        @keyframes pulse-logo { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        @media (max-width: 575.98px) { .movie-grid .col { width: 33.333333%; flex: 0 0 auto; } }
+        @media (min-width: 576px) and (max-width: 767.98px) { .movie-grid .col { width: 25%; flex: 0 0 auto; } }
+        @media (min-width: 768px) and (max-width: 991.98px) { .movie-grid .col { width: 20%; flex: 0 0 auto; } }
+        @media (min-width: 992px) { .movie-grid .col { width: 16.666667%; flex: 0 0 auto; } }
     </style>
 </head>
-<body class="no-scroll">
+<body>
 
     <div id="loadingOverlay">
-        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading..." style="max-width: 250px;">
+        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading...">
+        <div id="slowNetworkMessage" style="display: none; margin-top: 15px;">
+            <i class="bi bi-info-circle"></i> <span>Our server appears to be slow right now, please be patient.</span>
+        </div>
     </div>
 
     <header class="app-header">
-        <div class="container-fluid d-flex align-items-center">
-            <a id="logoLink" href="./index">
-                <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai" class="header-logo">
-            </a>
-            <div class="ms-auto d-flex align-items-center">
-                <span id="displayLabel" class="badge bg-primary me-3">Genre Filter</span>
-                <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                    <i class="bi bi-gear-fill" style="font-size: 1.5rem; color: var(--text-color);"></i>
-                </button>
+        <div class="container-fluid d-flex flex-wrap align-items-center">
+            <div class="dropdown logo-dropdown-container me-lg-4">
+                <a id="logoLink" href="./index">
+                    <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+                </a>
+                <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+                <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
+            </div>
+            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
+                <form id="searchForm" action="./language" method="GET" class="header-search">
+                    <input type="hidden" name="lang" id="searchLangInput"> 
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
+                    <button type="submit" class="btn btn-primary" title="Search"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+            <div class="d-flex align-items-center ms-auto">
+                <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav me-3">
+                    <a id="recentCategoryLink" class="nav-link" href="#">Recent</a>
+                    <a id="popularCategoryLink" class="nav-link" href="#">Popular</a>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="container movie-grid py-4">
-        <div class="row g-3" id="moviesContainer"></div>
-        <div class="text-center mt-5">
-            <button id="loadMoreBtn" class="btn btn-primary px-4 py-2 fw-bold" style="display:none;">Load More</button>
-            <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display:none;">
+    <main class="container movie-grid">
+        <div class="row" id="moviesContainer"></div>
+        <div class="load-more-container">
+            <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
+            <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status" style="display:none;">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
@@ -154,20 +195,22 @@
 
     <div class="modal fade" id="settingsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="background-color: var(--card-bg-color); color: var(--text-color);">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold">Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--close-filter);"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span>Appearance</span>
-                        <select id="themeSelect" class="form-select w-auto">
-                            <option value="system">System Default</option>
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                        </select>
+                    <p class="h6 mb-3">Appearance</p>
+                    <div class="list-group mb-4">
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="light">Light</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="dark">Dark</a>
+                        <a class="list-group-item list-group-item-action theme-option" href="#" data-theme="system">System Default</a>
                     </div>
+                    <p class="h6 mb-3">Preferred Language</p>
+                    <div id="preferredLangList" class="list-group mb-4"></div>
+                    <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -175,101 +218,140 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_BASE = 'https://api.thirai.me';
+        const PRIMARY_API_URL = 'https://api.thirai.me';
+        const FALLBACK_API_URL = 'https://backendthirai-test.onrender.com/';
+        let API_BASE_URL = PRIMARY_API_URL;
+        const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+
+        const moviesContainer = document.getElementById('moviesContainer');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const spinner = document.getElementById('loadingSpinner');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
         let currentPage = 1;
         let isLoading = false;
+        let initialLoadComplete = false;
 
-        // --- Theme Management ---
-        function applyTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'system';
-            const themeSelect = document.getElementById('themeSelect');
-            if (themeSelect) themeSelect.value = savedTheme;
+        // Extracts all parameters from current URL for the Genre Scrape
+        function getGenreParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                lang: urlParams.get('lang') || 'tamil',
+                action: urlParams.get('action') || '0-4',
+                comedy: urlParams.get('comedy') || '0-4',
+                romance: urlParams.get('romance') || '0-4',
+                storyline: urlParams.get('storyline') || '0-4',
+                performance: urlParams.get('performance') || '0-4',
+                ratecount: urlParams.get('ratecount') || '10'
+            };
+        }
 
-            const isDark = savedTheme === 'dark' || 
-                (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        async function fetchAndRenderMovies(append = true) {
+            if (isLoading) return;
+            isLoading = true;
+            loadMoreBtn.style.display = 'none';
+            spinner.style.display = 'block';
+
+            const p = getGenreParams();
+            // Constructing endpoint strictly as requested
+            const endpoint = `${API_BASE_URL}/genre/${p.lang}?action=${p.action}&comedy=${p.comedy}&romance=${p.romance}&storyline=${p.storyline}&performance=${p.performance}&ratecount=${p.ratecount}&page=${currentPage}`;
+
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok && API_BASE_URL === PRIMARY_API_URL) {
+                    API_BASE_URL = FALLBACK_API_URL;
+                    isLoading = false;
+                    return fetchAndRenderMovies(append);
+                }
+                const data = await response.json();
+                
+                renderMovies(data.movies, append);
+                
+                if (data.has_more) {
+                    currentPage++;
+                    loadMoreBtn.style.display = 'inline-block';
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+            } finally {
+                spinner.style.display = 'none';
+                isLoading = false;
+                if (!initialLoadComplete) {
+                    initialLoadComplete = true;
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        document.body.classList.remove('no-scroll');
+                    }, 500);
+                }
+            }
+        }
+
+        function renderMovies(movies, append) {
+            if (!append) moviesContainer.innerHTML = '';
+            if (!movies || movies.length === 0) return;
+
+            const html = movies.map(movie => `
+                <div class="col">
+                    <div class="movie-card">
+                        <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
+                            <img src="${movie.img_url.startsWith('http') ? movie.img_url : API_BASE_URL + movie.img_url}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'">
+                            <div class="movie-title">${movie.title}</div>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            moviesContainer.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Initialize UI and Theme (Keeping year.html logic)
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('no-scroll');
             
+            const p = getGenreParams();
+            document.getElementById('searchLangInput').value = p.lang;
+            document.getElementById('recentCategoryLink').href = `./language?lang=${p.lang}&category=recent`;
+            document.getElementById('popularCategoryLink').href = `./language?lang=${p.lang}&category=popular`;
+            
+            fetchAndRenderMovies(false);
+            loadMoreBtn.addEventListener('click', () => fetchAndRenderMovies(true));
+            
+            // Theme Logic
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            applyTheme(savedTheme);
+        });
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
             document.body.classList.toggle('dark-mode', isDark);
             const logo = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
             document.getElementById('headerLogo').src = logo;
             document.getElementById('overlayLogo').src = logo;
-            document.getElementById('faviconLink').href = isDark ? './static/faviconwhite.png' : './static/favicon.png';
         }
 
-        // --- Remove "api" Logic ---
-        document.getElementById('logoLink').addEventListener('click', function(e) {
-            const currentOrigin = window.location.origin;
-            if (currentOrigin.includes('api.thirai.me')) {
-                e.preventDefault();
-                window.location.href = currentOrigin.replace('api.', '') + '/index';
-            }
-        });
-
-        // --- Fetch & Render ---
-        async function fetchGenreMovies(page = 1) {
-            if (isLoading) return;
-            isLoading = true;
-            document.getElementById('loadingSpinner').style.display = 'inline-block';
-            document.getElementById('loadMoreBtn').style.display = 'none';
-
-            const params = new URLSearchParams(window.location.search);
-            const lang = params.get('lang') || 'tamil';
-            
-            // Build the specific query required by main.go /genre endpoint
-            const queryParams = new URLSearchParams({
-                action: params.get('action') || '0',
-                comedy: params.get('comedy') || '0',
-                romance: params.get('romance') || '0',
-                storyline: params.get('storyline') || '0',
-                performance: params.get('performance') || '0',
-                ratecount: params.get('ratecount') || '1',
-                page: page
-            });
-
-            try {
-                const response = await fetch(`${API_BASE}/genre/${lang}?${queryParams.toString()}`);
-                const data = await response.json();
-
-                if (data.movies && data.movies.length > 0) {
-                    const container = document.getElementById('moviesContainer');
-                    data.movies.forEach(movie => {
-                        const html = `
-                            <div class="col-6 col-md-4 col-lg-2">
-                                <div class="movie-card">
-                                    <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
-                                        <img src="${movie.img_url}" class="movie-img" loading="lazy">
-                                        <div class="movie-title">${movie.title}</div>
-                                    </a>
-                                </div>
-                            </div>`;
-                        container.insertAdjacentHTML('beforeend', html);
-                    });
-                    currentPage = page;
-                    document.getElementById('loadMoreBtn').style.display = data.has_more ? 'inline-block' : 'none';
-                }
-            } catch (err) {
-                console.error("API Error:", err);
-            } finally {
-                isLoading = false;
-                document.getElementById('loadingSpinner').style.display = 'none';
-                const overlay = document.getElementById('loadingOverlay');
-                overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    document.body.classList.remove('no-scroll');
-                }, 500);
-            }
+        // --- CONTINUE WATCHING CACHE LOGIC ---
+        const CACHE_KEY = 'thirai_continue_watching';
+        function saveToContinueWatching(movie) {
+            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+            history = history.filter(item => item.url !== movie.url);
+            history.unshift(movie);
+            if (history.length > 20) history.pop();
+            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
         }
 
-        // --- Init ---
-        document.getElementById('themeSelect').addEventListener('change', (e) => {
-            localStorage.setItem('theme', e.target.value);
-            applyTheme();
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('.movie-link');
+            if (!link) return;
+            const url = link.getAttribute('href');
+            if (url && url.includes('watch')) {
+                const card = link.closest('.movie-card');
+                const title = card.querySelector('.movie-title')?.textContent || '';
+                const img = card.querySelector('.movie-img')?.src || '';
+                saveToContinueWatching({ title, img, url });
+            }
         });
-
-        document.getElementById('loadMoreBtn').addEventListener('click', () => fetchGenreMovies(currentPage + 1));
-
-        applyTheme();
-        fetchGenreMovies(1);
     </script>
 </body>
 </html>
