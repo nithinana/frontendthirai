@@ -67,6 +67,47 @@
             padding-top: 80px;
         }
 
+        /* NEW: Blur background when filter modal is open */
+        body.filter-modal-open main, 
+        body.filter-modal-open .app-header,
+        body.filter-modal-open footer {
+            filter: blur(8px);
+            transition: filter 0.3s ease;
+        }
+
+        /* NEW: Filter Modal specific styles */
+        .filter-modal-content {
+            background-color: var(--card-bg-color);
+            border-radius: 20px !important; /* Curved corners */
+            overflow: hidden;
+            border: none;
+            height: 80vh;
+        }
+
+        .filter-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .btn-close-filter {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1060;
+            background-color: var(--bg-color);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+        }
+
         /* NEW: Prevent body from scrolling while overlay is active */
         body.no-scroll {
             overflow: hidden;
@@ -740,6 +781,10 @@ body {
             </a>
 
             <div class="d-flex align-items-center ms-auto order-lg-3">
+                <button class="settings-btn d-flex align-items-center justify-content-center me-2" title="Filter" style="width: 40px; height: 40px;" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="bi bi-filter-circle"></i>
+                </button>
+                
                 <a href="/install.html" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Install App" style="text-decoration: none; width: 40px; height: 40px;">
                     <i class="bi bi-download"></i>
                 </a>
@@ -775,403 +820,104 @@ body {
                     <select name="selected_language" id="languageSelect" class="form-select w-auto">
                         <option value="tamil">Tamil</option>
                         <option value="hindi">Hindi</option>
-                        <option value="telugu">Telugu</option>
-                        <option value="malayalam">Malayalam</option>
-                        <option value="kannada">Kannada</option>
-                        <option value="bengali">Bengali</option>
-                        <option value="marathi">Marathi</option>
-                        <option value="punjabi">Punjabi</option>
-                    </select>
-                    <input type="text" name="q" id="searchInput" class="form-control" placeholder=" ">
-                    <a href="/genre.html" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Filter by Genre">
-                        <i class="bi bi-sliders"></i>
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </form>
-            </div>
+                        <option value="telugu">Telugu</option> <option value="malayalam">Malayalam</option> <option value="kannada">Kannada</option> <option value="bengali">Bengali</option> <option value="marathi">Marathi</option> <option value="punjabi">Punjabi</option> </select> <input type="text" name="q" id="searchInput" class="form-control" placeholder=" "> <button type="submit" class="btn btn-primary"> <i class="bi bi-search"></i> </button> </form> </div> </div> </header> <main class="container-fluid mt-2"> <div class="promo-banner"> <img src="https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png" alt="Movie Logo" class="movie-logo"> <a href="/watch.html?film=3QoX" class="btn"> <i class="bi bi-play-fill"></i> Watch Now </a> </div> <div class="language-section" id="section-continue-watching" style="display: none;"> <div class="language-header"> <h2 class="language-title">Continue</h2> <button class="btn btn-sm text-muted" id="clear-continue-watching" title="Clear History"> <i class="bi bi-trash"></i> Clear </button> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-continue-watching" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-continue-watching"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-continue-watching" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-collections"> <div class="language-header"> <h2 class="language-title">Collections <a href="/actors" class="explore-link" title="Explore All Actors"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="collection-toggle"> <input type="radio" id="toggle-stars" name="collection-type" value="actors" checked> <label for="toggle-stars">Actors</label> <input type="radio" id="toggle-actresses" name="collection-type" value="actresses"> <label for="toggle-actresses">Actresses</label> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-collections" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-collections"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-collections" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-tamil"> <div class="language-header"> <h2 class="language-title">Tamil <a href="/language?lang=tamil" class="explore-link" title="Explore All Tamil movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-tamil"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="tamil" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tamil" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-tamil"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-tamil" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-hindi"> <div class="language-header"> <h2 class="language-title">Hindi <a href="/language?lang=hindi" class="explore-link" title="Explore All Hindi movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-hindi"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="hindi" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-hindi" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-hindi"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-hindi" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-telugu"> <div class="language-header"> <h2 class="language-title">Telugu <a href="/language?lang=telugu" class="explore-link" title="Explore All Telugu movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-telugu"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="telugu" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-telugu" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-telugu"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-telugu" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-malayalam"> <div class="language-header"> <h2 class="language-title">Malayalam <a href="/language?lang=malayalam" class="explore-link" title="Explore All Malayalam movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-malayalam"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="malayalam" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-malayalam" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-malayalam"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-malayalam" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-kannada"> <div class="language-header"> <h2 class="language-title">Kannada <a href="/language?lang=kannada" class="explore-link" title="Explore All Kannada movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-kannada"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="kannada" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-kannada" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-kannada"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-kannada" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-bengali"> <div class="language-header"> <h2 class="language-title">Bengali <a href="/language?lang=bengali" class="explore-link" title="Explore All Bengali movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-bengali"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="bengali" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-bengali" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-bengali"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-bengali" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-marathi"> <div class="language-header"> <h2 class="language-title">Marathi <a href="/language?lang=marathi" class="explore-link" title="Explore All Marathi movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-marathi"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="marathi" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-marathi" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-marathi"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-marathi" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> <div class="language-section" id="section-punjabi"> <div class="language-header"> <h2 class="language-title">Punjabi <a href="/language?lang=punjabi" class="explore-link" title="Explore All Punjabi movies"> <i class="bi bi-chevron-right"></i> <span class="explore-text">Explore</span> </a> </h2> <div class="d-flex align-items-center gap-2"> <div class="spinner-border spinner-border-sm" role="status" id="spinner-punjabi"> <span class="visually-hidden">Loading...</span> </div> <button class="btn load-more-arrow" data-language="punjabi" data-page="1" data-category="popular" title="Load More"> <i class="bi bi-arrow-clockwise"></i> </button> </div> </div> <div class="movies-scroller-container"> <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-punjabi" aria-label="Previous"> <i class="bi bi-chevron-left"></i> </button> <div class="movies-scroller-wrapper"> <div class="movies-scroller"> <div class="movies-row" id="movies-row-punjabi"> </div> </div> </div> <button class="btn scroll-btn scroll-btn-next" id="next-btn-punjabi" aria-label="Next"> <i class="bi bi-chevron-right"></i> </button> </div> </div> </main> <footer class="container-fluid text-center py-4 mt-5 border-top" style="border-color: var(--border-color) !important;"> <p class="text-muted mb-0" style="font-size: 0.9rem;"> ⓘ Thirai does not store any media on its servers, and only embeds content hosted by 3rd party services. </p> </footer> 
+
+<div class="modal fade" id="filterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content filter-modal-content">
+            <button type="button" class="btn-close-filter" data-bs-dismiss="modal" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <iframe src="/category.html" class="filter-iframe"></iframe>
         </div>
-    </header>
+    </div>
+</div>
 
-    <main class="container-fluid mt-2">
-        <div class="promo-banner">
-            <img src="https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png" alt="Movie Logo" class="movie-logo">
-            <a href="/watch.html?film=3QoX" class="btn">
-                <i class="bi bi-play-fill"></i> Watch Now
-            </a>
-        </div>
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> </div> <div class="modal-body"> <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p> <p class="text-muted mt-3"> <i class="bi bi-filetype-py"></i> Powered by Python </p> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> </div> </div> </div> </div> <div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-labelledby="clearHistoryModalLabel" aria-hidden="true"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-header border-0"> <h5 class="modal-title" id="clearHistoryModalLabel">Clear History</h5> </div> <div class="modal-body"> Are you sure you want to clear your watching history? </div> <div class="modal-footer border-0"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button> <button type="button" class="btn btn-danger" id="confirmClearHistoryBtn">Okay</button> </div> </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> <script> const API_BASE_URL = 'https://thiraibackend.onrender.com'; // --- NEW: CONTINUE WATCHING LOGIC --- const CACHE_KEY = 'thirai_continue_watching'; function normalizeWatchUrl(url) { if (!url) return url; if (url.startsWith('/watch')) return url.replace('/watch', './watch'); return url; }
 
-        <div class="language-section" id="section-continue-watching" style="display: none;">
-            <div class="language-header">
-                <h2 class="language-title">Continue</h2>
-                <button class="btn btn-sm text-muted" id="clear-continue-watching" title="Clear History">
-                    <i class="bi bi-trash"></i> Clear
-                </button>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-continue-watching" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-continue-watching">
-                            </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-continue-watching" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+    // NEW: Handle background blur when filter modal is open
+    const filterModal = document.getElementById('filterModal');
+    filterModal.addEventListener('show.bs.modal', function () {
+        document.body.classList.add('filter-modal-open');
+    });
+    filterModal.addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('filter-modal-open');
+    });
 
-        <div class="language-section" id="section-collections">
-            <div class="language-header">
-                <h2 class="language-title">Collections
-                    <a href="/actors" class="explore-link" title="Explore All Actors">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="collection-toggle">
-                    <input type="radio" id="toggle-stars" name="collection-type" value="actors" checked>
-                    <label for="toggle-stars">Actors</label>
-                    <input type="radio" id="toggle-actresses" name="collection-type" value="actresses">
-                    <label for="toggle-actresses">Actresses</label>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-collections" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-collections">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-collections" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+    // ... Rest of your existing scripts ...
+</script>
 
-        <div class="language-section" id="section-tamil">
-            <div class="language-header">
-                <h2 class="language-title">Tamil
-                    <a href="/language?lang=tamil" class="explore-link" title="Explore All Tamil movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-tamil">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="tamil" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tamil" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-tamil">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-tamil" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+<script>
+    // Manual scroll functionality for rows
+    const languages = ['continue-watching', 'collections', 'tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
 
-        <div class="language-section" id="section-hindi">
-            <div class="language-header">
-                <h2 class="language-title">Hindi
-                    <a href="/language?lang=hindi" class="explore-link" title="Explore All Hindi movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-hindi">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="hindi" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-hindi" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-hindi">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-hindi" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+    function updateScrollButtonsVisibility(container, prevBtn, nextBtn) {
+        if (!container || !prevBtn || !nextBtn) return;
+        
+        const scrollLeft = container.scrollLeft;
+        const maxScroll = container.scrollWidth - container.clientWidth;
 
-        <div class="language-section" id="section-telugu">
-            <div class="language-header">
-                <h2 class="language-title">Telugu
-                    <a href="/language?lang=telugu" class="explore-link" title="Explore All Telugu movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-telugu">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="telugu" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-telugu" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-telugu">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-telugu" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+        // Use a wrapper class to control the fade effect
+        const wrapper = container.closest('.movies-scroller-wrapper');
+        if (wrapper) {
+            if (scrollLeft <= 5) {
+                wrapper.classList.add('is-at-start');
+            } else {
+                wrapper.classList.remove('is-at-start');
+            }
 
-        <div class="language-section" id="section-malayalam">
-            <div class="language-header">
-                <h2 class="language-title">Malayalam
-                    <a href="/language?lang=malayalam" class="explore-link" title="Explore All Malayalam movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-malayalam">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="malayalam" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-malayalam" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-malayalam">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-malayalam" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+            if (scrollLeft >= maxScroll - 5) {
+                wrapper.classList.add('is-at-end');
+            } else {
+                wrapper.classList.remove('is-at-end');
+            }
+        }
 
-        <div class="language-section" id="section-kannada">
-            <div class="language-header">
-                <h2 class="language-title">Kannada
-                    <a href="/language?lang=kannada" class="explore-link" title="Explore All Kannada movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-kannada">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="kannada" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-kannada" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-kannada">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-kannada" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+        prevBtn.disabled = scrollLeft <= 5;
+        nextBtn.disabled = scrollLeft >= maxScroll - 5;
+    }
 
-        <div class="language-section" id="section-bengali">
-            <div class="language-header">
-                <h2 class="language-title">Bengali
-                    <a href="/language?lang=bengali" class="explore-link" title="Explore All Bengali movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-bengali">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="bengali" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-bengali" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-bengali">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-bengali" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+    languages.forEach(lang => {
+        const scrollContainer = document.getElementById(`movies-row-${lang}`);
+        const prevBtn = document.getElementById(`prev-btn-${lang}`);
+        const nextBtn = document.getElementById(`next-btn-${lang}`);
 
-        <div class="language-section" id="section-marathi">
-            <div class="language-header">
-                <h2 class="language-title">Marathi
-                    <a href="/language?lang=marathi" class="explore-link" title="Explore All Marathi movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-marathi">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="marathi" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-marathi" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-marathi">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-marathi" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
+        if (scrollContainer) {
+            // Initial visibility check
+            updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
 
-        <div class="language-section" id="section-punjabi">
-            <div class="language-header">
-                <h2 class="language-title">Punjabi
-                    <a href="/language?lang=punjabi" class="explore-link" title="Explore All Punjabi movies">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-punjabi">
-                      <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <button class="btn load-more-arrow" data-language="punjabi" data-page="1" data-category="popular" title="Load More">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-punjabi" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-punjabi">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn scroll-btn scroll-btn-next" id="next-btn-punjabi" aria-label="Next">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <footer class="container-fluid text-center py-4 mt-5 border-top" style="border-color: var(--border-color) !important;">
-        <p class="text-muted small mb-1">© 2024 Thirai. Built for modern movie discovery.</p>
-        <p class="text-muted small">All data sourced from <a href="https://www.themoviedb.org/" target="_blank" class="text-decoration-none">TMDB</a>.</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchForm = document.getElementById('searchForm');
-            const searchInput = document.getElementById('searchInput');
-            const languageSelect = document.getElementById('languageSelect');
-
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const query = searchInput.value.trim();
-                const language = languageSelect.value;
-                if (!query) {
-                    searchInput.classList.add('highlight-red');
-                    setTimeout(() => searchInput.classList.remove('highlight-red'), 1500);
-                    return;
-                }
-                window.location.href = `/search?q=${encodeURIComponent(query)}&lang=${language}`;
+            // Update visibility whenever the container is scrolled
+            scrollContainer.addEventListener('scroll', () => {
+                updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
             });
 
-            // Initialize theme, preferred language, scroll logic, etc...
-            // (Remaining script logic from original index (82).html)
-        });
-    </script>
-
-    <script>
-        // ... (Remaining scripts for dark mode, scrolling, and fetching)
-        // Ensure scroll buttons visibility is updated
-        const languages = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi', 'collections', 'continue-watching'];
-        languages.forEach(lang => {
-            const scrollContainer = document.getElementById(`movies-row-${lang}`);
-            const prevBtn = document.getElementById(`prev-btn-${lang}`);
-            const nextBtn = document.getElementById(`next-btn-${lang}`);
-
-            if (scrollContainer) {
-                scrollContainer.addEventListener('scroll', () => {
-                    updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
-                });
-            }
-        });
-
-        function updateScrollButtonsVisibility(container, prevBtn, nextBtn) {
-            if (!container || !prevBtn || !nextBtn) return;
-            prevBtn.disabled = container.scrollLeft <= 5;
-            nextBtn.disabled = container.scrollLeft + container.clientWidth >= container.scrollWidth - 5;
+            // Add a MutationObserver to handle dynamically loaded content
+            const observer = new MutationObserver(() => {
+                updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
+            });
+            observer.observe(scrollContainer, { childList: true });
         }
-    </script>
+    });
+</script>
+
+<script>
+let deferredPromptInline;
+function isMobileDevice() {
+  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPromptInline = e;
+  if (isMobileDevice()) {
+    document.getElementById('mobileInstallNotice').style.display = 'flex';
+  }
+});
+document.getElementById('installAppButtonInline')?.addEventListener('click', () => {
+  if (deferredPromptInline) {
+    deferredPromptInline.prompt();
+  }
+});
+</script>
 </body>
+
 </html>
