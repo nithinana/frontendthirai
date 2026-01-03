@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirai - Genres</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thirai">
+    <link rel="apple-touch-icon" href="./static/ios/icon-192x192.png">
+    <link rel="icon" type="image/png" href="./static/favicon.png" id="faviconLink"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* CSS Variables and Styles mirrored from year.html */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-border-color: #ced4da;
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --header-bg: rgba(248, 249, 250, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.85);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            padding-top: 75px; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1030;
+            padding: 1rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--header-shadow);
+        }
+
+        .header-logo { height: 30px; width: auto; }
+
+        .movie-card {
+            background-color: var(--card-bg-color);
+            border-radius: 0.75rem;
+            border: none;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .movie-img {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            background-color: var(--bg-color);
+        }
+
+        .movie-title {
+            padding: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            height: 4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+
+        .movie-link { text-decoration: none; color: inherit; }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        @media (max-width: 575.98px) {
+            .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
+        }
+    </style>
+</head>
+<body class="no-scroll">
+
+    <div id="loadingOverlay">
+        <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading..." style="max-width: 250px;">
+    </div>
+
+    <header class="app-header">
+        <div class="container-fluid d-flex align-items-center">
+            <a id="logoLink" href="./index">
+                <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+            </a>
+            <div class="ms-auto">
+                <span id="genreLabel" class="badge bg-primary">Genre Filtering</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container movie-grid py-4">
+        <div class="row g-3" id="moviesContainer"></div>
+
+        <div class="load-more-container text-center mt-4">
+            <button id="loadMoreBtn" class="btn btn-primary" style="display:none;">Load More</button>
+            <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display:none;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://api.thirai.me';
+        let currentPage = 1;
+        let isLoading = false;
+
+        // Theme Management
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            const isDark = savedTheme === 'dark' || 
+                          (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            if (isDark) document.body.classList.add('dark-mode');
+            document.getElementById('headerLogo').src = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
+            document.getElementById('overlayLogo').src = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
+        }
+
+        // Fetch Logic for Genre Endpoint
+        async function fetchGenreMovies(page = 1) {
+            if (isLoading) return;
+            isLoading = true;
+            
+            document.getElementById('loadingSpinner').style.display = 'inline-block';
+            document.getElementById('loadMoreBtn').style.display = 'none';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const lang = urlParams.get('lang') || 'tamil';
+            
+            // Build query string based on your Go API requirements
+            const queryParams = new URLSearchParams({
+                action: urlParams.get('action') || '0',
+                comedy: urlParams.get('comedy') || '0',
+                romance: urlParams.get('romance') || '0',
+                storyline: urlParams.get('storyline') || '0',
+                performance: urlParams.get('performance') || '0',
+                ratecount: urlParams.get('ratecount') || '1',
+                page: page
+            });
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/genre/${lang}?${queryParams.toString()}`);
+                const data = await response.json();
+
+                if (data.movies && data.movies.length > 0) {
+                    renderMovies(data.movies);
+                    currentPage = page;
+                    document.getElementById('loadMoreBtn').style.display = data.has_more ? 'inline-block' : 'none';
+                } else if (page === 1) {
+                    document.getElementById('moviesContainer').innerHTML = '<p class="text-center w-100">No movies found for these criteria.</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                isLoading = false;
+                document.getElementById('loadingSpinner').style.display = 'none';
+                hideLoadingOverlay();
+            }
+        }
+
+        function renderMovies(movies) {
+            const container = document.getElementById('moviesContainer');
+            const html = movies.map(movie => `
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="movie-card">
+                        <a href="./watch?url=${encodeURIComponent(movie.page_url)}&title=${encodeURIComponent(movie.title)}" class="movie-link">
+                            <img src="${movie.img_url}" class="movie-img" alt="${movie.title}" loading="lazy">
+                            <div class="movie-title">${movie.title}</div>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.body.classList.remove('no-scroll');
+            }, 500);
+        }
+
+        // Feature: Remove "api" from URL to go to normal site
+        document.getElementById('logoLink').addEventListener('click', function(e) {
+            const currentUrl = window.location.origin;
+            if (currentUrl.includes('api.thirai.me')) {
+                e.preventDefault();
+                window.location.href = currentUrl.replace('api.', '') + '/index';
+            }
+        });
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTheme();
+            fetchGenreMovies(1);
+        });
+
+        document.getElementById('loadMoreBtn').addEventListener('click', () => {
+            fetchGenreMovies(currentPage + 1);
+        });
+    </script>
+</body>
+</html>
