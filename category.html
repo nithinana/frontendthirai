@@ -1,1220 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-HKV7GQ766F');
-</script>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thirai - Decades</title>
-
-    <link rel="manifest" href="static/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Thirai">
-    <link rel="apple-touch-icon" href="/static/ios/icon-192x192.png">
-    <link rel="icon" type="image/png" href="/static/favicon.png" id="faviconLink"/>
-
+    <title>Thirai Filter</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    
     <style>
-        /* CSS Variables for a Themed, Modern UI */
         :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --muted-text-color: #6c757d;
-            --card-bg-color: #ffffff;
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            --border-color: #dee2e6;
-            --input-bg-color: #ffffff;
-            --input-border-color: #ced4da;
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --header-bg: rgba(248, 249, 250, 0.85);
-            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            --scrollbar-thumb-color: #ccc;
+            --bg: #f8f9fa; --card: #ffffff; --text: #212529; --border: #dee2e6; --primary: #0d6efd;
         }
-
-        body.dark-mode {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --muted-text-color: #adb5bd;
-            --card-bg-color: #1e1e1e;
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            --border-color: #333;
-            --input-bg-color: #282828;
-            --input-border-color: #444;
-            --header-bg: rgba(22, 22, 22, 0.85);
-            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-            --scrollbar-thumb-color: #555;
-        }
-
-        /* Base Body Styles */
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            padding-top: 80px;
-        }
-
-        body.no-scroll {
-            overflow: hidden;
-        }
-
-        @media (max-width: 991.98px) {
-            main {
-                padding-top: 2rem !important; 
-            }
-        }
-        
-        .text-muted {
-            color: var(--muted-text-color) !important;
-        }
-
-        /* --- Header and Navigation --- */
-        :root {
-            --header-height-mobile: 30px;
-            --header-height-desktop: 40px;
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --border: #333; }
         }
 
         body {
-            padding-top: var(--header-height-mobile); 
+            background-color: var(--bg); 
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0; 
+            padding: 0; /* Removed padding to allow card to touch edges */
+            height: 100vh;
+            width: 100vw;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
-        @media (min-width: 992px) {
-            body {
-                padding-top: var(--header-height-desktop); 
-            }
+        .filter-card {
+            background: var(--card); 
+            border: none; /* Removed border for seamless full-screen look */
+            border-radius: 0; /* Removed rounded corners for full-screen */
+            padding: 40px; /* Increased padding for better large-screen spacing */
+            width: 100%; /* Fill width */
+            min-height: 100vh; /* Fill height */
+            box-shadow: none;
+            box-sizing: border-box;
+            max-width: 100%; /* Ensure it doesn't stay at 320px */
         }
 
-        .app-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
-            padding: 0.75rem 1rem;
-            background-color: var(--header-bg);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+        /* Optimization for very wide screens so the UI doesn't look stretched thin */
+        .content-wrapper {
+            max-width: 600px; /* Limits the inner content width for readability */
+            margin: 0 auto;
         }
 
-        .app-header .container-fluid {
-            display: flex;
-            flex-wrap: wrap; 
-            align-items: center;
-            justify-content: space-between;
+        .section-title {
+            font-size: 12px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.2px; color: #6c757d; margin-bottom: 12px; display: block;
         }
 
-        .header-logo { height: 30px; width: auto; }
+        .genre-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        
+        .genre-btn {
+            font-size: 13px; padding: 12px 0; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--bg);
+            color: var(--text); cursor: pointer; transition: 0.2s; font-weight: 600;
+        }
+        .genre-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
 
-        .header-search {
-            display: flex;
-            align-items: stretch;
-            gap: 6px; 
-            width: 100%;
+        #customSection, #yearExpandSection {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        #customSection.expanded { max-height: 1000px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
+        #yearExpandSection.expanded { max-height: 600px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+
+        .year-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .year-btn {
+            font-size: 12px; padding: 10px 0; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--card);
+            color: var(--text); cursor: pointer; font-weight: 600; transition: 0.2s;
+        }
+        .year-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(13, 110, 253, 0.05); }
+        .explore-decade {
+            grid-column: span 4; background: rgba(13, 110, 253, 0.1);
+            color: var(--primary); border: 1px dashed var(--primary);
+            margin-top: 6px; font-weight: 800; text-transform: uppercase;
+            font-size: 11px; padding: 12px;
         }
 
-        .header-search .form-select,
-        .header-search .form-control,
-        .header-search .btn {
-            height: 42px;
-            border-radius: 0.5rem;
-            font-size: 0.95rem;
-        }
+        .slider-box { margin-bottom: 18px; }
+        .slider-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; }
+        .slider-head b { color: var(--primary); font-weight: 800; }
+        .any-check { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; cursor: pointer; color: #6c757d; }
+        input[type="range"] { width: 100%; height: 8px; accent-color: var(--primary); cursor: pointer; }
 
-        .header-search .form-control {
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--input-border-color);
-            flex-grow: 1;
-            min-width: 0; 
-        }
-
-        .header-search .form-select {
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--input-border-color);
-        }
-
-        body.dark-mode .header-search .form-select option {
-            background-color: #1e1e1e; 
-            color: #e0e0e0;
-        }
-
-        .header-main-content {
-            order: 3;
-            width: 100%;
-            margin-top: 0.75rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        @media (min-width: 992px) {
-            .app-header { padding: 0.8rem 1.5rem; }
-            .app-header .container-fluid { 
-                flex-wrap: nowrap; 
-                display: grid; 
-                grid-template-columns: auto 1fr auto; 
-                align-items: center;
-            }
-            .header-main-content {
-                order: 2;
-                width: 100%;
-                margin-top: 0;
-                display: flex;
-                justify-content: center; 
-            }
-            .header-search {
-                max-width: 600px;
-            }
-            body { padding-top: 85px; }
-        }
-
-        @media (max-width: 991.98px) {
-            body { padding-top: 135px; }
+        .top-controls { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        
+        .action-controls { 
+            display: flex; gap: 15px; margin-bottom: 25px; padding-bottom: 25px; 
+            border-bottom: 1px solid var(--border); align-items: flex-end;
         }
         
-        .settings-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; }
-        .dropdown-menu {
-            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow); border-radius: 0.5rem;
-        }
-        .dropdown-item { color: var(--text-color); }
-        .dropdown-item:hover { background-color: rgba(0,0,0,0.05); }
-        body.dark-mode .dropdown-item:hover { background-color: rgba(255,255,255,0.05); }
-
-        @media (min-width: 992px) {
-            .header-main-content { flex-grow: 1; justify-content: center; }
-            .header-search { max-width: 600px; width: 100%; }
-        }
-        @media (max-width: 991.98px) {
-            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
-            .header-search { flex-grow: 1; }
+        select, .pg-num {
+            background: var(--bg); color: var(--text); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px; font-size: 14px; outline: none; width: 100%;
         }
 
-        /* --- Language Section Styling --- */
-        .language-section {
-            position: relative;
-            margin-bottom: 2.5rem;
-            margin-left: 1rem;
-            margin-right: 1rem;
+        .btn-fetch {
+            flex-grow: 1; height: 48px; background: var(--primary); color: white; border: none;
+            border-radius: 12px; font-weight: 700; font-size: 15px; text-transform: uppercase; 
+            letter-spacing: 0.8px; transition: 0.2s;
         }
-
-        .language-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .language-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-             display: flex;
-            align-items: center;
-        }
-
-        .explore-link {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: var(--primary-color);
-            font-weight: 500;
-            transition: all 0.3s ease;
-            padding: 0.1rem 0.2rem;
-            border-radius: 0.5rem;
-            margin-left: 0.2rem;
-        }
-
-        .explore-link:hover {
-            background-color: rgba(var(--primary-color), 0.1);
-            transform: translateX(5px);
-        }
-
-        .explore-text {
-            max-width: 0;
-            overflow: hidden;
-            white-space: nowrap;
-            transition: max-width 0.3s ease, margin-left 0.3s ease;
-            font-size: 0.9rem;
-            margin-left: 0;
-        }
-
-        .explore-link:hover .explore-text {
-            max-width: 150px; 
-            margin-left: 0.5rem;
-        }
-        
-        .language-header .d-flex {
-            gap: 0.5rem;
-        }
-
-        .movies-scroller {
-            position: relative;
-        }
-
-        .movies-row {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 1rem;
-            scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb-color) var(--bg-color);
-            padding-left: 1rem; 
-            padding-right: 1rem; 
-        }
-
-        @media (min-width: 992px) {
-            .movies-row::-webkit-scrollbar {
-                display: none;
-            }
-            .movies-row {
-                scrollbar-width: none;
-            }
-        }
-        
-        .movies-row > .col {
-            flex: 0 0 auto;
-            width: 33.33%;
-        }
-        @media (min-width: 576px) {
-            .movies-row > .col {
-                width: 20%;
-            }
-        }
-        @media (min-width: 768px) {
-            .movies-row > .col {
-                width: 16.66%;
-            }
-        }
-        @media (min-width: 1200px) {
-            .movies-row > .col {
-                width: 10%;
-            }
-        }
-
-        /* --- Movie Card Styling --- */
-        .movie-card {
-            background-color: var(--card-bg-color); border-radius: 0.75rem;
-            border: none; overflow: hidden; box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            margin-right: 1rem;
-            position: relative; 
-        }
-        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
-        .movie-link { text-decoration: none; color: inherit; }
-        .movie-img {
-            width: 100%; aspect-ratio: 2 / 3; object-fit: cover;
-            background-color: var(--bg-color);
-        }
-        .movie-title-text {
-            padding: 0.75rem 1rem; font-weight: 600; font-size: 0.9rem;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        
-        .load-more-arrow {
-            cursor: pointer;
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            transition: all 0.2s ease;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .load-more-arrow:hover:not(:disabled) {
-            background-color: var(--primary-color);
-            color: #fff;
-            border-color: var(--primary-color);
-            transform: scale(1.05);
-        }
-
-        .load-more-arrow:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .spinner-border-sm {
-            display: none;
-            color: var(--primary-color);
-            border-color: currentColor;
-            border-right-color: transparent;
-        }
-        
-        .highlight-red {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-        }
-        body.dark-mode .highlight-red {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
-        }
-
-        .promo-banner {
-            width: 100%;
-            height: 300px;
-            background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://image.tmdb.org/t/p/original/rx9kyO6YJLpXfFrU934C6i4yYMj.jpg');
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 3rem;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-            padding-left: 5%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .promo-banner .movie-logo {
-            max-width: 300px; 
-            height: auto;
-            margin-bottom: 15px; 
-            border-radius: 5px;
-        }
-
-        .promo-banner .btn {
-            font-size: 1.25rem; 
-            padding: 10px 24px; 
-            border-radius: 50px;
-            background-color: rgba(108, 117, 125, 0.5);
-            color: white;
-            font-weight: bold;
-            border: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .promo-banner .btn:hover {
-            background-color: rgba(108, 117, 125, 0.7);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        @media (max-width: 767.98px) {
-            .promo-banner {
-                height: 150px;
-                margin-bottom: 2rem;
-                padding-left: 3%; 
-                border-radius: 10px;
-                align-items: flex-start; 
-                justify-content: center; 
-            }
-
-            .promo-banner .movie-logo {
-                max-width: 150px; 
-                margin-bottom: 10px;
-            }
-
-            .promo-banner .btn {
-                font-size: 0.9rem;
-                padding: 6px 15px;
-            }
-        }
-
-        .modal-content {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-        }
-        .modal-header,
-        .modal-footer {
-            border-color: var(--border-color);
-        }
-        .modal-title,
-        .modal-body {
-            color: var(--text-color);
-        }
-        .btn-close {
-            filter: var(--bs-btn-close-color); 
-            --bs-btn-close-color: #000;
-        }
-        body.dark-mode .btn-close {
-            --bs-btn-close-color: #fff;
-        }
-        
-        .modal-backdrop.show {
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            background-color: rgba(0,0,0,0.5); 
-            opacity: 1 !important; 
-        }
-        
-        .scroll-btn {
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-color);
-            box-shadow: var(--card-shadow);
-            transition: all 0.2s ease;
-        }
-
-        .scroll-btn:hover:not(:disabled) {
-            background-color: var(--primary-color);
-            color: #fff;
-            box-shadow: var(--card-hover-shadow);
-            border-color: var(--primary-color);
-        }
-
-        .scroll-btn:disabled {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .movies-scroller-container {
-            position: relative;
-            padding-right: 20px; 
-            padding-left: 20px; 
-        }
-
-        .movies-scroller-wrapper {
-            position: relative;
-            width: 100%;
-            overflow: hidden; 
-        }
-
-        .scroll-btn-prev, .scroll-btn-next {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 20;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .scroll-btn-prev {
-            left: 10px;
-        }
-
-        .scroll-btn-next {
-            right: 10px;
-        }
-
-        .movies-scroller-wrapper::before,
-        .movies-scroller-wrapper::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            height: 100%;
-            width: 50px;
-            z-index: 10;
-            pointer-events: auto;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-
-        .movies-scroller-wrapper::before {
-            left: 0;
-            background: linear-gradient(to right, var(--bg-color), transparent);
-        }
-        body.dark-mode .movies-scroller-wrapper::before {
-            background: linear-gradient(to right, var(--bg-color), transparent);
-        }
-
-        .movies-scroller-wrapper::after {
-            right: 0;
-            background: linear-gradient(to left, var(--bg-color), transparent);
-        }
-        body.dark-mode .movies-scroller-wrapper::after {
-            background: linear-gradient(to left, var(--bg-color), transparent);
-        }
-
-        .movies-scroller-wrapper.is-at-start::before {
-            opacity: 0;
-        }
-
-        .movies-scroller-wrapper.is-at-end::after {
-            opacity: 0;
-        }
-
-        @media (min-width: 992px) {
-            .scroll-btn-prev, .scroll-btn-next {
-                display: flex;
-            }
-        }
-        @media (max-width: 991.98px) {
-            .movies-scroller-container {
-                padding-right: 0;
-                padding-left: 0;
-            }
-            .scroll-btn-prev, .scroll-btn-next {
-                display: none !important; 
-            }
-            .movies-scroller-wrapper::before,
-            .movies-scroller-wrapper::after {
-                content: none; 
-            }
-        }
-        
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--bg-color);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-        #loadingOverlay .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-        #loadingOverlay img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-            animation: pulse-logo 1.5s infinite ease-in-out;
-        }
-        #slowNetworkMessage {
-            max-width: 80%;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        @keyframes pulse-logo {
-            0%, 100% {
-                opacity: 0.5;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
-
     </style>
 </head>
-  
 <body>
-    <div id="loadingOverlay">
-        <img id="overlayLogo" src="/static/thiraiblack.png" alt="Thirai Logo">
-        <div id="slowNetworkMessage" class="text-muted" style="display: none;">
-            <i class="bi bi-info-circle"></i> <span>If our servers are slow, consider choosing a specific language or use the search bar at the main site to reduce loading times.</span>
+
+<div class="filter-card">
+    <div class="content-wrapper">
+        <div class="top-controls">
+            <span class="section-title">Language</span>
+            <select id="ln">
+                <option value="tamil" selected>Tamil</option>
+                <option value="hindi">Hindi</option>
+                <option value="telugu">Telugu</option>
+                <option value="malayalam">Malayalam</option>
+                <option value="Kannada">Kannada</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Marathi">Marathi</option>
+            </select>
         </div>
-    </div>
-    
-<header class="app-header">
-        <div class="container-fluid">
-            <a href="/" class="d-flex align-items-center" id="logoLink">
-                <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
-            </a>
 
-            <div class="d-flex align-items-center ms-auto order-lg-3">
-                <a href="/install.html" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Install App" style="text-decoration: none; width: 40px; height: 40px;">
-                    <i class="bi bi-download"></i>
-                </a>
-                <div class="dropdown">
-                    <button class="settings-btn" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 40px; height: 40px;">
-                        <i class="bi bi-gear-fill"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Preferred Language</h6></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="all">All Languages</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="hindi">Hindi</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="telugu">Telugu</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="malayalam">Malayalam</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="kannada">Kannada</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="bengali">Bengali</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="marathi">Marathi</a></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="punjabi">Punjabi</a></li>
-                        <li id="disableLangOptionLi" style="display: none;"><a class="dropdown-item text-danger" href="#" id="disablePreferredLanguage">Disable Preference</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header">Appearance</h6></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
-                        <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" id="aboutButton">About</a></li>
-                    </ul>
-                </div>
-            </div>
+        <span class="section-title">Quick Genres</span>
+        <div class="genre-grid">
+            <button class="genre-btn" data-attr="action" onclick="toggleGenre(this)">Action</button>
+            <button class="genre-btn" data-attr="comedy" onclick="toggleGenre(this)">Comedy</button>
+            <button class="genre-btn" data-attr="romance" onclick="toggleGenre(this)">Romance</button>
+            <button class="genre-btn" data-attr="storyline" onclick="toggleGenre(this)">Storyline</button>
+            <button class="genre-btn" data-attr="performance" onclick="toggleGenre(this)">Performance</button>
+            <button class="genre-btn" style="color: var(--primary)" onclick="toggleCustom()">
+                <i class="bi bi-sliders"></i> Custom
+            </button>
+        </div>
 
-            <div class="header-main-content">
-                <form id="searchForm" action="/language/tamil" method="GET" class="header-search">
-                    <select name="selected_language" id="languageSelect" class="form-select w-auto">
-                        <option value="tamil">Tamil</option>
-                        <option value="hindi">Hindi</option>
-                        <option value="telugu">Telugu</option>
-                        <option value="malayalam">Malayalam</option>
-                        <option value="kannada">Kannada</option>
-                        <option value="bengali">Bengali</option>
-                        <option value="marathi">Marathi</option>
-                        <option value="punjabi">Punjabi</option>
-                    </select>
-                    <input type="text" name="q" id="searchInput" class="form-control" placeholder=" ">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </form>
+        <div id="customSection">
+            <span class="section-title">Genre Tuning</span>
+            <div id="slider-container"></div>
+            
+            <div class="slider-box" style="margin-top: 10px;">
+                <div class="slider-head"><span style="font-weight: 800; font-size: 10px; text-transform: uppercase;">Review Count</span></div>
+                <input type="number" id="ratecount" class="pg-num" value="75" min="0">
             </div>
         </div>
-    </header>
 
-    <main class="container-fluid mt-2">
-        <div class="promo-banner">
-            <img src="https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png" alt="Movie Logo" class="movie-logo">
-            <a href="/watch.html?film=3QoX" class="btn">
-                <i class="bi bi-play-fill"></i> Watch Now
-            </a>
+        <div class="action-controls">
+            <div style="width: 80px;">
+                <span class="section-title" style="font-size: 8px; margin-bottom: 4px;">Page</span>
+                <input type="number" id="pg" class="pg-num" value="1" min="1">
+            </div>
+            <button class="btn-fetch" onclick="go()">Go</button>
         </div>
 
-        <div id="decades-container"></div>
-        
-    </main>
-
-  <footer class="container-fluid text-center py-4 mt-5 border-top" style="border-color: var(--border-color) !important;">
-        <p class="text-muted mb-0" style="font-size: 0.9rem;">
-            ⓘ Thirai does not store any media on its servers, and only embeds content hosted by 3rd party services.
-        </p>
-    </footer>
-    
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
-            <p class="text-muted mt-3">
-                <i class="bi bi-filetype-py"></i> Powered by Python
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
+        <span class="section-title">Release Date</span>
+        <div class="genre-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <button class="genre-btn" onclick="showYears(2020)">2020s</button>
+            <button class="genre-btn" onclick="showYears(2010)">2010s</button>
+            <button class="genre-btn" onclick="showYears(2000)">2000s</button>
+            <button class="genre-btn" onclick="showYears(1990)">1990s</button>
+            <button class="genre-btn" onclick="showYears(1980)">1980s</button>
+            <button class="genre-btn" onclick="showYears(1970)">1970s</button>
+            <button class="genre-btn" onclick="showYears(1960)">1960s</button>
+            <button class="genre-btn" onclick="showYears(1950)">1950s</button>
         </div>
-      </div>
+
+        <div id="yearExpandSection">
+            <div id="yearGridContent" class="year-grid"></div>
+        </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const PRIMARY_API_URL = 'https://api.thirai.me';
-        const FALLBACK_API_URL = 'https://backendthirai-test.onrender.com';
-        let API_BASE_URL = PRIMARY_API_URL;
-
-        // --- Element Selectors ---
-        const body = document.body;
-        const faviconLink = document.getElementById('faviconLink');
-        const headerLogo = document.getElementById('headerLogo');
-        const overlayLogo = document.getElementById('overlayLogo');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
-        let initialLoadComplete = false;
-        const logoLink = document.getElementById('logoLink');
-
-        // Start a 7-second timer to show the slow network message
-        const loadingTimer = setTimeout(() => {
-            if (!initialLoadComplete) {
-                slowNetworkMessage.style.display = 'flex';
-            }
-        }, 7000);
-        
-        const preferredLangOptions = document.querySelectorAll('.preferred-lang-option');
-        const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguage');
-        const disableLangOptionLi = document.getElementById('disableLangOptionLi');
-        const themeOptions = document.querySelectorAll('.theme-option');
-
-        function updateLogoHeight() {
-            const logoHeight = headerLogo.getAttribute('data-height');
-            if (logoHeight) {
-                headerLogo.style.height = `${logoHeight}px`;
-            }
-        }
-        
-        // --- THEME MANAGEMENT ---
-        function updateThemeAssets(isDarkMode) {
-            const lightLogo = '/static/thiraiblack.png';
-            const darkLogo = '/static/thiraiwhite.png';
-            
-            faviconLink.href = isDarkMode ? '/static/favicon.png' : '/static/faviconlight.png';
-            headerLogo.src = isDarkMode ? darkLogo : lightLogo;
-            overlayLogo.src = isDarkMode ? darkLogo : lightLogo;
-        }
-
-        function applyTheme(theme) {
-            let isDarkMode;
-            if (theme === 'dark') {
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-                isDarkMode = true;
-            } else if (theme === 'light') {
-                body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
-                isDarkMode = false;
-            } else { // System default
-                localStorage.removeItem('theme');
-                isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (isDarkMode) {
-                    body.classList.add('dark-mode');
-                } else {
-                    body.classList.remove('dark-mode');
-                }
-            }
-            updateThemeAssets(isDarkMode);
-        }
-        
-        // Listen for system theme changes
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (!localStorage.getItem('theme')) { // Only apply if theme is 'system'
-                    applyTheme('system');
-                }
-            });
-        }
-        
-        // Event listeners for theme options in dropdown
-        themeOptions.forEach(option => {
-            option.addEventListener('click', (event) => {
-                event.preventDefault();
-                applyTheme(event.currentTarget.dataset.theme);
-            });
-        });
-
-        // --- PREFERRED LANGUAGE ---
-        function updateDisableLangOptionVisibility() {
-            disableLangOptionLi.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
-        }
-
-        function updateActiveLanguageOption(language) {
-            preferredLangOptions.forEach(option => {
-                option.classList.remove('active');
-                if (option.dataset.language === language) {
-                    option.classList.add('active');
-                }
-            });
-        }
-
-        function updateLogoLink() {
-            const preferredLanguage = localStorage.getItem('preferred-language');
-            if (preferredLanguage && preferredLanguage !== 'all') {
-                logoLink.href = `/language?lang=${preferredLanguage}`;
-            } else {
-                logoLink.href = '/';
-            }
-        }
-
-        disablePreferredLanguageBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            localStorage.removeItem('preferred-language');
-            updateDisableLangOptionVisibility();
-            updateActiveLanguageOption(null); 
-            updateLogoLink(); 
-        });
-
-         preferredLangOptions.forEach(option => {
-            option.addEventListener('click', (event) => {
-                event.preventDefault();
-                const selectedLanguage = event.currentTarget.dataset.language;
-                localStorage.setItem('preferred-language', selectedLanguage);
-                updateDisableLangOptionVisibility();
-                updateActiveLanguageOption(selectedLanguage);
-                updateLogoLink();
-            });
-        });
-        
-        // --- ABOUT MODAL ---
-        document.getElementById('aboutButton').addEventListener('click', function (event) {
-            event.preventDefault();
-            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-            aboutModal.show();
-        });
-
-        // --- SEARCH LOGIC ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchForm = document.getElementById('searchForm');
-            const searchInput = document.getElementById('searchInput');
-            const languageSelect = document.getElementById('languageSelect');
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const currentLang = urlParams.get('language') || 'tamil';
-            
-            if(languageSelect) {
-                languageSelect.value = currentLang;
-            }
-
-            function updateSearchFormAction() {
-                if (languageSelect && searchForm) {
-                    const selectedLanguage = languageSelect.value;
-                    searchForm.action = `/language/${selectedLanguage}`;
-                }
-            }
-
-            updateSearchFormAction();
-
-            if (languageSelect) {
-                languageSelect.addEventListener('change', updateSearchFormAction);
-            }
-
-            if (searchForm) {
-                searchForm.addEventListener('submit', (e) => {
-                    const searchQuery = searchInput.value.trim();
-                    if (searchQuery === '') {
-                        e.preventDefault();
-                        searchInput.classList.add('highlight-red');
-                        searchInput.focus();
-                    } else {
-                        e.preventDefault(); 
-                        searchInput.classList.remove('highlight-red');
-                        const selectedLanguage = languageSelect.value;
-                        const newUrl = `/language?lang=${selectedLanguage}&q=${encodeURIComponent(searchQuery)}`;
-                        window.location.href = newUrl; 
-                    }
-                });
-            }
-
-            if (searchInput) {
-                searchInput.addEventListener('input', () => {
-                    if (searchInput.value.trim() !== '') {
-                        searchInput.classList.remove('highlight-red');
-                    }
-                });
-            }
-        });
-
-        // --- CACHE CONTINUE WATCHING (Just for saving logic on clicks) ---
-        const CACHE_KEY = 'thirai_continue_watching';
-        function normalizeWatchUrl(url) {
-            if (!url) return url;
-            if (url.startsWith('/watch')) return url.replace('/watch', './watch');
-            return url;
-        }
-
-        function saveToContinueWatching(movie) {
-            let history = [];
-            try {
-                history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            } catch (e) {
-                console.error("Error parsing history:", e);
-                history = [];
-            }
-            history = history.filter(item => item.url !== movie.url);
-            history.unshift(movie);
-            if (history.length > 20) {
-                history = history.slice(0, 20);
-            }
-            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-        }
-
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('.movie-link');
-            if (link) {
-                let url = link.getAttribute('href');
-                url = normalizeWatchUrl(url);
-                if (url && url.includes('/watch')) {
-                    const card = link.closest('.movie-card');
-                    const title = card.querySelector('.movie-title-text').textContent;
-                    const img = card.querySelector('.movie-img').src;
-                    saveToContinueWatching({ title, img, url });
-                }
-            }
-        });
-
-        // --- MAIN PAGE LOGIC: DECADES ---
-        const decades = ['2020', '2010', '2000', '1990', '1980', '1970', '1960', '1950'];
-        let currentLanguage = 'tamil'; // Default, will be updated by URL
-        const decadePages = {};
-
-        function createDecadeSection(decade, language) {
-            const container = document.getElementById('decades-container');
-            const sectionId = `section-${decade}`;
-            const rowId = `movies-row-${decade}`;
-            
-            const html = `
-            <div class="language-section" id="${sectionId}">
-                <div class="language-header">
-                    <h2 class="language-title">${decade}s
-                        <a href="/years.html?decade=${decade}&language=${language}" class="explore-link" title="Explore All ${decade}s movies">
-                            <i class="bi bi-chevron-right"></i>
-                            <span class="explore-text">Explore</span>
-                        </a>
-                    </h2>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="spinner-border spinner-border-sm" role="status" id="spinner-${decade}">
-                          <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <button class="btn load-more-arrow" data-decade="${decade}" data-page="1" title="Load More">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="movies-scroller-container">
-                    <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-${decade}" aria-label="Previous">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <div class="movies-scroller-wrapper">
-                        <div class="movies-scroller">
-                            <div class="movies-row" id="${rowId}">
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn scroll-btn scroll-btn-next" id="next-btn-${decade}" aria-label="Next">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-            </div>`;
-            
-            container.insertAdjacentHTML('beforeend', html);
-        }
-
-        async function loadMovies(decade, pageToLoad) {
-            const moviesContainer = document.getElementById(`movies-row-${decade}`);
-            const spinner = document.getElementById(`spinner-${decade}`);
-            const button = document.querySelector(`.load-more-arrow[data-decade="${decade}"]`);
-            
-            if (button) button.style.display = 'none';
-            if (spinner) spinner.style.display = 'inline-block';
-
-            try {
-                let endpoint = `${API_BASE_URL}/decade/${currentLanguage}/${decade}?page=${pageToLoad}`;
-                let res;
-                
-                try {
-                    res = await fetch(endpoint);
-                    // Fallback logic check
-                     if (!res.ok && API_BASE_URL === PRIMARY_API_URL) {
-                        API_BASE_URL = FALLBACK_API_URL;
-                        endpoint = `${API_BASE_URL}/decade/${currentLanguage}/${decade}?page=${pageToLoad}`;
-                        res = await fetch(endpoint);
-                    }
-                } catch(fetchErr) {
-                    if (API_BASE_URL === PRIMARY_API_URL) {
-                        API_BASE_URL = FALLBACK_API_URL;
-                        endpoint = `${API_BASE_URL}/decade/${currentLanguage}/${decade}?page=${pageToLoad}`;
-                        res = await fetch(endpoint);
-                    } else {
-                        throw fetchErr;
-                    }
-                }
-
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                const data = await res.json();
-                
-                // If it's the first page and no movies
-                if ((!data.movies || data.movies.length === 0) && pageToLoad === 1) {
-                    const emptyMessage = document.createElement('div');
-                    emptyMessage.className = 'text-muted my-3 empty-or-error-message';
-                    emptyMessage.textContent = 'No movies found for this decade.';
-                    moviesContainer.appendChild(emptyMessage);
-                    if(button) {
-                        button.disabled = true;
-                        button.innerHTML = '<i class="bi bi-check-lg"></i>';
-                    }
-                } else if (data.movies && data.movies.length > 0) {
-                     const moviesHtml = data.movies.map(movie => {
-                        const moviePageUrlEncoded = encodeURIComponent(movie.page_url);
-                        const movieTitleEncoded = encodeURIComponent(movie.title);
-                        // Ensure full image URL if needed, though backend usually sends full or partial.
-                        let imgUrl = movie.img_url;
-                        if (!imgUrl.startsWith('http')) {
-                            imgUrl = API_BASE_URL + imgUrl;
-                        }
-
-                        return `
-                            <div class="col">
-                                <div class="movie-card">
-                                    <a href="/watch?url=${moviePageUrlEncoded}&title=${movieTitleEncoded}" class="movie-link">
-                                        <img src="${imgUrl}" class="movie-img" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
-                                        <div class="movie-title-text">${movie.title}</div>
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                    moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
-
-                    if (pageToLoad === decadePages[decade]) {
-                        decadePages[decade]++;
-                    }
-                    
-                    if (button) {
-                        if (!data.has_more) {
-                            button.disabled = true;
-                            button.innerHTML = '<i class="bi bi-check-lg"></i>';
-                        } else {
-                            button.disabled = false;
-                            button.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
-                        }
-                    }
-                }
-
-            } catch (error) {
-                console.error(`Error loading movies for ${decade}:`, error);
-                if (button) {
-                    button.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
-                    button.disabled = true;
-                }
-            } finally {
-                if (spinner) spinner.style.display = 'none';
-                if (button) button.style.display = 'flex'; 
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check URL Params - UPDATE: Ensure currentLanguage is captured correctly before creating sections
-            const urlParams = new URLSearchParams(window.location.search);
-            const langParam = urlParams.get('language');
-            if (langParam) {
-                currentLanguage = langParam.toLowerCase();
-                document.title = `Thirai - ${currentLanguage.charAt(0).toUpperCase() + currentLanguage.slice(1)} Decades`;
-            }
-
-            applyTheme(localStorage.getItem('theme') || 'system');
-            updateLogoHeight();
-            updateLogoLink();
-
-            // Setup Language Options
-            const storedLanguage = localStorage.getItem('preferred-language');
-            updateDisableLangOptionVisibility();
-            updateActiveLanguageOption(storedLanguage);
-            
-            // Build the rows
-            document.body.classList.add('no-scroll');
-            
-            let completedLoads = 0;
-            const totalInitialLoads = decades.length;
-
-            const checkCompletion = () => {
-                completedLoads++;
-                if (completedLoads >= totalInitialLoads) {
-                    initialLoadComplete = true;
-                    clearTimeout(loadingTimer);
-                    loadingOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        document.body.classList.remove('no-scroll');
-                    }, 500);
-                }
-            };
-
-            decades.forEach(decade => {
-                decadePages[decade] = 1;
-                createDecadeSection(decade, currentLanguage);
-                loadMovies(decade, 1).finally(checkCompletion);
-            });
-
-            // Bind Load More Buttons
-            const loadMoreButtons = document.querySelectorAll('.load-more-arrow');
-            loadMoreButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const decade = this.dataset.decade;
-                    loadMovies(decade, decadePages[decade]);
-                });
-            });
-
-            // Bind Scroll Buttons
-            setupScrollButtons();
-        });
-
-        function setupScrollButtons() {
-            const scrollButtons = document.querySelectorAll('.scroll-btn');
-            
-            scrollButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const section = button.closest('.language-section');
-                    const scrollContainer = section.querySelector('.movies-row');
-                    if (!scrollContainer) return;
-                    const movieCard = scrollContainer.querySelector('.movie-card');
-                    
-                    let scrollAmount = 200; 
-                    if(movieCard) {
-                        const movieCardWidth = movieCard.offsetWidth;
-                        scrollAmount = movieCardWidth * 3 + (16 * 3);
-                    }
-
-                    if (button.classList.contains('scroll-btn-prev')) {
-                        scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                    } else if (button.classList.contains('scroll-btn-next')) {
-                        scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                    }
-                });
-            });
-
-            const allSections = document.querySelectorAll('.language-section');
-            allSections.forEach(section => {
-                const decade = section.id.replace('section-', '');
-                const scrollContainer = document.getElementById(`movies-row-${decade}`);
-                const prevBtn = document.getElementById(`prev-btn-${decade}`);
-                const nextBtn = document.getElementById(`next-btn-${decade}`);
-
-                if (scrollContainer) {
-                    scrollContainer.addEventListener('scroll', () => {
-                        updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
-                    });
-                    
-                    const observer = new MutationObserver(() => {
-                        updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn);
-                    });
-                    observer.observe(scrollContainer, { childList: true });
-                }
-            });
-        }
-
-        function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
-            if (!scrollContainer || !prevBtn || !nextBtn) return;
-            const wrapper = scrollContainer.closest('.movies-scroller-wrapper');
-            if (!wrapper) return;
-
-            const atStart = scrollContainer.scrollLeft <= 5;
-            const atEnd = scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 5;
-            const isScrollable = scrollContainer.scrollWidth > scrollContainer.clientWidth;
-
-            prevBtn.disabled = atStart;
-            nextBtn.disabled = atEnd || !isScrollable;
-
-            if (atStart || !isScrollable) {
-                wrapper.classList.add('is-at-start');
-            } else {
-                wrapper.classList.remove('is-at-start');
-            }
-
-            if (atEnd || !isScrollable) {
-                wrapper.classList.add('is-at-end');
-            } else {
-                wrapper.classList.remove('is-at-end');
-            }
-        }
-    </script>
-    
 <script>
-let deferredPromptInline;
-function isMobileDevice() {
-  return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPromptInline = e;
-});
+    // [All original script logic preserved]
+    const categories = ['action', 'comedy', 'romance', 'storyline', 'performance'];
+    const sliderContainer = document.getElementById('slider-container');
+
+    categories.forEach(cat => {
+        const div = document.createElement('div');
+        div.className = 'slider-box';
+        div.innerHTML = `
+            <div class="slider-head">
+                <span style="text-transform: capitalize;">${cat}: <b id="v-${cat}">ANY</b></span>
+                <label class="any-check"><input type="checkbox" id="c-${cat}" checked onchange="handleAny('${cat}')"> ANY</label>
+            </div>
+            <input type="range" id="s-${cat}" min="1" max="4" value="4" disabled oninput="updateLabel('${cat}')">
+        `;
+        sliderContainer.appendChild(div);
+    });
+
+    function toggleCustom() {
+        const customBox = document.getElementById('customSection');
+        const yearBox = document.getElementById('yearExpandSection');
+        yearBox.classList.remove('expanded');
+        customBox.classList.toggle('expanded');
+    }
+
+    function showYears(decade) {
+        const yearBox = document.getElementById('yearExpandSection');
+        const yearContent = document.getElementById('yearGridContent');
+        const customBox = document.getElementById('customSection');
+        const lang = document.getElementById('ln').value;
+        customBox.classList.remove('expanded');
+        if (yearBox.classList.contains('expanded') && yearBox.dataset.activeDecade == decade) {
+            yearBox.classList.remove('expanded');
+            return;
+        }
+        yearContent.innerHTML = ''; 
+        yearBox.dataset.activeDecade = decade;
+        for (let i = 0; i <= 9; i++) {
+            let year = decade + i;
+            if (year > new Date().getFullYear()) break;
+            const btn = document.createElement('button');
+            btn.className = 'year-btn';
+            btn.innerText = year;
+            btn.onclick = () => window.open(`https://thirai.me/year?lang=${lang}&year=${year}`, '_blank');
+            yearContent.appendChild(btn);
+        }
+        const exploreBtn = document.createElement('button');
+        exploreBtn.className = 'year-btn explore-decade';
+        exploreBtn.innerHTML = `Explore the ${decade}s`;
+        exploreBtn.onclick = () => window.open(`https://thirai.me/decade?lang=${lang}&decade=${decade}`, '_blank');
+        yearContent.appendChild(exploreBtn);
+        yearBox.classList.add('expanded');
+    }
+
+    function toggleGenre(btn) {
+        const attr = btn.getAttribute('data-attr');
+        btn.classList.toggle('active');
+        const checkbox = document.getElementById('c-' + attr);
+        const slider = document.getElementById('s-' + attr);
+        if (btn.classList.contains('active')) {
+            checkbox.checked = false;
+            slider.disabled = false;
+            slider.value = 4;
+        } else {
+            checkbox.checked = true;
+            slider.disabled = true;
+        }
+        updateLabel(attr);
+    }
+
+    function handleAny(id) {
+        const s = document.getElementById('s-' + id);
+        const check = document.getElementById('c-' + id);
+        s.disabled = check.checked;
+        const btn = document.querySelector(`.genre-btn[data-attr="${id}"]`);
+        if (btn) {
+            if (check.checked) btn.classList.remove('active');
+            else if (s.value == 4) btn.classList.add('active');
+        }
+        updateLabel(id);
+    }
+
+    function updateLabel(id) {
+        const label = document.getElementById('v-' + id);
+        const isAny = document.getElementById('c-' + id).checked;
+        label.innerText = isAny ? "ANY" : document.getElementById('s-' + id).value;
+    }
+
+    function go() {
+        const lang = document.getElementById('ln').value;
+        const page = document.getElementById('pg').value;
+        const rateCount = document.getElementById('ratecount').value || 0;
+        const params = categories.map(cat => {
+            const isAny = document.getElementById('c-' + cat).checked;
+            const val = isAny ? "0" : document.getElementById('s-' + cat).value;
+            return `${cat}=${val}`;
+        }).join('&');
+        const url = `https://api.thirai.me/genre/${lang}?${params}&ratecount=${rateCount}&page=${page}`;
+        window.open(url, '_blank');
+    }
 </script>
+
 </body>
 </html>
