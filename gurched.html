@@ -1406,9 +1406,9 @@
                 const val = isAny ? "0" : document.getElementById('s-' + cat).value;
                 return `${cat}=${val}`;
             }).join('&');
-            window.open(`https://thirai.me/genre?lang=${lang}&${params}&ratecount=${rateCount}`, '_blank');
+            window.open(`https://api.thirai.me/genre/${lang}?${params}&ratecount=${rateCount}&page=${page}`, '_blank');
         }
-/genre?lang=tamil&action=4&comedy=4&romance=1&storyline=4&performance=4&ratecount=50
+
         document.addEventListener('DOMContentLoaded', () => {
              initThiraiFilter();
         });
