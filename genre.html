@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* CSS Variables - Matched exactly to year (5).html */
+        /* CSS Variables - Matched exactly to year.html */
         :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -59,7 +59,7 @@
         
         body.no-scroll { overflow: hidden; }
 
-        /* --- Header - Matched to year (5).html --- */
+        /* --- Header - Matched to year.html --- */
         .app-header {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -74,6 +74,7 @@
         }
 
         .header-logo { height: 30px; width: auto; }
+        
         .logo-dropdown-container { display: flex; align-items: center; gap: 0.25rem; }
         .logo-dropdown-toggle { color: var(--text-color); opacity: 0.6; transition: opacity 0.2s ease; }
         .logo-dropdown-toggle:hover { color: var(--text-color); opacity: 1; }
@@ -99,6 +100,16 @@
             height: calc(1.5em + 1rem + 2px); 
         }
 
+        .header-search .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            border-color: var(--primary-color);
+        }
+
+        body.dark-mode .header-search .form-control::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+
         .header-search .btn-primary {
             padding: 0; 
             height: calc(1.5em + 1rem + 2px);
@@ -108,8 +119,18 @@
             justify-content: center;
             font-size: 1.1rem;
         }
+
+        .dropdown-menu {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 0.5rem;
+        }
+        .dropdown-item { color: var(--text-color); }
+        .dropdown-item:hover { background-color: rgba(0,0,0,0.05); }
+        body.dark-mode .dropdown-item:hover { background-color: rgba(255,255,255,0.05); }
         
-        /* --- Grid & Cards - Matched to year (5).html --- */
+        /* --- Grid & Cards --- */
         .movie-grid { padding: 1rem 0; }
         .movie-grid .row { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
         .movie-grid .col { padding: var(--bs-gutter-y) var(--bs-gutter-x); }
@@ -133,15 +154,17 @@
             height: 4.0em;
             text-align: center;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            overflow: hidden;
+            align-items: center;
+            white-space: normal;
             word-break: break-word;
+            overflow: hidden;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
 
-        /* --- Load More & Spinner - Centering/Spacing Matched exactly to year (5).html --- */
+        /* --- Load More & Spinner --- */
         .load-more-container {
             display: flex; 
             flex-direction: column; 
@@ -163,7 +186,7 @@
         }
         #loadingSpinner { display: none; }
         
-        /* --- Loading Screen - Matched to year (5).html --- */
+        /* --- Loading Screen --- */
         #loadingOverlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -175,13 +198,60 @@
             align-items: center;
             transition: opacity 0.5s ease;
         }
-        #loadingOverlay img { max-width: 250px; animation: pulse-logo 1.5s infinite ease-in-out; }
-        #slowNetworkMessage { text-align: center; display: flex; align-items: center; gap: 8px; color: var(--text-color); opacity: 0.7; margin-top: 20px; }
+        #loadingOverlay img { max-width: 250px; height: auto; margin-bottom: 20px; animation: pulse-logo 1.5s infinite ease-in-out; }
+        #slowNetworkMessage { text-align: center; display: flex; align-items: center; gap: 8px; color: var(--text-color); opacity: 0.7; max-width: 80%; }
 
         @keyframes pulse-logo { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-        /* --- Responsive Queries - Matched to year (5).html --- */
+        /* --- Modal Styling --- */
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+        .modal-header { border-bottom: none; }
+        .modal-header h5 { font-weight: bold; }
+        .modal-body .list-group-item {
+            cursor: pointer;
+            color: var(--text-color);
+            background-color: transparent;
+            border-color: var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        .modal-body .list-group-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        body.dark-mode .modal-body .list-group-item.active {
+            background-color: var(--input-border-color);
+            color: var(--text-color);
+            border-color: var(--input-border-color);
+        }
+        .modal-body .list-group-item:hover { background-color: var(--border-color); }
+        body.dark-mode .modal-body .list-group-item:hover { background-color: var(--input-bg-color); }
+        
+        .modal-body .btn-secondary[data-bs-dismiss="modal"] {
+            border-color: #dc3545;
+            color: #dc3545;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+        .modal-body .btn-secondary[data-bs-dismiss="modal"]:hover { background-color: #dc3545; color: white; }
+
+        /* --- Responsive Queries (Matched Header Layout) --- */
+        @media (min-width: 992px) {
+            .header-main-content { flex-grow: 1; justify-content: center; }
+            .header-search { max-width: 500px; width: 100%; }
+        }
+        @media (max-width: 991.98px) {
+            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
+            .header-search { flex-grow: 1; }
+        }
         @media (max-width: 575.98px) {
+            .app-header .container-fluid { padding: 0.75rem 0.5rem; }
+            .header-center-nav .nav-link { padding: 0.5rem 0.5rem; font-size: 0.85rem; }
             .movie-grid .row { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; }
             .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
         }
@@ -289,18 +359,33 @@
         const spinner = document.getElementById('loadingSpinner');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const slowNetworkMessage = document.getElementById('slowNetworkMessage');
+        const headerLogo = document.getElementById('headerLogo');
+        const faviconLink = document.getElementById('faviconLink');
+        const logoLink = document.getElementById('logoLink');
+        const searchInput = document.getElementById('searchInput');
+        const searchLangInput = document.getElementById('searchLangInput');
+        const disablePreferredLanguageBtn = document.getElementById('disablePreferredLanguageBtn');
+        const overlayLogo = document.getElementById('overlayLogo');
 
         let currentPage = 1;
         let isLoading = false;
         let initialLoadComplete = false;
         let loadingTimer;
 
-        // Wake server logic - Matched to year (5).html
         async function wakeServer() {
             try {
                 await fetch('https://thirai-watch.onrender.com/', { method: 'GET', mode: 'no-cors' });
             } catch (e) {}
         }
+
+        // --- Header Adjustment Logic (Matched year.html) ---
+        function adjustBodyPadding() {
+            const header = document.querySelector('.app-header');
+            if (header) {
+                document.body.style.paddingTop = `${header.offsetHeight}px`;
+            }
+        }
+        window.addEventListener('resize', adjustBodyPadding);
 
         function getGenreParams() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -315,7 +400,6 @@
             };
         }
 
-        // Logic matched to year (5).html including 2-page batch loading
         async function fetchAndRenderMovies(append = true) {
             if (isLoading) return;
             isLoading = true;
@@ -372,6 +456,7 @@
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                         document.body.classList.remove('no-scroll');
+                        adjustBodyPadding(); // Correct padding after load
                     }, 500);
                 }
             }
@@ -394,6 +479,7 @@
             moviesContainer.insertAdjacentHTML('beforeend', html);
         }
 
+        // --- Language & Menu Logic (Matched year.html) ---
         function populateLanguageMenus() {
             const dropdown = document.getElementById('languageDropdownMenu');
             const prefList = document.getElementById('preferredLangList');
@@ -408,14 +494,60 @@
             dropdown.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
         }
 
+        function updateLogoLink(language) {
+            if (language && language !== 'all') {
+                logoLink.href = `./language?lang=${language}`;
+            } else {
+                 logoLink.href = './index';
+            }
+        }
+
+        function updateDisableBtnVisibility() {
+            disablePreferredLanguageBtn.style.display = localStorage.getItem('preferred-language') ? 'block' : 'none';
+        }
+
+        function updateActiveLanguageOption(language) {
+            document.querySelectorAll('.preferred-lang-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.language === language) option.classList.add('active');
+            });
+        }
+
+        function setupPreferredLanguage() {
+             const storedLanguage = localStorage.getItem('preferred-language');
+             updateDisableBtnVisibility();
+             updateActiveLanguageOption(storedLanguage);
+             updateLogoLink(storedLanguage);
+
+            document.querySelectorAll('.preferred-lang-option').forEach(option => {
+                option.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const selectedLanguage = event.currentTarget.dataset.language;
+                    localStorage.setItem('preferred-language', selectedLanguage);
+                    updateDisableBtnVisibility();
+                    updateActiveLanguageOption(selectedLanguage);
+                    updateLogoLink(selectedLanguage);
+                });
+            });
+
+            disablePreferredLanguageBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                localStorage.removeItem('preferred-language');
+                updateDisableBtnVisibility();
+                updateActiveLanguageOption(null);
+                updateLogoLink(null);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             wakeServer();
             document.body.classList.add('no-scroll');
             populateLanguageMenus();
+            setupPreferredLanguage();
             
             const p = getGenreParams();
-            document.getElementById('searchLangInput').value = p.lang;
-            document.getElementById('searchInput').placeholder = `Search ${p.lang.charAt(0).toUpperCase() + p.lang.slice(1)} movies...`;
+            searchLangInput.value = p.lang;
+            searchInput.placeholder = `Search ${p.lang.charAt(0).toUpperCase() + p.lang.slice(1)} movies...`;
             document.getElementById('recentCategoryLink').href = `./language?lang=${p.lang}&category=recent`;
             document.getElementById('popularCategoryLink').href = `./language?lang=${p.lang}&category=popular`;
             
@@ -431,10 +563,15 @@
                 opt.addEventListener('click', (e) => {
                     e.preventDefault();
                     applyTheme(opt.dataset.theme);
+                    document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
                 });
             });
+            // Set active theme option on load
+            document.querySelectorAll('.theme-option').forEach(opt => {
+               if(opt.dataset.theme === savedTheme) opt.classList.add('active');
+            });
 
-            // About/Settings Modal logic matched to year (5).html
             const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
             const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
             document.getElementById('aboutButtonInModal').addEventListener('click', (e) => {
@@ -446,15 +583,32 @@
         });
 
         function applyTheme(theme) {
-            const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            let isDark;
+            if (theme === 'dark') {
+                isDark = true;
+                localStorage.setItem('theme', 'dark');
+            } else if (theme === 'light') {
+                isDark = false;
+                localStorage.setItem('theme', 'light');
+            } else {
+                isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                localStorage.removeItem('theme');
+            }
+            
             document.body.classList.toggle('dark-mode', isDark);
             const logo = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
-            document.getElementById('headerLogo').src = logo;
-            document.getElementById('overlayLogo').src = logo;
-            localStorage.setItem('theme', theme === 'system' ? 'system' : (isDark ? 'dark' : 'light'));
+            headerLogo.src = logo;
+            overlayLogo.src = logo;
+            faviconLink.href = isDark ? './static/favicon.png' : './static/faviconlight.png';
         }
 
-        // --- CONTINUE WATCHING - Matched to year (5).html ---
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!localStorage.getItem('theme')) applyTheme('system');
+            });
+        }
+
+        // --- CONTINUE WATCHING ---
         const CACHE_KEY = 'thirai_continue_watching';
         function saveToContinueWatching(movie) {
             let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
