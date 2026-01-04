@@ -15,184 +15,129 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <style>
-        /* CSS Variables - Matched exactly to year (5).html */
-        :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --card-bg-color: #ffffff;
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            --border-color: #dee2e6;
-            --input-bg-color: #ffffff;
-            --input-border-color: #ced4da;
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --header-bg: rgba(248, 249, 250, 0.85);
-            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+<style>
+    :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --card-bg-color: #ffffff;
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+        --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        --border-color: #dee2e6;
+        --input-bg-color: #ffffff;
+        --input-border-color: #ced4da;
+        --primary-color: #007bff;
+        --primary-hover-color: #0056b3;
+        --header-bg: rgba(248, 249, 250, 0.9);
+        --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 
-        body.dark-mode {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --card-bg-color: #1e1e1e;
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            --border-color: #333;
-            --input-bg-color: #282828;
-            --input-border-color: #444;
-            --header-bg: rgba(22, 22, 22, 0.85);
-            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-        }
+    body.dark-mode {
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --card-bg-color: #1e1e1e;
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        --border-color: #333;
+        --input-bg-color: #282828;
+        --input-border-color: #444;
+        --header-bg: rgba(22, 22, 22, 0.9);
+        --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
 
-        body.dark-mode .btn-close {
-            filter: invert(1) grayscale(100%) brightness(200%);
-        }
+    body {
+        padding-top: 115px; /* Adjusted for two-row mobile header */
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease;
+    }
 
-        body {
-            padding-top: 75px; 
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden;
-        }
-        
-        body.no-scroll { overflow: hidden; }
+    /* --- Enhanced Mobile Header --- */
+    .app-header {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 1030;
+        padding: 0.5rem 0.75rem;
+        background-color: var(--header-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--header-shadow);
+    }
 
-        /* --- Header - Matched to year (5).html --- */
-        .app-header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1030;
-            padding: 1rem 1rem;
-            background-color: var(--header-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--header-shadow);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+    .header-container {
+        display: grid;
+        grid-template-areas: 
+            "logo nav"
+            "search search";
+        gap: 8px;
+        align-items: center;
+    }
 
-        .header-logo { height: 30px; width: auto; }
-        .logo-dropdown-container { display: flex; align-items: center; gap: 0.25rem; }
-        .logo-dropdown-toggle { color: var(--text-color); opacity: 0.6; transition: opacity 0.2s ease; }
-        .logo-dropdown-toggle:hover { color: var(--text-color); opacity: 1; }
-        .logo-dropdown-toggle::after { display: none; }
-        
-        .nav-link {
-            color: var(--text-color);
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .nav-link:hover { background-color: var(--card-bg-color); }
-        .nav-link.active { color: var(--primary-color); font-weight: 600; }
-        
-        .header-search { display: flex; align-items: center; gap: 8px; }
-        .header-search .form-control {
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--input-border-color);
-            border-radius: 0.5rem;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            height: calc(1.5em + 1rem + 2px); 
-        }
+    .logo-dropdown-container { grid-area: logo; display: flex; align-items: center; }
+    .header-main-content { grid-area: search; }
+    .header-nav-actions { grid-area: nav; display: flex; justify-content: flex-end; }
 
-        .header-search .btn-primary {
-            padding: 0; 
-            height: calc(1.5em + 1rem + 2px);
-            width: calc(1.5em + 1rem + 2px); 
+    .header-logo { height: 24px; width: auto; }
+    
+    .header-search { width: 100%; display: flex; gap: 5px; }
+    .header-search .form-control {
+        height: 38px;
+        font-size: 0.9rem;
+        background-color: var(--input-bg-color);
+        color: var(--text-color);
+        border: 1px solid var(--input-border-color);
+    }
+
+    .nav-link {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+        color: var(--text-color);
+        text-decoration: none;
+    }
+
+    /* Desktop Adjustments */
+    @media (min-width: 992px) {
+        body { padding-top: 75px; }
+        .header-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
+            justify-content: space-between;
+            grid-template-areas: none;
         }
-        
-        /* --- Grid & Cards - Matched to year (5).html --- */
-        .movie-grid { padding: 1rem 0; }
-        .movie-grid .row { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
-        .movie-grid .col { padding: var(--bs-gutter-y) var(--bs-gutter-x); }
+        .header-main-content { width: 400px; }
+        .header-logo { height: 30px; }
+    }
 
-        .movie-card {
-            background-color: var(--card-bg-color);
-            border-radius: 0.75rem;
-            border: none;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
-        .movie-link { text-decoration: none; color: inherit; }
-        .movie-img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: var(--bg-color); }
+    /* Keep existing Grid & Card styles below... */
+</style>
 
-        .movie-card .movie-title {
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            height: 4.0em;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            word-break: break-word;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
+<header class="app-header">
+    <div class="container-fluid header-container">
+        <div class="dropdown logo-dropdown-container">
+            <a id="logoLink" href="./index">
+                <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
+            </a>
+            <a href="#" class="dropdown-toggle logo-dropdown-toggle ms-1" data-bs-toggle="dropdown">
+                <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+            </a>
+            <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
+        </div>
 
-        /* --- Load More & Spinner - Centering/Spacing Matched exactly to year (5).html --- */
-        .load-more-container {
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 2rem 0;
-        }
+        <div class="header-main-content">
+            <form id="searchForm" action="./language" method="GET" class="header-search">
+                <input type="hidden" name="lang" id="searchLangInput"> 
+                <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search...">
+                <button type="submit" class="btn btn-primary px-3"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
-        }
-        .btn-primary:hover {
-            background-color: var(--primary-hover-color);
-            border-color: var(--primary-hover-color);
-        }
-        #loadingSpinner { display: none; }
-        
-        /* --- Loading Screen - Matched to year (5).html --- */
-        #loadingOverlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--bg-color);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease;
-        }
-        #loadingOverlay img { max-width: 250px; animation: pulse-logo 1.5s infinite ease-in-out; }
-        #slowNetworkMessage { text-align: center; display: flex; align-items: center; gap: 8px; color: var(--text-color); opacity: 0.7; margin-top: 20px; }
-
-        @keyframes pulse-logo { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-        /* --- Responsive Queries - Matched to year (5).html --- */
-        @media (max-width: 575.98px) {
-            .movie-grid .row { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; }
-            .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
-        }
-        @media (min-width: 576px) and (max-width: 767.98px) { .movie-grid .col { width: 25%; flex: 0 0 auto; } }
-        @media (min-width: 768px) and (max-width: 991.98px) { .movie-grid .col { width: 20%; flex: 0 0 auto; } }
-        @media (min-width: 992px) {
-            .movie-grid .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
-            .movie-grid .col { width: 16.666667%; flex: 0 0 auto; }
-        }
-    </style>
-</head>
+        <div class="header-nav-actions">
+            <div id="categoryNav" class="d-flex gap-1">
+                <a id="recentCategoryLink" class="nav-link" href="#">Recent</a>
+                <a id="popularCategoryLink" class="nav-link" href="#">Popular</a>
+            </div>
+        </div>
+    </div>
+</header>
 <body>
 
     <div id="loadingOverlay">
