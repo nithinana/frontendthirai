@@ -15,161 +15,217 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-<style>
-    :root {
-        --bg-color: #f8f9fa;
-        --text-color: #212529;
-        --card-bg-color: #ffffff;
-        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-        --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        --border-color: #dee2e6;
-        --input-bg-color: #ffffff;
-        --input-border-color: #ced4da;
-        --primary-color: #007bff;
-        --primary-hover-color: #0056b3;
-        --header-bg: rgba(248, 249, 250, 0.9);
-        --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    body.dark-mode {
-        --bg-color: #121212;
-        --text-color: #e0e0e0;
-        --card-bg-color: #1e1e1e;
-        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        --border-color: #333;
-        --input-bg-color: #282828;
-        --input-border-color: #444;
-        --header-bg: rgba(22, 22, 22, 0.9);
-        --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-    }
-
-    body {
-        padding-top: 115px; /* Adjusted for two-row mobile header */
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        transition: background-color 0.3s ease;
-    }
-
-    /* --- Enhanced Mobile Header --- */
-    .app-header {
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        z-index: 1030;
-        padding: 0.5rem 0.75rem;
-        background-color: var(--header-bg);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--border-color);
-        box-shadow: var(--header-shadow);
-    }
-
-    .header-container {
-        display: grid;
-        grid-template-areas: 
-            "logo nav"
-            "search search";
-        gap: 8px;
-        align-items: center;
-    }
-
-    .logo-dropdown-container { grid-area: logo; display: flex; align-items: center; }
-    .header-main-content { grid-area: search; }
-    .header-nav-actions { grid-area: nav; display: flex; justify-content: flex-end; }
-
-    .header-logo { height: 24px; width: auto; }
-    
-    .header-search { width: 100%; display: flex; gap: 5px; }
-    .header-search .form-control {
-        height: 38px;
-        font-size: 0.9rem;
-        background-color: var(--input-bg-color);
-        color: var(--text-color);
-        border: 1px solid var(--input-border-color);
-    }
-
-    .nav-link {
-        font-size: 0.85rem;
-        padding: 0.4rem 0.6rem;
-        color: var(--text-color);
-        text-decoration: none;
-    }
-
-    /* Desktop Adjustments */
-    @media (min-width: 992px) {
-        body { padding-top: 75px; }
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            grid-template-areas: none;
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-border-color: #ced4da;
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --header-bg: rgba(248, 249, 250, 0.9);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        .header-main-content { width: 400px; }
-        .header-logo { height: 30px; }
-    }
 
-    /* Keep existing Grid & Card styles below... */
-</style>
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.9);
+            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
 
-<header class="app-header">
-    <div class="container-fluid header-container">
-        <div class="dropdown logo-dropdown-container">
-            <a id="logoLink" href="./index">
-                <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
-            </a>
-            <a href="#" class="dropdown-toggle logo-dropdown-toggle ms-1" data-bs-toggle="dropdown">
-                <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
-            </a>
-            <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
-        </div>
+        body {
+            padding-top: 110px; /* Adjusted for mobile stack */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+        
+        body.no-scroll { overflow: hidden; }
 
-        <div class="header-main-content">
-            <form id="searchForm" action="./language" method="GET" class="header-search">
-                <input type="hidden" name="lang" id="searchLangInput"> 
-                <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search...">
-                <button type="submit" class="btn btn-primary px-3"><i class="bi bi-search"></i></button>
-            </form>
-        </div>
+        /* --- Optimized Mobile Header --- */
+        .app-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1030;
+            padding: 0.6rem 0.75rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--header-shadow);
+        }
 
-        <div class="header-nav-actions">
-            <div id="categoryNav" class="d-flex gap-1">
-                <a id="recentCategoryLink" class="nav-link" href="#">Recent</a>
-                <a id="popularCategoryLink" class="nav-link" href="#">Popular</a>
-            </div>
-        </div>
-    </div>
-</header>
+        .header-container {
+            display: grid;
+            grid-template-areas: 
+                "logo nav"
+                "search search";
+            gap: 10px;
+            align-items: center;
+        }
+
+        .logo-dropdown-container { grid-area: logo; display: flex; align-items: center; gap: 4px; }
+        .header-main-content { grid-area: search; }
+        .header-nav-actions { grid-area: nav; display: flex; justify-content: flex-end; }
+
+        .header-logo { height: 24px; width: auto; }
+        .logo-dropdown-toggle { color: var(--text-color); opacity: 0.6; text-decoration: none; }
+        
+        .header-search { display: flex; align-items: center; gap: 6px; width: 100%; }
+        .header-search .form-control {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 0.5rem;
+            height: 38px;
+            font-size: 0.9rem;
+        }
+
+        .header-search .btn-primary {
+            height: 38px;
+            width: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+        }
+        .nav-link.active { color: var(--primary-color); font-weight: 600; }
+
+        /* Desktop Layout (min-width: 992px) */
+        @media (min-width: 992px) {
+            body { padding-top: 75px; }
+            .header-container {
+                display: flex;
+                justify-content: space-between;
+                grid-template-areas: none;
+            }
+            .header-main-content { width: 400px; margin: 0 20px; }
+            .header-logo { height: 30px; }
+            .nav-link { font-size: 0.95rem; padding: 0.5rem 1rem; }
+        }
+        
+        /* --- Grid & Cards --- */
+        .movie-grid { padding: 1rem 0; }
+        .movie-grid .row { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
+
+        .movie-card {
+            background-color: var(--card-bg-color);
+            border-radius: 0.75rem;
+            border: none;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
+        .movie-link { text-decoration: none; color: inherit; }
+        .movie-img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background-color: var(--bg-color); }
+
+        .movie-card .movie-title {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            height: 3.8em;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .load-more-container {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 2rem 0;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        #loadingOverlay img { max-width: 200px; animation: pulse-logo 1.5s infinite ease-in-out; }
+
+        @keyframes pulse-logo { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        @media (max-width: 575.98px) {
+            .movie-grid .col { width: 33.333333%; flex: 0 0 auto; }
+        }
+        @media (min-width: 576px) and (max-width: 767.98px) { .movie-grid .col { width: 25%; flex: 0 0 auto; } }
+        @media (min-width: 768px) and (max-width: 991.98px) { .movie-grid .col { width: 20%; flex: 0 0 auto; } }
+        @media (min-width: 992px) {
+            .movie-grid .col { width: 16.666667%; flex: 0 0 auto; }
+        }
+    </style>
+</head>
 <body>
 
     <div id="loadingOverlay">
         <img id="overlayLogo" src="./static/thiraiblack.png" alt="Loading...">
-        <div id="slowNetworkMessage" style="display: none;">
-            <i class="bi bi-info-circle"></i> <span>Our server appears to be slow right now, please be patient.</span>
-        </div>
     </div>
 
     <header class="app-header">
-        <div class="container-fluid d-flex flex-wrap align-items-center">
-            <div class="dropdown logo-dropdown-container me-lg-4">
+        <div class="container-fluid header-container">
+            <div class="dropdown logo-dropdown-container">
                 <a id="logoLink" href="./index">
                     <img id="headerLogo" src="./static/thiraiblack.png" alt="Thirai Logo" class="header-logo">
                 </a>
-                <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <a href="#" class="dropdown-toggle logo-dropdown-toggle" data-bs-toggle="dropdown">
                     <i class="bi bi-chevron-down"></i>
                 </a>
                 <ul class="dropdown-menu" id="languageDropdownMenu"></ul>
             </div>
-            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
+
+            <div class="header-nav-actions">
+                <div id="categoryNav" class="d-flex align-items-center gap-1">
+                    <a id="recentCategoryLink" class="nav-link" href="#">Recent</a>
+                    <a id="popularCategoryLink" class="nav-link" href="#">Popular</a>
+                </div>
+            </div>
+
+            <div class="header-main-content">
                 <form id="searchForm" action="./language" method="GET" class="header-search">
                     <input type="hidden" name="lang" id="searchLangInput"> 
                     <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
                     <button type="submit" class="btn btn-primary" title="Search"><i class="bi bi-search"></i></button>
                 </form>
-            </div>
-            <div class="d-flex align-items-center ms-auto">
-                <div id="categoryNav" class="d-flex align-items-center gap-2 header-center-nav me-3">
-                    <a id="recentCategoryLink" class="nav-link" href="#">Recent</a>
-                    <a id="popularCategoryLink" class="nav-link" href="#">Popular</a>
-                </div>
             </div>
         </div>
     </header>
@@ -177,8 +233,8 @@
     <main class="container movie-grid">
         <div class="row" id="moviesContainer"></div>
         <div class="load-more-container">
-            <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
-            <div id="loadingSpinner" class="spinner-border text-primary mt-3" role="status">
+            <button id="loadMoreBtn" class="btn btn-primary px-4 py-2">Load More</button>
+            <div id="loadingSpinner" class="spinner-border text-primary mt-3" style="display: none;" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
@@ -200,7 +256,6 @@
                     </div>
                     <p class="h6 mb-3">Preferred Language</p>
                     <div id="preferredLangList" class="list-group mb-4"></div>
-                    <button class="btn btn-outline-danger w-100 mb-3" id="disablePreferredLanguageBtn" style="display: none;">Disable Language Preference</button>
                     <button class="btn btn-outline-secondary w-100 mb-3" id="aboutButtonInModal">About</button>
                     <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
                 </div>
@@ -233,18 +288,13 @@
         const loadMoreBtn = document.getElementById('loadMoreBtn');
         const spinner = document.getElementById('loadingSpinner');
         const loadingOverlay = document.getElementById('loadingOverlay');
-        const slowNetworkMessage = document.getElementById('slowNetworkMessage');
 
         let currentPage = 1;
         let isLoading = false;
         let initialLoadComplete = false;
-        let loadingTimer;
 
-        // Wake server logic - Matched to year (5).html
         async function wakeServer() {
-            try {
-                await fetch('https://thirai-watch.onrender.com/', { method: 'GET', mode: 'no-cors' });
-            } catch (e) {}
+            try { await fetch('https://thirai-watch.onrender.com/', { method: 'GET', mode: 'no-cors' }); } catch (e) {}
         }
 
         function getGenreParams() {
@@ -260,7 +310,6 @@
             };
         }
 
-        // Logic matched to year (5).html including 2-page batch loading
         async function fetchAndRenderMovies(append = true) {
             if (isLoading) return;
             isLoading = true;
@@ -302,8 +351,6 @@
                 if (hasMore) {
                     currentPage = startPage + pagesToFetch;
                     loadMoreBtn.style.display = 'inline-block';
-                } else {
-                    loadMoreBtn.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Fetch Error:', error);
@@ -312,7 +359,6 @@
                 isLoading = false;
                 if (!initialLoadComplete) {
                     initialLoadComplete = true;
-                    clearTimeout(loadingTimer);
                     loadingOverlay.style.opacity = '0';
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
@@ -324,8 +370,6 @@
 
         function renderMovies(movies, append) {
             if (!append) moviesContainer.innerHTML = '';
-            if (!movies || movies.length === 0) return;
-
             const html = movies.map(movie => `
                 <div class="col">
                     <div class="movie-card">
@@ -343,12 +387,12 @@
             const dropdown = document.getElementById('languageDropdownMenu');
             const prefList = document.getElementById('preferredLangList');
             dropdown.innerHTML = '<li><h6 class="dropdown-header">Languages</h6></li>';
-            prefList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
+            prefList.innerHTML = '<a class="list-group-item list-group-item-action" href="#" data-language="all">All Languages</a>';
 
             ALL_LANGUAGES.forEach(lang => {
                 const cap = lang.charAt(0).toUpperCase() + lang.slice(1);
                 dropdown.innerHTML += `<li><a class="dropdown-item" href="./language?lang=${lang}&category=popular">${cap}</a></li>`;
-                prefList.innerHTML += `<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="${lang}">${cap}</a>`;
+                prefList.innerHTML += `<a class="list-group-item list-group-item-action" href="#" data-language="${lang}">${cap}</a>`;
             });
             dropdown.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
         }
@@ -360,34 +404,23 @@
             
             const p = getGenreParams();
             document.getElementById('searchLangInput').value = p.lang;
-            document.getElementById('searchInput').placeholder = `Search ${p.lang.charAt(0).toUpperCase() + p.lang.slice(1)} movies...`;
+            document.getElementById('searchInput').placeholder = `Search ${p.lang.charAt(0).toUpperCase() + p.lang.slice(1)}...`;
             document.getElementById('recentCategoryLink').href = `./language?lang=${p.lang}&category=recent`;
             document.getElementById('popularCategoryLink').href = `./language?lang=${p.lang}&category=popular`;
-            
-            loadingTimer = setTimeout(() => { if (!initialLoadComplete) slowNetworkMessage.style.display = 'flex'; }, 7000);
             
             fetchAndRenderMovies(false);
             loadMoreBtn.addEventListener('click', () => fetchAndRenderMovies(true));
             
-            const savedTheme = localStorage.getItem('theme') || 'system';
-            applyTheme(savedTheme);
-
+            applyTheme(localStorage.getItem('theme') || 'system');
             document.querySelectorAll('.theme-option').forEach(opt => {
-                opt.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    applyTheme(opt.dataset.theme);
-                });
+                opt.addEventListener('click', (e) => { e.preventDefault(); applyTheme(opt.dataset.theme); });
             });
 
-            // About/Settings Modal logic matched to year (5).html
             const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
             const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
             document.getElementById('aboutButtonInModal').addEventListener('click', (e) => {
-                e.preventDefault();
-                settingsModal.hide();
-                aboutModal.show();
+                e.preventDefault(); settingsModal.hide(); aboutModal.show();
             });
-            document.getElementById('aboutModal').addEventListener('hidden.bs.modal', () => settingsModal.show());
         });
 
         function applyTheme(theme) {
@@ -396,30 +429,8 @@
             const logo = isDark ? './static/thiraiwhite.png' : './static/thiraiblack.png';
             document.getElementById('headerLogo').src = logo;
             document.getElementById('overlayLogo').src = logo;
-            localStorage.setItem('theme', theme === 'system' ? 'system' : (isDark ? 'dark' : 'light'));
+            localStorage.setItem('theme', theme);
         }
-
-        // --- CONTINUE WATCHING - Matched to year (5).html ---
-        const CACHE_KEY = 'thirai_continue_watching';
-        function saveToContinueWatching(movie) {
-            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            history = history.filter(item => item.url !== movie.url);
-            history.unshift(movie);
-            if (history.length > 20) history.pop();
-            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-        }
-
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('.movie-link');
-            if (!link) return;
-            const url = link.getAttribute('href');
-            if (url && url.includes('watch')) {
-                const card = link.closest('.movie-card');
-                const title = card.querySelector('.movie-title')?.textContent || '';
-                const img = card.querySelector('.movie-img')?.src || '';
-                saveToContinueWatching({ title, img, url });
-            }
-        });
     </script>
 </body>
 </html>
