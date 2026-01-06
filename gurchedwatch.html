@@ -12,6 +12,7 @@
 </script>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
   // CAPTURE ORIGINAL URL BEFORE REWRITING
@@ -429,61 +430,101 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: #121212;
-            padding: 2rem;
-            border-radius: 12px;
+            padding: 1.5rem;
+            border-radius: 16px;
             z-index: 1000;
             display: none;
             color: white;
             text-align: center;
             border: 1px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            width: 300px;
-        }
-        #partyModal h3 { margin-top: 0; }
-        #partyModal input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        .modal-btn {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-        #partyStatusTag {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: #0d6efd;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 100;
-            display: none;
-        }
-        .user-list-box {
-            margin-top: 15px;
-            font-size: 0.8rem;
-            color: #aaa;
-            max-height: 80px;
-            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            width: 320px;
+            max-width: 90vw;
         }
 
+        .party-choice-container {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .choice-btn {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            padding: 20px 10px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .choice-btn i { font-size: 1.5rem; color: #0d6efd; }
+        .choice-btn:hover { background: #252525; border-color: #0d6efd; }
+
+        .party-form { display: none; text-align: left; }
+        .party-form label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+
+        #partyModal input {
+            width: 100%;
+            background: #222;
+            border: 1px solid #444;
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .modal-action-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0d6efd;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        #partyStatusBadge {
+            position: fixed;
+            top: 15px;
+            right: 80px;
+            background: #0d6efd;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 1001;
+            display: none;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div id="partyStatusTag">Watch Party Active</div>
+    <div id="partyStatusBadge">Watch Party Active</div>
 
     <div class="video-player-wrapper" id="videoPlayerWrapper">
         <video id="moviePlayer" playsinline webkit-playsinline preload="auto" autoplay>
@@ -546,14 +587,51 @@
     </div>
 
     <div id="partyModal">
-        <h3 id="modalTitle">Watch Party</h3>
-        <input type="text" id="partyNameInput" placeholder="Enter Your Name">
-        <input type="text" id="partyCodeInput" placeholder="Enter Room Code (Join Only)">
-        <button class="modal-btn" id="startPartyBtn">Start / Join</button>
-        <div id="roomCodeDisplay" style="margin-top:10px; font-weight:bold; color:#0d6efd; display:none;"></div>
-        <div class="user-list-box" id="userListBox"></div>
-        <button class="modal-btn" id="stopPartyBtn" style="background:#dc3545; display:none;">Stop Party</button>
-        <button class="modal-btn" style="background:transparent; border:1px solid #444;" onclick="document.getElementById('partyModal').style.display='none'">Close</button>
+        <h3 style="margin-top:0">Watch Party</h3>
+        
+        <div id="selectionScreen">
+            <div class="party-choice-container">
+                <button class="choice-btn" id="chooseHost">
+                    <i class="bi bi-broadcast"></i>
+                    <span>Host</span>
+                </button>
+                <button class="choice-btn" id="chooseJoin">
+                    <i class="bi bi-door-open"></i>
+                    <span>Join</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="hostSetup" class="party-form">
+            <label>Display Name</label>
+            <input type="text" id="hostName" placeholder="Your Name" value="Host">
+            <button class="modal-action-btn" id="startHostBtn">Create Room</button>
+            <span class="back-link" onclick="resetModal()">Back</span>
+        </div>
+
+        <div id="joinSetup" class="party-form">
+            <label>Display Name</label>
+            <input type="text" id="joinName" placeholder="Your Name" value="Guest">
+            <label>Room Code</label>
+            <input type="text" id="joinCode" placeholder="Enter Code">
+            <button class="modal-action-btn" id="startJoinBtn">Join Party</button>
+            <span class="back-link" onclick="resetModal()">Back</span>
+        </div>
+
+        <div id="activeHostInfo" class="party-form" style="text-align: center;">
+            <p style="margin-bottom: 5px; color:#0d6efd; font-weight:bold;">Room Code: <span id="displayCode"></span></p>
+            <div id="qrcode"></div>
+            <p style="font-size: 0.7rem; color: #888;">Users: <span id="hostUserCount">1</span></p>
+            <button class="modal-action-btn" style="background:#dc3545" id="endPartyBtn">End Party</button>
+        </div>
+
+        <div id="activeJoinInfo" class="party-form" style="text-align: center;">
+            <p>Connected to Party</p>
+            <p style="font-size: 0.7rem; color: #888;">Users: <span id="joinUserCount">1</span></p>
+            <button class="modal-action-btn" style="background:#444" id="leavePartyBtn">Leave Party</button>
+        </div>
+
+        <button class="top-button" style="margin-top:20px; font-size: 0.9rem; color: #555; width:100%" onclick="document.getElementById('partyModal').style.display='none'">Close Overlay</button>
     </div>
 
     <script>
@@ -584,13 +662,12 @@
         // Watch Party Elements
         const partyToggleBtn = document.getElementById('partyToggleBtn');
         const partyModal = document.getElementById('partyModal');
-        const partyNameInput = document.getElementById('partyNameInput');
-        const partyCodeInput = document.getElementById('partyCodeInput');
-        const startPartyBtn = document.getElementById('startPartyBtn');
-        const stopPartyBtn = document.getElementById('stopPartyBtn');
-        const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-        const userListBox = document.getElementById('userListBox');
-        const partyStatusTag = document.getElementById('partyStatusTag');
+        const selectionScreen = document.getElementById('selectionScreen');
+        const hostSetup = document.getElementById('hostSetup');
+        const joinSetup = document.getElementById('joinSetup');
+        const activeHostInfo = document.getElementById('activeHostInfo');
+        const activeJoinInfo = document.getElementById('activeJoinInfo');
+        const partyStatusBadge = document.getElementById('partyStatusBadge');
 
         let zoomLevel = 1;
         let lastVolume = 1;
@@ -606,68 +683,107 @@
         let socket;
         let isHost = false;
         let currentRoomId = null;
-        let myName = "";
-        const SERVER_URL = "http://localhost:3000"; // Change this if hosting python server elsewhere
+        const SERVER_URL = "http://localhost:3000"; // Update with your actual server IP/URL
 
-        // --- WATCH PARTY LOGIC ---
-        
-        // Check if API is working
+        // --- WATCH PARTY INITIALIZATION ---
         try {
             socket = io(SERVER_URL);
-            socket.on('connect', () => { partyToggleBtn.style.display = 'flex'; });
-        } catch(e) { console.log("Watch Party API Offline"); }
+            socket.on('connect', () => {
+                partyToggleBtn.style.display = 'flex';
+            });
+        } catch (e) { console.log("Socket server unavailable"); }
 
-        partyToggleBtn.addEventListener('click', () => {
-            partyModal.style.display = 'block';
-        });
+        partyToggleBtn.onclick = () => { partyModal.style.display = 'block'; };
 
-        startPartyBtn.addEventListener('click', () => {
-            myName = partyNameInput.value.trim() || "User";
-            const code = partyCodeInput.value.trim().toUpperCase();
+        function resetModal() {
+            selectionScreen.style.display = 'block';
+            hostSetup.style.display = 'none';
+            joinSetup.style.display = 'none';
+            activeHostInfo.style.display = 'none';
+            activeJoinInfo.style.display = 'none';
+        }
 
-            if (!code) {
-                // Host Mode
-                isHost = true;
-                currentRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                socket.emit('create-room', { 
-                    roomId: currentRoomId, 
-                    hostName: myName, 
-                    movieUrl: window.location.search 
-                });
-                roomCodeDisplay.innerText = "ROOM CODE: " + currentRoomId;
-                roomCodeDisplay.style.display = 'block';
-                stopPartyBtn.style.display = 'block';
-                startPartyBtn.style.display = 'none';
-                partyStatusTag.innerText = "Hosting: " + currentRoomId;
-                partyStatusTag.style.display = 'block';
-            } else {
-                // Participant Mode
-                isHost = false;
-                currentRoomId = code;
-                socket.emit('join-room', { roomId: currentRoomId, userName: myName });
+        document.getElementById('chooseHost').onclick = () => {
+            selectionScreen.style.display = 'none';
+            hostSetup.style.display = 'block';
+        };
+
+        document.getElementById('chooseJoin').onclick = () => {
+            selectionScreen.style.display = 'none';
+            joinSetup.style.display = 'block';
+        };
+
+        // Hosting Logic
+        document.getElementById('startHostBtn').onclick = () => {
+            const name = document.getElementById('hostName').value || "Host";
+            isHost = true;
+            currentRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            socket.emit('create-room', {
+                roomId: currentRoomId,
+                hostName: name,
+                movieUrl: window.location.search
+            });
+
+            document.getElementById('displayCode').innerText = currentRoomId;
+            hostSetup.style.display = 'none';
+            activeHostInfo.style.display = 'block';
+            partyStatusBadge.innerText = "Hosting: " + currentRoomId;
+            partyStatusBadge.style.display = 'block';
+
+            // Generate QR
+            const qrTarget = window.location.origin + window.location.pathname + window.location.search + "&join=" + currentRoomId;
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById('qrcode'), {
+                text: qrTarget,
+                width: 128,
+                height: 128
+            });
+        };
+
+        // Joining Logic
+        document.getElementById('startJoinBtn').onclick = () => {
+            const name = document.getElementById('joinName').value || "Guest";
+            const code = document.getElementById('joinCode').value.trim().toUpperCase();
+            if(!code) return;
+
+            isHost = false;
+            currentRoomId = code;
+            socket.emit('join-room', { roomId: currentRoomId, userName: name });
+        };
+
+        socket.on('joined-room', (data) => {
+            // Check if joiner is on the same movie as host
+            const hostParams = new URLSearchParams(data.movieUrl);
+            const myParams = new URLSearchParams(window.location.search);
+            
+            if(hostParams.get('film') !== myParams.get('film')) {
+                // Redirect to host's movie
+                window.location.href = window.location.pathname + data.movieUrl + "&join=" + currentRoomId;
+                return;
             }
-        });
 
-        socket.on('joined-room', () => {
+            // Sync successfully
+            joinSetup.style.display = 'none';
+            activeJoinInfo.style.display = 'block';
+            partyStatusBadge.innerText = "In Party: " + currentRoomId;
+            partyStatusBadge.style.display = 'block';
+            
             // Lock controls for non-hosts
             playPauseButton.disabled = true;
             rewindButton.disabled = true;
             forwardButton.disabled = true;
             progressBarContainer.style.pointerEvents = 'none';
-            
-            partyStatusTag.innerText = "In Party: " + currentRoomId;
-            partyStatusTag.style.display = 'block';
-            partyModal.style.display = 'none';
         });
 
         socket.on('user-list', (users) => {
-            userListBox.innerHTML = "People: " + users.map(u => u.name).join(", ");
+            document.getElementById('hostUserCount').innerText = users.length;
+            document.getElementById('joinUserCount').innerText = users.length;
         });
 
         socket.on('video-update', (data) => {
-            if (!isHost) {
-                // Forced sync for participants
-                if (Math.abs(moviePlayer.currentTime - data.time) > 1.5) {
+            if(!isHost) {
+                if (Math.abs(moviePlayer.currentTime - data.time) > 2) {
                     moviePlayer.currentTime = data.time;
                 }
                 if (data.state === 'play') moviePlayer.play();
@@ -676,58 +792,48 @@
         });
 
         socket.on('party-ended', () => {
-            alert("Party ended. Controls restored.");
-            resetPartyState();
+            alert("The host has ended the party.");
+            location.reload();
         });
 
-        stopPartyBtn.addEventListener('click', () => {
+        document.getElementById('endPartyBtn').onclick = () => {
             socket.emit('stop-party', currentRoomId);
-            resetPartyState();
-        });
+            location.reload();
+        };
 
-        function resetPartyState() {
-            isHost = false;
-            currentRoomId = null;
-            playPauseButton.disabled = false;
-            rewindButton.disabled = false;
-            forwardButton.disabled = false;
-            progressBarContainer.style.pointerEvents = 'auto';
-            partyStatusTag.style.display = 'none';
-            roomCodeDisplay.style.display = 'none';
-            stopPartyBtn.style.display = 'none';
-            startPartyBtn.style.display = 'block';
-            partyModal.style.display = 'none';
-        }
+        document.getElementById('leavePartyBtn').onclick = () => {
+            location.reload();
+        };
 
-        // Host Control Emitting
+        // Sync Emitters (Host Only)
         moviePlayer.addEventListener('play', () => {
-            if (isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+            if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
         });
         moviePlayer.addEventListener('pause', () => {
-            if (isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'pause', time: moviePlayer.currentTime });
+            if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'pause', time: moviePlayer.currentTime });
         });
         moviePlayer.addEventListener('seeking', () => {
-            if (isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'seek', time: moviePlayer.currentTime });
+            if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'seek', time: moviePlayer.currentTime });
         });
 
-        // 3-Second Heartbeat sync
-        setInterval(() => {
-            if (isHost && !moviePlayer.paused) {
-                socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+        // Auto-fill join code from URL if present
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('join')) {
+                document.getElementById('joinCode').value = urlParams.get('join');
+                partyToggleBtn.click();
+                document.getElementById('chooseJoin').click();
             }
-        }, 3000);
-        
-        // --- END WATCH PARTY LOGIC ---
+        });
 
-        // --- CACHE / CONTINUE WATCHING CONSTANTS ---
+        // --- CORE VIDEO PLAYER LOGIC ---
+
         const CACHE_KEY = 'thirai_continue_watching';
 
         function saveToContinueWatching(movie) {
             let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            // Remove existing entry with same URL to push it to top
             history = history.filter(item => item.url !== movie.url);
             history.unshift(movie);
-            // Limit to 20 items
             if (history.length > 20) history.pop();
             localStorage.setItem(CACHE_KEY, JSON.stringify(history));
         }
@@ -776,20 +882,20 @@
             if (moviePlayer.readyState < 3) {
                 playPauseIcon.style.display = 'none';
                 loadingSpinner.style.display = 'block';
-                playPauseButton.disabled = true;
-                rewindButton.disabled = true;
-                forwardButton.disabled = true;
+                if(!currentRoomId || isHost) {
+                    playPauseButton.disabled = true;
+                    rewindButton.disabled = true;
+                    forwardButton.disabled = true;
+                }
             }
-            // RESUME LOGIC
             if (movieKey) {
                 const savedTime = localStorage.getItem(movieKey);
-                if (savedTime) {
+                if (savedTime && !currentRoomId) {
                     moviePlayer.currentTime = parseFloat(savedTime);
                 }
             }
         });
 
-        // CONSTANT RECORDING LOGIC
         moviePlayer.addEventListener('timeupdate', () => {
             updateProgressBar();
             if (movieKey && !moviePlayer.ended && moviePlayer.currentTime > 0) {
@@ -871,18 +977,22 @@
         moviePlayer.addEventListener('waiting', () => {
             playPauseIcon.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            if(!currentRoomId || isHost) playPauseButton.disabled = true;
-            if(!currentRoomId || isHost) rewindButton.disabled = true;
-            if(!currentRoomId || isHost) forwardButton.disabled = true;
+            if(!currentRoomId || isHost) {
+                playPauseButton.disabled = true;
+                rewindButton.disabled = true;
+                forwardButton.disabled = true;
+            }
             showControls();
         });
 
         moviePlayer.addEventListener('playing', () => {
             loadingSpinner.style.display = 'none';
             playPauseIcon.style.display = 'block';
-            if(!currentRoomId || isHost) playPauseButton.disabled = false;
-            if(!currentRoomId || isHost) rewindButton.disabled = false;
-            if(!currentRoomId || isHost) forwardButton.disabled = false;
+            if(!currentRoomId || isHost) {
+                playPauseButton.disabled = false;
+                rewindButton.disabled = false;
+                forwardButton.disabled = false;
+            }
             playPauseIcon.classList.remove('bi-play-fill');
             playPauseIcon.classList.add('bi-pause-fill');
             showControls();
@@ -892,9 +1002,11 @@
             if (loadingSpinner.style.display === 'block') {
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
-                if(!currentRoomId || isHost) playPauseButton.disabled = false;
-                if(!currentRoomId || isHost) rewindButton.disabled = false;
-                if(!currentRoomId || isHost) forwardButton.disabled = false;
+                if(!currentRoomId || isHost) {
+                    playPauseButton.disabled = false;
+                    rewindButton.disabled = false;
+                    forwardButton.disabled = false;
+                }
             }
             updateProgressBar();
         });
@@ -1107,9 +1219,7 @@
             const tapX = event.changedTouches[0].clientX;
 
             if (currentTime - lastTapTime < DOUBLE_TAP_THRESHOLD_MS) {
-                // Ignore double tap seek for non-hosts
                 if(currentRoomId && !isHost) return;
-
                 const videoWidth = videoPlayerWrapper.offsetWidth;
                 if (tapX < videoWidth / 2) {
                     moviePlayer.currentTime = Math.max(0, moviePlayer.currentTime - SEEK_TIME);
@@ -1157,9 +1267,11 @@
         async function fetchMovieSource() {
             playPauseIcon.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            playPauseButton.disabled = true;
-            rewindButton.disabled = true;
-            forwardButton.disabled = true;
+            if(!currentRoomId || isHost) {
+                playPauseButton.disabled = true;
+                rewindButton.disabled = true;
+                forwardButton.disabled = true;
+            }
 
             const urlParams = new URLSearchParams(window.location.search);
             const filmCode = urlParams.get('film');
@@ -1183,7 +1295,6 @@
                         movieTitleDisplay.textContent = data.title;
                         document.title = data.title;
                         
-                        // --- UPDATED: SAVE ORIGINAL URL TO CACHE ---
                         const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
                         const cacheObj = {
                             title: data.title,
@@ -1191,12 +1302,11 @@
                             url: currentUrl
                         };
                         saveToContinueWatching(cacheObj);
-                        // ---------------------------------------------
                         
                         movieKey = `movie_progress_${data.title}`;
                         
                         const savedTime = localStorage.getItem(movieKey);
-                        if (savedTime && (!currentRoomId)) {
+                        if (savedTime && !currentRoomId) {
                             moviePlayer.currentTime = parseFloat(savedTime);
                         }
                         updateProgressBar();
@@ -1222,9 +1332,11 @@
             if (loadingSpinner.style.display === 'block') {
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
-                if(!currentRoomId || isHost) playPauseButton.disabled = false;
-                if(!currentRoomId || isHost) rewindButton.disabled = false;
-                if(!currentRoomId || isHost) forwardButton.disabled = false;
+                if(!currentRoomId || isHost) {
+                    playPauseButton.disabled = false;
+                    rewindButton.disabled = false;
+                    forwardButton.disabled = false;
+                }
             }
         });
     </script>
