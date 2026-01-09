@@ -149,6 +149,7 @@
             object-fit: contain;
             display: block;
             controls: none;
+            z-index: 1;
         }
 
         .video-player-wrapper video {
@@ -547,6 +548,7 @@
             text-align: left;
             -webkit-user-select: text;
             user-select: text;
+            display: none; /* Hidden by default */
         }
 
         .user-item {
@@ -596,40 +598,44 @@
         #lobbyScreen {
             display: none;
             text-align: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
         #lobbyPoster {
             width: 120px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin: 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: block;
         }
         
         #lobbyStatus {
             font-size: 0.9rem;
             color: #888;
-            margin-bottom: 15px;
+            margin: 0;
+            display: block;
+            font-weight: 500;
         }
         .copy-row {
             display: flex;
             gap: 10px;
-            justify-content: space-between;
-            margin: 15px 0;
+            justify-content: center;
+            margin-top: 5px;
+            width: 100%;
         }
         .copy-btn {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             background: #2a2a2a;
             border: 1px solid #444;
-            border-radius: 8px;
+            border-radius: 6px;
             color: white;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         .copy-btn:hover { background: #333; }
-        .copy-btn i { margin-right: 8px; }
+        .copy-btn i { margin-right: 5px; }
 
         /* Internal Toast Popup */
         #thiraiToast {
@@ -672,8 +678,19 @@
             width: 350px;
             max-width: 85vw;
         }
-        #partyEndedModal h2 { margin-top: 0; color: #0d6efd; font-size: 1.4rem; }
-        #partyEndedModal p { color: #ccc; margin: 15px 0 25px; line-height: 1.4; }
+        
+        #partyEndedModal .close-ended-x {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.4rem;
+            color: #888;
+            cursor: pointer;
+        }
+        #partyEndedModal .close-ended-x:hover { color: white; }
+
+        #partyEndedModal h2 { margin-top: 0; color: #0d6efd; font-size: 1.2rem; }
+        #partyEndedModal p { color: #ccc; margin: 15px 0 25px; line-height: 1.4; font-size: 0.9rem; }
 
     </style>
 </head>
@@ -682,9 +699,10 @@
     <div id="thiraiToast"><i class="bi bi-crown-fill"></i> <span id="toastMsg">You are now a host!</span></div>
 
     <div id="partyEndedModal">
+        <i class="bi bi-x-lg close-ended-x" onclick="closeEndedModal()"></i>
         <i class="bi bi-info-circle-fill" style="font-size: 3rem; color: #0d6efd; display: block; margin-bottom: 15px;"></i>
-        <h2 id="endedTitle">(Host) has ended the party</h2>
-        <p>You can now watch on your own accord.</p>
+        <h2 id="endedTitle">User has ended session</h2>
+        <p>You may now control video playback on your own.</p>
         <button class="modal-action-btn" onclick="closeEndedModal()">Close</button>
     </div>
 
@@ -790,18 +808,18 @@
             </div>
 
             <div class="user-list-container" id="hostUserList"></div>
-            <button class="modal-action-btn" style="background:#dc3545; margin-top: 10px;" id="endPartyBtn">End Party</button>
+            <button class="modal-action-btn" style="background:#dc3545" id="endPartyBtn">End Party</button>
         </div>
 
         <div id="lobbyScreen">
             <img id="lobbyPoster" src="" alt="Movie Poster">
-            <p id="lobbyStatus">Waiting for host...</p>
+            <span id="lobbyStatus">Waiting for host...</span>
             
             <div class="user-list-container" id="lobbyUserList"></div>
             
             <div class="copy-row" style="margin-bottom: 10px;">
-                <button class="copy-btn" id="lobbyCopyCodeBtn"><i class="bi bi-clipboard"></i> Code</button>
-                <button class="copy-btn" id="lobbyCopyLinkBtn"><i class="bi bi-link-45deg"></i> Link</button>
+                <button class="copy-btn" id="lobbyCopyCodeBtn"><i class="bi bi-clipboard"></i> Copy Code</button>
+                <button class="copy-btn" id="lobbyCopyLinkBtn"><i class="bi bi-link-45deg"></i> Copy Link</button>
             </div>
 
             <button class="modal-action-btn secondary" id="leavePartyBtn">Leave Party</button>
@@ -864,7 +882,7 @@
         let timeFormatMode = 0; // 0: Rem, 1: Cur/Tot
         timeDisplay.onclick = (e) => {
             e.stopPropagation(); 
-            timeFormatMode = (timeFormatMode + 1) % 2; // Removed 3rd option
+            timeFormatMode = (timeFormatMode + 1) % 2;
             updateProgressBar();
         };
 
@@ -873,7 +891,7 @@
         let isHost = false;
         let currentRoomId = null;
         let hostNickname = "Host";
-        let hostSyncInterval = null; // HEARTBEAT FOR HOST
+        let hostSyncInterval = null; 
         const SERVER_URL = "https://watchpartybackend-b5a2.onrender.com"; 
 
         // --- WATCH PARTY INITIALIZATION ---
@@ -919,11 +937,11 @@
             if (!isJoinLink || (isJoinLink && currentRoomId)) {
                 partyModal.style.display = 'none';
                 modalBackdrop.style.display = 'none';
+                document.getElementById('partyEndedModal').style.display = 'none';
             }
         }
 
         function resetModal() {
-            // FIX: If on join link, go to root instead of selection screen
             if (new URLSearchParams(window.location.search).has('join')) {
                 window.location.href = '/';
                 return;
@@ -946,25 +964,29 @@
             joinSetup.style.display = 'block';
         };
 
-        async function copyToClipboard(text) {
+        async function copyToClipboard(text, element) {
             try {
                 await navigator.clipboard.writeText(text);
-                const prev = document.activeElement.innerHTML;
-                document.activeElement.innerHTML = '<i class="bi bi-check"></i> Copied';
-                setTimeout(() => document.activeElement.innerHTML = prev, 1500);
+                const originalHtml = element.innerHTML;
+                element.innerHTML = '<i class="bi bi-check"></i> Copied';
+                setTimeout(() => {
+                    element.innerHTML = originalHtml;
+                }, 1500);
             } catch (err) {
                 console.error('Failed to copy:', err);
             }
         }
 
         function getJoinLink(code) {
-             return window.location.origin + window.location.pathname + ORIGINAL_SEARCH_PARAMS + "&join=" + code;
+             const urlParams = new URLSearchParams(window.location.search);
+             urlParams.set('join', code);
+             return window.location.origin + window.location.pathname + '?' + urlParams.toString();
         }
 
-        document.getElementById('copyCodeBtn').onclick = () => copyToClipboard(currentRoomId);
-        document.getElementById('copyLinkBtn').onclick = () => copyToClipboard(getJoinLink(currentRoomId));
-        document.getElementById('lobbyCopyCodeBtn').onclick = () => copyToClipboard(currentRoomId);
-        document.getElementById('lobbyCopyLinkBtn').onclick = () => copyToClipboard(getJoinLink(currentRoomId));
+        document.getElementById('copyCodeBtn').onclick = (e) => copyToClipboard(currentRoomId, e.currentTarget);
+        document.getElementById('copyLinkBtn').onclick = (e) => copyToClipboard(getJoinLink(currentRoomId), e.currentTarget);
+        document.getElementById('lobbyCopyCodeBtn').onclick = (e) => copyToClipboard(currentRoomId, e.currentTarget);
+        document.getElementById('lobbyCopyLinkBtn').onclick = (e) => copyToClipboard(getJoinLink(currentRoomId), e.currentTarget);
 
         function generateHostUI(roomId) {
             document.getElementById('displayCode').innerText = roomId;
@@ -1000,11 +1022,10 @@
             hostSetup.style.display = 'none';
             activeHostInfo.style.display = 'block';
             
-            // Set title correctly now that party is created
             document.getElementById('partyHeader').innerText = movieMeta.title || "Watch Party";
-            // Removed: showInternalToast("You are now a host!");
 
-            fetchMovieSource();
+            updateControlsState();
+            startHostHeartbeat();
         };
 
         // Joining Logic
@@ -1015,7 +1036,6 @@
             if(!code) return;
 
             joinBtn.disabled = true;
-            // Clean joining text
             joinBtn.innerText = 'Joining...';
 
             isHost = false;
@@ -1033,12 +1053,11 @@
             }
 
             joinSetup.style.display = 'none';
-            lobbyScreen.style.display = 'block';
+            lobbyScreen.style.display = 'flex';
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'none';
             closePartyX.style.display = 'block';
             
-            // Set title correctly
             document.getElementById('partyHeader').innerText = movieMeta.title || "Movie Lobby";
 
             if(data.isHost) isHost = true;
@@ -1049,10 +1068,12 @@
             fetchMovieSource().then(() => {
                  const title = movieMeta.title || "Unknown Movie";
                  document.getElementById('partyHeader').innerText = title;
-                 if(movieMeta.img) lobbyPoster.src = movieMeta.img;
+                 if(movieMeta.img) {
+                    lobbyPoster.src = movieMeta.img;
+                    lobbyPoster.style.display = 'inline-block';
+                 }
                  else lobbyPoster.style.display = 'none';
 
-                 // Initial state sync will come from host heartbeat
                  lobbyStatus.textContent = "Waiting for sync...";
             });
         });
@@ -1060,10 +1081,18 @@
         socket.on('user-list', (users) => {
             const hostList = document.getElementById('hostUserList');
             const guestList = document.getElementById('lobbyUserList');
+            
+            if (users.length > 0) {
+                hostList.style.display = 'block';
+                guestList.style.display = 'block';
+            } else {
+                hostList.style.display = 'none';
+                guestList.style.display = 'none';
+            }
+
             hostList.innerHTML = '';
             guestList.innerHTML = '';
 
-            // HOST LOGIC: If I am host, send a sync update immediately so new joiners don't wait
             if (isHost && socket) {
                 const state = moviePlayer.paused ? (isBuffering ? 'buffering' : 'pause') : 'play';
                 socket.emit('sync-video', { roomId: currentRoomId, state: state, time: moviePlayer.currentTime });
@@ -1111,20 +1140,16 @@
                     moviePlayer.pause();
                 } else if(data.state === 'play') {
                     lobbyStatus.textContent = "Playing Now";
-                    
-                    // SYNC DRIFT CORRECTION
                     const drift = Math.abs(moviePlayer.currentTime - data.time);
-                    if (drift > 0.5) { // If drifted more than half a second
+                    if (drift > 0.5) {
                         moviePlayer.currentTime = data.time;
                     }
-                    
                     if(moviePlayer.paused) {
                         moviePlayer.play().catch(() => { 
                             lobbyStatus.textContent = "Interaction required to sync";
                         });
                     }
                 } else {
-                    // Pause
                     lobbyStatus.textContent = "Paused at " + formatTime(data.time);
                     if (Math.abs(moviePlayer.currentTime - data.time) > 0.1) {
                          moviePlayer.currentTime = data.time;
@@ -1134,16 +1159,13 @@
             }
         });
 
-        // Party Ended Pop-up Logic
         socket.on('party-ended', () => {
             currentRoomId = null;
             isHost = false;
             updateControlsState();
+            
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'block'; 
-            
-            // RESET PARTY UI TO CLEAN STATE
-            resetModal();
             
             document.getElementById('endedTitle').innerText = `${hostNickname} has ended the party`;
             document.getElementById('partyEndedModal').style.display = 'block';
@@ -1152,8 +1174,10 @@
         function closeEndedModal() {
             document.getElementById('partyEndedModal').style.display = 'none';
             modalBackdrop.style.display = 'none';
-            // Clean URL
-            window.history.replaceState({}, '', window.location.pathname + ORIGINAL_SEARCH_PARAMS);
+            
+            const url = new URL(window.location);
+            url.searchParams.delete('join');
+            window.history.replaceState({}, '', url);
         }
 
         document.getElementById('endPartyBtn').onclick = () => {
@@ -1166,7 +1190,6 @@
             location.reload();
         };
 
-        // --- HOST SYNC HEARTBEAT ---
         function startHostHeartbeat() {
             stopHostHeartbeat();
             if(isHost) {
@@ -1174,7 +1197,7 @@
                     if(!moviePlayer.paused && !isBuffering) {
                         socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
                     }
-                }, 2000); // Sync every 2 seconds
+                }, 2000);
             }
         }
 
@@ -1185,7 +1208,6 @@
             }
         }
 
-        // Sync Emitters
         moviePlayer.addEventListener('play', () => {
             if(isHost) {
                 socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
@@ -1193,7 +1215,6 @@
             }
         });
         moviePlayer.addEventListener('pause', () => {
-            // FIX: Explicitly fix icon when paused
             playPauseIcon.classList.remove('bi-pause-fill');
             playPauseIcon.classList.add('bi-play-fill');
 
@@ -1266,6 +1287,8 @@
             }
         }
 
+        moviePlayer.oncontextmenu = (e) => e.preventDefault();
+
         moviePlayer.addEventListener('loadedmetadata', () => {
             if (moviePlayer.paused || moviePlayer.ended || moviePlayer.currentTime === 0) {
                 showControls();
@@ -1287,8 +1310,6 @@
             if (movieKey && !moviePlayer.ended && moviePlayer.currentTime > 0) {
                 localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
             }
-
-            // [FIXED] REMOVED AGGRESSIVE BLACK SCREEN CHECK HERE
         });
 
         videoPlayerWrapper.addEventListener('click', (event) => {
@@ -1364,7 +1385,6 @@
             showControls();
         });
 
-        // Buffering Logic Fix
         moviePlayer.addEventListener('waiting', () => {
             isBuffering = true;
             playPauseIcon.style.display = 'none';
@@ -1372,7 +1392,6 @@
             showControls();
             if(!isHost && currentRoomId) lobbyStatus.textContent = "Buffering...";
             
-            // Host sends buffering state
             if(isHost && currentRoomId) {
                 socket.emit('sync-video', { roomId: currentRoomId, state: 'buffering', time: moviePlayer.currentTime });
             }
@@ -1409,7 +1428,6 @@
                 const tot = formatTime(moviePlayer.duration);
                 const rem = formatTime(moviePlayer.duration - moviePlayer.currentTime);
                 
-                // Formats: Remaining, Current/Total (Removed Min Watched)
                 if(timeFormatMode === 0) timeDisplay.textContent = `-${rem}`;
                 else timeDisplay.textContent = `${cur} / ${tot}`;
             } else {
@@ -1470,11 +1488,7 @@
         }
 
         backButton.addEventListener('click', () => {
-            if(new URLSearchParams(window.location.search).has('join')) {
-                window.location.href = '/';
-            } else {
-                window.history.back();
-            }
+            window.location.href = '/';
         });
 
         fullscreenButton.addEventListener('click', () => {
@@ -1521,6 +1535,7 @@
                                      event.target.closest('.movie-title-display') ||
                                      event.target.closest('.volume-container') ||
                                      event.target.closest('#partyModal') ||
+                                     event.target.closest('#partyEndedModal') ||
                                      event.target.closest('.time-display');
 
             if (clickedOnControl) return;
@@ -1553,7 +1568,7 @@
             let movieUrl = urlParams.get('url');
 
             if (filmCode) {
-                movieUrl = `https://einthusan.tv/movie/watch/${filmCode}/`;
+                movieUrl = `https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`;
             }
             
             if (movieUrl) {
@@ -1574,13 +1589,11 @@
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image'
                         };
 
-                        // Removed auto partyHeader update to fix bug
-
-                        const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
+                        const cacheUrl = `./watch?url=${encodeURIComponent(movieUrl)}&title=${encodeURIComponent(data.title)}`;
                         saveToContinueWatching({
                             title: data.title,
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image', 
-                            url: currentUrl
+                            url: cacheUrl
                         });
                         
                         movieKey = `movie_progress_${data.title}`;
