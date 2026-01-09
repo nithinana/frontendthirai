@@ -303,7 +303,14 @@
             font-size: 1rem;
             white-space: nowrap;
             order: 2;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
         }
+        .time-display:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         .progress-bar-container {
             order: 1;
         }
@@ -608,7 +615,7 @@
             margin-bottom: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        /* Removed #lobbyTitle as per request */
+        
         #lobbyStatus {
             font-size: 0.9rem;
             color: #888;
@@ -682,7 +689,7 @@
                     <div class="progress-bar" id="progressBar"></div>
                     <div class="progress-bar-handle" id="progressBarHandle"></div>
                 </div>
-                <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+                <span class="time-display" id="timeDisplay" title="Click to change format">00:00 / 00:00</span>
                 
                 <div class="volume-container">
                     <button id="volumeButton">
@@ -806,8 +813,16 @@
         const DOUBLE_TAP_THRESHOLD_MS = 300;
         const SEEK_TIME = 10;
         let movieKey;
-        let movieMeta = {}; // Store title/img for lobby
-        let desiredPartyState = 'pause'; // Tracks what the room *should* be doing
+        let movieMeta = {}; 
+        let desiredPartyState = 'pause'; 
+
+        // Timestamp Format Logic
+        let timeFormatMode = 0; // 0: Cur/Tot, 1: Cur/Rem, 2: Cur
+        timeDisplay.onclick = (e) => {
+            e.stopPropagation(); // prevent UI toggle
+            timeFormatMode = (timeFormatMode + 1) % 3;
+            updateProgressBar();
+        };
 
         // Watch Party Variables
         let socket;
@@ -821,9 +836,23 @@
             socket.on('connect', () => {
                 partyToggleBtn.style.display = 'flex';
             });
+            
+            // Handle Room Error
+            socket.on('error', (msg) => {
+                if(msg === 'Room not found') {
+                    alert("Room not found! Please check the code.");
+                    // Reset UI
+                    joinBtn.disabled = false;
+                    joinBtn.innerHTML = 'Join Party';
+                    isHost = false;
+                    currentRoomId = null;
+                    resetModal();
+                }
+            });
+
         } catch (e) { console.log("Socket server unavailable"); }
 
-        // Clean up socket on unload to ensure "User Left" works
+        // Clean up socket on unload
         window.addEventListener('beforeunload', () => {
             if(socket) socket.disconnect();
         });
@@ -924,7 +953,6 @@
             const code = document.getElementById('joinCode').value.trim().toUpperCase();
             if(!code) return;
 
-            // Visual feedback to prevent double clicks
             joinBtn.disabled = true;
             joinBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Joining...';
 
@@ -934,7 +962,7 @@
         };
 
         socket.on('joined-room', (data) => {
-            // Check if joiner needs to sync with host's movie
+            // Check sync
             const hostParams = new URLSearchParams(data.movieUrl);
             const myParams = new URLSearchParams(window.location.search);
             
@@ -943,38 +971,48 @@
                 return;
             }
 
-            // Sync successfully - Show Lobby
+            // Sync successfully
             joinSetup.style.display = 'none';
             lobbyScreen.style.display = 'block';
-            
-            // Close modal immediately
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'none';
-            
-            // Restore close button
             closePartyX.style.display = 'block';
             
             document.getElementById('partyHeader').innerText = movieMeta.title || "Movie Lobby";
 
+            // Apply server-provided state immediately
+            if(data.isHost) isHost = true;
+            desiredPartyState = data.state;
+            
             updateControlsState();
-
+            
             fetchMovieSource().then(() => {
                  const title = movieMeta.title || "Unknown Movie";
                  document.getElementById('partyHeader').innerText = title;
                  if(movieMeta.img) lobbyPoster.src = movieMeta.img;
                  else lobbyPoster.style.display = 'none';
+
+                 // Jump to specific time
+                 if(data.startTime > 0) {
+                     moviePlayer.currentTime = data.startTime;
+                 }
+                 if(data.state === 'play') {
+                     moviePlayer.play().catch(e => console.log(e));
+                 } else {
+                     moviePlayer.pause();
+                 }
             });
         });
 
-        // Function to assign host
-        window.assignHost = function(targetUserId) {
+        // Function to promote host (multiple hosts)
+        window.promoteHost = function(targetUserId) {
             if(!isHost) return;
-            socket.emit('transfer-host', { roomId: currentRoomId, targetId: targetUserId });
+            socket.emit('promote-host', { roomId: currentRoomId, targetId: targetUserId });
         }
 
         socket.on('you-are-host', () => {
             isHost = true;
-            alert("You are now the Host!");
+            alert("You are now a Host!");
             lobbyScreen.style.display = 'none';
             activeHostInfo.style.display = 'block';
             document.getElementById('hostSetup').style.display = 'none';
@@ -989,8 +1027,10 @@
 
             const userItems = users.map(user => {
                 let actionBtn = '';
+                // Only show button if we are host and other user isn't already a host (logic simplified for frontend)
+                // Since we don't have full host list in frontend, we show button for everyone except self
                 if(isHost && user.id !== socket.id) {
-                    actionBtn = `<button class="assign-host-btn" onclick="assignHost('${user.id}')"><i class="bi bi-crown"></i> Make Host</button>`;
+                    actionBtn = `<button class="assign-host-btn" onclick="promoteHost('${user.id}')"><i class="bi bi-crown"></i> Make Host</button>`;
                 }
 
                 return `
@@ -1005,15 +1045,6 @@
 
             hostList.innerHTML = userItems;
             guestList.innerHTML = userItems;
-
-            // HOST: Immediately force sync when user list changes (someone joined)
-            if(isHost) {
-                socket.emit('sync-video', {
-                    roomId: currentRoomId,
-                    state: moviePlayer.paused ? 'pause' : 'play',
-                    time: moviePlayer.currentTime
-                });
-            }
         });
 
         function updateControlsState() {
@@ -1032,7 +1063,7 @@
 
         socket.on('video-update', (data) => {
             if(!isHost) {
-                desiredPartyState = data.state; // Track what we SHOULD be doing
+                desiredPartyState = data.state; 
 
                 if(data.state === 'play') lobbyStatus.textContent = "Playing Now";
                 else lobbyStatus.textContent = "Paused at " + formatTime(data.time);
@@ -1042,10 +1073,9 @@
                 }
                 
                 if (data.state === 'play') {
-                    // Try to play. If loading, it will pause, but 'canplay' listener will handle resumption
                     const playPromise = moviePlayer.play();
                     if (playPromise !== undefined) {
-                        playPromise.catch(error => { console.log("Auto-play prevented (buffering or interaction)"); });
+                        playPromise.catch(error => { console.log("Auto-play prevented"); });
                     }
                 } else {
                     moviePlayer.pause();
@@ -1054,29 +1084,26 @@
         });
 
         socket.on('party-ended', () => {
-            // Unlock everything immediately
             currentRoomId = null;
             isHost = false;
             updateControlsState();
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'none';
-            
             alert("The host has ended the party.");
-            window.location.href = window.location.pathname + ORIGINAL_SEARCH_PARAMS; // Reload clean
+            window.location.href = window.location.pathname + ORIGINAL_SEARCH_PARAMS; 
         });
 
         document.getElementById('endPartyBtn').onclick = () => {
             socket.emit('stop-party', currentRoomId);
-            // Don't rely on socket event for self, just reload
             location.reload();
         };
 
         document.getElementById('leavePartyBtn').onclick = () => {
-            socket.disconnect(); // Explicit disconnect
+            socket.disconnect(); 
             location.reload();
         };
 
-        // Sync Emitters (Host Only)
+        // Sync Emitters
         moviePlayer.addEventListener('play', () => {
             if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
         });
@@ -1179,7 +1206,8 @@
                                      event.target.closest('.progress-bar-container') || 
                                      event.target.closest('.movie-title-display') ||
                                      event.target.closest('.volume-container') ||
-                                     event.target.closest('#partyModal');
+                                     event.target.closest('#partyModal') ||
+                                     event.target.closest('.time-display');
 
             if (!clickedOnControl && (currentTime - lastTapTime > DOUBLE_TAP_THRESHOLD_MS)) {
                 toggleControls();
@@ -1259,7 +1287,6 @@
             showControls();
         });
 
-        // FIXED: Resume playing if we stalled but host is playing
         moviePlayer.addEventListener('canplay', () => {
             if (loadingSpinner.style.display === 'block') {
                 loadingSpinner.style.display = 'none';
@@ -1307,8 +1334,18 @@
                 const progress = (moviePlayer.currentTime / moviePlayer.duration) * 100;
                 progressBar.style.width = `${progress}%`;
                 progressBarHandle.style.left = `${progress}%`;
+                
+                const cur = formatTime(moviePlayer.currentTime);
+                const tot = formatTime(moviePlayer.duration);
+                const rem = formatTime(moviePlayer.duration - moviePlayer.currentTime);
+                
+                // Toggle formats
+                if(timeFormatMode === 0) timeDisplay.textContent = `${cur} / ${tot}`;
+                else if(timeFormatMode === 1) timeDisplay.textContent = `${cur} / -${rem}`;
+                else timeDisplay.textContent = `${cur}`;
+            } else {
+                timeDisplay.textContent = "00:00 / 00:00";
             }
-            timeDisplay.textContent = `${formatTime(moviePlayer.currentTime)} / ${formatTime(moviePlayer.duration)}`;
         }
 
         progressBarContainer.addEventListener('mousedown', (e) => {
@@ -1369,7 +1406,6 @@
             updateProgressBar();
         }
 
-        // BACK BUTTON FIX: Redirect to home if on join link
         backButton.addEventListener('click', () => {
             if(new URLSearchParams(window.location.search).has('join')) {
                 window.location.href = '/';
@@ -1470,7 +1506,8 @@
                                      event.target.closest('.progress-bar-container') ||
                                      event.target.closest('.movie-title-display') ||
                                      event.target.closest('.volume-container') ||
-                                     event.target.closest('#partyModal');
+                                     event.target.closest('#partyModal') ||
+                                     event.target.closest('.time-display');
 
             if (clickedOnControl) return;
 
