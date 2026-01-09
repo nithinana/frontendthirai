@@ -637,12 +637,37 @@
             font-size: 0.8rem;
             cursor: pointer;
         }
+        .copy-btn:hover { background: #333; }
         .copy-btn i { margin-right: 5px; }
+
+        /* Internal Toast Popup */
+        #thiraiToast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #0d6efd;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+        #thiraiToast.show {
+            transform: translateX(-50%) translateY(0);
+        }
 
     </style>
 </head>
 <body>
     <div id="modalBackdrop"></div>
+    <div id="thiraiToast"><i class="bi bi-crown-fill"></i> <span id="toastMsg">You are now a host!</span></div>
 
     <div class="video-player-wrapper" id="videoPlayerWrapper">
         <video id="moviePlayer" playsinline webkit-playsinline preload="auto" autoplay></video>
@@ -839,7 +864,7 @@
             // Handle Room Error
             socket.on('error', (msg) => {
                 if(msg === 'Room not found') {
-                    alert("Room not found! Please check the code.");
+                    showInternalToast("Room not found! Check code.");
                     // Reset UI
                     joinBtn.disabled = false;
                     joinBtn.innerHTML = 'Join Party';
@@ -918,6 +943,24 @@
         document.getElementById('lobbyCopyCodeBtn').onclick = () => copyToClipboard(currentRoomId);
         document.getElementById('lobbyCopyLinkBtn').onclick = () => copyToClipboard(getJoinLink(currentRoomId));
 
+        function generateHostUI(roomId) {
+            document.getElementById('displayCode').innerText = roomId;
+            // Generate QR
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById('qrcode'), {
+                text: getJoinLink(roomId),
+                width: 128,
+                height: 128
+            });
+        }
+
+        function showInternalToast(msg) {
+            const toast = document.getElementById('thiraiToast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
         // Hosting Logic
         document.getElementById('startHostBtn').onclick = () => {
             const name = document.getElementById('hostName').value || "Host";
@@ -930,17 +973,9 @@
                 movieUrl: ORIGINAL_SEARCH_PARAMS
             });
 
-            document.getElementById('displayCode').innerText = currentRoomId;
+            generateHostUI(currentRoomId);
             hostSetup.style.display = 'none';
             activeHostInfo.style.display = 'block';
-
-            // Generate QR
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), {
-                text: getJoinLink(currentRoomId),
-                width: 128,
-                height: 128
-            });
 
             fetchMovieSource();
         };
@@ -1011,10 +1046,11 @@
 
         socket.on('you-are-host', () => {
             isHost = true;
-            alert("You are now a Host!");
+            showInternalToast("You are now a host!");
             lobbyScreen.style.display = 'none';
             activeHostInfo.style.display = 'block';
             document.getElementById('hostSetup').style.display = 'none';
+            generateHostUI(currentRoomId);
             updateControlsState();
         });
 
@@ -1026,9 +1062,14 @@
 
             const userItems = users.map(user => {
                 let actionBtn = '';
-                // Only show button if we are host and other user isn't already a host (logic simplified for frontend)
-                // Since we don't have full host list in frontend, we show button for everyone except self
-                if(isHost && user.id !== socket.id) {
+                let label = '';
+                
+                // Show Host Label
+                if(user.isHost) {
+                    label = '<span style="color: #ffc107; font-size: 0.6rem; margin-left:5px;">(HOST)</span>';
+                }
+
+                if(isHost && user.id !== socket.id && !user.isHost) {
                     actionBtn = `<button class="assign-host-btn" onclick="promoteHost('${user.id}')"><i class="bi bi-crown"></i> Make Host</button>`;
                 }
 
@@ -1036,7 +1077,7 @@
                 <div class="user-item">
                     <div class="user-info-left">
                         <i class="bi bi-person-fill"></i>
-                        <span>${user.name} ${user.id === socket.id ? '(You)' : ''}</span>
+                        <span>${user.name} ${user.id === socket.id ? '(You)' : ''} ${label}</span>
                     </div>
                     ${actionBtn}
                 </div>
@@ -1064,14 +1105,13 @@
             if(!isHost) {
                 desiredPartyState = data.state; 
 
-                if(data.state === 'play') {
-                    lobbyStatus.textContent = "Playing Now";
-                    playPauseIcon.classList.remove('bi-play-fill');
-                    playPauseIcon.classList.add('bi-pause-fill');
+                // FIX: Better Status Messaging
+                if(moviePlayer.readyState < 3) {
+                     lobbyStatus.textContent = "Buffering...";
+                } else if(data.state === 'play') {
+                     lobbyStatus.textContent = "Playing Now";
                 } else {
-                    lobbyStatus.textContent = "Paused at " + formatTime(data.time);
-                    playPauseIcon.classList.remove('bi-pause-fill');
-                    playPauseIcon.classList.add('bi-play-fill');
+                     lobbyStatus.textContent = "Paused at " + formatTime(data.time);
                 }
 
                 if (Math.abs(moviePlayer.currentTime - data.time) > 2) {
@@ -1079,9 +1119,13 @@
                 }
                 
                 if (data.state === 'play') {
+                    // Force a "Can Play" check to ensure it doesn't get stuck in loading
                     const playPromise = moviePlayer.play();
                     if (playPromise !== undefined) {
-                        playPromise.catch(error => { console.log("Auto-play prevented"); });
+                        playPromise.catch(error => { 
+                            console.log("Auto-play prevented"); 
+                            lobbyStatus.textContent = "Click Play Icon to Sync";
+                        });
                     }
                 } else {
                     moviePlayer.pause();
@@ -1111,10 +1155,18 @@
 
         // Sync Emitters
         moviePlayer.addEventListener('play', () => {
-            if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+            if(isHost) {
+                socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+                // Heartbeat to ensure guests pick up the play state
+                setTimeout(() => {
+                    if(!moviePlayer.paused) socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+                }, 500);
+            }
         });
         moviePlayer.addEventListener('pause', () => {
-            if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'pause', time: moviePlayer.currentTime });
+            if(isHost && moviePlayer.readyState >= 3) { // Only sync if not pausing because of buffering
+                socket.emit('sync-video', { roomId: currentRoomId, state: 'pause', time: moviePlayer.currentTime });
+            }
         });
         moviePlayer.addEventListener('seeking', () => {
             if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'seek', time: moviePlayer.currentTime });
@@ -1203,6 +1255,14 @@
             if (movieKey && !moviePlayer.ended && moviePlayer.currentTime > 0) {
                 localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
             }
+
+            // Mitigation for Black Screen randomly
+            if(!moviePlayer.paused && moviePlayer.videoWidth === 0 && moviePlayer.currentTime > 0.1) {
+                console.log("Black screen detected - forcing re-render");
+                moviePlayer.style.display = 'none';
+                moviePlayer.offsetHeight; // force reflow
+                moviePlayer.style.display = 'block';
+            }
         });
 
         videoPlayerWrapper.addEventListener('click', (event) => {
@@ -1282,6 +1342,7 @@
             loadingSpinner.style.display = 'block';
             updateControlsState();
             showControls();
+            if(!isHost && currentRoomId) lobbyStatus.textContent = "Buffering...";
         });
 
         moviePlayer.addEventListener('playing', () => {
@@ -1291,6 +1352,7 @@
             playPauseIcon.classList.remove('bi-play-fill');
             playPauseIcon.classList.add('bi-pause-fill');
             showControls();
+            if(!isHost && currentRoomId) lobbyStatus.textContent = "Playing Now";
         });
 
         moviePlayer.addEventListener('canplay', () => {
@@ -1300,7 +1362,7 @@
                 updateControlsState();
             }
             
-            if (desiredPartyState === 'play' && moviePlayer.paused) {
+            if (currentRoomId && !isHost && desiredPartyState === 'play' && moviePlayer.paused) {
                 moviePlayer.play().catch(e => console.log("Resume failed", e));
             }
 
