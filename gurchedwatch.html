@@ -566,18 +566,6 @@
         }
         .user-info-left i { color: #0d6efd; font-size: 0.7rem; }
 
-        /* Assign host button */
-        .assign-host-btn {
-            background: transparent;
-            border: 1px solid #444;
-            color: #ffc107;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            cursor: pointer;
-        }
-        .assign-host-btn:hover { background: rgba(255, 193, 7, 0.1); border-color: #ffc107; }
-
         #qrcode {
             background: white;
             padding: 10px;
@@ -663,11 +651,39 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* Party Ended Modal */
+        #partyEndedModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #121212;
+            padding: 2rem;
+            border-radius: 20px;
+            z-index: 2000;
+            display: none;
+            color: white;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
+            width: 350px;
+            max-width: 85vw;
+        }
+        #partyEndedModal h2 { margin-top: 0; color: #0d6efd; font-size: 1.4rem; }
+        #partyEndedModal p { color: #ccc; margin: 15px 0 25px; line-height: 1.4; }
+
     </style>
 </head>
 <body>
     <div id="modalBackdrop"></div>
     <div id="thiraiToast"><i class="bi bi-crown-fill"></i> <span id="toastMsg">You are now a host!</span></div>
+
+    <div id="partyEndedModal">
+        <i class="bi bi-info-circle-fill" style="font-size: 3rem; color: #0d6efd; display: block; margin-bottom: 15px;"></i>
+        <h2 id="endedTitle">(Host) has ended the party</h2>
+        <p>You can now watch on your own accord.</p>
+        <button class="modal-action-btn" onclick="closeEndedModal()">Close</button>
+    </div>
 
     <div class="video-player-wrapper" id="videoPlayerWrapper">
         <video id="moviePlayer" playsinline webkit-playsinline preload="auto" autoplay></video>
@@ -839,11 +855,12 @@
         let movieKey;
         let movieMeta = {}; 
         let desiredPartyState = 'pause'; 
+        let isBuffering = false;
 
         // Timestamp Format Logic
-        let timeFormatMode = 0; // 0: Cur/Tot, 1: Cur/Rem, 2: Cur
+        let timeFormatMode = 0; // 0: Rem, 1: Cur/Tot, 2: Min Watched
         timeDisplay.onclick = (e) => {
-            e.stopPropagation(); // prevent UI toggle
+            e.stopPropagation(); 
             timeFormatMode = (timeFormatMode + 1) % 3;
             updateProgressBar();
         };
@@ -852,6 +869,7 @@
         let socket;
         let isHost = false;
         let currentRoomId = null;
+        let hostNickname = "Host";
         const SERVER_URL = "https://watchpartybackend-b5a2.onrender.com"; 
 
         // --- WATCH PARTY INITIALIZATION ---
@@ -861,11 +879,9 @@
                 partyToggleBtn.style.display = 'flex';
             });
             
-            // Handle Room Error
             socket.on('error', (msg) => {
                 if(msg === 'Room not found') {
                     showInternalToast("Room not found! Check code.");
-                    // Reset UI
                     joinBtn.disabled = false;
                     joinBtn.innerHTML = 'Join Party';
                     isHost = false;
@@ -876,7 +892,6 @@
 
         } catch (e) { console.log("Socket server unavailable"); }
 
-        // Clean up socket on unload
         window.addEventListener('beforeunload', () => {
             if(socket) socket.disconnect();
         });
@@ -921,7 +936,6 @@
             joinSetup.style.display = 'block';
         };
 
-        // Clipboard Helper
         async function copyToClipboard(text) {
             try {
                 await navigator.clipboard.writeText(text);
@@ -937,7 +951,6 @@
              return window.location.origin + window.location.pathname + ORIGINAL_SEARCH_PARAMS + "&join=" + code;
         }
 
-        // Copy Buttons
         document.getElementById('copyCodeBtn').onclick = () => copyToClipboard(currentRoomId);
         document.getElementById('copyLinkBtn').onclick = () => copyToClipboard(getJoinLink(currentRoomId));
         document.getElementById('lobbyCopyCodeBtn').onclick = () => copyToClipboard(currentRoomId);
@@ -945,7 +958,6 @@
 
         function generateHostUI(roomId) {
             document.getElementById('displayCode').innerText = roomId;
-            // Generate QR
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById('qrcode'), {
                 text: getJoinLink(roomId),
@@ -965,6 +977,7 @@
         document.getElementById('startHostBtn').onclick = () => {
             const name = document.getElementById('hostName').value || "Host";
             isHost = true;
+            hostNickname = name;
             currentRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
             
             socket.emit('create-room', {
@@ -976,6 +989,7 @@
             generateHostUI(currentRoomId);
             hostSetup.style.display = 'none';
             activeHostInfo.style.display = 'block';
+            showInternalToast("You are now a host!");
 
             fetchMovieSource();
         };
@@ -996,7 +1010,6 @@
         };
 
         socket.on('joined-room', (data) => {
-            // Check sync
             const hostParams = new URLSearchParams(data.movieUrl);
             const myParams = new URLSearchParams(window.location.search);
             
@@ -1005,7 +1018,6 @@
                 return;
             }
 
-            // Sync successfully
             joinSetup.style.display = 'none';
             lobbyScreen.style.display = 'block';
             partyModal.style.display = 'none';
@@ -1014,7 +1026,6 @@
             
             document.getElementById('partyHeader').innerText = movieMeta.title || "Movie Lobby";
 
-            // Apply server-provided state immediately
             if(data.isHost) isHost = true;
             desiredPartyState = data.state;
             
@@ -1026,7 +1037,6 @@
                  if(movieMeta.img) lobbyPoster.src = movieMeta.img;
                  else lobbyPoster.style.display = 'none';
 
-                 // Jump to specific time
                  if(data.startTime > 0) {
                      moviePlayer.currentTime = data.startTime;
                  }
@@ -1038,22 +1048,6 @@
             });
         });
 
-        // Function to promote host (multiple hosts)
-        window.promoteHost = function(targetUserId) {
-            if(!isHost) return;
-            socket.emit('promote-host', { roomId: currentRoomId, targetId: targetUserId });
-        }
-
-        socket.on('you-are-host', () => {
-            isHost = true;
-            showInternalToast("You are now a host!");
-            lobbyScreen.style.display = 'none';
-            activeHostInfo.style.display = 'block';
-            document.getElementById('hostSetup').style.display = 'none';
-            generateHostUI(currentRoomId);
-            updateControlsState();
-        });
-
         socket.on('user-list', (users) => {
             const hostList = document.getElementById('hostUserList');
             const guestList = document.getElementById('lobbyUserList');
@@ -1061,25 +1055,17 @@
             guestList.innerHTML = '';
 
             const userItems = users.map(user => {
-                let actionBtn = '';
                 let label = '';
-                
-                // Show Host Label
                 if(user.isHost) {
                     label = '<span style="color: #ffc107; font-size: 0.6rem; margin-left:5px;">(HOST)</span>';
+                    hostNickname = user.name;
                 }
-
-                if(isHost && user.id !== socket.id && !user.isHost) {
-                    actionBtn = `<button class="assign-host-btn" onclick="promoteHost('${user.id}')"><i class="bi bi-crown"></i> Make Host</button>`;
-                }
-
                 return `
                 <div class="user-item">
                     <div class="user-info-left">
                         <i class="bi bi-person-fill"></i>
                         <span>${user.name} ${user.id === socket.id ? '(You)' : ''} ${label}</span>
                     </div>
-                    ${actionBtn}
                 </div>
             `}).join('');
 
@@ -1105,8 +1091,7 @@
             if(!isHost) {
                 desiredPartyState = data.state; 
 
-                // FIX: Better Status Messaging
-                if(moviePlayer.readyState < 3) {
+                if(isBuffering) {
                      lobbyStatus.textContent = "Buffering...";
                 } else if(data.state === 'play') {
                      lobbyStatus.textContent = "Playing Now";
@@ -1119,29 +1104,33 @@
                 }
                 
                 if (data.state === 'play') {
-                    // Force a "Can Play" check to ensure it doesn't get stuck in loading
-                    const playPromise = moviePlayer.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => { 
-                            console.log("Auto-play prevented"); 
-                            lobbyStatus.textContent = "Click Play Icon to Sync";
-                        });
-                    }
+                    moviePlayer.play().catch(() => { 
+                        lobbyStatus.textContent = "Interaction required to sync";
+                    });
                 } else {
                     moviePlayer.pause();
                 }
             }
         });
 
+        // Party Ended Pop-up Logic
         socket.on('party-ended', () => {
             currentRoomId = null;
             isHost = false;
             updateControlsState();
             partyModal.style.display = 'none';
-            modalBackdrop.style.display = 'none';
-            alert("The host has ended the party.");
-            window.location.href = window.location.pathname + ORIGINAL_SEARCH_PARAMS; 
+            modalBackdrop.style.display = 'block'; 
+            
+            document.getElementById('endedTitle').innerText = `${hostNickname} has ended the party`;
+            document.getElementById('partyEndedModal').style.display = 'block';
         });
+
+        function closeEndedModal() {
+            document.getElementById('partyEndedModal').style.display = 'none';
+            modalBackdrop.style.display = 'none';
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname + ORIGINAL_SEARCH_PARAMS);
+        }
 
         document.getElementById('endPartyBtn').onclick = () => {
             socket.emit('stop-party', currentRoomId);
@@ -1157,14 +1146,10 @@
         moviePlayer.addEventListener('play', () => {
             if(isHost) {
                 socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
-                // Heartbeat to ensure guests pick up the play state
-                setTimeout(() => {
-                    if(!moviePlayer.paused) socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
-                }, 500);
             }
         });
         moviePlayer.addEventListener('pause', () => {
-            if(isHost && moviePlayer.readyState >= 3) { // Only sync if not pausing because of buffering
+            if(isHost && moviePlayer.readyState >= 3) {
                 socket.emit('sync-video', { roomId: currentRoomId, state: 'pause', time: moviePlayer.currentTime });
             }
         });
@@ -1172,7 +1157,6 @@
             if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'seek', time: moviePlayer.currentTime });
         });
 
-        // Auto-fill join code
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('join')) {
@@ -1240,7 +1224,6 @@
             if (moviePlayer.readyState < 3) {
                 playPauseIcon.style.display = 'none';
                 loadingSpinner.style.display = 'block';
-                updateControlsState();
             }
             if (movieKey) {
                 const savedTime = localStorage.getItem(movieKey);
@@ -1256,11 +1239,10 @@
                 localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
             }
 
-            // Mitigation for Black Screen randomly
+            // Black screen check
             if(!moviePlayer.paused && moviePlayer.videoWidth === 0 && moviePlayer.currentTime > 0.1) {
-                console.log("Black screen detected - forcing re-render");
                 moviePlayer.style.display = 'none';
-                moviePlayer.offsetHeight; // force reflow
+                moviePlayer.offsetHeight;
                 moviePlayer.style.display = 'block';
             }
         });
@@ -1273,6 +1255,7 @@
                                      event.target.closest('.movie-title-display') ||
                                      event.target.closest('.volume-container') ||
                                      event.target.closest('#partyModal') ||
+                                     event.target.closest('#partyEndedModal') ||
                                      event.target.closest('.time-display');
 
             if (!clickedOnControl && (currentTime - lastTapTime > DOUBLE_TAP_THRESHOLD_MS)) {
@@ -1337,21 +1320,21 @@
             showControls();
         });
 
+        // Buffering Logic Fix
         moviePlayer.addEventListener('waiting', () => {
+            isBuffering = true;
             playPauseIcon.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            updateControlsState();
             showControls();
             if(!isHost && currentRoomId) lobbyStatus.textContent = "Buffering...";
         });
 
         moviePlayer.addEventListener('playing', () => {
+            isBuffering = false;
             loadingSpinner.style.display = 'none';
             playPauseIcon.style.display = 'block';
-            updateControlsState();
             playPauseIcon.classList.remove('bi-play-fill');
             playPauseIcon.classList.add('bi-pause-fill');
-            showControls();
             if(!isHost && currentRoomId) lobbyStatus.textContent = "Playing Now";
         });
 
@@ -1359,42 +1342,12 @@
             if (loadingSpinner.style.display === 'block') {
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
-                updateControlsState();
             }
             
             if (currentRoomId && !isHost && desiredPartyState === 'play' && moviePlayer.paused) {
-                moviePlayer.play().catch(e => console.log("Resume failed", e));
+                moviePlayer.play().catch(() => {});
             }
-
             updateProgressBar();
-        });
-
-        moviePlayer.addEventListener('play', () => {
-            playPauseIcon.classList.remove('bi-play-fill');
-            playPauseIcon.classList.add('bi-pause-fill');
-            loadingSpinner.style.display = 'none';
-            playPauseIcon.style.display = 'block';
-            showControls();
-        });
-
-        moviePlayer.addEventListener('pause', () => {
-            playPauseIcon.classList.remove('bi-pause-fill');
-            playPauseIcon.classList.add('bi-play-fill');
-            loadingSpinner.style.display = 'none';
-            playPauseIcon.style.display = 'block';
-            showControls();
-        });
-
-        moviePlayer.addEventListener('ended', () => {
-            playPauseIcon.classList.remove('bi-pause-fill');
-            playPauseIcon.classList.add('bi-play-fill');
-            loadingSpinner.style.display = 'none';
-            playPauseIcon.style.display = 'block';
-            showControls();
-            
-            if (movieKey) {
-                localStorage.removeItem(movieKey);
-            }
         });
 
         function updateProgressBar() {
@@ -1406,11 +1359,12 @@
                 const cur = formatTime(moviePlayer.currentTime);
                 const tot = formatTime(moviePlayer.duration);
                 const rem = formatTime(moviePlayer.duration - moviePlayer.currentTime);
+                const mins = Math.floor(moviePlayer.currentTime / 60);
                 
-                // Toggle formats
-                if(timeFormatMode === 0) timeDisplay.textContent = `${cur} / ${tot}`;
-                else if(timeFormatMode === 1) timeDisplay.textContent = `${cur} / -${rem}`;
-                else timeDisplay.textContent = `${cur}`;
+                // Formats: Remaining, Current/Total, Minutes Watched
+                if(timeFormatMode === 0) timeDisplay.textContent = `-${rem}`;
+                else if(timeFormatMode === 1) timeDisplay.textContent = `${cur} / ${tot}`;
+                else timeDisplay.textContent = `${mins} min watched`;
             } else {
                 timeDisplay.textContent = "00:00 / 00:00";
             }
@@ -1435,22 +1389,17 @@
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (isDraggingProgressBar) {
-                updateSeek(e);
-            }
+            if (isDraggingProgressBar) updateSeek(e);
         });
 
         document.addEventListener('touchmove', (e) => {
-            if (isDraggingProgressBar) {
-                updateSeek(e.touches[0]);
-            }
+            if (isDraggingProgressBar) updateSeek(e.touches[0]);
         });
 
         document.addEventListener('mouseup', () => {
             if (isDraggingProgressBar) {
                 isDraggingProgressBar = false;
                 progressBarContainer.classList.remove('dragging');
-                showControls();
             }
         });
 
@@ -1458,7 +1407,6 @@
             if (isDraggingProgressBar) {
                 isDraggingProgressBar = false;
                 progressBarContainer.classList.remove('dragging');
-                showControls();
             }
         });
 
@@ -1490,25 +1438,9 @@
                     videoPlayerWrapper.requestFullscreen();
                 } else if (videoPlayerWrapper.webkitRequestFullscreen) {
                     videoPlayerWrapper.webkitRequestFullscreen();
-                } else if (videoPlayerWrapper.msRequestFullscreen) {
-                    videoPlayerWrapper.msRequestFullscreen();
                 }
             }
             showControls();
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                fullscreenIcon.classList.remove('bi-arrows-fullscreen');
-                fullscreenIcon.classList.add('bi-arrows-angle-contract');
-                if (!moviePlayer.paused) {
-                    hideControls();
-                }
-            } else {
-                fullscreenIcon.classList.remove('bi-arrows-angle-contract');
-                fullscreenIcon.classList.add('bi-arrows-fullscreen');
-                showControls();
-            }
         });
 
         magnificationButton.addEventListener('click', () => {
@@ -1535,39 +1467,6 @@
             showControls();
         });
 
-        if (window.WebKitPlaybackTargetAvailabilityEvent) {
-            moviePlayer.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
-                switch (event.availability) {
-                    case "available":
-                        castButton.style.display = 'flex';
-                        castButton.onclick = function() {
-                            moviePlayer.webkitShowPlaybackTargetPicker();
-                        };
-                        break;
-                    case "not-available":
-                        if (!window.chrome || !window.chrome.cast || !window.chrome.cast.isAvailable) {
-                             castButton.style.display = 'none';
-                        }
-                        break;
-                }
-            });
-        }
-
-        window['__onGCastApiAvailable'] = function(isAvailable) {
-            if (isAvailable) {
-                cast.framework.CastContext.getInstance().setOptions({
-                    receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-                    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-                });
-                castButton.style.display = 'flex';
-                castButton.addEventListener('click', function() {
-                    if (!moviePlayer.webkitShowPlaybackTargetPicker) {
-                         cast.framework.CastContext.getInstance().requestSession();
-                    }
-                });
-            }
-        };
-
         document.addEventListener('touchend', (event) => {
             const clickedOnControl = event.target.closest('.control-button') ||
                                      event.target.closest('.top-button') ||
@@ -1578,15 +1477,6 @@
                                      event.target.closest('.time-display');
 
             if (clickedOnControl) return;
-
-            if (moviePlayer.paused || moviePlayer.ended || moviePlayer.readyState < 2) {
-                const currentTime = new Date().getTime();
-                if (currentTime - lastTapTime > DOUBLE_TAP_THRESHOLD_MS) {
-                    toggleControls();
-                }
-                lastTapTime = currentTime;
-                return;
-            }
 
             const currentTime = new Date().getTime();
             const tapX = event.changedTouches[0].clientX;
@@ -1606,41 +1496,10 @@
                 toggleControls();
             }
         });
-
-        document.addEventListener('keydown', (event) => {
-            const isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
-            if (isInputFocused) return;
-
-            switch (event.key) {
-                case ' ': 
-                    event.preventDefault();
-                    if(!currentRoomId || isHost) playPauseButton.click();
-                    break;
-                case 'ArrowLeft':
-                    event.preventDefault();
-                    if(!currentRoomId || isHost) rewindButton.click();
-                    break;
-                case 'ArrowRight':
-                    event.preventDefault();
-                    if(!currentRoomId || isHost) forwardButton.click();
-                    break;
-                case 'f':
-                case 'F':
-                    event.preventDefault();
-                    fullscreenButton.click();
-                    break;
-                case 'm':
-                case 'M':
-                    event.preventDefault();
-                    volumeButton.click();
-                    break;
-            }
-        });
         
         async function fetchMovieSource() {
             playPauseIcon.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            updateControlsState();
 
             const urlParams = new URLSearchParams(window.location.search);
             const filmCode = urlParams.get('film');
@@ -1653,7 +1512,6 @@
             if (movieUrl) {
                 try {
                     const response = await fetch(`https://api.thirai.me/watch?url=${encodeURIComponent(movieUrl)}`);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     
                     if (data && data.video_url) {
@@ -1670,50 +1528,31 @@
                         };
 
                         const partyHeader = document.getElementById('partyHeader');
-                        if(partyHeader && partyHeader.innerText === "Lobby") {
+                        if(partyHeader && partyHeader.innerText === "Watch Party") {
                             partyHeader.innerText = data.title;
                             if(data.img_url) lobbyPoster.src = data.img_url;
                         }
 
                         const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
-                        const cacheObj = {
+                        saveToContinueWatching({
                             title: data.title,
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image', 
                             url: currentUrl
-                        };
-                        saveToContinueWatching(cacheObj);
+                        });
                         
                         movieKey = `movie_progress_${data.title}`;
-                        
                         const savedTime = localStorage.getItem(movieKey);
                         if (savedTime && !currentRoomId) {
                             moviePlayer.currentTime = parseFloat(savedTime);
                         }
-                        updateProgressBar();
-
-                    } else {
-                        loadingSpinner.style.display = 'none';
-                        playPauseIcon.style.display = 'block';
                     }
                 } catch (error) {
-                    loadingSpinner.style.display = 'none';
-                    playPauseIcon.style.display = 'block';
+                    console.log(error);
                 }
-            } else {
-                loadingSpinner.style.display = 'none';
-                playPauseIcon.style.display = 'block';
             }
         }
         
         document.addEventListener('DOMContentLoaded', showControls);
-
-        moviePlayer.addEventListener('canplaythrough', () => {
-            if (loadingSpinner.style.display === 'block') {
-                loadingSpinner.style.display = 'none';
-                playPauseIcon.style.display = 'block';
-                updateControlsState();
-            }
-        });
     </script>
 </body>
 </html>
