@@ -858,10 +858,10 @@
         let isBuffering = false;
 
         // Timestamp Format Logic
-        let timeFormatMode = 0; // 0: Rem, 1: Cur/Tot, 2: Min Watched
+        let timeFormatMode = 0; // 0: Rem, 1: Cur/Tot
         timeDisplay.onclick = (e) => {
             e.stopPropagation(); 
-            timeFormatMode = (timeFormatMode + 1) % 3;
+            timeFormatMode = (timeFormatMode + 1) % 2; // Removed 3rd option
             updateProgressBar();
         };
 
@@ -870,6 +870,7 @@
         let isHost = false;
         let currentRoomId = null;
         let hostNickname = "Host";
+        let hostSyncInterval = null; // HEARTBEAT FOR HOST
         const SERVER_URL = "https://watchpartybackend-b5a2.onrender.com"; 
 
         // --- WATCH PARTY INITIALIZATION ---
@@ -883,7 +884,7 @@
                 if(msg === 'Room not found') {
                     showInternalToast("Room not found! Check code.");
                     joinBtn.disabled = false;
-                    joinBtn.innerHTML = 'Join Party';
+                    joinBtn.innerText = 'Join Party';
                     isHost = false;
                     currentRoomId = null;
                     resetModal();
@@ -919,6 +920,12 @@
         }
 
         function resetModal() {
+            // FIX: If on join link, go to root instead of selection screen
+            if (new URLSearchParams(window.location.search).has('join')) {
+                window.location.href = '/';
+                return;
+            }
+
             selectionScreen.style.display = 'block';
             hostSetup.style.display = 'none';
             joinSetup.style.display = 'none';
@@ -989,7 +996,10 @@
             generateHostUI(currentRoomId);
             hostSetup.style.display = 'none';
             activeHostInfo.style.display = 'block';
-            showInternalToast("You are now a host!");
+            
+            // Set title correctly now that party is created
+            document.getElementById('partyHeader').innerText = movieMeta.title || "Watch Party";
+            // Removed: showInternalToast("You are now a host!");
 
             fetchMovieSource();
         };
@@ -1002,7 +1012,8 @@
             if(!code) return;
 
             joinBtn.disabled = true;
-            joinBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Joining...';
+            // Clean joining text
+            joinBtn.innerText = 'Joining...';
 
             isHost = false;
             currentRoomId = code;
@@ -1024,6 +1035,7 @@
             modalBackdrop.style.display = 'none';
             closePartyX.style.display = 'block';
             
+            // Set title correctly
             document.getElementById('partyHeader').innerText = movieMeta.title || "Movie Lobby";
 
             if(data.isHost) isHost = true;
@@ -1037,14 +1049,8 @@
                  if(movieMeta.img) lobbyPoster.src = movieMeta.img;
                  else lobbyPoster.style.display = 'none';
 
-                 if(data.startTime > 0) {
-                     moviePlayer.currentTime = data.startTime;
-                 }
-                 if(data.state === 'play') {
-                     moviePlayer.play().catch(e => console.log(e));
-                 } else {
-                     moviePlayer.pause();
-                 }
+                 // Initial state sync will come from host heartbeat
+                 lobbyStatus.textContent = "Waiting for sync...";
             });
         });
 
@@ -1053,6 +1059,12 @@
             const guestList = document.getElementById('lobbyUserList');
             hostList.innerHTML = '';
             guestList.innerHTML = '';
+
+            // HOST LOGIC: If I am host, send a sync update immediately so new joiners don't wait
+            if (isHost && socket) {
+                const state = moviePlayer.paused ? (isBuffering ? 'buffering' : 'pause') : 'play';
+                socket.emit('sync-video', { roomId: currentRoomId, state: state, time: moviePlayer.currentTime });
+            }
 
             const userItems = users.map(user => {
                 let label = '';
@@ -1091,23 +1103,29 @@
             if(!isHost) {
                 desiredPartyState = data.state; 
 
-                if(isBuffering) {
-                     lobbyStatus.textContent = "Buffering...";
+                if(data.state === 'buffering') {
+                    lobbyStatus.textContent = "Host is buffering...";
+                    moviePlayer.pause();
                 } else if(data.state === 'play') {
-                     lobbyStatus.textContent = "Playing Now";
+                    lobbyStatus.textContent = "Playing Now";
+                    
+                    // SYNC DRIFT CORRECTION
+                    const drift = Math.abs(moviePlayer.currentTime - data.time);
+                    if (drift > 0.5) { // If drifted more than half a second
+                        moviePlayer.currentTime = data.time;
+                    }
+                    
+                    if(moviePlayer.paused) {
+                        moviePlayer.play().catch(() => { 
+                            lobbyStatus.textContent = "Interaction required to sync";
+                        });
+                    }
                 } else {
-                     lobbyStatus.textContent = "Paused at " + formatTime(data.time);
-                }
-
-                if (Math.abs(moviePlayer.currentTime - data.time) > 2) {
-                    moviePlayer.currentTime = data.time;
-                }
-                
-                if (data.state === 'play') {
-                    moviePlayer.play().catch(() => { 
-                        lobbyStatus.textContent = "Interaction required to sync";
-                    });
-                } else {
+                    // Pause
+                    lobbyStatus.textContent = "Paused at " + formatTime(data.time);
+                    if (Math.abs(moviePlayer.currentTime - data.time) > 0.1) {
+                         moviePlayer.currentTime = data.time;
+                    }
                     moviePlayer.pause();
                 }
             }
@@ -1142,14 +1160,39 @@
             location.reload();
         };
 
+        // --- HOST SYNC HEARTBEAT ---
+        function startHostHeartbeat() {
+            stopHostHeartbeat();
+            if(isHost) {
+                hostSyncInterval = setInterval(() => {
+                    if(!moviePlayer.paused && !isBuffering) {
+                        socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+                    }
+                }, 2000); // Sync every 2 seconds
+            }
+        }
+
+        function stopHostHeartbeat() {
+            if(hostSyncInterval) {
+                clearInterval(hostSyncInterval);
+                hostSyncInterval = null;
+            }
+        }
+
         // Sync Emitters
         moviePlayer.addEventListener('play', () => {
             if(isHost) {
                 socket.emit('sync-video', { roomId: currentRoomId, state: 'play', time: moviePlayer.currentTime });
+                startHostHeartbeat();
             }
         });
         moviePlayer.addEventListener('pause', () => {
+            // FIX: Explicitly fix icon when paused
+            playPauseIcon.classList.remove('bi-pause-fill');
+            playPauseIcon.classList.add('bi-play-fill');
+
             if(isHost && moviePlayer.readyState >= 3) {
+                stopHostHeartbeat();
                 socket.emit('sync-video', { roomId: currentRoomId, state: 'pause', time: moviePlayer.currentTime });
             }
         });
@@ -1327,6 +1370,11 @@
             loadingSpinner.style.display = 'block';
             showControls();
             if(!isHost && currentRoomId) lobbyStatus.textContent = "Buffering...";
+            
+            // Host sends buffering state
+            if(isHost && currentRoomId) {
+                socket.emit('sync-video', { roomId: currentRoomId, state: 'buffering', time: moviePlayer.currentTime });
+            }
         });
 
         moviePlayer.addEventListener('playing', () => {
@@ -1359,12 +1407,10 @@
                 const cur = formatTime(moviePlayer.currentTime);
                 const tot = formatTime(moviePlayer.duration);
                 const rem = formatTime(moviePlayer.duration - moviePlayer.currentTime);
-                const mins = Math.floor(moviePlayer.currentTime / 60);
                 
-                // Formats: Remaining, Current/Total, Minutes Watched
+                // Formats: Remaining, Current/Total (Removed Min Watched)
                 if(timeFormatMode === 0) timeDisplay.textContent = `-${rem}`;
-                else if(timeFormatMode === 1) timeDisplay.textContent = `${cur} / ${tot}`;
-                else timeDisplay.textContent = `${mins} min watched`;
+                else timeDisplay.textContent = `${cur} / ${tot}`;
             } else {
                 timeDisplay.textContent = "00:00 / 00:00";
             }
@@ -1527,11 +1573,7 @@
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image'
                         };
 
-                        const partyHeader = document.getElementById('partyHeader');
-                        if(partyHeader && partyHeader.innerText === "Watch Party") {
-                            partyHeader.innerText = data.title;
-                            if(data.img_url) lobbyPoster.src = data.img_url;
-                        }
+                        // Removed auto partyHeader update to fix bug
 
                         const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
                         saveToContinueWatching({
