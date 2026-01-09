@@ -539,10 +539,28 @@
             border-bottom: 1px solid #222;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
         }
         .user-item:last-child { border-bottom: none; }
-        .user-item i { color: #0d6efd; font-size: 0.7rem; }
+        
+        .user-info-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-info-left i { color: #0d6efd; font-size: 0.7rem; }
+
+        /* Assign host button */
+        .assign-host-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ffc107;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            cursor: pointer;
+        }
+        .assign-host-btn:hover { background: rgba(255, 193, 7, 0.1); border-color: #ffc107; }
 
         #qrcode {
             background: white;
@@ -773,7 +791,8 @@
         // Removed activeJoinInfo in favor of lobbyScreen
         const lobbyScreen = document.getElementById('lobbyScreen');
         const lobbyPoster = document.getElementById('lobbyPoster');
-        const lobbyTitle = document.getElementById('lobbyTitle');
+        // Reusing this element ID for consistency but text will change
+        const lobbyTitleElement = document.getElementById('lobbyTitle');
         const lobbyStatus = document.getElementById('lobbyStatus');
         const lobbyUserList = document.getElementById('lobbyUserList');
 
@@ -807,22 +826,23 @@
             modalBackdrop.style.display = 'block';
         };
 
-        // If joined via link, restrict closing
+        // If joined via link, restrict closing initially
         const isJoinLink = new URLSearchParams(window.location.search).has('join');
         if (isJoinLink) {
             closePartyX.style.display = 'none';
-            backButton.style.display = 'none';
         }
 
         closePartyX.onclick = () => {
-            if(!isJoinLink) {
-                partyModal.style.display = 'none';
-                modalBackdrop.style.display = 'none';
-            }
+            partyModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
         };
 
         modalBackdrop.onclick = () => {
-            if(!isJoinLink) {
+            // If checking strict join link logic: user can only close if they actually joined? 
+            // Current request: "Close popup WHEN I JOIN". 
+            // So if they haven't joined yet and click backdrop, we can decide.
+            // For safety, let's allow closing if they aren't forced.
+            if (!isJoinLink || (isJoinLink && currentRoomId)) {
                 partyModal.style.display = 'none';
                 modalBackdrop.style.display = 'none';
             }
@@ -922,43 +942,79 @@
             // Sync successfully - Show Lobby
             joinSetup.style.display = 'none';
             lobbyScreen.style.display = 'block';
-            document.getElementById('partyHeader').innerText = "Lobby";
             
+            // KEY CHANGE: Close the modal immediately upon joining
+            partyModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+            
+            // KEY CHANGE: Restore the close button for future opens
+            closePartyX.style.display = 'block';
+            
+            // Set header title for lobby
+            document.getElementById('partyHeader').innerText = movieMeta.title || "Movie Lobby";
+
             // Lock controls for non-hosts
-            playPauseButton.disabled = true;
-            rewindButton.disabled = true;
-            forwardButton.disabled = true;
-            progressBarContainer.style.pointerEvents = 'none';
+            updateControlsState();
 
             // Load source
             fetchMovieSource().then(() => {
-                 lobbyTitle.textContent = movieMeta.title || "Unknown Movie";
+                 // Update lobby text with actual title
+                 const title = movieMeta.title || "Unknown Movie";
+                 document.getElementById('partyHeader').innerText = title;
+                 lobbyTitleElement.textContent = title;
                  if(movieMeta.img) lobbyPoster.src = movieMeta.img;
                  else lobbyPoster.style.display = 'none';
             });
         });
 
+        // Function to assign host
+        window.assignHost = function(targetUserId) {
+            if(!isHost) return;
+            // Emit transfer event
+            socket.emit('transfer-host', { roomId: currentRoomId, targetId: targetUserId });
+            // Note: If backend doesn't support 'transfer-host', this does nothing.
+        }
+
+        // Listen for becoming host
+        socket.on('you-are-host', () => {
+            isHost = true;
+            alert("You are now the Host!");
+            // Switch UI
+            lobbyScreen.style.display = 'none'; // hide guest view if visible
+            activeHostInfo.style.display = 'block'; // show host view
+            document.getElementById('hostSetup').style.display = 'none'; // ensure setup is gone
+            
+            // Unlock controls
+            updateControlsState();
+        });
+
         socket.on('user-list', (users) => {
-            // Clear existing list first
             const hostList = document.getElementById('hostUserList');
             const guestList = document.getElementById('lobbyUserList');
             hostList.innerHTML = '';
             guestList.innerHTML = '';
 
-            const userItems = users.map(user => `
+            const userItems = users.map(user => {
+                // Generate Host Assign Button if we are host and user is not us
+                let actionBtn = '';
+                if(isHost && user.id !== socket.id) {
+                    actionBtn = `<button class="assign-host-btn" onclick="assignHost('${user.id}')"><i class="bi bi-crown"></i> Make Host</button>`;
+                }
+
+                return `
                 <div class="user-item">
-                    <i class="bi bi-person-fill"></i>
-                    <span>${user.name} ${user.id === socket.id ? '(You)' : ''}</span>
+                    <div class="user-info-left">
+                        <i class="bi bi-person-fill"></i>
+                        <span>${user.name} ${user.id === socket.id ? '(You)' : ''}</span>
+                    </div>
+                    ${actionBtn}
                 </div>
-            `).join('');
+            `}).join('');
 
             hostList.innerHTML = userItems;
             guestList.innerHTML = userItems;
 
-            // IMMEDIATE SYNC LOGIC FOR HOST
             if(isHost) {
-                // Whenever user list updates (someone joined/left), force a sync to everyone
-                // This ensures new users get the current time immediately
                 socket.emit('sync-video', {
                     roomId: currentRoomId,
                     state: moviePlayer.paused ? 'pause' : 'play',
@@ -967,9 +1023,22 @@
             }
         });
 
+        function updateControlsState() {
+            if(currentRoomId && !isHost) {
+                playPauseButton.disabled = true;
+                rewindButton.disabled = true;
+                forwardButton.disabled = true;
+                progressBarContainer.style.pointerEvents = 'none';
+            } else {
+                playPauseButton.disabled = false;
+                rewindButton.disabled = false;
+                forwardButton.disabled = false;
+                progressBarContainer.style.pointerEvents = 'auto';
+            }
+        }
+
         socket.on('video-update', (data) => {
             if(!isHost) {
-                // Update Lobby Status
                 if(data.state === 'play') lobbyStatus.textContent = "Playing Now";
                 else lobbyStatus.textContent = "Paused at " + formatTime(data.time);
 
@@ -1013,9 +1082,7 @@
                 document.getElementById('joinCode').value = urlParams.get('join');
                 partyToggleBtn.click();
                 document.getElementById('chooseJoin').click();
-                // Video is NOT loaded here for joiners until they click "Join Party"
             } else {
-                // Load video immediately for normal browsing or host start
                 fetchMovieSource();
             }
         });
@@ -1076,11 +1143,7 @@
             if (moviePlayer.readyState < 3) {
                 playPauseIcon.style.display = 'none';
                 loadingSpinner.style.display = 'block';
-                if(!currentRoomId || isHost) {
-                    playPauseButton.disabled = true;
-                    rewindButton.disabled = true;
-                    forwardButton.disabled = true;
-                }
+                updateControlsState();
             }
             if (movieKey) {
                 const savedTime = localStorage.getItem(movieKey);
@@ -1171,22 +1234,14 @@
         moviePlayer.addEventListener('waiting', () => {
             playPauseIcon.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            if(!currentRoomId || isHost) {
-                playPauseButton.disabled = true;
-                rewindButton.disabled = true;
-                forwardButton.disabled = true;
-            }
+            updateControlsState();
             showControls();
         });
 
         moviePlayer.addEventListener('playing', () => {
             loadingSpinner.style.display = 'none';
             playPauseIcon.style.display = 'block';
-            if(!currentRoomId || isHost) {
-                playPauseButton.disabled = false;
-                rewindButton.disabled = false;
-                forwardButton.disabled = false;
-            }
+            updateControlsState();
             playPauseIcon.classList.remove('bi-play-fill');
             playPauseIcon.classList.add('bi-pause-fill');
             showControls();
@@ -1196,11 +1251,7 @@
             if (loadingSpinner.style.display === 'block') {
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
-                if(!currentRoomId || isHost) {
-                    playPauseButton.disabled = false;
-                    rewindButton.disabled = false;
-                    forwardButton.disabled = false;
-                }
+                updateControlsState();
             }
             updateProgressBar();
         });
@@ -1300,8 +1351,15 @@
             updateProgressBar();
         }
 
+        // BACK BUTTON LOGIC UPDATE
         backButton.addEventListener('click', () => {
-            window.history.back();
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('join')) {
+                // Redirect to home if on join parameter
+                window.location.href = '/';
+            } else {
+                window.history.back();
+            }
         });
 
         fullscreenButton.addEventListener('click', () => {
@@ -1461,11 +1519,7 @@
         async function fetchMovieSource() {
             playPauseIcon.style.display = 'none';
             loadingSpinner.style.display = 'block';
-            if(!currentRoomId || isHost) {
-                playPauseButton.disabled = true;
-                rewindButton.disabled = true;
-                forwardButton.disabled = true;
-            }
+            updateControlsState();
 
             const urlParams = new URLSearchParams(window.location.search);
             const filmCode = urlParams.get('film');
@@ -1494,6 +1548,14 @@
                             title: data.title,
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image'
                         };
+
+                        // Update lobby header if already in lobby
+                        const partyHeader = document.getElementById('partyHeader');
+                        if(partyHeader && partyHeader.innerText === "Lobby") {
+                            partyHeader.innerText = data.title;
+                            lobbyTitleElement.textContent = data.title;
+                            if(data.img_url) lobbyPoster.src = data.img_url;
+                        }
 
                         const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
                         const cacheObj = {
@@ -1531,11 +1593,7 @@
             if (loadingSpinner.style.display === 'block') {
                 loadingSpinner.style.display = 'none';
                 playPauseIcon.style.display = 'block';
-                if(!currentRoomId || isHost) {
-                    playPauseButton.disabled = false;
-                    rewindButton.disabled = false;
-                    forwardButton.disabled = false;
-                }
+                updateControlsState();
             }
         });
     </script>
