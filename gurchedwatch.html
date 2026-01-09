@@ -1172,6 +1172,7 @@
             const cleanParams = new URLSearchParams(window.location.search);
             cleanParams.delete('join');
             window.history.replaceState({}, '', window.location.pathname + '?' + cleanParams.toString());
+            // Redirection logic removed to allow user to continue watching
         }
 
         document.getElementById('endPartyBtn').onclick = () => {
@@ -1482,11 +1483,8 @@
         }
 
         backButton.addEventListener('click', () => {
-            if(new URLSearchParams(window.location.search).has('join')) {
-                window.location.href = '/';
-            } else {
-                window.history.back();
-            }
+            // ALWAYS redirect to root of website
+            window.location.href = '/';
         });
 
         fullscreenButton.addEventListener('click', () => {
