@@ -192,21 +192,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 1.5rem 1rem;
+            padding: 1rem 1.2rem;
             box-sizing: border-box;
+            gap: 12px;
         }
 
         .movie-title-display {
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             text-align: center;
             flex-grow: 1;
-            margin: 0 1rem;
+            margin: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1;
+            line-height: 1.2;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -216,18 +217,18 @@
         .center-controls {
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 3rem;
         }
 
         .bottom-controls {
             width: 100%;
-            padding: 1rem 1.5rem 2rem;
+            padding: 1rem 1.5rem 2.5rem;
             box-sizing: border-box;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
+            gap: 15px;
         }
 
         .control-button {
@@ -264,12 +265,11 @@
 
         .progress-bar-container {
             flex-grow: 1;
-            height: 8px;
+            height: 6px;
             background-color: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             cursor: grab;
             position: relative;
-            margin: 0 1rem;
         }
 
         .progress-bar {
@@ -285,8 +285,8 @@
             top: 50%;
             left: 0%;
             transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             background-color: white;
             border-radius: 50%;
             display: none;
@@ -301,19 +301,14 @@
 
         .time-display {
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             white-space: nowrap;
-            order: 2;
             cursor: pointer;
-            padding: 5px;
+            padding: 4px 8px;
             border-radius: 4px;
         }
         .time-display:hover {
             background: rgba(255,255,255,0.1);
-        }
-
-        .progress-bar-container {
-            order: 1;
         }
 
         .spinner-border {
@@ -336,14 +331,13 @@
             border: none;
             color: white;
             font-size: 1.5rem;
-            padding: 0.7rem 1rem;
-            border-radius: 0.5rem;
+            padding: 0.6rem;
+            border-radius: 50%;
             cursor: pointer;
             transition: background 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
             -webkit-tap-highlight-color: transparent;
         }
         .top-button:hover {
@@ -369,8 +363,7 @@
             background: transparent;
             box-shadow: none;
             padding: 0.5rem;
-            font-size: 1.8rem;
-            order: 10;
+            font-size: 1.6rem;
         }
 
         #fullscreenButton:hover:not(:disabled) {
@@ -381,7 +374,6 @@
         .volume-container {
             display: flex;
             align-items: center;
-            order: 4;
             position: relative;
         }
 
@@ -389,7 +381,7 @@
             background: transparent;
             box-shadow: none;
             padding: 0.5rem;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: white;
             border: none;
             cursor: pointer;
@@ -415,14 +407,15 @@
             opacity: 0;
             transition: width 0.3s ease, opacity 0.3s ease;
             cursor: pointer;
-            margin-left: 0.5rem;
+            margin-left: 0;
         }
 
         .volume-container:hover .volume-slider,
         .volume-slider:active,
         .volume-slider:focus {
-            width: 70px;
+            width: 60px;
             opacity: 1;
+            margin-left: 5px;
         }
 
         .volume-slider::-webkit-slider-thumb {
@@ -740,11 +733,11 @@
             </div>
 
             <div class="bottom-controls">
+                <span class="time-display" id="timeDisplay" title="Click to change format">00:00 / 00:00</span>
                 <div class="progress-bar-container" id="progressBarContainer">
                     <div class="progress-bar" id="progressBar"></div>
                     <div class="progress-bar-handle" id="progressBarHandle"></div>
                 </div>
-                <span class="time-display" id="timeDisplay" title="Click to change format">00:00 / 00:00</span>
                 
                 <div class="volume-container">
                     <button id="volumeButton">
@@ -1070,6 +1063,11 @@
                  else lobbyPoster.style.display = 'none';
 
                  lobbyStatus.textContent = "Waiting for sync...";
+                 
+                 // CRITICAL FIX: Ensure guest matches host initial state (pause/play)
+                 if(desiredPartyState === 'pause' || desiredPartyState === 'buffering') {
+                     moviePlayer.pause();
+                 }
             });
         });
 
@@ -1407,8 +1405,13 @@
                 playPauseIcon.style.display = 'block';
             }
             
-            if (currentRoomId && !isHost && desiredPartyState === 'play' && moviePlayer.paused) {
-                moviePlayer.play().catch(() => {});
+            // STRICT SYNC CHECK
+            if (currentRoomId && !isHost) {
+                if (desiredPartyState === 'play') {
+                    moviePlayer.play().catch(() => {});
+                } else {
+                    moviePlayer.pause();
+                }
             }
             updateProgressBar();
         });
@@ -1579,12 +1582,16 @@
                         movieTitleDisplay.textContent = data.title;
                         document.title = data.title;
                         
+                        // AIRPLAY/CAST VISIBILITY CHECK
+                        if(window.cast && cast.framework) {
+                            castButton.style.display = 'flex';
+                        }
+
                         movieMeta = {
                             title: data.title,
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image'
                         };
 
-                        // ALWAYS USE THIS SPECIFIC CACHE FORMAT
                         const cacheUrl = `./watch?url=${encodeURIComponent(movieUrl)}&title=${encodeURIComponent(data.title)}`;
                         saveToContinueWatching({
                             title: data.title,
