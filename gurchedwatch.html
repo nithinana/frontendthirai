@@ -1282,12 +1282,7 @@
                 localStorage.setItem(movieKey, moviePlayer.currentTime.toString());
             }
 
-            // Black screen check
-            if(!moviePlayer.paused && moviePlayer.videoWidth === 0 && moviePlayer.currentTime > 0.1) {
-                moviePlayer.style.display = 'none';
-                moviePlayer.offsetHeight;
-                moviePlayer.style.display = 'block';
-            }
+            // [FIXED] REMOVED AGGRESSIVE BLACK SCREEN CHECK HERE
         });
 
         videoPlayerWrapper.addEventListener('click', (event) => {
