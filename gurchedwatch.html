@@ -598,31 +598,25 @@
         #lobbyScreen {
             display: none;
             text-align: center;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
         }
         #lobbyPoster {
             width: 120px;
             border-radius: 8px;
-            margin: 0;
+            margin-bottom: 15px; /* Added spacing */
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: block;
         }
         
         #lobbyStatus {
             font-size: 0.9rem;
             color: #888;
-            margin: 0;
+            margin-bottom: 15px;
             display: block;
-            font-weight: 500;
         }
         .copy-row {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-top: 5px;
-            width: 100%;
         }
         .copy-btn {
             flex: 1;
@@ -702,7 +696,7 @@
         <i class="bi bi-x-lg close-ended-x" onclick="closeEndedModal()"></i>
         <i class="bi bi-info-circle-fill" style="font-size: 3rem; color: #0d6efd; display: block; margin-bottom: 15px;"></i>
         <h2 id="endedTitle">User has ended session</h2>
-        <p>You may now control video playback on your own.</p>
+        <p>You may now control video playback.</p>
         <button class="modal-action-btn" onclick="closeEndedModal()">Close</button>
     </div>
 
@@ -882,7 +876,7 @@
         let timeFormatMode = 0; // 0: Rem, 1: Cur/Tot
         timeDisplay.onclick = (e) => {
             e.stopPropagation(); 
-            timeFormatMode = (timeFormatMode + 1) % 2;
+            timeFormatMode = (timeFormatMode + 1) % 2; // Removed 3rd option
             updateProgressBar();
         };
 
@@ -891,7 +885,7 @@
         let isHost = false;
         let currentRoomId = null;
         let hostNickname = "Host";
-        let hostSyncInterval = null; 
+        let hostSyncInterval = null; // HEARTBEAT FOR HOST
         const SERVER_URL = "https://watchpartybackend-b5a2.onrender.com"; 
 
         // --- WATCH PARTY INITIALIZATION ---
@@ -937,11 +931,11 @@
             if (!isJoinLink || (isJoinLink && currentRoomId)) {
                 partyModal.style.display = 'none';
                 modalBackdrop.style.display = 'none';
-                document.getElementById('partyEndedModal').style.display = 'none';
             }
         }
 
         function resetModal() {
+            // FIX: If on join link, go to root instead of selection screen
             if (new URLSearchParams(window.location.search).has('join')) {
                 window.location.href = '/';
                 return;
@@ -1024,6 +1018,7 @@
             
             document.getElementById('partyHeader').innerText = movieMeta.title || "Watch Party";
 
+            // No movie reload on host start - just sync current state
             updateControlsState();
             startHostHeartbeat();
         };
@@ -1053,7 +1048,7 @@
             }
 
             joinSetup.style.display = 'none';
-            lobbyScreen.style.display = 'flex';
+            lobbyScreen.style.display = 'block';
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'none';
             closePartyX.style.display = 'block';
@@ -1082,6 +1077,7 @@
             const hostList = document.getElementById('hostUserList');
             const guestList = document.getElementById('lobbyUserList');
             
+            // Show/Hide container based on user count
             if (users.length > 0) {
                 hostList.style.display = 'block';
                 guestList.style.display = 'block';
@@ -1163,7 +1159,6 @@
             currentRoomId = null;
             isHost = false;
             updateControlsState();
-            
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'block'; 
             
@@ -1174,10 +1169,9 @@
         function closeEndedModal() {
             document.getElementById('partyEndedModal').style.display = 'none';
             modalBackdrop.style.display = 'none';
-            
-            const url = new URL(window.location);
-            url.searchParams.delete('join');
-            window.history.replaceState({}, '', url);
+            const cleanParams = new URLSearchParams(window.location.search);
+            cleanParams.delete('join');
+            window.history.replaceState({}, '', window.location.pathname + '?' + cleanParams.toString());
         }
 
         document.getElementById('endPartyBtn').onclick = () => {
@@ -1488,7 +1482,11 @@
         }
 
         backButton.addEventListener('click', () => {
-            window.location.href = '/';
+            if(new URLSearchParams(window.location.search).has('join')) {
+                window.location.href = '/';
+            } else {
+                window.history.back();
+            }
         });
 
         fullscreenButton.addEventListener('click', () => {
@@ -1535,7 +1533,6 @@
                                      event.target.closest('.movie-title-display') ||
                                      event.target.closest('.volume-container') ||
                                      event.target.closest('#partyModal') ||
-                                     event.target.closest('#partyEndedModal') ||
                                      event.target.closest('.time-display');
 
             if (clickedOnControl) return;
@@ -1589,6 +1586,7 @@
                             img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image'
                         };
 
+                        // ALWAYS USE THIS SPECIFIC CACHE FORMAT
                         const cacheUrl = `./watch?url=${encodeURIComponent(movieUrl)}&title=${encodeURIComponent(data.title)}`;
                         saveToContinueWatching({
                             title: data.title,
