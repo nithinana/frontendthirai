@@ -459,10 +459,8 @@
             text-align: center;
             border: 1px solid #333;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9);
-            width: 340px;
+            width: 320px;
             max-width: 90vw;
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
         .close-modal-x {
@@ -501,12 +499,7 @@
         .choice-btn i { font-size: 1.5rem; color: #0d6efd; }
         .choice-btn:hover { background: #252525; border-color: #0d6efd; }
 
-        /* Fix overlapping: use Flex column */
-        .party-form { 
-            display: none; 
-            flex-direction: column; 
-            text-align: left; 
-        }
+        .party-form { display: none; text-align: left; }
         .party-form label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; }
 
         #partyModal input {
@@ -534,7 +527,6 @@
             justify-content: center;
             align-items: center;
             gap: 8px;
-            flex-shrink: 0;
         }
 
         .modal-action-btn.secondary {
@@ -551,12 +543,12 @@
             background: #1a1a1a;
             border-radius: 8px;
             padding: 10px;
-            max-height: 120px;
+            max-height: 150px;
             overflow-y: auto;
             text-align: left;
             -webkit-user-select: text;
             user-select: text;
-            display: none; 
+            display: none; /* Hidden by default */
         }
 
         .user-item {
@@ -587,7 +579,7 @@
         .back-link {
             display: block;
             text-align: center;
-            margin-top: 5px;
+            margin-top: 15px;
             color: #888;
             font-size: 0.8rem;
             cursor: pointer;
@@ -605,14 +597,12 @@
         /* Lobby specific styles */
         #lobbyScreen {
             display: none;
-            flex-direction: column;
-            align-items: center;
             text-align: center;
         }
         #lobbyPoster {
             width: 120px;
             border-radius: 8px;
-            margin-bottom: 15px; 
+            margin-bottom: 15px; /* Added spacing */
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         
@@ -625,10 +615,8 @@
         .copy-row {
             display: flex;
             gap: 10px;
-            width: 100%;
             justify-content: center;
             margin-top: 5px;
-            margin-bottom: 10px;
         }
         .copy-btn {
             flex: 1;
@@ -639,7 +627,6 @@
             color: white;
             font-size: 0.8rem;
             cursor: pointer;
-            white-space: nowrap;
         }
         .copy-btn:hover { background: #333; }
         .copy-btn i { margin-right: 5px; }
@@ -824,7 +811,7 @@
             
             <div class="user-list-container" id="lobbyUserList"></div>
             
-            <div class="copy-row">
+            <div class="copy-row" style="margin-bottom: 10px;">
                 <button class="copy-btn" id="lobbyCopyCodeBtn"><i class="bi bi-clipboard"></i> Copy Code</button>
                 <button class="copy-btn" id="lobbyCopyLinkBtn"><i class="bi bi-link-45deg"></i> Copy Link</button>
             </div>
@@ -928,11 +915,6 @@
         partyToggleBtn.onclick = () => { 
             partyModal.style.display = 'block';
             modalBackdrop.style.display = 'block';
-            
-            // If party ended but variables weren't cleared, ensure we show selection
-            if(!currentRoomId) {
-                resetModal();
-            }
         };
 
         const isJoinLink = new URLSearchParams(window.location.search).has('join');
@@ -953,9 +935,6 @@
         }
 
         function resetModal() {
-            // Reset header text
-            document.getElementById('partyHeader').innerText = "Watch Party";
-            
             // FIX: If on join link, go to root instead of selection screen
             if (new URLSearchParams(window.location.search).has('join')) {
                 window.location.href = '/';
@@ -971,12 +950,12 @@
 
         document.getElementById('chooseHost').onclick = () => {
             selectionScreen.style.display = 'none';
-            hostSetup.style.display = 'flex';
+            hostSetup.style.display = 'block';
         };
 
         document.getElementById('chooseJoin').onclick = () => {
             selectionScreen.style.display = 'none';
-            joinSetup.style.display = 'flex';
+            joinSetup.style.display = 'block';
         };
 
         async function copyToClipboard(text, element) {
@@ -1035,7 +1014,7 @@
 
             generateHostUI(currentRoomId);
             hostSetup.style.display = 'none';
-            activeHostInfo.style.display = 'flex';
+            activeHostInfo.style.display = 'block';
             
             document.getElementById('partyHeader').innerText = movieMeta.title || "Watch Party";
 
@@ -1069,7 +1048,7 @@
             }
 
             joinSetup.style.display = 'none';
-            lobbyScreen.style.display = 'flex';
+            lobbyScreen.style.display = 'block';
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'none';
             closePartyX.style.display = 'block';
@@ -1177,17 +1156,14 @@
         });
 
         socket.on('party-ended', () => {
-            // FIX: Reset all state immediately
             currentRoomId = null;
             isHost = false;
             updateControlsState();
-            
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'block'; 
             
             document.getElementById('endedTitle').innerText = `${hostNickname} has ended the party`;
             document.getElementById('partyEndedModal').style.display = 'block';
-            resetModal(); // Ensure main modal is ready for next time
         });
 
         function closeEndedModal() {
@@ -1203,15 +1179,11 @@
 
         document.getElementById('endPartyBtn').onclick = () => {
             socket.emit('stop-party', currentRoomId);
-            currentRoomId = null;
-            isHost = false;
             location.reload();
         };
 
         document.getElementById('leavePartyBtn').onclick = () => {
             socket.disconnect(); 
-            currentRoomId = null;
-            isHost = false;
             location.reload();
         };
 
