@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 | Page Not Found</title>
+    <title>404</title>
     <style>
         body {
             margin: 0;
@@ -19,44 +19,38 @@
             overflow: hidden;
         }
 
-        #starfield {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Top centered logo */
+        .header {
+            position: absolute;
+            top: 60px; /* Spaced slightly further down for better balance */
             width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+            text-align: center;
+        }
+
+        .logo {
+            width: 140px; /* Increased size */
+            height: auto;
+            display: inline-block;
         }
 
         .main-content {
             text-align: center;
-            z-index: 1;
-            /* Allow mouse events to pass to canvas but capture them for buttons */
-            pointer-events: none; 
-        }
-
-        .main-content h1, .main-content p, .button-stack a {
-            pointer-events: auto;
         }
 
         h1 {
-            font-size: clamp(100px, 18vw, 160px);
+            font-size: clamp(100px, 18vw, 160px); /* Massive bold 404 */
             font-weight: 900;
             margin: 0;
             letter-spacing: -8px;
             line-height: 1;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-            user-select: none;
         }
 
         p {
             font-size: 18px;
-            color: #888;
+            color: #666;
             margin: 15px 0 45px 0;
             font-weight: 300;
             letter-spacing: 1px;
-            user-select: none;
         }
 
         .button-stack {
@@ -75,19 +69,16 @@
             font-size: 14px;
             font-weight: 700;
             width: 220px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s ease, background-color 0.2s;
         }
 
         .btn-home:hover {
-            background-color: #f0f0f0;
+            background-color: #e0e0e0;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
         }
 
         .btn-snap {
-            color: #666;
+            color: #555;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
@@ -102,122 +93,19 @@
 </head>
 <body>
 
-    <canvas id="starfield"></canvas>
+    <div class="header">
+        <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo">
+    </div>
 
     <div class="main-content">
         <h1>404</h1>
-        <p>Lost in the stars. All is well.</p>
+        <p>Looks like you're lost. All is well.</p>
 
         <div class="button-stack">
             <a href="/" class="btn-home">Return to Home</a>
             <a href="https://www.snapchat.com/add/nithinan_a" class="btn-snap">Need Help?</a>
         </div>
     </div>
-
-    <script>
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-
-        let stars = [];
-        const numStars = 200;
-        const mouse = { x: -1000, y: -1000, radius: 100 };
-
-        class Star {
-            constructor() {
-                this.init();
-            }
-
-            init() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                // Original positions for returning after hover
-                this.baseX = this.x;
-                this.baseY = this.y;
-                
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speed = Math.random() * 0.4 + 0.1;
-                this.opacity = Math.random() * 0.8 + 0.2;
-            }
-
-            update() {
-                // Constant slow drift
-                this.baseY += this.speed;
-                if (this.baseY > canvas.height) {
-                    this.baseY = -10;
-                    this.baseX = Math.random() * canvas.width;
-                }
-
-                // Interaction Logic
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                
-                let forceX = 0;
-                let forceY = 0;
-
-                if (distance < mouse.radius) {
-                    // Calculate repulsion force
-                    let force = (mouse.radius - distance) / mouse.radius;
-                    forceX = (dx / distance) * force * 10;
-                    forceY = (dy / distance) * force * 10;
-                    
-                    // Move away from mouse
-                    this.x -= forceX;
-                    this.y -= forceY;
-                } else {
-                    // Smoothly ease back to the original drift path
-                    if (this.x !== this.baseX) {
-                        let dxBack = this.x - this.baseX;
-                        this.x -= dxBack / 20;
-                    }
-                    if (this.y !== this.baseY) {
-                        let dyBack = this.y - this.baseY;
-                        this.y -= dyBack / 20;
-                    }
-                }
-            }
-
-            draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function setup() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            stars = [];
-            for (let i = 0; i < numStars; i++) {
-                stars.push(new Star());
-            }
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(star => {
-                star.update();
-                star.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
-        });
-
-        window.addEventListener('mouseleave', () => {
-            mouse.x = -1000;
-            mouse.y = -1000;
-        });
-
-        window.addEventListener('resize', setup);
-        
-        setup();
-        animate();
-    </script>
 
 </body>
 </html>
