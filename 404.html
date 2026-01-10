@@ -19,21 +19,39 @@
             overflow: hidden;
         }
 
+        /* Canvas Background */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+        }
+
         .main-content {
             text-align: center;
+            z-index: 1;
+            pointer-events: none; /* Allows clicks to pass through if needed, though buttons have their own pointer-events */
+        }
+
+        .main-content * {
+            pointer-events: auto; /* Re-enables clicks for buttons and text */
         }
 
         h1 {
-            font-size: clamp(100px, 18vw, 160px); /* Massive bold 404 */
+            font-size: clamp(100px, 18vw, 160px);
             font-weight: 900;
             margin: 0;
             letter-spacing: -8px;
             line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
         p {
             font-size: 18px;
-            color: #666;
+            color: #888;
             margin: 15px 0 45px 0;
             font-weight: 300;
             letter-spacing: 1px;
@@ -55,17 +73,19 @@
             font-size: 14px;
             font-weight: 700;
             width: 220px;
-            transition: transform 0.2s ease, background-color 0.2s;
+            transition: all 0.3s ease;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
         }
 
         .btn-home:hover {
-            background-color: #e0e0e0;
+            background-color: #f0f0f0;
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
         }
 
         .btn-snap {
-            color: #555;
+            color: #666;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
@@ -80,15 +100,66 @@
 </head>
 <body>
 
+    <canvas id="starfield"></canvas>
+
     <div class="main-content">
         <h1>404</h1>
-        <p>Looks like you're lost. All is well.</p>
+        <p>Looks like you're lost in space. All is well.</p>
 
         <div class="button-stack">
             <a href="/" class="btn-home">Return to Home</a>
             <a href="https://www.snapchat.com/add/nithinan_a" class="btn-snap">Need Help?</a>
         </div>
     </div>
+
+    <script>
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+
+        let stars = [];
+        const numStars = 150;
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    speed: Math.random() * 0.5 + 0.1,
+                    opacity: Math.random()
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Move stars downward slowly
+                star.y += star.speed;
+
+                // Reset star to top if it goes off screen
+                if (star.y > canvas.height) {
+                    star.y = -5;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        animate();
+    </script>
 
 </body>
 </html>
