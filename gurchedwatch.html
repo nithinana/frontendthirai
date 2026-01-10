@@ -948,7 +948,8 @@
         };
 
         document.getElementById('chooseJoin').onclick = () => {
-            window.location.href = '/join.html';
+            selectionScreen.style.display = 'none';
+            joinSetup.style.display = 'block';
         };
 
         async function copyToClipboard(text, element) {
@@ -1248,32 +1249,24 @@
 
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            
-            if(urlParams.has('join') && urlParams.has('name')) {
-                const code = urlParams.get('join');
-                const name = decodeURIComponent(urlParams.get('name'));
-
-                // Open Modal & Show Status
-                partyModal.style.display = 'block';
-                modalBackdrop.style.display = 'block';
-                selectionScreen.style.display = 'none';
+            if(urlParams.has('join')) {
+                document.getElementById('joinCode').value = urlParams.get('join');
                 
-                // Pre-fill and show join screen for feedback
-                joinSetup.style.display = 'block';
-                document.getElementById('joinName').value = name;
-                document.getElementById('joinCode').value = code;
-                
-                const btn = document.getElementById('startJoinBtn');
-                btn.disabled = true;
-                btn.innerText = 'Joining in a moment...';
-
-                // Delay to simulate "loading content for a bit"
-                setTimeout(() => {
-                    isHost = false;
-                    currentRoomId = code;
-                    socket.emit('join-room', { roomId: currentRoomId, userName: name });
-                }, 2000);
-
+                // AUTO-JOIN LOGIC ADDED HERE
+                if (urlParams.has('name')) {
+                     const name = decodeURIComponent(urlParams.get('name'));
+                     document.getElementById('joinName').value = name;
+                     
+                     partyToggleBtn.click(); 
+                     document.getElementById('chooseJoin').click();
+                     
+                     setTimeout(() => {
+                         document.getElementById('startJoinBtn').click();
+                     }, 300);
+                } else {
+                    partyToggleBtn.click();
+                    document.getElementById('chooseJoin').click();
+                }
             } else {
                 fetchMovieSource();
             }
