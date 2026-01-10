@@ -116,6 +116,36 @@
             user-select: none;
         }
 
+        /* Loading Overlay (Always Dark) */
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #000000;
+            z-index: 99999;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        #loadingOverlay img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: pulse-logo 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-logo {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
         /* Backdrop Blur Effect */
         #modalBackdrop {
             position: fixed;
@@ -689,6 +719,10 @@
     </style>
 </head>
 <body>
+    <div id="loadingOverlay">
+        <img id="overlayLogo" src="/static/thiraiwhite.png" alt="Loading...">
+    </div>
+
     <div id="modalBackdrop"></div>
     <div id="thiraiToast"><i class="bi bi-crown-fill"></i> <span id="toastMsg">You are now a host!</span></div>
 
@@ -896,6 +930,12 @@
             });
             
             socket.on('error', (msg) => {
+                const overlay = document.getElementById('loadingOverlay');
+                if(overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => { overlay.style.display = 'none'; }, 500);
+                }
+
                 if(msg === 'Room not found') {
                     showInternalToast("Room not found! Check code.");
                     joinBtn.disabled = false;
@@ -1033,6 +1073,13 @@
         };
 
         socket.on('joined-room', (data) => {
+            // HIDE OVERLAY
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => { overlay.style.display = 'none'; }, 500);
+            }
+
             const hostParams = new URLSearchParams(data.movieUrl);
             const myParams = new URLSearchParams(window.location.search);
             
@@ -1254,6 +1301,9 @@
                 
                 // AUTO-JOIN LOGIC ADDED HERE
                 if (urlParams.has('name')) {
+                     // SHOW OVERLAY
+                     document.getElementById('loadingOverlay').style.display = 'flex';
+
                      const name = decodeURIComponent(urlParams.get('name'));
                      document.getElementById('joinName').value = name;
                      
