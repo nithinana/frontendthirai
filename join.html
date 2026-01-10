@@ -218,17 +218,14 @@
         // SMART BACK NAVIGATION
         backBtn.onclick = () => {
             if (codeView.style.display === 'none') {
-                // If we are deep in the process, reset to code entry
                 resetToStart();
             } else {
-                // If we are at the very beginning, go to root
                 window.location.href = '/';
             }
         };
 
         function resetToStart() {
             if (socket) socket.disconnect();
-            // Reconnect for next attempt
             window.location.reload(); 
         }
 
@@ -243,6 +240,7 @@
             return `Host is at ${m.toString().padStart(2, '0')}:${rs.toString().padStart(2, '0')}`;
         }
 
+        // UPDATED: Logic to handle typing, backspace, AND pasting
         codeInputs.forEach((input, index) => {
             input.addEventListener('input', () => {
                 errorMessage.style.display = 'none';
@@ -250,8 +248,27 @@
                 if (input.value && index < 5) codeInputs[index+1].focus();
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
+
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !input.value && index > 0) codeInputs[index-1].focus();
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const data = e.clipboardData.getData('text').toUpperCase().trim();
+                const chars = data.split('');
+
+                chars.forEach((char, i) => {
+                    if (codeInputs[index + i]) {
+                        codeInputs[index + i].value = char;
+                    }
+                });
+
+                // Set focus to the next relevant box
+                const nextIndex = Math.min(index + chars.length, 5);
+                codeInputs[nextIndex].focus();
+                
+                checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
         });
 
@@ -260,7 +277,6 @@
             codeView.style.display = 'none';
             loadingArea.style.display = 'flex';
             
-            // Timeout to catch non-existent rooms
             const roomCheckTimeout = setTimeout(() => {
                 if (lobbyView.style.display !== 'block') {
                     showError();
@@ -332,7 +348,7 @@
         joinFinalBtn.onclick = () => {
             const name = encodeURIComponent(nicknameInput.value.trim());
             socket.disconnect();
-            window.location.href = `gurchedwatch.html?join=${currentRoomId}&name=${name}`;
+            window.location.href = `watch.html?join=${currentRoomId}&name=${name}`;
         };
 
         // Theme logic
