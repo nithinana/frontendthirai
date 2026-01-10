@@ -527,7 +527,6 @@
             justify-content: center;
             align-items: center;
             gap: 8px;
-            margin-top: 10px; /* Added spacing */
         }
 
         .modal-action-btn.secondary {
@@ -618,7 +617,6 @@
             gap: 10px;
             justify-content: center;
             margin-top: 5px;
-            margin-bottom: 10px; /* Added spacing */
         }
         .copy-btn {
             flex: 1;
@@ -813,7 +811,7 @@
             
             <div class="user-list-container" id="lobbyUserList"></div>
             
-            <div class="copy-row">
+            <div class="copy-row" style="margin-bottom: 10px;">
                 <button class="copy-btn" id="lobbyCopyCodeBtn"><i class="bi bi-clipboard"></i> Copy Code</button>
                 <button class="copy-btn" id="lobbyCopyLinkBtn"><i class="bi bi-link-45deg"></i> Copy Link</button>
             </div>
@@ -937,14 +935,7 @@
         }
 
         function resetModal() {
-            // FIX: Clear current room and UI lists
-            currentRoomId = null;
-            document.getElementById('displayCode').innerText = "";
-            document.getElementById('hostUserList').innerHTML = "";
-            document.getElementById('lobbyUserList').innerHTML = "";
-            document.getElementById('partyHeader').innerText = "Watch Party";
-
-            // If on join link, go to root instead of selection screen
+            // FIX: If on join link, go to root instead of selection screen
             if (new URLSearchParams(window.location.search).has('join')) {
                 window.location.href = '/';
                 return;
@@ -1168,10 +1159,6 @@
             currentRoomId = null;
             isHost = false;
             updateControlsState();
-            
-            // FIX: Fully reset the Watch Party modal state so it's fresh when opened next
-            resetModal(); 
-
             partyModal.style.display = 'none';
             modalBackdrop.style.display = 'block'; 
             
@@ -1182,9 +1169,12 @@
         function closeEndedModal() {
             document.getElementById('partyEndedModal').style.display = 'none';
             modalBackdrop.style.display = 'none';
+            
+            // FIX: Remove join code from URL but stay on page
             const cleanParams = new URLSearchParams(window.location.search);
             cleanParams.delete('join');
-            window.history.replaceState({}, '', window.location.pathname + '?' + cleanParams.toString());
+            const newUrl = window.location.pathname + (cleanParams.toString() ? '?' + cleanParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
         }
 
         document.getElementById('endPartyBtn').onclick = () => {
@@ -1419,8 +1409,11 @@
                 playPauseIcon.style.display = 'block';
             }
             
+            // FIX: Only auto-play if the host's reported state is actually 'play'
             if (currentRoomId && !isHost && desiredPartyState === 'play' && moviePlayer.paused) {
                 moviePlayer.play().catch(() => {});
+            } else if (currentRoomId && !isHost && desiredPartyState !== 'play') {
+                moviePlayer.pause();
             }
             updateProgressBar();
         });
