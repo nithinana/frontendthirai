@@ -55,27 +55,31 @@
         .container {
             text-align: center;
             background-color: #fff;
-            padding: 40px;
+            padding: 35px 40px; /* Reduced top padding to move logo up */
             border-radius: 12px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             max-width: 90%;
             width: 420px;
             transition: background-color 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         body.dark-mode .container { background-color: #111; box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid #222; }
 
+        /* Smaller Logo & Adjusted Positioning */
         #logo { 
             display: block; 
-            max-width: 175px; 
+            max-width: 140px; /* Made smaller as requested */
             height: auto;
-            margin: 0 auto 15px; 
+            margin: 0 auto 25px; /* Spaced evenly from the title/inputs */
         }
         
         .code-input-container {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin: 25px 0;
+            margin: 20px 0 30px;
         }
         .code-input {
             width: 40px;
@@ -91,14 +95,13 @@
         body.dark-mode .code-input { color: #fff; background-color: #222; border-color: #333; }
         .code-input:focus { border-color: #0d6efd; }
 
-        #lobbyView { display: none; }
+        #lobbyView { display: none; width: 100%; }
         
         .movie-poster {
             width: 130px;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            margin-bottom: 12px;
-            background: #444;
+            margin-bottom: 15px;
         }
         .movie-title { font-size: 1.15rem; font-weight: bold; margin-bottom: 4px; }
         .movie-status { font-size: 0.8rem; color: #0d6efd; margin-bottom: 15px; height: 1.2rem; }
@@ -112,6 +115,8 @@
             overflow-y: auto;
             text-align: left;
             border: 1px solid rgba(0,0,0,0.1);
+            width: 100%;
+            box-sizing: border-box;
         }
         body.dark-mode .user-list { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
         .user-item { font-size: 0.85rem; padding: 5px 0; display: flex; align-items: center; gap: 8px; }
@@ -141,8 +146,15 @@
         }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        #loadingSpinner { display: none; margin: 30px; font-size: 2.5rem; color: #0d6efd; animation: spin 1s linear infinite; }
+        #loadingArea { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 40px 0;
+        }
+        .spinner { font-size: 2.5rem; color: #0d6efd; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-text { margin-top: 15px; font-size: 0.9rem; color: #888; }
     </style>
 </head>
 <body>
@@ -153,7 +165,7 @@
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
         <div id="codeView">
-            <h2 style="font-size: 1.4rem; margin-bottom: 20px;">Enter Room Code</h2>
+            <h2 style="font-size: 1.4rem; margin-bottom: 10px;">Enter Room Code</h2>
             <div class="code-input-container">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
@@ -165,11 +177,14 @@
             <button class="action-btn" id="checkCodeBtn" disabled>Find Party</button>
         </div>
 
-        <div id="loadingSpinner"><i class="bi bi-arrow-repeat"></i></div>
+        <div id="loadingArea">
+            <i class="bi bi-arrow-repeat spinner"></i>
+            <div class="loading-text">Fetching room details...</div>
+        </div>
 
         <div id="lobbyView">
-            <img src="" id="lobbyPoster" class="movie-poster" style="display:none;">
-            <div id="lobbyTitle" class="movie-title">Ready to Join</div>
+            <img src="" id="lobbyPoster" class="movie-poster">
+            <div id="lobbyTitle" class="movie-title"></div>
             <div id="lobbyStatus" class="movie-status"></div>
             
             <div class="user-list" id="userList"></div>
@@ -186,7 +201,7 @@
         const joinFinalBtn = document.getElementById('joinFinalBtn');
         const codeView = document.getElementById('codeView');
         const lobbyView = document.getElementById('lobbyView');
-        const loadingSpinner = document.getElementById('loadingSpinner');
+        const loadingArea = document.getElementById('loadingArea');
 
         let currentRoomId = '';
         const socket = io("https://watchpartybackend-b5a2.onrender.com");
@@ -212,55 +227,49 @@
         checkCodeBtn.onclick = () => {
             currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
             codeView.style.display = 'none';
-            loadingSpinner.style.display = 'block';
+            loadingArea.style.display = 'flex';
             
-            // Connect to fetch room state
             socket.emit('join-room', { roomId: currentRoomId, userName: "Preview_User" });
-            
-            // Safety timeout: If no data in 4 seconds, show the UI anyway
-            setTimeout(() => {
-                if (lobbyView.style.display !== 'block') {
-                    loadingSpinner.style.display = 'none';
-                    lobbyView.style.display = 'block';
-                }
-            }, 4000);
         };
 
         socket.on('joined-room', async (data) => {
-            loadingSpinner.style.display = 'none';
-            lobbyView.style.display = 'block';
-            
-            if (data.time) document.getElementById('lobbyStatus').innerText = formatTime(data.time);
-
             if (data.movieUrl) {
-                const urlParams = new URLSearchParams(data.movieUrl.split('?')[1]);
-                const filmCode = urlParams.get('film');
+                const filmMatch = data.movieUrl.match(/film=([^&]+)/) || data.movieUrl.match(/watch\/(\d+)/);
+                const filmCode = filmMatch ? filmMatch[1] : null;
+
                 if (filmCode) {
                     try {
                         const res = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`);
                         const meta = await res.json();
-                        const poster = document.getElementById('lobbyPoster');
-                        poster.src = meta.img_url;
-                        poster.style.display = 'inline-block';
+                        
+                        document.getElementById('lobbyPoster').src = meta.img_url;
                         document.getElementById('lobbyTitle').innerText = meta.title;
-                    } catch(e) {}
-                }
-            }
-            // Request latest user list immediately
-            socket.emit('request-sync', { roomId: currentRoomId });
+                        document.getElementById('lobbyStatus').innerText = formatTime(data.time);
+                        
+                        // ONLY SHOW LOBBY ONCE DATA IS FULLY LOADED
+                        loadingArea.style.display = 'none';
+                        lobbyView.style.display = 'block';
+                    } catch(e) { showFallback(); }
+                } else { showFallback(); }
+            } else { showFallback(); }
         });
+
+        function showFallback() {
+            document.getElementById('lobbyTitle').innerText = "Movie Session";
+            loadingArea.style.display = 'none';
+            lobbyView.style.display = 'block';
+        }
 
         socket.on('user-list', (users) => {
             const list = document.getElementById('userList');
             const realUsers = users.filter(u => u.name !== "Preview_User");
-            
             if (realUsers.length === 0) {
                 list.innerHTML = `<div style="text-align:center; color:#888; font-size:0.8rem;">Waiting for others...</div>`;
             } else {
                 list.innerHTML = realUsers.map(u => `
                     <div class="user-item">
                         <i class="bi bi-person-circle" style="color:#0d6efd"></i>
-                        <span>${u.name} ${u.isHost ? '<b style="color:#ffc107; font-size:0.7rem;">HOST</b>' : ''}</span>
+                        <span>${u.name} ${u.isHost ? '<b style="color:#ffc107; font-size:0.7rem; margin-left:5px;">HOST</b>' : ''}</span>
                     </div>
                 `).join('');
             }
