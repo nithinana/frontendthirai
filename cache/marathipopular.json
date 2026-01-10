@@ -79,14 +79,14 @@
       "title": "Bucket List"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1kRa-e879.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1kRa/?lang=marathi",
-      "title": "Wedding Cha Shinema"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2wc3-505c.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2wc3/?lang=marathi",
       "title": "Ved"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1kRa-e879.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1kRa/?lang=marathi",
+      "title": "Wedding Cha Shinema"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6LqP-5905.jpg",
@@ -269,14 +269,14 @@
       "title": "Pyaar Vali Love Story"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6yTz-1f57.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6yTz/?lang=marathi",
-      "title": "Lai Bhaari"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7IhR-1c9e.jpg",
       "page_url": "https://einthusan.tv/movie/watch/7IhR/?lang=marathi",
       "title": "Ata Thambaycha Naay!"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6yTz-1f57.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6yTz/?lang=marathi",
+      "title": "Lai Bhaari"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/QaWy-dee7.jpg",
@@ -306,7 +306,7 @@
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6400-6ce4.jpg",
       "page_url": "https://einthusan.tv/movie/watch/6400/?lang=marathi",
-      "title": "Elizabeth Ekadashi"
+      "title": "Elizabeth Ekadashi (2014)"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/dWMP-2443.jpg",
@@ -339,14 +339,14 @@
       "title": "Lagna Mubarak"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/47Y8-3fa5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/47Y8/?lang=marathi",
-      "title": "Me Shivajiraje Bhosale Boltoy"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/70ja-b471.jpg",
       "page_url": "https://einthusan.tv/movie/watch/70ja/?lang=marathi",
       "title": "Anandi Gopal"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/47Y8-3fa5.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/47Y8/?lang=marathi",
+      "title": "Me Shivajiraje Bhosale Boltoy"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5155-2c8e.jpg",
@@ -419,14 +419,19 @@
       "title": "Babanchi Shala"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4Nbv-0cff.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4Nbv/?lang=marathi",
-      "title": "Daagdi Chawl 2"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6205-f08c.jpg",
       "page_url": "https://einthusan.tv/movie/watch/6205/?lang=marathi",
       "title": "Tukaram"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2VMT-4ec6.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2VMT/?lang=marathi",
+      "title": "Jarann"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4Nbv-0cff.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4Nbv/?lang=marathi",
+      "title": "Daagdi Chawl 2"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7sV1-6b71.jpg",
@@ -444,24 +449,19 @@
       "title": "Sachin : A Billion Dreams"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2VMT-4ec6.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2VMT/?lang=marathi",
-      "title": "Jarann"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/8428-a806.jpg",
       "page_url": "https://einthusan.tv/movie/watch/8428/?lang=marathi",
       "title": "Kaydyacha Bola"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7ddN-66b0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7ddN/?lang=marathi",
-      "title": "Takatak"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2782-471e.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2782/?lang=marathi",
       "title": "Prem Mhanje Prem Mhanje Prem Asta"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7ddN-66b0.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/7ddN/?lang=marathi",
+      "title": "Takatak"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2MNh-068e.jpg",
@@ -479,14 +479,14 @@
       "title": "Bali"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/AJc1-7af9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/AJc1/?lang=marathi",
-      "title": "Befaam"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4k8B-863b.jpg",
       "page_url": "https://einthusan.tv/movie/watch/4k8B/?lang=marathi",
       "title": "Rajwade and Sons"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/AJc1-7af9.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/AJc1/?lang=marathi",
+      "title": "Befaam"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/yP7J-e9e7.jpg",
@@ -519,6 +519,11 @@
       "title": "Ashi Hi Banwa Banwi"
     },
     {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1ACZ-a9c6.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1ACZ/?lang=marathi",
+      "title": "Phulrani"
+    },
+    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/R66T-c3a1.jpg",
       "page_url": "https://einthusan.tv/movie/watch/R66T/?lang=marathi",
       "title": "Hirkani"
@@ -527,11 +532,6 @@
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5091-14f6.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5091/?lang=marathi",
       "title": "Saatchya Aat Gharat"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1ACZ-a9c6.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1ACZ/?lang=marathi",
-      "title": "Phulrani"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4vBK-08b7.jpg",
@@ -564,14 +564,14 @@
       "title": "Luckee"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7Lgc-cdba.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7Lgc/?lang=marathi",
-      "title": "Preetam"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6yt0-c483.jpg",
       "page_url": "https://einthusan.tv/movie/watch/6yt0/?lang=marathi",
       "title": "Timepass 3"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7Lgc-cdba.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/7Lgc/?lang=marathi",
+      "title": "Preetam"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5247-6d82.jpg",
@@ -599,6 +599,11 @@
       "title": "Kanika"
     },
     {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/wCbW-06c2.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/wCbW/?lang=marathi",
+      "title": "Masala"
+    },
+    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2AC7-4385.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2AC7/?lang=marathi",
       "title": "Aathvani"
@@ -609,9 +614,9 @@
       "title": "Ek Nirnay... Swatahacha Swatasathi"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/wCbW-06c2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/wCbW/?lang=marathi",
-      "title": "Masala"
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3988-2fc2.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3988/?lang=marathi",
+      "title": "Aajcha Divas Majha"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1UPt-be6d.jpg",
@@ -622,11 +627,6 @@
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5m4Q-d43e.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5m4Q/?lang=marathi",
       "title": "Rangaa Patangaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3988-2fc2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3988/?lang=marathi",
-      "title": "Aajcha Divas Majha"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3224-3c6d.jpg",
@@ -701,7 +701,7 @@
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/8426-b45b.jpg",
       "page_url": "https://einthusan.tv/movie/watch/8426/?lang=marathi",
-      "title": "Duniyadari (2013) Marathi in Ultra HD - Einthusan"
+      "title": "Duniyadari"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/NCML-67e3.jpg",
@@ -754,14 +754,14 @@
       "title": "Checkmate"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2DVl-56f6.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2DVl/?lang=marathi",
-      "title": "Bhonsle"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4rQR-ab2f.jpg",
       "page_url": "https://einthusan.tv/movie/watch/4rQR/?lang=marathi",
       "title": "Date Bhet"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2DVl-56f6.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2DVl/?lang=marathi",
+      "title": "Bhonsle"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3202-f8fe.jpg",
@@ -979,14 +979,14 @@
       "title": "Sandook"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2794-d1c5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2794/?lang=marathi",
-      "title": "Majha Navra Tujhi Baiko"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7454-7df5.jpg",
       "page_url": "https://einthusan.tv/movie/watch/7454/?lang=marathi",
       "title": "Jatra"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2794-d1c5.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2794/?lang=marathi",
+      "title": "Majha Navra Tujhi Baiko"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/30cj-4d37.jpg",
@@ -1076,7 +1076,7 @@
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7561-4a93.jpg",
       "page_url": "https://einthusan.tv/movie/watch/7561/?lang=marathi",
-      "title": "Gaiir"
+      "title": "Gaiir (2009)"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6EuK-a5f1.jpg",
@@ -1099,14 +1099,14 @@
       "title": "Tya Ratri Paus Hota"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2ENT-42ba.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2ENT/?lang=marathi",
-      "title": "Asehi Ekada Vhave"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5L1B-8409.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5L1B/?lang=marathi",
       "title": "The Disciple"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2ENT-42ba.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2ENT/?lang=marathi",
+      "title": "Asehi Ekada Vhave"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5740-9933.jpg",
@@ -1184,14 +1184,14 @@
       "title": "Pak Pak Pakaak"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5148-88f8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5148/?lang=marathi",
-      "title": "Char Divas Premache"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6Y3K-d6d0.jpg",
       "page_url": "https://einthusan.tv/movie/watch/6Y3K/?lang=marathi",
       "title": "Khari Biscuit"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5148-88f8.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5148/?lang=marathi",
+      "title": "Char Divas Premache"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2YXe-8b6f.jpg",
@@ -1229,14 +1229,14 @@
       "title": "Uladhaal"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2790-7267.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2790/?lang=marathi",
-      "title": "Aevdhe Se Aabhal"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2ww3-a37a.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2ww3/?lang=marathi",
       "title": "Kaakan"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2790-7267.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2790/?lang=marathi",
+      "title": "Aevdhe Se Aabhal"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3676-3d04.jpg",
@@ -1259,14 +1259,14 @@
       "title": "Gandha"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2793-9e3f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2793/?lang=marathi",
-      "title": "Jetaa"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5251-a253.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5251/?lang=marathi",
       "title": "Ideachi Kalpana"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2793-9e3f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2793/?lang=marathi",
+      "title": "Jetaa"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3999-7eeb.jpg",
@@ -1314,14 +1314,14 @@
       "title": "Ravrambha"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6306-e108.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6306/?lang=marathi",
-      "title": "Mala Gheun Chala"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3994-3858.jpg",
       "page_url": "https://einthusan.tv/movie/watch/3994/?lang=marathi",
       "title": "Badha"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6306-e108.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6306/?lang=marathi",
+      "title": "Mala Gheun Chala"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5qHh-3c33.jpg",
@@ -1369,14 +1369,14 @@
       "title": "Dhanya Wagh"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3226-a942.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3226/?lang=marathi",
-      "title": "Natigoti"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5252-4176.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5252/?lang=marathi",
       "title": "Irada Pakka"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3226-a942.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3226/?lang=marathi",
+      "title": "Natigoti"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5uYC-ecd2.jpg",
@@ -1394,14 +1394,14 @@
       "title": "Manthan"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3tAY-33dc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3tAY/?lang=marathi",
-      "title": "Funral"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4qEu-b129.jpg",
       "page_url": "https://einthusan.tv/movie/watch/4qEu/?lang=marathi",
       "title": "Ghantaa"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3tAY-33dc.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3tAY/?lang=marathi",
+      "title": "Funral"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3996-7d9d.jpg",
@@ -1419,19 +1419,24 @@
       "title": "Kumari Gangubai Metric"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3987-000e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3987/?lang=marathi",
-      "title": "Aayna Ka Bayna"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5739-8660.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5739/?lang=marathi",
       "title": "Sant Dnyaneshwar"
     },
     {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3987-000e.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3987/?lang=marathi",
+      "title": "Aayna Ka Bayna"
+    },
+    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3HJM-b76d.jpg",
       "page_url": "https://einthusan.tv/movie/watch/3HJM/?lang=marathi",
       "title": "We Are On Houn Jau Dya"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3MPk-77cc.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3MPk/?lang=marathi",
+      "title": "Kokanastha"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1Zm4-d1e8.jpg",
@@ -1442,11 +1447,6 @@
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4096-4caf.jpg",
       "page_url": "https://einthusan.tv/movie/watch/4096/?lang=marathi",
       "title": "Gosht Janmantarichi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3MPk-77cc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3MPk/?lang=marathi",
-      "title": "Kokanastha"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5u7z-5cbc.jpg",
@@ -1469,14 +1469,14 @@
       "title": "66 Sadashiv"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5150-6193.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5150/?lang=marathi",
-      "title": "Davpech"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3nOE-236e.jpg",
       "page_url": "https://einthusan.tv/movie/watch/3nOE/?lang=marathi",
       "title": "Ek Hota Vidushak"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5150-6193.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5150/?lang=marathi",
+      "title": "Davpech"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5093-5f12.jpg",
@@ -1502,6 +1502,406 @@
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5065-0fe3.jpg",
       "page_url": "https://einthusan.tv/movie/watch/5065/?lang=marathi",
       "title": "Dhoom 2 Dhamaal"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6960-29b6.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6960/?lang=marathi",
+      "title": "Khel Saat Baracha"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7m1i-49be.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/7m1i/?lang=marathi",
+      "title": "Aika Dajiba"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4100-b4ca.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4100/?lang=marathi",
+      "title": "Limited Manuski"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/8102-f16a.png",
+      "page_url": "https://einthusan.tv/movie/watch/8102/?lang=marathi",
+      "title": "Bebhan"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5082-01ba.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5082/?lang=marathi",
+      "title": "Pangira"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6505-d48f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6505/?lang=marathi",
+      "title": "Chalu Navra Bholi Bayako"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6505-d48f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6505/?lang=marathi",
+      "title": "Chalu Navra Bholi Bayako"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5089-d104.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5089/?lang=marathi",
+      "title": "Ranbhool"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5073-c7aa.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5073/?lang=marathi",
+      "title": "Mission Possible"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6305-aec2.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6305/?lang=marathi",
+      "title": "Maratha Tituka Melvava"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2XpH-19b5.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2XpH/?lang=marathi",
+      "title": "Jay Jay Maharashtra Majha"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5253-a9eb.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5253/?lang=marathi",
+      "title": "Khel Mandala"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5086-a137.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5086/?lang=marathi",
+      "title": "Ramshastri"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/BA6P-5443.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/BA6P/?lang=marathi",
+      "title": "Samna"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1KKh-a151.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1KKh/?lang=marathi",
+      "title": "Bharat Aala Parat"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5745-48a2.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5745/?lang=marathi",
+      "title": "Shejari"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5f4o-875d.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5f4o/?lang=marathi",
+      "title": "Bangarwadi"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/qJsR-5033.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/qJsR/?lang=marathi",
+      "title": "Khulyancha Bazar"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3955-33f1.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3955/?lang=marathi",
+      "title": "Aaram Haram Aahe"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/cBjf-e2c4.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/cBjf/?lang=marathi",
+      "title": "Bokad"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/OMAL-099c.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/OMAL/?lang=marathi",
+      "title": "Mithun"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3956-2d5b.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3956/?lang=marathi",
+      "title": "Aaicha Gondhal"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/SGmy-421f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/SGmy/?lang=marathi",
+      "title": "Sata Lota Pan Sagla Khota"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6czC-dc93.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6czC/?lang=marathi",
+      "title": "Dr Tatya Lahane Angaar Power is within"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6wZm-ca12.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6wZm/?lang=marathi",
+      "title": "Aata Pita"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3qcn-cbe9.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3qcn/?lang=marathi",
+      "title": "Ticha Umbartha"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5080-b7f8.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5080/?lang=marathi",
+      "title": "Nashibachi Aishi Taishi"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5083-a4c4.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5083/?lang=marathi",
+      "title": "Pathlaag"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3995-7aaa.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3995/?lang=marathi",
+      "title": "Bayko Maheri Jate"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2wnx-fd4e.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2wnx/?lang=marathi",
+      "title": "Mi Amruta Boltey"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3Gaa-b8cb.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3Gaa/?lang=marathi",
+      "title": "Nirop"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/k00l-60b8.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/k00l/?lang=marathi",
+      "title": "Aadharstambh"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3992-910f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3992/?lang=marathi",
+      "title": "Ayodhyecha Raja"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3InN-a3cc.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3InN/?lang=marathi",
+      "title": "Nilkanth Master"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5GRu-92ab.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5GRu/?lang=marathi",
+      "title": "Gabhricha Paus"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5b3c-962c.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5b3c/?lang=marathi",
+      "title": "Jawai Maaza Bhala"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4eaY-be05.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4eaY/?lang=marathi",
+      "title": "Nagrik"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7455-8c96.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/7455/?lang=marathi",
+      "title": "Kunku"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6302-df27.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6302/?lang=marathi",
+      "title": "Manoos"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1UTh-7d6a.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1UTh/?lang=marathi",
+      "title": "Aaya Sawant Jhoom Ke"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6s2S-7999.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6s2S/?lang=marathi",
+      "title": "Rajmata Jijau"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4yu9-b1e5.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4yu9/?lang=marathi",
+      "title": "Vantas"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6401-ae36.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6401/?lang=marathi",
+      "title": "Father Majha God Father"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5738-8894.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5738/?lang=marathi",
+      "title": "Sakshatkara"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4PkD-4d3a.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4PkD/?lang=marathi",
+      "title": "Surajya"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/LeTp-7964.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/LeTp/?lang=marathi",
+      "title": "Sukhi Sansarachi 12 Sutre"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3990-5552.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3990/?lang=marathi",
+      "title": "Amar Bhoopali"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4ZEx-980d.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4ZEx/?lang=marathi",
+      "title": "Bedhadak"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/jtbP-587f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/jtbP/?lang=marathi",
+      "title": "Hridaynath"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2dJO-a374.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2dJO/?lang=marathi",
+      "title": "Baboo Band Baaja"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6200-6cc7.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6200/?lang=marathi",
+      "title": "Superstar"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2dY4-a0a9.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2dY4/?lang=marathi",
+      "title": "Sadrakshanaay"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3QqZ-dc58.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3QqZ/?lang=marathi",
+      "title": "Rocky"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1IZ3-9fc0.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1IZ3/?lang=marathi",
+      "title": "Ladi Godi"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/o0pC-5b2e.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/o0pC/?lang=marathi",
+      "title": "Chal Dhar Pakad"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/26pD-7d92.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/26pD/?lang=marathi",
+      "title": "Ek Gaon Barah Bhangadi"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1UAR-2e5b.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1UAR/?lang=marathi",
+      "title": "Javai Bapu Zindabad"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3PBW-4755.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3PBW/?lang=marathi",
+      "title": "Vijay Aso"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1orB-3c87.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1orB/?lang=marathi",
+      "title": "Saha September"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3YaG-89dd.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3YaG/?lang=marathi",
+      "title": "2 Premi Premache"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4Fuw-b1f2.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/4Fuw/?lang=marathi",
+      "title": "Bol Baby Bol"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2VBI-2968.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2VBI/?lang=marathi",
+      "title": "Sawaal Majha Aika"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6407-a7ed.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6407/?lang=marathi",
+      "title": "Gharandaaz"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1p1F-85d8.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1p1F/?lang=marathi",
+      "title": "Sangte Aika"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1sZg-bbf4.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1sZg/?lang=marathi",
+      "title": "Shegavicha Rana Gajanan"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6A6x-c870.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6A6x/?lang=marathi",
+      "title": "Sarvasakshi"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6GuY-ab6f.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6GuY/?lang=marathi",
+      "title": "Bhairu Pailwan Ki Jai Ho"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1HS0-2da6.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1HS0/?lang=marathi",
+      "title": "Mata Ekvira Navsala Pavli"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3XGj-ab37.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3XGj/?lang=marathi",
+      "title": "Hari Majhya Ghari"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7866-5690.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/7866/?lang=marathi",
+      "title": "Samragni"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6307-c3aa.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6307/?lang=marathi",
+      "title": "Mahima Jyotibacha"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/77HJ-3277.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/77HJ/?lang=marathi",
+      "title": "Roll No.56"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3FEt-7163.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/3FEt/?lang=marathi",
+      "title": "Kama Purta Vima"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2MqV-d093.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2MqV/?lang=marathi",
+      "title": "Dandagi Mule"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2Tli-d3af.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2Tli/?lang=marathi",
+      "title": "Shapath Tujhya Premachi"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6KOw-b18b.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6KOw/?lang=marathi",
+      "title": "Thenga"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7KDT-d0ff.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/7KDT/?lang=marathi",
+      "title": "Khandobachya Navan"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/SUED-38ea.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/SUED/?lang=marathi",
+      "title": "Sambha: Aajcha Chhavaa"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5O5a-db69.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/5O5a/?lang=marathi",
+      "title": "Durga Mhantyat Mala"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6nUl-a40d.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/6nUl/?lang=marathi",
+      "title": "Kundmauli Malganga"
     }
   ]
 }
