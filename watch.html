@@ -71,7 +71,6 @@
 </script>
 
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
     <meta name="screen-orientation" content="landscape">
     <link rel="manifest" href="/manifest.json">
@@ -421,91 +420,6 @@
             border: none;
         }
 
-        /* --- WATCH PARTY STYLES --- */
-        .wp-modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(20, 20, 20, 0.95);
-            padding: 2rem;
-            border-radius: 12px;
-            color: white;
-            z-index: 100;
-            display: none;
-            min-width: 300px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-        .wp-modal.visible {
-            display: block;
-        }
-        .wp-modal h3 { margin-top: 0; margin-bottom: 1.5rem; }
-        .wp-input-group {
-            margin-bottom: 1rem;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .wp-input {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            background: #222;
-            color: white;
-            width: 150px;
-        }
-        .wp-btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .wp-btn-primary { background: #0d6efd; color: white; }
-        .wp-btn-primary:hover { background: #0b5ed7; }
-        .wp-btn-danger { background: #dc3545; color: white; }
-        .wp-btn-danger:hover { background: #bb2d3b; }
-        .wp-btn-secondary { background: #6c757d; color: white; }
-        .wp-btn-secondary:hover { background: #5c636a; }
-        
-        /* Updated layout for active party controls to prevent overlap */
-        .wp-active-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-            width: 100%;
-        }
-        .wp-info-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .wp-toast {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(40, 167, 69, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            z-index: 110;
-            display: none;
-            animation: fadeInOut 3s forwards;
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -20px); }
-            10% { opacity: 1; transform: translate(-50%, 0); }
-            90% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -20px); }
-        }
-
     </style>
 </head>
 <body>
@@ -518,11 +432,6 @@
                 <button id="backButton" class="top-button">
                     <i class="bi bi-arrow-left"></i>
                 </button>
-                
-                <button id="watchPartyButton" class="top-button">
-                    <i class="bi bi-people-fill"></i>
-                </button>
-
                 <div class="movie-title-display" id="movieTitleDisplay">Thirai</div>
                 <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button" style="display: none;">
                     <i class="bi bi-download"></i>
@@ -567,43 +476,6 @@
                 </button>
             </div>
         </div>
-
-        <div id="wpModal" class="wp-modal">
-            <div id="wpSetup">
-                <h3>Watch Party</h3>
-                <div class="wp-input-group">
-                    <button id="wpHostBtn" class="wp-btn wp-btn-primary">Host Party</button>
-                </div>
-                <div style="margin: 10px 0; font-size: 0.9rem; color: #aaa;">OR</div>
-                <div class="wp-input-group">
-                    <input type="text" id="wpJoinInput" class="wp-input" placeholder="Enter Room ID">
-                    <button id="wpJoinBtn" class="wp-btn wp-btn-secondary">Join</button>
-                </div>
-                <button id="wpCloseBtn" class="wp-btn" style="background: transparent; border: 1px solid #555; margin-top: 1rem;">Close</button>
-            </div>
-
-            <div id="wpActive" style="display: none;">
-                <h3>Active Party</h3>
-                <div class="wp-active-controls">
-                    <div class="wp-info-row">
-                        <span style="color: #aaa;">Room:</span>
-                        <span id="wpRoomCode" style="font-weight: bold; font-family: monospace; font-size: 1.2rem; user-select: text;"></span>
-                        <button id="wpCopyBtn" class="wp-btn wp-btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;"><i class="bi bi-clipboard"></i></button>
-                    </div>
-                    
-                    <div id="wpHostControls" style="width: 100%;">
-                        <button id="wpEndBtn" class="wp-btn wp-btn-danger" style="width: 100%;">End Party</button>
-                    </div>
-                    
-                    <div id="wpViewerControls" style="display: none; width: 100%;">
-                         <button id="wpLeaveBtn" class="wp-btn wp-btn-danger" style="width: 100%;">Leave Party</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="wpToast" class="wp-toast"></div>
-
     </div>
 
     <script>
@@ -725,8 +597,7 @@
                                      event.target.closest('.top-button') || 
                                      event.target.closest('.progress-bar-container') || 
                                      event.target.closest('.movie-title-display') ||
-                                     event.target.closest('.volume-container') ||
-                                     event.target.closest('.wp-modal'); // Prevent closing when clicking modal
+                                     event.target.closest('.volume-container');
 
             if (!clickedOnControl && (currentTime - lastTapTime > DOUBLE_TAP_THRESHOLD_MS)) {
                 toggleControls();
@@ -736,10 +607,8 @@
         playPauseButton.addEventListener('click', () => {
             if (moviePlayer.paused || moviePlayer.ended) {
                 moviePlayer.play();
-                if(isWatchPartyActive && isHost) emitAction('play', moviePlayer.currentTime);
             } else {
                 moviePlayer.pause();
-                if(isWatchPartyActive && isHost) emitAction('pause', moviePlayer.currentTime);
             }
             showControls();
         });
@@ -747,7 +616,6 @@
         rewindButton.addEventListener('click', () => {
             if (!rewindButton.disabled) {
                 moviePlayer.currentTime = Math.max(0, moviePlayer.currentTime - SEEK_TIME);
-                if(isWatchPartyActive && isHost) emitAction('seek', moviePlayer.currentTime);
                 showControls();
             }
         });
@@ -755,7 +623,6 @@
         forwardButton.addEventListener('click', () => {
             if (!forwardButton.disabled) {
                 moviePlayer.currentTime = Math.min(moviePlayer.duration, moviePlayer.currentTime + SEEK_TIME);
-                if(isWatchPartyActive && isHost) emitAction('seek', moviePlayer.currentTime);
                 showControls();
             }
         });
@@ -897,7 +764,6 @@
                 isDraggingProgressBar = false;
                 progressBarContainer.classList.remove('dragging');
                 showControls();
-                if(isWatchPartyActive && isHost) emitAction('seek', moviePlayer.currentTime);
             }
         });
 
@@ -906,7 +772,6 @@
                 isDraggingProgressBar = false;
                 progressBarContainer.classList.remove('dragging');
                 showControls();
-                if(isWatchPartyActive && isHost) emitAction('seek', moviePlayer.currentTime);
             }
         });
 
@@ -923,9 +788,6 @@
         }
 
         backButton.addEventListener('click', () => {
-            if (isWatchPartyActive) {
-                // Warning before leaving party? For now, standard behavior
-            }
             window.history.back();
         });
 
@@ -1020,8 +882,7 @@
                                      event.target.closest('.top-button') ||
                                      event.target.closest('.progress-bar-container') ||
                                      event.target.closest('.movie-title-display') ||
-                                     event.target.closest('.volume-container') || 
-                                     event.target.closest('.wp-modal');
+                                     event.target.closest('.volume-container');
 
             if (clickedOnControl) return;
 
@@ -1041,10 +902,8 @@
                 const videoWidth = videoPlayerWrapper.offsetWidth;
                 if (tapX < videoWidth / 2) {
                     moviePlayer.currentTime = Math.max(0, moviePlayer.currentTime - SEEK_TIME);
-                    if(isWatchPartyActive && isHost) emitAction('seek', moviePlayer.currentTime);
                 } else {
                     moviePlayer.currentTime = Math.min(moviePlayer.duration, moviePlayer.currentTime + SEEK_TIME);
-                    if(isWatchPartyActive && isHost) emitAction('seek', moviePlayer.currentTime);
                 }
                 lastTapTime = 0;
                 showControls();
@@ -1157,178 +1016,6 @@
                 forwardButton.disabled = false;
             }
         });
-
-        // ----------------------------------------------------
-        // WATCH PARTY LOGIC START
-        // ----------------------------------------------------
-        
-        const watchPartyButton = document.getElementById('watchPartyButton');
-        const wpModal = document.getElementById('wpModal');
-        const wpSetup = document.getElementById('wpSetup');
-        const wpActive = document.getElementById('wpActive');
-        const wpHostBtn = document.getElementById('wpHostBtn');
-        const wpJoinBtn = document.getElementById('wpJoinBtn');
-        const wpJoinInput = document.getElementById('wpJoinInput');
-        const wpCloseBtn = document.getElementById('wpCloseBtn');
-        const wpRoomCode = document.getElementById('wpRoomCode');
-        const wpCopyBtn = document.getElementById('wpCopyBtn');
-        const wpEndBtn = document.getElementById('wpEndBtn');
-        const wpLeaveBtn = document.getElementById('wpLeaveBtn');
-        const wpHostControls = document.getElementById('wpHostControls');
-        const wpViewerControls = document.getElementById('wpViewerControls');
-        const wpToast = document.getElementById('wpToast');
-
-        let socket = null;
-        let isWatchPartyActive = false;
-        let isHost = false;
-        let currentRoomId = null;
-
-        watchPartyButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (isWatchPartyActive) {
-                // If active, show active controls immediately
-                wpSetup.style.display = 'none';
-                wpActive.style.display = 'block';
-            } else {
-                // If not active, show setup (FIX: Stale state reset ensuring this view is correct)
-                wpSetup.style.display = 'block';
-                wpActive.style.display = 'none';
-                wpJoinInput.value = '';
-            }
-            wpModal.classList.add('visible');
-        });
-
-        wpCloseBtn.addEventListener('click', () => {
-            wpModal.classList.remove('visible');
-        });
-
-        function showToast(msg) {
-            wpToast.textContent = msg;
-            wpToast.style.display = 'block';
-            setTimeout(() => { wpToast.style.display = 'none'; }, 3000);
-        }
-
-        function initSocket() {
-            if (!socket) {
-                // Assuming the socket server is on the same host or specific URL
-                socket = io('https://api.thirai.me'); 
-                
-                socket.on('connect', () => {
-                    console.log('Connected to socket server');
-                });
-
-                socket.on('player_update', (data) => {
-                    if (!isHost) {
-                        // Viewer receives updates
-                        if (data.type === 'play') {
-                            moviePlayer.currentTime = data.time;
-                            moviePlayer.play();
-                        } else if (data.type === 'pause') {
-                            moviePlayer.currentTime = data.time;
-                            moviePlayer.pause();
-                        } else if (data.type === 'seek') {
-                            moviePlayer.currentTime = data.time;
-                        }
-                    }
-                });
-
-                socket.on('party_joined', (data) => {
-                    isWatchPartyActive = true;
-                    currentRoomId = data.roomId;
-                    isHost = data.isHost;
-                    
-                    wpRoomCode.textContent = currentRoomId;
-                    
-                    wpSetup.style.display = 'none';
-                    wpActive.style.display = 'block';
-                    
-                    if (isHost) {
-                        wpHostControls.style.display = 'block';
-                        wpViewerControls.style.display = 'none';
-                        showToast('Party Created!');
-                    } else {
-                        wpHostControls.style.display = 'none';
-                        wpViewerControls.style.display = 'block';
-                        showToast('Joined Party!');
-                        // Disable controls for viewer? 
-                        // Typically viewers can't control playback, but for simplicity here we just listen
-                    }
-                });
-                
-                // FIX: When party ends, do NOT redirect. Reset state and give control back.
-                socket.on('party_ended', () => {
-                   resetPartyState();
-                   showToast('Host ended the party. You have control.');
-                });
-            }
-        }
-
-        wpHostBtn.addEventListener('click', () => {
-            initSocket();
-            socket.emit('create_party');
-        });
-
-        wpJoinBtn.addEventListener('click', () => {
-            const roomId = wpJoinInput.value.trim();
-            if (roomId) {
-                initSocket();
-                socket.emit('join_party', { roomId: roomId });
-            }
-        });
-
-        wpCopyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(currentRoomId).then(() => {
-                showToast('Room Code Copied!');
-            });
-        });
-
-        // FIX: End Party button logic
-        wpEndBtn.addEventListener('click', () => {
-            if (socket) {
-                socket.emit('end_party', { roomId: currentRoomId });
-            }
-            resetPartyState();
-            showToast('Party Ended');
-        });
-
-        // FIX: Leave Party button logic (No redirect)
-        wpLeaveBtn.addEventListener('click', () => {
-            if (socket) {
-                socket.emit('leave_party', { roomId: currentRoomId });
-            }
-            resetPartyState();
-            showToast('Left Party');
-        });
-
-        function resetPartyState() {
-            // Close modal
-            wpModal.classList.remove('visible');
-            
-            // Disconnect socket (or just leave room logic depending on backend)
-            if (socket) {
-                socket.disconnect();
-                socket = null; 
-            }
-            
-            // Reset variables
-            isWatchPartyActive = false;
-            isHost = false;
-            currentRoomId = null;
-            
-            // Reset UI for next time modal opens (Stale state fix)
-            wpSetup.style.display = 'block';
-            wpActive.style.display = 'none';
-        }
-
-        function emitAction(type, time) {
-            if (socket && isWatchPartyActive && isHost) {
-                socket.emit('player_action', { roomId: currentRoomId, type: type, time: time });
-            }
-        }
-        // ----------------------------------------------------
-        // WATCH PARTY LOGIC END
-        // ----------------------------------------------------
-
     </script>
 </body>
 </html>
