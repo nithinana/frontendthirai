@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thirai - Join Watch Party</title>
+    <title>Thirai - Watch Party</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
@@ -172,7 +172,7 @@
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
         <div id="codeView">
-            <h2 style="font-size: 1.3rem; margin-bottom: 5px;">Enter Room Code</h2>
+            <h2 style="font-size: 1.3rem; margin-bottom: 5px;">Enter Watch Party Code</h2>
             <div class="code-input-container">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
@@ -196,8 +196,8 @@
             
             <div class="user-list" id="userList"></div>
 
-            <input type="text" id="nickname" class="name-input" placeholder="Your Display Name" autocomplete="off">
-            <button class="action-btn" id="joinFinalBtn" disabled>Join Watch Party</button>
+            <input type="text" id="nickname" class="name-input" placeholder="Name" autocomplete="off">
+            <button class="action-btn" id="joinFinalBtn" disabled>Join</button>
         </div>
     </div>
 
