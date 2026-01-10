@@ -36,9 +36,6 @@
             border-radius: 0.375rem;
             padding: 0.5rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             width: 2.5rem;
             height: 2.5rem;
             z-index: 1000;
@@ -67,15 +64,13 @@
         }
         body.dark-mode .container { background-color: #111; box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid #222; }
 
-        /* Logo Sizing Matched to Original join(3).html */
         #logo { 
             display: block; 
             max-width: 175px; 
             height: auto;
-            margin: 0 auto 12px; 
+            margin: 0 auto 15px; 
         }
         
-        /* Phase 1: Code Entry */
         .code-input-container {
             display: flex;
             justify-content: center;
@@ -96,31 +91,30 @@
         body.dark-mode .code-input { color: #fff; background-color: #222; border-color: #333; }
         .code-input:focus { border-color: #0d6efd; }
 
-        /* Phase 2: Lobby */
         #lobbyView { display: none; }
         
         .movie-poster {
-            width: 140px;
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            margin-bottom: 15px;
-            background: #eee;
+            width: 130px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin-bottom: 12px;
+            background: #444;
         }
-        .movie-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
-        .movie-status { font-size: 0.85rem; color: #0d6efd; margin-bottom: 20px; font-weight: 500; }
+        .movie-title { font-size: 1.15rem; font-weight: bold; margin-bottom: 4px; }
+        .movie-status { font-size: 0.8rem; color: #0d6efd; margin-bottom: 15px; height: 1.2rem; }
 
         .user-list {
             background: rgba(0,0,0,0.05);
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 20px;
-            max-height: 120px;
+            max-height: 100px;
             overflow-y: auto;
             text-align: left;
+            border: 1px solid rgba(0,0,0,0.1);
         }
-        body.dark-mode .user-list { background: rgba(255,255,255,0.05); }
-        .user-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        body.dark-mode .user-item { border-bottom-color: rgba(255,255,255,0.05); }
+        body.dark-mode .user-list { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .user-item { font-size: 0.85rem; padding: 5px 0; display: flex; align-items: center; gap: 8px; }
 
         .name-input {
             width: 100%;
@@ -133,7 +127,6 @@
             outline: none;
         }
         body.dark-mode .name-input { background: #222; border-color: #333; color: white; }
-        .name-input:focus { border-color: #0d6efd; }
 
         .action-btn {
             width: 100%;
@@ -145,9 +138,7 @@
             font-size: 1.1em;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s;
         }
-        .action-btn:hover { background-color: #0b5ed7; }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         #loadingSpinner { display: none; margin: 30px; font-size: 2.5rem; color: #0d6efd; animation: spin 1s linear infinite; }
@@ -162,7 +153,7 @@
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
         <div id="codeView">
-            <h2 style="font-size: 1.5rem; margin-bottom: 25px;">Enter Room Code</h2>
+            <h2 style="font-size: 1.4rem; margin-bottom: 20px;">Enter Room Code</h2>
             <div class="code-input-container">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
@@ -174,17 +165,17 @@
             <button class="action-btn" id="checkCodeBtn" disabled>Find Party</button>
         </div>
 
-        <i class="bi bi-arrow-repeat" id="loadingSpinner"></i>
+        <div id="loadingSpinner"><i class="bi bi-arrow-repeat"></i></div>
 
         <div id="lobbyView">
-            <img src="" id="lobbyPoster" class="movie-poster" onerror="this.src='https://via.placeholder.com/140x210?text=Thirai'">
-            <div id="lobbyTitle" class="movie-title">Loading Movie...</div>
+            <img src="" id="lobbyPoster" class="movie-poster" style="display:none;">
+            <div id="lobbyTitle" class="movie-title">Ready to Join</div>
             <div id="lobbyStatus" class="movie-status"></div>
             
             <div class="user-list" id="userList"></div>
 
-            <input type="text" id="nickname" class="name-input" placeholder="Enter Your Name" autocomplete="off">
-            <button class="action-btn" id="joinFinalBtn" disabled>Join Session</button>
+            <input type="text" id="nickname" class="name-input" placeholder="Your Display Name" autocomplete="off">
+            <button class="action-btn" id="joinFinalBtn" disabled>Join Watch Party</button>
         </div>
     </div>
 
@@ -201,75 +192,82 @@
         const socket = io("https://watchpartybackend-b5a2.onrender.com");
 
         function formatTime(s) {
-            if (isNaN(s) || s === null) return "";
+            if (!s && s !== 0) return "";
             const m = Math.floor(s / 60);
             const rs = Math.floor(s % 60);
             return `Host is at ${m.toString().padStart(2, '0')}:${rs.toString().padStart(2, '0')}`;
         }
 
-        // --- PHASE 1 ---
         codeInputs.forEach((input, index) => {
             input.addEventListener('input', () => {
                 input.value = input.value.toUpperCase();
-                if (input.value && index < 5) codeInputs[index + 1].focus();
+                if (input.value && index < 5) codeInputs[index+1].focus();
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !input.value && index > 0) codeInputs[index - 1].focus();
+                if (e.key === 'Backspace' && !input.value && index > 0) codeInputs[index-1].focus();
             });
         });
 
         checkCodeBtn.onclick = () => {
             currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
             codeView.style.display = 'none';
-            loadingSpinner.style.display = 'inline-block';
+            loadingSpinner.style.display = 'block';
             
-            // Join as a "spectator" to fetch lobby info
+            // Connect to fetch room state
             socket.emit('join-room', { roomId: currentRoomId, userName: "Preview_User" });
+            
+            // Safety timeout: If no data in 4 seconds, show the UI anyway
+            setTimeout(() => {
+                if (lobbyView.style.display !== 'block') {
+                    loadingSpinner.style.display = 'none';
+                    lobbyView.style.display = 'block';
+                }
+            }, 4000);
         };
 
-        // --- PHASE 2 ---
         socket.on('joined-room', async (data) => {
             loadingSpinner.style.display = 'none';
             lobbyView.style.display = 'block';
             
-            // Hide NaN or null times
-            const statusText = formatTime(data.time);
-            document.getElementById('lobbyStatus').innerText = statusText;
+            if (data.time) document.getElementById('lobbyStatus').innerText = formatTime(data.time);
 
-            // Extract film code for poster
-            const urlMatch = data.movieUrl.match(/watch\/(\d+)/);
-            if (urlMatch) {
-                try {
-                    const response = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${urlMatch[1]}/?lang=tamil`);
-                    const meta = await response.json();
-                    document.getElementById('lobbyPoster').src = meta.img_url;
-                    document.getElementById('lobbyTitle').innerText = meta.title;
-                } catch (e) {
-                    document.getElementById('lobbyTitle').innerText = "Movie Session Found";
+            if (data.movieUrl) {
+                const urlParams = new URLSearchParams(data.movieUrl.split('?')[1]);
+                const filmCode = urlParams.get('film');
+                if (filmCode) {
+                    try {
+                        const res = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`);
+                        const meta = await res.json();
+                        const poster = document.getElementById('lobbyPoster');
+                        poster.src = meta.img_url;
+                        poster.style.display = 'inline-block';
+                        document.getElementById('lobbyTitle').innerText = meta.title;
+                    } catch(e) {}
                 }
             }
+            // Request latest user list immediately
+            socket.emit('request-sync', { roomId: currentRoomId });
         });
 
         socket.on('user-list', (users) => {
             const list = document.getElementById('userList');
-            // Filter out the Preview_User so it's never visible
-            const filteredUsers = users.filter(u => u.name !== "Preview_User");
+            const realUsers = users.filter(u => u.name !== "Preview_User");
             
-            if (filteredUsers.length === 0) {
-                list.innerHTML = `<div style="text-align:center; font-size:0.8rem; color:#888;">No other users yet</div>`;
+            if (realUsers.length === 0) {
+                list.innerHTML = `<div style="text-align:center; color:#888; font-size:0.8rem;">Waiting for others...</div>`;
             } else {
-                list.innerHTML = filteredUsers.map(u => `
+                list.innerHTML = realUsers.map(u => `
                     <div class="user-item">
-                        <i class="bi bi-person-fill" style="margin-right:8px; color:#0d6efd;"></i>
-                        ${u.name} ${u.isHost ? '<small style="color:#ffc107; font-weight:bold; margin-left:5px;">(Host)</small>' : ''}
+                        <i class="bi bi-person-circle" style="color:#0d6efd"></i>
+                        <span>${u.name} ${u.isHost ? '<b style="color:#ffc107; font-size:0.7rem;">HOST</b>' : ''}</span>
                     </div>
                 `).join('');
             }
         });
 
         nicknameInput.oninput = () => {
-            joinFinalBtn.disabled = nicknameInput.value.trim().length < 2;
+            joinFinalBtn.disabled = nicknameInput.value.trim().length < 1;
         };
 
         joinFinalBtn.onclick = () => {
@@ -277,7 +275,7 @@
             window.location.href = `watch.html?join=${currentRoomId}&nickname=${name}`;
         };
 
-        // Theme management
+        // Theme logic
         const body = document.body;
         const logo = document.getElementById('logo');
         function applyTheme(theme) {
