@@ -802,7 +802,7 @@
             </div>
 
             <div class="user-list-container" id="hostUserList"></div>
-            <button class="modal-action-btn" style="background:#dc3545" id="endPartyBtn">End Party</button>
+            <button class="modal-action-btn" style="background:#dc3545; margin-top: 15px;" id="endPartyBtn">End Party</button>
         </div>
 
         <div id="lobbyScreen">
@@ -935,12 +935,6 @@
         }
 
         function resetModal() {
-            // FIX: If on join link, go to root instead of selection screen
-            if (new URLSearchParams(window.location.search).has('join')) {
-                window.location.href = '/';
-                return;
-            }
-
             selectionScreen.style.display = 'block';
             hostSetup.style.display = 'none';
             joinSetup.style.display = 'none';
@@ -1156,12 +1150,27 @@
         });
 
         socket.on('party-ended', () => {
+            if (socket) socket.disconnect();
+            
+            // Clean up state immediately so controls work
             currentRoomId = null;
             isHost = false;
             updateControlsState();
-            partyModal.style.display = 'none';
-            modalBackdrop.style.display = 'block'; 
             
+            // Hide the active lobby modal
+            partyModal.style.display = 'none';
+            
+            // Reset URL (remove ?join=...) immediately to prevent reload/join loops
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.delete('join');
+            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
+
+            // Reset modal internal UI so next open shows Host/Join
+            resetModal();
+
+            // Show the "Ended" modal and keep backdrop
+            modalBackdrop.style.display = 'block'; 
             document.getElementById('endedTitle').innerText = `${hostNickname} has ended the party`;
             document.getElementById('partyEndedModal').style.display = 'block';
         });
@@ -1169,22 +1178,36 @@
         function closeEndedModal() {
             document.getElementById('partyEndedModal').style.display = 'none';
             modalBackdrop.style.display = 'none';
-            
-            // FIX: Remove join code from URL but stay on page
-            const cleanParams = new URLSearchParams(window.location.search);
-            cleanParams.delete('join');
-            const newUrl = window.location.pathname + (cleanParams.toString() ? '?' + cleanParams.toString() : '');
-            window.history.replaceState({}, '', newUrl);
         }
 
         document.getElementById('endPartyBtn').onclick = () => {
             socket.emit('stop-party', currentRoomId);
+            // Reload host to clear state completely
             location.reload();
         };
 
         document.getElementById('leavePartyBtn').onclick = () => {
-            socket.disconnect(); 
-            location.reload();
+            if (socket) socket.disconnect();
+            
+            // Restore controls
+            currentRoomId = null;
+            isHost = false;
+            updateControlsState();
+
+            // Hide modals
+            partyModal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+            
+            // Clean URL
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.delete('join');
+            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
+            
+            // Reset modal state
+            resetModal();
+            
+            showInternalToast("Left party. You have control.");
         };
 
         function startHostHeartbeat() {
