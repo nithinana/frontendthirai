@@ -211,6 +211,8 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
+            /* Ensure controls don't wrap unexpectedly, but allow shrinking */
+            flex-wrap: nowrap;
         }
 
         .control-button {
@@ -420,6 +422,51 @@
             border: none;
         }
 
+        /* --- RESPONSIVE & PORTRAIT ORGANISATION --- */
+        @media screen and (orientation: portrait) {
+            /* Clean up top controls in portrait */
+            .top-controls {
+                padding: 1rem 0.5rem;
+            }
+            .movie-title-display {
+                font-size: 1rem;
+                margin: 0 0.5rem;
+            }
+            .top-button {
+                padding: 0.5rem;
+                font-size: 1.2rem;
+            }
+            
+            /* Clean up bottom controls in portrait to be neatly laid out */
+            .bottom-controls {
+                padding: 0.5rem 0.5rem 1.5rem;
+                gap: 0.5rem;
+            }
+            
+            .time-display {
+                font-size: 0.8rem; /* Smaller font to fit */
+                min-width: auto;
+            }
+            
+            /* Hide volume slider in portrait to save space, keep icon */
+            .volume-slider {
+                display: none !important;
+            }
+            .volume-container:hover .volume-slider {
+                display: none !important;
+            }
+            
+            #fullscreenButton {
+                font-size: 1.5rem;
+                padding: 0.3rem;
+            }
+            
+            #volumeButton {
+                font-size: 1.5rem;
+                padding: 0.3rem;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -604,7 +651,36 @@
             }
         });
 
+        // --- NEW AUTO-FULLSCREEN & LANDSCAPE LOCK LOGIC ---
+        let hasInteracted = false;
+        function forceImmersion() {
+            if (!hasInteracted) {
+                hasInteracted = true;
+                // Attempt fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log("Fullscreen request failed (likely need explicit gesture):", err);
+                    });
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
+                
+                // Attempt Landscape Lock
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(err => {
+                         console.log("Orientation lock failed (not supported or invalid state):", err);
+                    });
+                }
+            }
+        }
+
+        // Attach forced immersion to multiple interaction points
+        videoPlayerWrapper.addEventListener('click', forceImmersion);
+        videoPlayerWrapper.addEventListener('touchstart', forceImmersion);
+        // --------------------------------------------------
+
         playPauseButton.addEventListener('click', () => {
+            forceImmersion(); // Ensure we try to lock on play click
             if (moviePlayer.paused || moviePlayer.ended) {
                 moviePlayer.play();
             } else {
@@ -794,6 +870,9 @@
         fullscreenButton.addEventListener('click', () => {
             if (document.fullscreenElement) {
                 document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
             } else {
                 if (videoPlayerWrapper.requestFullscreen) {
                     videoPlayerWrapper.requestFullscreen();
@@ -801,6 +880,9 @@
                     videoPlayerWrapper.webkitRequestFullscreen();
                 } else if (videoPlayerWrapper.msRequestFullscreen) {
                     videoPlayerWrapper.msRequestFullscreen();
+                }
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(e => console.log(e));
                 }
             }
             showControls();
@@ -810,6 +892,10 @@
             if (document.fullscreenElement) {
                 fullscreenIcon.classList.remove('bi-arrows-fullscreen');
                 fullscreenIcon.classList.add('bi-arrows-angle-contract');
+                // Try locking again on change
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(e => console.log(e));
+                }
                 if (!moviePlayer.paused) {
                     hideControls();
                 }
