@@ -6,258 +6,260 @@
     <title>Thirai - Watch Party</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root {
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #212529;
-            --border-color: #ccc;
-            --input-bg: #f0f0f0;
-        }
-
-        body.dark-mode {
-            --bg-color: #121212;
-            --card-bg: #111111;
-            --text-color: #e0e0e0;
-            --border-color: #333;
-            --input-bg: #1a1a1a;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden;
-            transition: background-color 0.4s ease;
+            flex-direction: column;
+            position: relative;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        /* Top Navigation Bar */
-        .top-nav {
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        #toggleDarkMode {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .nav-icon-btn {
+            top: 1rem;
+            right: 1rem;
             background-color: #333;
             color: white;
             border: none;
-            border-radius: 0.5rem;
-            width: 2.6rem;
-            height: 2.6rem;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            width: 2.5rem;
+            height: 2.5rem;
+            z-index: 1000;
+        }
+
+        /* UPDATED: Back button is now a transparent box with curved corners */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #212529;
+            font-size: 20px;
+            text-decoration: none;
+            z-index: 10;
+            cursor: pointer;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: transform 0.2s ease;
+            border-radius: 10px; /* Curved corners */
+            background: transparent; /* No background by default */
+            transition: background 0.2s ease, transform 0.1s active;
         }
 
-        .nav-icon-btn:active { transform: scale(0.9); }
+        /* Highlight only on hover */
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
 
-        /* Centered Container */
+        body.dark-mode .back-button { 
+            color: #e0e0e0; 
+        }
+
+        body.dark-mode .back-button:hover {
+            background: rgba(255, 255, 255, 0.1); 
+        }
+
+        /* UPDATED: Resized for mobile with even spacing */
         .container {
-            position: relative;
             text-align: center;
-            background-color: var(--card-bg);
-            padding: 40px 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 380px;
-            transition: background-color 0.4s ease;
-            box-sizing: border-box;
-            border: 1px solid transparent;
+            background-color: #fff;
+            padding: 35px 25px; /* Balanced padding */
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 88%; /* Slightly wider to balance against screen edges */
+            max-width: 360px; /* Optimized width for mobile forms */
+            transition: background-color 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box; /* Ensures padding doesn't affect total width */
         }
 
         body.dark-mode .container { 
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5); 
-            border-color: #222;
+            background-color: #111; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            border: 1px solid #222; 
         }
 
         #logo { 
-            max-width: 125px; 
+            display: block; 
+            max-width: 130px; 
             height: auto;
-            margin-bottom: 25px;
+            margin-bottom: 25px; /* Consistent spacing below logo */
         }
         
-        /* Input & Buttons */
         .code-input-container {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin: 10px 0 25px;
+            gap: 8px; /* Slightly wider gap for touch accuracy */
+            margin: 20px 0 30px;
         }
 
         .code-input {
-            width: 13%;
-            aspect-ratio: 1/1.2;
+            width: 38px;
+            height: 48px;
             text-align: center;
-            font-size: 1.4rem;
+            font-size: 1.4em;
             font-weight: bold;
-            background-color: var(--input-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-color);
+            background-color: #f0f0f0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
             outline: none;
-            transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
-        .code-input:focus { border-color: #0d6efd; }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            width: 100%;
+        body.dark-mode .code-input { 
+            color: #fff; 
+            background-color: #222; 
+            border-color: #333; 
         }
 
-        .action-btn {
-            flex: 1;
-            padding: 14px;
-            background-color: #0d6efd;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: bold;
+        .code-input:focus { 
+            border-color: #0d6efd; 
         }
 
-        .qr-btn {
-            width: 54px;
-            flex: none;
-            background-color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
+        #loadingArea { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 40px 0;
         }
 
-        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .beta-note {
-            margin-top: 18px;
-            font-size: 0.75rem;
-            color: #777;
-            line-height: 1.4;
+        .spinner { 
+            font-size: 2.5rem; 
+            color: #0d6efd; 
+            animation: spin 1s linear infinite; 
         }
 
-        /* Inline QR Scanner */
-        #qr-container {
-            display: none;
-            width: 100%;
-            flex-direction: column;
-        }
-
-        .scanner-box {
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: #000;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-
-        #qr-video { width: 100%; height: 100%; object-fit: cover; }
-
-        .qr-target {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 65%;
-            height: 65%;
-            border: 2px solid #0d6efd;
-            border-radius: 12px;
-            box-shadow: 0 0 0 1000px rgba(0,0,0,0.4);
-        }
-
-        /* Lobby & Loading */
-        #loadingArea { display: none; padding: 30px 0; }
-        .spinner { font-size: 2.5rem; color: #0d6efd; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #lobbyView { display: none; width: 100%; }
-        .movie-poster { width: 100px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #lobbyView { 
+            display: none; 
+            width: 100%; 
+        }
+        
+        .movie-poster {
+            width: 110px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin-bottom: 12px;
+        }
+
+        .movie-title { 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            margin-bottom: 4px; 
+        }
+
+        .movie-status { 
+            font-size: 0.8rem; 
+            color: #0d6efd; 
+            margin-bottom: 15px; 
+        }
+
         .user-list {
             background: rgba(0,0,0,0.05);
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 10px;
-            margin: 15px 0;
-            max-height: 100px;
+            margin-bottom: 20px;
+            max-height: 90px;
             overflow-y: auto;
             text-align: left;
+            border: 1px solid rgba(0,0,0,0.1);
+            width: 100%;
+            box-sizing: border-box;
         }
-        body.dark-mode .user-list { background: rgba(255,255,255,0.05); }
+
+        body.dark-mode .user-list { 
+            background: rgba(255,255,255,0.05); 
+            border-color: rgba(255,255,255,0.1); 
+        }
+
+        .user-item { 
+            font-size: 0.8rem; 
+            padding: 4px 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
 
         .name-input {
             width: 100%;
             padding: 14px;
-            border-radius: 10px;
-            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            border: 2px solid #ccc;
             margin-bottom: 15px;
-            background: transparent;
-            color: inherit;
             box-sizing: border-box;
+            font-size: 1rem;
+            outline: none;
         }
 
-        #error-message { color: #dc3545; font-size: 0.85rem; margin-top: 15px; display: none; }
+        body.dark-mode .name-input { 
+            background: #222; 
+            border-color: #333; 
+            color: white; 
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .action-btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+
+        #error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-
-    <nav class="top-nav">
-        <button id="backBtn" class="nav-icon-btn"><i class="bi bi-arrow-left"></i></button>
-        <button id="toggleDarkMode" class="nav-icon-btn"><i id="modeIcon" class="bi bi-moon-fill"></i></button>
-    </nav>
+    <button id="toggleDarkMode"><i id="modeIcon" class="bi bi-moon-fill"></i></button>
+    
+    <div id="backBtn" class="back-button"><i class="bi bi-arrow-left"></i></div>
     
     <div class="container">
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
         <div id="codeView">
-            <h2 style="font-size: 1.25rem; margin-bottom: 5px;">Join a Watch Party</h2>
+            <h2 style="font-size: 1.3rem; margin-bottom: 5px;">Enter Party Code</h2>
             <div class="code-input-container">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
             </div>
-            
-            <div class="btn-group">
-                <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
-                <button class="action-btn qr-btn" id="startScanner"><i class="bi bi-qr-code-scan"></i></button>
-            </div>
-
-            <div class="beta-note">
-                ⓘ Currently not a publicly available feature. Lmk if you want to try it out early.
-            </div>
-            
+            <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
             <div id="error-message">Invalid or expired room code.</div>
-        </div>
-
-        <div id="qr-container">
-            <h2 style="font-size: 1.25rem; margin-bottom: 15px;">Scan QR Code</h2>
-            <div class="scanner-box">
-                <video id="qr-video" playsinline></video>
-                <div class="qr-target"></div>
-            </div>
-            <button class="action-btn" style="background: #6c757d;" id="stopScanner">Cancel</button>
-            <canvas id="qr-canvas" style="display:none;"></canvas>
         </div>
 
         <div id="loadingArea">
@@ -266,11 +268,13 @@
 
         <div id="lobbyView">
             <img src="" id="lobbyPoster" class="movie-poster">
-            <div id="lobbyTitle" style="font-weight:bold;"></div>
-            <div id="lobbyStatus" style="font-size:0.8rem; color:#0d6efd; margin-top:4px;"></div>
+            <div id="lobbyTitle" class="movie-title"></div>
+            <div id="lobbyStatus" class="movie-status"></div>
+            
             <div class="user-list" id="userList"></div>
-            <input type="text" id="nickname" class="name-input" placeholder="Enter your nickname" autocomplete="off">
-            <button class="action-btn" id="joinFinalBtn" disabled>Join Now</button>
+
+            <input type="text" id="nickname" class="name-input" placeholder="Name" autocomplete="off">
+            <button class="action-btn" id="joinFinalBtn" disabled>Join</button>
         </div>
     </div>
 
@@ -282,79 +286,100 @@
         const codeView = document.getElementById('codeView');
         const lobbyView = document.getElementById('lobbyView');
         const loadingArea = document.getElementById('loadingArea');
-        const qrContainer = document.getElementById('qr-container');
+        const backBtn = document.getElementById('backBtn');
         const errorMessage = document.getElementById('error-message');
-
-        const qrVideo = document.getElementById('qr-video');
-        const qrCanvas = document.getElementById('qr-canvas');
-        const qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
-        let scanning = false;
 
         let currentRoomId = '';
         const socket = io("https://watchpartybackend-b5a2.onrender.com");
 
-        // Back Logic
-        document.getElementById('backBtn').onclick = () => {
+        backBtn.onclick = () => {
             if (codeView.style.display === 'none') {
-                resetUI();
+                resetToStart();
             } else {
                 window.location.href = '/';
             }
         };
 
-        function resetUI() {
-            stopScannerFunc();
-            lobbyView.style.display = 'none';
-            qrContainer.style.display = 'none';
-            loadingArea.style.display = 'none';
-            codeView.style.display = 'block';
-            codeInputs.forEach(i => i.value = '');
-            checkCodeBtn.disabled = true;
-            errorMessage.style.display = 'none';
+        function resetToStart() {
+            if (socket) socket.disconnect();
+            window.location.reload(); 
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (socket) socket.disconnect();
+        });
+
+        function formatTime(s) {
+            if (!s && s !== 0) return "";
+            const m = Math.floor(s / 60);
+            const rs = Math.floor(s % 60);
+            return `Host is at ${m.toString().padStart(2, '0')}:${rs.toString().padStart(2, '0')}`;
         }
 
         codeInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
+            input.addEventListener('input', () => {
+                errorMessage.style.display = 'none';
                 input.value = input.value.toUpperCase();
                 if (input.value && index < 5) codeInputs[index+1].focus();
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
+
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !input.value && index > 0) codeInputs[index-1].focus();
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const data = e.clipboardData.getData('text').toUpperCase().trim();
+                const chars = data.split('');
+
+                chars.forEach((char, i) => {
+                    if (codeInputs[index + i]) {
+                        codeInputs[index + i].value = char;
+                    }
+                });
+
+                const nextIndex = Math.min(index + chars.length, 5);
+                codeInputs[nextIndex].focus();
+                
+                checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
         });
 
         checkCodeBtn.onclick = () => {
-            const code = Array.from(codeInputs).map(i => i.value).join('');
-            initiateRoomCheck(code);
-        };
-
-        function initiateRoomCheck(roomId) {
-            currentRoomId = roomId;
+            currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
             codeView.style.display = 'none';
-            qrContainer.style.display = 'none';
             loadingArea.style.display = 'flex';
             
+            const roomCheckTimeout = setTimeout(() => {
+                if (lobbyView.style.display !== 'block') {
+                    showError();
+                }
+            }, 6000);
+
             socket.emit('join-room', { roomId: currentRoomId, userName: "Preview_User" });
+            
             socket.once('joined-room', async (data) => {
+                clearTimeout(roomCheckTimeout);
                 if (data && data.movieUrl) {
                     processRoomData(data);
                 } else {
                     showError();
                 }
             });
-        }
+        };
 
         async function processRoomData(data) {
             const filmMatch = data.movieUrl.match(/film=([^&]+)/) || data.movieUrl.match(/watch\/(\d+)/);
             const filmCode = filmMatch ? filmMatch[1] : null;
+
             if (filmCode) {
                 try {
                     const res = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`);
                     const meta = await res.json();
                     document.getElementById('lobbyPoster').src = meta.img_url;
                     document.getElementById('lobbyTitle').innerText = meta.title;
-                    document.getElementById('lobbyStatus').innerText = `Syncing with host...`;
+                    document.getElementById('lobbyStatus').innerText = formatTime(data.time);
                     loadingArea.style.display = 'none';
                     lobbyView.style.display = 'block';
                 } catch(e) { showFallback(); }
@@ -365,70 +390,51 @@
             loadingArea.style.display = 'none';
             codeView.style.display = 'block';
             errorMessage.style.display = 'block';
+            codeInputs.forEach(i => i.value = '');
+            codeInputs[0].focus();
         }
 
         function showFallback() {
-            document.getElementById('lobbyTitle').innerText = "Movie Session Found";
+            document.getElementById('lobbyTitle').innerText = "Movie Session";
             loadingArea.style.display = 'none';
             lobbyView.style.display = 'block';
         }
 
-        // QR Logic
-        document.getElementById('startScanner').onclick = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                qrVideo.srcObject = stream;
-                qrVideo.play();
-                codeView.style.display = 'none';
-                qrContainer.style.display = 'flex';
-                scanning = true;
-                requestAnimationFrame(scanFrame);
-            } catch (err) { alert("Camera access denied."); }
+        socket.on('user-list', (users) => {
+            const list = document.getElementById('userList');
+            const realUsers = users.filter(u => u.name !== "Preview_User");
+            if (realUsers.length === 0) {
+                list.innerHTML = `<div style="text-align:center; color:#888; font-size:0.75rem;">Waiting for others...</div>`;
+            } else {
+                list.innerHTML = realUsers.map(u => `
+                    <div class="user-item">
+                        <i class="bi bi-person-circle" style="color:#0d6efd"></i>
+                        <span>${u.name} ${u.isHost ? '<b style="color:#ffc107; font-size:0.65rem; margin-left:3px;">HOST</b>' : ''}</span>
+                    </div>
+                `).join('');
+            }
+        });
+
+        nicknameInput.oninput = () => {
+            joinFinalBtn.disabled = nicknameInput.value.trim().length < 1;
         };
 
-        function stopScannerFunc() {
-            scanning = false;
-            if (qrVideo.srcObject) qrVideo.srcObject.getTracks().forEach(t => t.stop());
-            qrContainer.style.display = 'none';
-        }
-
-        document.getElementById('stopScanner').onclick = () => { stopScannerFunc(); codeView.style.display = 'block'; };
-
-        function scanFrame() {
-            if (!scanning) return;
-            if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
-                qrCanvas.height = qrVideo.videoHeight;
-                qrCanvas.width = qrVideo.videoWidth;
-                qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
-                const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-                if (code) {
-                    const match = code.data.match(/join=([A-Z0-9]{6})/i);
-                    if (match) {
-                        stopScannerFunc();
-                        initiateRoomCheck(match[1].toUpperCase());
-                        return;
-                    }
-                }
-            }
-            requestAnimationFrame(scanFrame);
-        }
-
-        nicknameInput.oninput = () => joinFinalBtn.disabled = nicknameInput.value.trim().length < 1;
         joinFinalBtn.onclick = () => {
             const name = encodeURIComponent(nicknameInput.value.trim());
+            socket.disconnect();
             window.location.href = `watch.html?join=${currentRoomId}&name=${name}`;
         };
 
-        // Theme Toggle
+        const body = document.body;
+        const logo = document.getElementById('logo');
         function applyTheme(theme) {
             const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.body.classList.toggle('dark-mode', isDark);
-            document.getElementById('logo').src = isDark ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
+            body.classList.toggle('dark-mode', isDark);
+            logo.src = isDark ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
             document.getElementById('modeIcon').className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
         }
         document.getElementById('toggleDarkMode').onclick = () => {
-            const nt = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+            const nt = body.classList.contains('dark-mode') ? 'light' : 'dark';
             localStorage.setItem('theme', nt);
             applyTheme(nt);
         };
