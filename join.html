@@ -41,7 +41,7 @@
             z-index: 1000;
         }
 
-        /* UPDATED: Back button is now a transparent box with curved corners */
+        /* Back button: Box with curved corners, highlight on hover */
         .back-button {
             position: absolute;
             top: 20px;
@@ -56,60 +56,44 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px; /* Curved corners */
-            background: transparent; /* No background by default */
-            transition: background 0.2s ease, transform 0.1s active;
+            border-radius: 10px;
+            background: transparent;
+            transition: background 0.2s ease;
         }
+        .back-button:hover { background: rgba(0, 0, 0, 0.08); }
+        body.dark-mode .back-button { color: #e0e0e0; }
+        body.dark-mode .back-button:hover { background: rgba(255, 255, 255, 0.1); }
 
-        /* Highlight only on hover */
-        .back-button:hover {
-            background: rgba(0, 0, 0, 0.08);
-        }
-
-        body.dark-mode .back-button { 
-            color: #e0e0e0; 
-        }
-
-        body.dark-mode .back-button:hover {
-            background: rgba(255, 255, 255, 0.1); 
-        }
-
-        /* UPDATED: Resized for mobile with even spacing */
+        /* Container: Resized for mobile edges */
         .container {
             text-align: center;
             background-color: #fff;
-            padding: 35px 25px; /* Balanced padding */
+            padding: 35px 25px;
             border-radius: 12px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            width: 88%; /* Slightly wider to balance against screen edges */
-            max-width: 360px; /* Optimized width for mobile forms */
+            width: 88%;
+            max-width: 360px;
             transition: background-color 0.5s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-sizing: border-box; /* Ensures padding doesn't affect total width */
+            box-sizing: border-box;
         }
-
-        body.dark-mode .container { 
-            background-color: #111; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
-            border: 1px solid #222; 
-        }
+        body.dark-mode .container { background-color: #111; box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid #222; }
 
         #logo { 
             display: block; 
             max-width: 130px; 
             height: auto;
-            margin-bottom: 25px; /* Consistent spacing below logo */
+            margin-bottom: 25px; 
         }
         
         .code-input-container {
             display: flex;
             justify-content: center;
-            gap: 8px; /* Slightly wider gap for touch accuracy */
+            gap: 8px;
             margin: 20px 0 30px;
         }
-
         .code-input {
             width: 38px;
             height: 48px;
@@ -120,38 +104,15 @@
             border: 2px solid #ccc;
             border-radius: 8px;
             outline: none;
-            box-sizing: border-box;
         }
+        body.dark-mode .code-input { color: #fff; background-color: #222; border-color: #333; }
+        .code-input:focus { border-color: #0d6efd; }
 
-        body.dark-mode .code-input { 
-            color: #fff; 
-            background-color: #222; 
-            border-color: #333; 
-        }
-
-        .code-input:focus { 
-            border-color: #0d6efd; 
-        }
-
-        #loadingArea { 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 40px 0;
-        }
-
-        .spinner { 
-            font-size: 2.5rem; 
-            color: #0d6efd; 
-            animation: spin 1s linear infinite; 
-        }
-
+        #loadingArea { display: none; flex-direction: column; align-items: center; padding: 40px 0; }
+        .spinner { font-size: 2.5rem; color: #0d6efd; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #lobbyView { 
-            display: none; 
-            width: 100%; 
-        }
+        #lobbyView { display: none; width: 100%; }
         
         .movie-poster {
             width: 110px;
@@ -159,18 +120,8 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             margin-bottom: 12px;
         }
-
-        .movie-title { 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            margin-bottom: 4px; 
-        }
-
-        .movie-status { 
-            font-size: 0.8rem; 
-            color: #0d6efd; 
-            margin-bottom: 15px; 
-        }
+        .movie-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
+        .movie-status { font-size: 0.8rem; color: #0d6efd; margin-bottom: 15px; }
 
         .user-list {
             background: rgba(0,0,0,0.05);
@@ -184,19 +135,7 @@
             width: 100%;
             box-sizing: border-box;
         }
-
-        body.dark-mode .user-list { 
-            background: rgba(255,255,255,0.05); 
-            border-color: rgba(255,255,255,0.1); 
-        }
-
-        .user-item { 
-            font-size: 0.8rem; 
-            padding: 4px 0; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
+        body.dark-mode .user-list { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
 
         .name-input {
             width: 100%;
@@ -208,12 +147,7 @@
             font-size: 1rem;
             outline: none;
         }
-
-        body.dark-mode .name-input { 
-            background: #222; 
-            border-color: #333; 
-            color: white; 
-        }
+        body.dark-mode .name-input { background: #222; border-color: #333; color: white; }
 
         .action-btn {
             width: 100%;
@@ -226,11 +160,17 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .action-btn:disabled { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
+        /* Style for the new note under the search button */
+        .feature-note {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 15px;
+            line-height: 1.4;
+            padding: 0 5px;
         }
+        body.dark-mode .feature-note { color: #999; }
 
         #error-message {
             color: #dc3545;
@@ -259,6 +199,9 @@
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
             </div>
             <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
+            <div class="feature-note">
+                ⓘ Currently not a publicly available feature. Lmk if you want to try it out early.
+            </div>
             <div id="error-message">Invalid or expired room code.</div>
         </div>
 
@@ -332,16 +275,9 @@
                 e.preventDefault();
                 const data = e.clipboardData.getData('text').toUpperCase().trim();
                 const chars = data.split('');
-
-                chars.forEach((char, i) => {
-                    if (codeInputs[index + i]) {
-                        codeInputs[index + i].value = char;
-                    }
-                });
-
+                chars.forEach((char, i) => { if (codeInputs[index + i]) codeInputs[index + i].value = char; });
                 const nextIndex = Math.min(index + chars.length, 5);
                 codeInputs[nextIndex].focus();
-                
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
         });
@@ -352,27 +288,20 @@
             loadingArea.style.display = 'flex';
             
             const roomCheckTimeout = setTimeout(() => {
-                if (lobbyView.style.display !== 'block') {
-                    showError();
-                }
+                if (lobbyView.style.display !== 'block') showError();
             }, 6000);
 
             socket.emit('join-room', { roomId: currentRoomId, userName: "Preview_User" });
-            
             socket.once('joined-room', async (data) => {
                 clearTimeout(roomCheckTimeout);
-                if (data && data.movieUrl) {
-                    processRoomData(data);
-                } else {
-                    showError();
-                }
+                if (data && data.movieUrl) processRoomData(data);
+                else showError();
             });
         };
 
         async function processRoomData(data) {
             const filmMatch = data.movieUrl.match(/film=([^&]+)/) || data.movieUrl.match(/watch\/(\d+)/);
             const filmCode = filmMatch ? filmMatch[1] : null;
-
             if (filmCode) {
                 try {
                     const res = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`);
