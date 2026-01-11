@@ -238,6 +238,17 @@
             margin-top: 15px;
             display: none;
         }
+
+        .availability-note {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 12px;
+            line-height: 1.4;
+        }
+
+        body.dark-mode .availability-note {
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
@@ -259,6 +270,7 @@
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
             </div>
             <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
+            <div class="availability-note">ⓘ Currently not publicly available. Lmk if you want to try it out early.</div>
             <div id="error-message">Invalid or expired room code.</div>
         </div>
 
@@ -291,6 +303,21 @@
 
         let currentRoomId = '';
         const socket = io("https://watchpartybackend-b5a2.onrender.com");
+
+        // URL Parameter Handler
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoCode = urlParams.get('code');
+            
+            if (autoCode && autoCode.length === 6) {
+                const chars = autoCode.toUpperCase().split('');
+                chars.forEach((char, i) => {
+                    if (codeInputs[i]) codeInputs[i].value = char;
+                });
+                checkCodeBtn.disabled = false;
+                handleCodeSearch(autoCode.toUpperCase());
+            }
+        });
 
         backBtn.onclick = () => {
             if (codeView.style.display === 'none') {
@@ -340,14 +367,14 @@
                 });
 
                 const nextIndex = Math.min(index + chars.length, 5);
-                codeInputs[nextIndex].focus();
+                if (codeInputs[nextIndex]) codeInputs[nextIndex].focus();
                 
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
         });
 
-        checkCodeBtn.onclick = () => {
-            currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
+        function handleCodeSearch(roomId) {
+            currentRoomId = roomId;
             codeView.style.display = 'none';
             loadingArea.style.display = 'flex';
             
@@ -367,6 +394,11 @@
                     showError();
                 }
             });
+        }
+
+        checkCodeBtn.onclick = () => {
+            const code = Array.from(codeInputs).map(i => i.value).join('');
+            handleCodeSearch(code);
         };
 
         async function processRoomData(data) {
