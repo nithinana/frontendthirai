@@ -1,277 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-HKV7GQ766F');
+    </script>
+    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thirai - Watch Party</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirai</title>
+
+    <link rel="manifest" href="static/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thirai">
+    <link rel="apple-touch-icon" href="/static/ios/icon-192x192.png">
+    <link rel="icon" type="image/png" href="/static/favicon.png" id="faviconLink"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
-        body {
-            background-color: #f8f9fa;
-            color: #212529;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-            position: relative;
-            transition: background-color 0.5s ease, color 0.5s ease;
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --muted-text-color: #6c757d;
+            --card-bg-color: #ffffff;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-border-color: #ced4da;
+            --primary-color: #007bff;
+            --header-bg: rgba(248, 249, 250, 0.85);
         }
 
         body.dark-mode {
-            background-color: #121212;
-            color: #e0e0e0;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --muted-text-color: #adb5bd;
+            --card-bg-color: #1e1e1e;
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            --border-color: #333;
+            --input-bg-color: #282828;
+            --input-border-color: #444;
+            --header-bg: rgba(22, 22, 22, 0.85);
         }
 
-        #toggleDarkMode {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 0.375rem;
-            padding: 0.5rem;
-            cursor: pointer;
-            width: 2.5rem;
-            height: 2.5rem;
-            z-index: 1000;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            padding-top: 80px;
         }
 
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #212529;
-            font-size: 20px;
-            text-decoration: none;
-            z-index: 10;
-            cursor: pointer;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: transparent;
-            transition: background 0.2s ease;
-        }
-        .back-button:hover { background: rgba(0, 0, 0, 0.08); }
-        body.dark-mode .back-button { color: #e0e0e0; }
-        body.dark-mode .back-button:hover { background: rgba(255, 255, 255, 0.1); }
-
-        .container {
-            text-align: center;
-            background-color: #fff;
-            padding: 35px 25px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            width: 88%;
-            max-width: 360px;
-            transition: background-color 0.5s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-sizing: border-box;
-        }
-        body.dark-mode .container { background-color: #111; box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid #222; }
-
-        #logo { 
-            display: block; 
-            max-width: 130px; 
-            height: auto;
-            margin-bottom: 25px; 
-        }
-        
-        .code-input-container {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin: 20px 0 30px;
-        }
-        .code-input {
-            width: 38px;
-            height: 48px;
-            text-align: center;
-            font-size: 1.4em;
-            font-weight: bold;
-            background-color: #f0f0f0;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            outline: none;
-        }
-        body.dark-mode .code-input { color: #fff; background-color: #222; border-color: #333; }
-        .code-input:focus { border-color: #0d6efd; }
-
-        /* Updated Action Group for Search and QR */
-        .action-group {
-            display: flex;
+        /* --- Camera & QR Logic Styling --- */
+        #cameraContainer {
             width: 100%;
-            gap: 10px;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+            margin: 20px auto;
+            border: 4px solid var(--primary-color);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+            display: none; /* Hidden until QR requested */
         }
 
-        .action-btn {
-            flex: 1;
-            padding: 15px;
-            background-color: #0d6efd;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            font-weight: bold;
+        #cameraContainer video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* QR Code Button Style */
-        .qr-btn {
-            width: 54px;
-            height: 54px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f0f0;
-            color: #212529;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.5rem;
-            transition: all 0.2s ease;
+        .btn-cancel-clean {
+            background: transparent;
+            color: var(--muted-text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
-        body.dark-mode .qr-btn { background-color: #222; border-color: #333; color: #fff; }
-        .qr-btn:hover { background-color: #e2e2e2; }
-        body.dark-mode .qr-btn:hover { background-color: #333; }
 
-        /* QR Scanner Overlay */
-        #reader-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .btn-cancel-clean:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
         }
-        #reader { width: 300px; border-radius: 12px; overflow: hidden; }
 
-        .feature-note { font-size: 0.75rem; color: #6c757d; margin-top: 15px; }
-        body.dark-mode .feature-note { color: #999; }
-        #error-message { color: #dc3545; font-size: 0.85rem; margin-top: 15px; display: none; }
-
-        /* Lobby styles omitted for brevity, same as original */
-        #lobbyView { display: none; width: 100%; }
-        .movie-poster { width: 110px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); margin-bottom: 12px; }
-        .movie-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
-        .movie-status { font-size: 0.8rem; color: #0d6efd; margin-bottom: 15px; }
-        .user-list { background: rgba(0,0,0,0.05); border-radius: 8px; padding: 10px; margin-bottom: 20px; max-height: 90px; overflow-y: auto; text-align: left; border: 1px solid rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
-        body.dark-mode .user-list { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-        .name-input { width: 100%; padding: 14px; border-radius: 8px; border: 2px solid #ccc; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; outline: none; }
-        body.dark-mode .name-input { background: #222; border-color: #333; color: white; }
+        /* Existing Styles ... */
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            padding: 0.75rem 1rem;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header-logo { height: 30px; }
+        .settings-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; }
     </style>
 </head>
 <body>
-    <button id="toggleDarkMode"><i id="modeIcon" class="bi bi-moon-fill"></i></button>
-    <div id="backBtn" class="back-button"><i class="bi bi-arrow-left"></i></div>
-    
-    <div id="reader-overlay">
-        <div id="reader"></div>
-        <button class="action-btn" style="margin-top: 20px; max-width: 200px;" onclick="stopScanner()">Cancel</button>
-    </div>
-    
-    <div class="container">
-        <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
-        <div id="codeView">
-            <h2 style="font-size: 1.3rem; margin-bottom: 5px;">Enter Party Code</h2>
-            <div class="code-input-container">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]">
-            </div>
+    <header class="app-header">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <a href="/"><img src="/static/thiraiblack.png" alt="Logo" class="header-logo" id="headerLogo"></a>
             
-            <div class="action-group">
-                <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
-                <button class="qr-btn" id="qrScanBtn"><i class="bi bi-qr-code-scan"></i></button>
+            <div class="d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="settings-btn" type="button" data-bs-toggle="dropdown"><i class="bi bi-gear-fill"></i></button>
+                    <ul class="dropdown-item dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Appearance</h6></li>
+                        <li><a class="dropdown-item theme-option" data-theme="light" href="#">Light</a></li>
+                        <li><a class="dropdown-item theme-option" data-theme="dark" href="#">Dark</a></li>
+                        <li><a class="dropdown-item theme-option" data-theme="system" href="#">System</a></li>
+                    </ul>
+                </div>
             </div>
+        </div>
+    </header>
 
-            <div class="feature-note">ⓘ Currently not a publicly available feature. Lmk if you want to try it out early.</div>
-            <div id="error-message">Invalid or expired room code.</div>
+    <main class="container py-4 text-center">
+        <div id="cameraSection">
+            <div id="cameraContainer">
+                <video id="qrVideo"></video>
+            </div>
+            <button id="cancelScanner" class="btn-cancel-clean mt-3" style="display:none;">Cancel Scan</button>
         </div>
 
-        <div id="lobbyView">
-            <img src="" id="lobbyPoster" class="movie-poster">
-            <div id="lobbyTitle" class="movie-title"></div>
-            <div id="lobbyStatus" class="movie-status"></div>
-            <div class="user-list" id="userList"></div>
-            <input type="text" id="nickname" class="name-input" placeholder="Name">
-            <button class="action-btn" id="joinFinalBtn" disabled>Join</button>
+        <div class="mt-4">
+            <input type="text" id="joinInput" class="form-control mx-auto" style="max-width:300px" placeholder="Enter Code">
         </div>
-    </div>
+    </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ... Previous code input and socket logic ...
-        const codeInputs = document.querySelectorAll('.code-input');
-        const checkCodeBtn = document.getElementById('checkCodeBtn');
-        const qrScanBtn = document.getElementById('qrScanBtn');
-        const overlay = document.getElementById('reader-overlay');
-        let html5QrCode;
+        /** 1. URL LOGIC: AUTO-INPUT JOIN CODE **/
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const joinCode = urlParams.get('join');
+            const inputField = document.getElementById('joinInput');
 
-        // QR Scanning Logic
-        qrScanBtn.onclick = () => {
-            overlay.style.display = 'flex';
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    try {
-                        const url = new URL(decodedText);
-                        // Security check: Only thirai.me domains
-                        if (url.hostname === 'thirai.me' || url.hostname.endsWith('.thirai.me')) {
-                            stopScanner();
-                            window.location.href = decodedText;
-                        } else {
-                            alert("Only thirai.me QR codes are supported.");
-                        }
-                    } catch (e) {
-                        alert("Invalid QR code format.");
-                    }
-                }
-            ).catch(err => {
-                alert("Camera access denied or error: " + err);
-                stopScanner();
-            });
-        };
-
-        function stopScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    overlay.style.display = 'none';
-                });
-            } else {
-                overlay.style.display = 'none';
+            if (joinCode && inputField) {
+                inputField.value = joinCode;
+                console.log("Join code auto-filled:", joinCode);
+                // Trigger join logic automatically if needed:
+                // submitJoinCode(joinCode);
             }
+        });
+
+        /** 2. DARK/LIGHT MODE LOGIC **/
+        function applyTheme(theme) {
+            const logo = document.getElementById('headerLogo');
+            if (theme === 'system') {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                if(logo) logo.src = '/static/thiraiwhite.png';
+            } else {
+                document.body.classList.remove('dark-mode');
+                if(logo) logo.src = '/static/thiraiblack.png';
+            }
+            localStorage.setItem('theme', theme);
         }
 
-        // Rest of your logic (socket, inputs, theme) from previous version goes here
-        codeInputs.forEach((input, index) => {
-            input.addEventListener('input', () => {
-                input.value = input.value.toUpperCase();
-                if (input.value && index < 5) codeInputs[index+1].focus();
-                checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'system';
+        applyTheme(savedTheme);
+
+        // Add Listeners to Dropdown
+        document.querySelectorAll('.theme-option').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                applyTheme(item.getAttribute('data-theme'));
             });
         });
 
-        // (Include Socket.io logic and Join buttons from your snippet)
+        /** 3. CAMERA BOX TOGGLE (Example Trigger) **/
+        function startScanner() {
+            document.getElementById('cameraContainer').style.display = 'block';
+            document.getElementById('cancelScanner').style.display = 'inline-block';
+            // Start your QR Library logic here...
+        }
+
+        document.getElementById('cancelScanner').onclick = () => {
+            document.getElementById('cameraContainer').style.display = 'none';
+            document.getElementById('cancelScanner').style.display = 'none';
+        };
     </script>
 </body>
 </html>
