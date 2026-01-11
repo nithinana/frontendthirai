@@ -196,12 +196,7 @@
             height: 1.5rem;
         }
 
-        .center-controls {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
+        /* --- BOTTOM CONTROLS CONTAINER --- */
         .bottom-controls {
             width: 100%;
             padding: 1rem 1.5rem 2rem;
@@ -211,9 +206,85 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            /* Ensure controls don't wrap unexpectedly, but allow shrinking */
             flex-wrap: nowrap;
         }
+
+        /* --- MAIN PLAYBACK CONTROLS (RW/PLAY/FF) --- */
+        .main-playback-controls {
+            /* LANDSCAPE DEFAULT: Positioned Absolute Center */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            z-index: 20;
+        }
+
+        /* --- UTILITY GROUP (Time, Vol, FS) --- */
+        /* To keep them grouped in landscape */
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .controls-left { order: 0; }
+        .controls-right { order: 2; }
+
+        /* Progress Bar Wrapper */
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: grab;
+            position: relative;
+            margin: 0 1rem;
+            order: 1; /* In landscape, it sits between left and right controls */
+        }
+
+        /* --- PORTRAIT / ROTATE MODE OVERRIDES --- */
+        /* This class is toggled by JS or Media Query */
+        .custom-controls-overlay.portrait-mode .bottom-controls {
+            flex-direction: column; /* Stack vertically */
+            padding-bottom: 3rem;
+            gap: 1.5rem;
+        }
+
+        .custom-controls-overlay.portrait-mode .progress-bar-container {
+            width: 100%;
+            margin: 0;
+            order: 1; /* Put Progress Bar FIRST (Top of bottom section) */
+        }
+
+        /* Create a row for ALL buttons in portrait */
+        .custom-controls-overlay.portrait-mode .portrait-button-row {
+            display: flex;
+            width: 100%;
+            justify-content: space-evenly; /* Equally spaced */
+            align-items: center;
+            order: 2; /* Below progress bar */
+        }
+
+        /* Move Main Playback controls BACK into flow for Portrait */
+        .custom-controls-overlay.portrait-mode .main-playback-controls {
+            position: static;
+            transform: none;
+            gap: 1rem;
+        }
+
+        /* In Landscape, we hide the wrapper .portrait-button-row's display properties
+           but the children inside need to be managed carefully. 
+           Actually, we will just change how the children flow. 
+        */
+        
+        /* Helper to handle the structure difference */
+        .portrait-button-row {
+            display: contents; /* In landscape, act as if this div doesn't exist */
+        }
+
 
         .control-button {
             background: rgba(255, 255, 255, 0.2);
@@ -246,15 +317,15 @@
             font-size: 3.5rem;
             padding: 1.2rem;
         }
-
-        .progress-bar-container {
-            flex-grow: 1;
-            height: 8px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            cursor: grab;
-            position: relative;
-            margin: 0 1rem;
+        
+        /* Adjust button sizes in portrait mode to fit */
+        .custom-controls-overlay.portrait-mode #playPauseButton {
+            font-size: 2.8rem;
+            padding: 1rem;
+        }
+        .custom-controls-overlay.portrait-mode .control-button {
+             font-size: 1.8rem;
+             padding: 0.6rem;
         }
 
         .progress-bar {
@@ -288,10 +359,6 @@
             color: white;
             font-size: 1rem;
             white-space: nowrap;
-            order: 2;
-        }
-        .progress-bar-container {
-            order: 1;
         }
 
         .spinner-border {
@@ -348,7 +415,6 @@
             box-shadow: none;
             padding: 0.5rem;
             font-size: 1.8rem;
-            order: 10;
         }
 
         #fullscreenButton:hover:not(:disabled) {
@@ -359,7 +425,6 @@
         .volume-container {
             display: flex;
             align-items: center;
-            order: 4;
             position: relative;
         }
 
@@ -402,6 +467,11 @@
             width: 70px;
             opacity: 1;
         }
+        
+        /* Hide volume slider in portrait mode */
+        .custom-controls-overlay.portrait-mode .volume-slider {
+            display: none !important;
+        }
 
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -422,51 +492,6 @@
             border: none;
         }
 
-        /* --- RESPONSIVE & PORTRAIT ORGANISATION --- */
-        @media screen and (orientation: portrait) {
-            /* Clean up top controls in portrait */
-            .top-controls {
-                padding: 1rem 0.5rem;
-            }
-            .movie-title-display {
-                font-size: 1rem;
-                margin: 0 0.5rem;
-            }
-            .top-button {
-                padding: 0.5rem;
-                font-size: 1.2rem;
-            }
-            
-            /* Clean up bottom controls in portrait to be neatly laid out */
-            .bottom-controls {
-                padding: 0.5rem 0.5rem 1.5rem;
-                gap: 0.5rem;
-            }
-            
-            .time-display {
-                font-size: 0.8rem; /* Smaller font to fit */
-                min-width: auto;
-            }
-            
-            /* Hide volume slider in portrait to save space, keep icon */
-            .volume-slider {
-                display: none !important;
-            }
-            .volume-container:hover .volume-slider {
-                display: none !important;
-            }
-            
-            #fullscreenButton {
-                font-size: 1.5rem;
-                padding: 0.3rem;
-            }
-            
-            #volumeButton {
-                font-size: 1.5rem;
-                padding: 0.3rem;
-            }
-        }
-
     </style>
 </head>
 <body>
@@ -485,42 +510,54 @@
                 </a>
                 <button id="magnificationButton" class="top-button">
                     <i class="bi bi-zoom-in"></i> </button>
+                <button id="rotateButton" class="top-button">
+                    <i class="bi bi-phone-flip"></i>
+                </button>
                 <button id="castButton" class="top-button" style="display: none;">
                     <i class="bi bi-cast"></i>
                 </button>
             </div>
 
-            <div class="center-controls">
-                <button id="rewindButton" class="control-button">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </button>
-                <button id="playPauseButton" class="control-button">
-                    <i class="bi bi-play-fill"></i>
-                    <div class="spinner-border" role="status" style="display: none;">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </button>
-                <button id="forwardButton" class="control-button">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </button>
-            </div>
-
             <div class="bottom-controls">
+                
+                <div class="portrait-button-row">
+                    <div class="controls-left">
+                        <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+                    </div>
+
+                    <div class="main-playback-controls">
+                        <button id="rewindButton" class="control-button">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                        <button id="playPauseButton" class="control-button">
+                            <i class="bi bi-play-fill"></i>
+                            <div class="spinner-border" role="status" style="display: none;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </button>
+                        <button id="forwardButton" class="control-button">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+
+                    <div class="controls-right">
+                         <div class="volume-container">
+                            <button id="volumeButton">
+                                <i class="bi bi-volume-up-fill"></i>
+                            </button>
+                            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1">
+                        </div>
+                        <button id="fullscreenButton" class="control-button">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="progress-bar-container" id="progressBarContainer">
                     <div class="progress-bar" id="progressBar"></div>
                     <div class="progress-bar-handle" id="progressBarHandle"></div>
                 </div>
-                <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
-                
-                <div class="volume-container">
-                    <button id="volumeButton">
-                        <i class="bi bi-volume-up-fill"></i>
-                    </button>
-                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1">
-                </div>
-                <button id="fullscreenButton" class="control-button">
-                    <i class="bi bi-arrows-fullscreen"></i>
-                </button>
+
             </div>
         </div>
     </div>
@@ -549,6 +586,7 @@
         const volumeButton = document.getElementById('volumeButton');
         const volumeIcon = volumeButton.querySelector('i');
         const volumeSlider = document.getElementById('volumeSlider');
+        const rotateButton = document.getElementById('rotateButton');
 
         let zoomLevel = 1;
         let lastVolume = 1;
@@ -560,7 +598,41 @@
         const SEEK_TIME = 10;
         let movieKey;
         
-        // --- CACHE / CONTINUE WATCHING CONSTANTS ---
+        // --- LAYOUT MODE LOGIC ---
+        // We use a CSS class 'portrait-mode' to switch layouts.
+        // We detect orientation on load/resize, but 'rotateButton' overrides it.
+        
+        let isManualRotationOverride = false;
+        
+        function updateLayoutMode() {
+            // If user hasn't manually clicked rotate, use screen dimensions
+            if (!isManualRotationOverride) {
+                const isPortrait = window.innerHeight > window.innerWidth;
+                if (isPortrait) {
+                    customControlsOverlay.classList.add('portrait-mode');
+                } else {
+                    customControlsOverlay.classList.remove('portrait-mode');
+                }
+            }
+        }
+
+        window.addEventListener('resize', updateLayoutMode);
+        // Run once on start
+        updateLayoutMode();
+
+        rotateButton.addEventListener('click', () => {
+            isManualRotationOverride = true; 
+            // Toggle the class manually
+            if (customControlsOverlay.classList.contains('portrait-mode')) {
+                customControlsOverlay.classList.remove('portrait-mode');
+            } else {
+                customControlsOverlay.classList.add('portrait-mode');
+            }
+            showControls();
+        });
+
+        // -------------------------
+
         const CACHE_KEY = 'thirai_continue_watching';
 
         function saveToContinueWatching(movie) {
@@ -650,37 +722,26 @@
                 toggleControls();
             }
         });
-
-        // --- NEW AUTO-FULLSCREEN & LANDSCAPE LOCK LOGIC ---
+        
         let hasInteracted = false;
-        function forceImmersion() {
+        function forceFull() {
             if (!hasInteracted) {
                 hasInteracted = true;
-                // Attempt fullscreen
                 if (document.documentElement.requestFullscreen) {
                     document.documentElement.requestFullscreen().catch(err => {
-                        console.log("Fullscreen request failed (likely need explicit gesture):", err);
+                        console.log("Fullscreen request failed:", err);
                     });
                 } else if (document.documentElement.webkitRequestFullscreen) {
                     document.documentElement.webkitRequestFullscreen();
                 }
-                
-                // Attempt Landscape Lock
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(err => {
-                         console.log("Orientation lock failed (not supported or invalid state):", err);
-                    });
-                }
             }
         }
-
-        // Attach forced immersion to multiple interaction points
-        videoPlayerWrapper.addEventListener('click', forceImmersion);
-        videoPlayerWrapper.addEventListener('touchstart', forceImmersion);
-        // --------------------------------------------------
+        
+        videoPlayerWrapper.addEventListener('click', forceFull);
+        videoPlayerWrapper.addEventListener('touchstart', forceFull);
 
         playPauseButton.addEventListener('click', () => {
-            forceImmersion(); // Ensure we try to lock on play click
+            forceFull();
             if (moviePlayer.paused || moviePlayer.ended) {
                 moviePlayer.play();
             } else {
@@ -870,9 +931,6 @@
         fullscreenButton.addEventListener('click', () => {
             if (document.fullscreenElement) {
                 document.exitFullscreen();
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
             } else {
                 if (videoPlayerWrapper.requestFullscreen) {
                     videoPlayerWrapper.requestFullscreen();
@@ -880,9 +938,6 @@
                     videoPlayerWrapper.webkitRequestFullscreen();
                 } else if (videoPlayerWrapper.msRequestFullscreen) {
                     videoPlayerWrapper.msRequestFullscreen();
-                }
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(e => console.log(e));
                 }
             }
             showControls();
@@ -892,10 +947,6 @@
             if (document.fullscreenElement) {
                 fullscreenIcon.classList.remove('bi-arrows-fullscreen');
                 fullscreenIcon.classList.add('bi-arrows-angle-contract');
-                // Try locking again on change
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(e => console.log(e));
-                }
                 if (!moviePlayer.paused) {
                     hideControls();
                 }
