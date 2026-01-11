@@ -17,8 +17,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            flex-direction: column;
-            position: relative;
+            overflow: hidden;
             transition: background-color 0.5s ease, color 0.5s ease;
         }
 
@@ -42,153 +41,137 @@
             z-index: 1000;
         }
 
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #212529;
-            font-size: 20px;
-            text-decoration: none;
-            z-index: 10;
-            cursor: pointer;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: transparent;
-            transition: background 0.2s ease, transform 0.1s active;
-        }
-
-        .back-button:hover {
-            background: rgba(0, 0, 0, 0.08);
-        }
-
-        body.dark-mode .back-button { 
-            color: #e0e0e0; 
-        }
-
-        body.dark-mode .back-button:hover {
-            background: rgba(255, 255, 255, 0.1); 
-        }
-
         .container {
+            position: relative;
             text-align: center;
             background-color: #fff;
-            padding: 35px 25px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            width: 88%;
-            max-width: 360px;
+            padding: 40px 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 380px;
+            max-height: 90vh;
             transition: background-color 0.5s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         body.dark-mode .container { 
             background-color: #111; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
             border: 1px solid #222; 
         }
 
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: inherit;
+            font-size: 20px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover { background: rgba(0, 0, 0, 0.05); }
+        body.dark-mode .back-button:hover { background: rgba(255, 255, 255, 0.1); }
+
         #logo { 
-            display: block; 
-            max-width: 130px; 
+            max-width: 120px; 
             height: auto;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .code-input-container {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin: 20px 0 30px;
+            gap: 6px;
+            margin: 15px 0 25px;
+            width: 100%;
         }
 
         .code-input {
-            width: 38px;
-            height: 48px;
+            width: 14%;
+            aspect-ratio: 4/5;
             text-align: center;
-            font-size: 1.4em;
+            font-size: 1.3rem;
             font-weight: bold;
             background-color: #f0f0f0;
             border: 2px solid #ccc;
             border-radius: 8px;
             outline: none;
-            box-sizing: border-box;
         }
 
         body.dark-mode .code-input { 
             color: #fff; 
-            background-color: #222; 
+            background-color: #1a1a1a; 
             border-color: #333; 
         }
 
-        .code-input:focus { 
-            border-color: #0d6efd; 
-        }
+        .code-input:focus { border-color: #0d6efd; }
 
         .btn-group {
             display: flex;
             gap: 10px;
             width: 100%;
+            margin-top: 5px;
         }
 
         .action-btn {
             flex: 1;
-            padding: 15px;
+            padding: 14px;
             background-color: #0d6efd;
             color: #fff;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
+            border-radius: 10px;
+            font-size: 1rem;
             cursor: pointer;
             font-weight: bold;
         }
 
         .qr-btn {
-            width: 54px;
-            background-color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
+            width: 52px;
             flex: none;
+            background-color: #6c757d;
+            font-size: 1.2rem;
         }
 
-        .action-btn:disabled { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-        }
+        .action-btn:disabled { opacity: 0.5; }
 
-        /* Beta Note Styling */
         .beta-note {
-            margin-top: 15px;
-            font-size: 0.75rem;
-            color: #666;
+            margin-top: 18px;
+            font-size: 0.72rem;
+            color: #6c757d;
             line-height: 1.4;
-            max-width: 90%;
+            padding: 0 10px;
         }
 
-        body.dark-mode .beta-note {
-            color: #999;
-        }
+        body.dark-mode .beta-note { color: #888; }
 
-        #qr-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 2000;
+        /* QR Scanner - Inside Box */
+        #qr-container {
             display: none;
+            width: 100%;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+        }
+
+        .scanner-viewport {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #000;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
         }
 
         #qr-video {
@@ -197,140 +180,71 @@
             object-fit: cover;
         }
 
-        .qr-close {
+        .qr-guide-box {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 2rem;
-            z-index: 2001;
-            cursor: pointer;
-        }
-
-        .qr-guide {
-            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
             border: 2px solid #0d6efd;
-            width: 250px;
-            height: 250px;
-            border-radius: 20px;
-            box-shadow: 0 0 0 4000px rgba(0,0,0,0.5);
-            z-index: 2001;
+            border-radius: 15px;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.4);
             pointer-events: none;
         }
 
-        #loadingArea { 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 40px 0;
-        }
-
-        .spinner { 
-            font-size: 2.5rem; 
-            color: #0d6efd; 
-            animation: spin 1s linear infinite; 
-        }
-
+        #loadingArea { display: none; padding: 40px 0; }
+        .spinner { font-size: 2.5rem; color: #0d6efd; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #lobbyView { 
-            display: none; 
-            width: 100%; 
-        }
-        
-        .movie-poster {
-            width: 110px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            margin-bottom: 12px;
-        }
-
-        .movie-title { 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            margin-bottom: 4px; 
-        }
-
-        .movie-status { 
-            font-size: 0.8rem; 
-            color: #0d6efd; 
-            margin-bottom: 15px; 
-        }
+        #lobbyView { display: none; width: 100%; }
+        .movie-poster { width: 100px; border-radius: 8px; margin-bottom: 10px; }
+        .movie-title { font-size: 1.1rem; font-weight: bold; }
+        .movie-status { font-size: 0.8rem; color: #0d6efd; margin-bottom: 15px; }
 
         .user-list {
-            background: rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.04);
             border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 20px;
-            max-height: 90px;
+            padding: 8px;
+            margin-bottom: 15px;
+            max-height: 80px;
             overflow-y: auto;
-            text-align: left;
-            border: 1px solid rgba(0,0,0,0.1);
             width: 100%;
             box-sizing: border-box;
         }
 
-        body.dark-mode .user-list { 
-            background: rgba(255,255,255,0.05); 
-            border-color: rgba(255,255,255,0.1); 
-        }
-
-        .user-item { 
-            font-size: 0.8rem; 
-            padding: 4px 0; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
+        body.dark-mode .user-list { background: rgba(255,255,255,0.05); }
 
         .name-input {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border-radius: 8px;
             border: 2px solid #ccc;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             box-sizing: border-box;
-            font-size: 1rem;
-            outline: none;
+            background: transparent;
+            color: inherit;
         }
 
-        body.dark-mode .name-input { 
-            background: #222; 
-            border-color: #333; 
-            color: white; 
-        }
-
-        #error-message {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 15px;
-            display: none;
-        }
+        #error-message { color: #dc3545; font-size: 0.8rem; margin-top: 12px; display: none; }
     </style>
 </head>
 <body>
     <button id="toggleDarkMode"><i id="modeIcon" class="bi bi-moon-fill"></i></button>
-    <div id="backBtn" class="back-button"><i class="bi bi-arrow-left"></i></div>
-
-    <div id="qr-overlay">
-        <div class="qr-close" id="closeScanner"><i class="bi bi-x-lg"></i></div>
-        <div class="qr-guide"></div>
-        <video id="qr-video" playsinline></video>
-        <canvas id="qr-canvas" style="display:none;"></canvas>
-    </div>
     
     <div class="container">
+        <div id="backBtn" class="back-button"><i class="bi bi-arrow-left"></i></div>
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
-        <div id="codeView">
-            <h2 style="font-size: 1.3rem; margin-bottom: 5px;">Enter Party Code</h2>
+        <div id="codeView" style="width: 100%;">
+            <h2 style="font-size: 1.2rem; margin: 0;">Enter Party Code</h2>
             <div class="code-input-container">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
-                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
+                <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text">
             </div>
             
             <div class="btn-group">
@@ -345,6 +259,16 @@
             <div id="error-message">Invalid or expired room code.</div>
         </div>
 
+        <div id="qr-container">
+            <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Scan QR Code</h2>
+            <div class="scanner-viewport">
+                <video id="qr-video" playsinline></video>
+                <div class="qr-guide-box"></div>
+            </div>
+            <button class="action-btn" style="background: #6c757d;" id="stopScanner">Cancel</button>
+            <canvas id="qr-canvas" style="display:none;"></canvas>
+        </div>
+
         <div id="loadingArea">
             <i class="bi bi-arrow-repeat spinner"></i>
         </div>
@@ -353,11 +277,9 @@
             <img src="" id="lobbyPoster" class="movie-poster">
             <div id="lobbyTitle" class="movie-title"></div>
             <div id="lobbyStatus" class="movie-status"></div>
-            
             <div class="user-list" id="userList"></div>
-
-            <input type="text" id="nickname" class="name-input" placeholder="Name" autocomplete="off">
-            <button class="action-btn" id="joinFinalBtn" disabled>Join</button>
+            <input type="text" id="nickname" class="name-input" placeholder="Your Name" autocomplete="off">
+            <button class="action-btn" id="joinFinalBtn" disabled>Join Party</button>
         </div>
     </div>
 
@@ -369,13 +291,13 @@
         const codeView = document.getElementById('codeView');
         const lobbyView = document.getElementById('lobbyView');
         const loadingArea = document.getElementById('loadingArea');
+        const qrContainer = document.getElementById('qr-container');
         const backBtn = document.getElementById('backBtn');
         const errorMessage = document.getElementById('error-message');
 
-        const qrOverlay = document.getElementById('qr-overlay');
         const qrVideo = document.getElementById('qr-video');
         const startScanner = document.getElementById('startScanner');
-        const closeScanner = document.getElementById('closeScanner');
+        const stopScanner = document.getElementById('stopScanner');
         const qrCanvas = document.getElementById('qr-canvas');
         const qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
         let scanning = false;
@@ -384,70 +306,47 @@
         const socket = io("https://watchpartybackend-b5a2.onrender.com");
 
         backBtn.onclick = () => {
-            if (codeView.style.display === 'none') {
-                resetToStart();
+            if (lobbyView.style.display === 'block' || qrContainer.style.display === 'flex') {
+                resetView();
             } else {
                 window.location.href = '/';
             }
         };
 
-        function resetToStart() {
-            if (socket) socket.disconnect();
-            window.location.reload(); 
-        }
-
-        window.addEventListener('beforeunload', () => {
-            if (socket) socket.disconnect();
-        });
-
-        function formatTime(s) {
-            if (!s && s !== 0) return "";
-            const m = Math.floor(s / 60);
-            const rs = Math.floor(s % 60);
-            return `Host is at ${m.toString().padStart(2, '0')}:${rs.toString().padStart(2, '0')}`;
+        function resetView() {
+            stopScannerFunc();
+            lobbyView.style.display = 'none';
+            qrContainer.style.display = 'none';
+            loadingArea.style.display = 'none';
+            codeView.style.display = 'block';
+            codeInputs.forEach(i => i.value = '');
+            errorMessage.style.display = 'none';
         }
 
         codeInputs.forEach((input, index) => {
             input.addEventListener('input', () => {
-                errorMessage.style.display = 'none';
                 input.value = input.value.toUpperCase();
                 if (input.value && index < 5) codeInputs[index+1].focus();
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
-
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !input.value && index > 0) codeInputs[index-1].focus();
-            });
-
-            input.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const data = e.clipboardData.getData('text').toUpperCase().trim();
-                const chars = data.split('');
-                chars.forEach((char, i) => { if (codeInputs[index + i]) codeInputs[index + i].value = char; });
-                const nextIndex = Math.min(index + chars.length, 5);
-                codeInputs[nextIndex].focus();
-                checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
         });
 
         checkCodeBtn.onclick = () => {
-            currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
-            initiateRoomCheck(currentRoomId);
+            const code = Array.from(codeInputs).map(i => i.value).join('');
+            initiateRoomCheck(code);
         };
 
         function initiateRoomCheck(roomId) {
             currentRoomId = roomId;
             codeView.style.display = 'none';
+            qrContainer.style.display = 'none';
             loadingArea.style.display = 'flex';
             
-            const roomCheckTimeout = setTimeout(() => {
-                if (lobbyView.style.display !== 'block') showError();
-            }, 6000);
-
             socket.emit('join-room', { roomId: currentRoomId, userName: "Preview_User" });
-            
             socket.once('joined-room', async (data) => {
-                clearTimeout(roomCheckTimeout);
                 if (data && data.movieUrl) {
                     processRoomData(data);
                 } else {
@@ -459,14 +358,13 @@
         async function processRoomData(data) {
             const filmMatch = data.movieUrl.match(/film=([^&]+)/) || data.movieUrl.match(/watch\/(\d+)/);
             const filmCode = filmMatch ? filmMatch[1] : null;
-
             if (filmCode) {
                 try {
                     const res = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`);
                     const meta = await res.json();
                     document.getElementById('lobbyPoster').src = meta.img_url;
                     document.getElementById('lobbyTitle').innerText = meta.title;
-                    document.getElementById('lobbyStatus').innerText = formatTime(data.time);
+                    document.getElementById('lobbyStatus').innerText = `Host is at ${Math.floor(data.time/60)}:${Math.floor(data.time%60).toString().padStart(2,'0')}`;
                     loadingArea.style.display = 'none';
                     lobbyView.style.display = 'block';
                 } catch(e) { showFallback(); }
@@ -477,8 +375,6 @@
             loadingArea.style.display = 'none';
             codeView.style.display = 'block';
             errorMessage.style.display = 'block';
-            codeInputs.forEach(i => i.value = '');
-            codeInputs[0].focus();
         }
 
         function showFallback() {
@@ -487,30 +383,25 @@
             lobbyView.style.display = 'block';
         }
 
-        // QR SCANNER
         startScanner.onclick = async () => {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                 qrVideo.srcObject = stream;
-                qrVideo.setAttribute("playsinline", true);
                 qrVideo.play();
-                qrOverlay.style.display = 'flex';
+                codeView.style.display = 'none';
+                qrContainer.style.display = 'flex';
                 scanning = true;
                 requestAnimationFrame(scanFrame);
-            } catch (err) {
-                alert("Camera access denied or not available.");
-            }
+            } catch (err) { alert("Camera access required for QR scanning."); }
         };
 
         function stopScannerFunc() {
             scanning = false;
-            if (qrVideo.srcObject) {
-                qrVideo.srcObject.getTracks().forEach(track => track.stop());
-            }
-            qrOverlay.style.display = 'none';
+            if (qrVideo.srcObject) qrVideo.srcObject.getTracks().forEach(t => t.stop());
+            qrContainer.style.display = 'none';
         }
 
-        closeScanner.onclick = stopScannerFunc;
+        stopScanner.onclick = () => { stopScannerFunc(); codeView.style.display = 'block'; };
 
         function scanFrame() {
             if (!scanning) return;
@@ -519,16 +410,12 @@
                 qrCanvas.width = qrVideo.videoWidth;
                 qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
                 const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
-
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
                 if (code) {
-                    const url = code.data;
-                    const match = url.match(/join=([A-Z0-9]{6})/i);
-                    if (match && match[1]) {
-                        const foundCode = match[1].toUpperCase();
+                    const match = code.data.match(/join=([A-Z0-9]{6})/i);
+                    if (match) {
                         stopScannerFunc();
-                        foundCode.split('').forEach((char, i) => { if (codeInputs[i]) codeInputs[i].value = char; });
-                        initiateRoomCheck(foundCode);
+                        initiateRoomCheck(match[1].toUpperCase());
                         return;
                     }
                 }
@@ -536,41 +423,20 @@
             requestAnimationFrame(scanFrame);
         }
 
-        socket.on('user-list', (users) => {
-            const list = document.getElementById('userList');
-            const realUsers = users.filter(u => u.name !== "Preview_User");
-            if (realUsers.length === 0) {
-                list.innerHTML = `<div style="text-align:center; color:#888; font-size:0.75rem;">Waiting for others...</div>`;
-            } else {
-                list.innerHTML = realUsers.map(u => `
-                    <div class="user-item">
-                        <i class="bi bi-person-circle" style="color:#0d6efd"></i>
-                        <span>${u.name} ${u.isHost ? '<b style="color:#ffc107; font-size:0.65rem; margin-left:3px;">HOST</b>' : ''}</span>
-                    </div>
-                `).join('');
-            }
-        });
-
-        nicknameInput.oninput = () => {
-            joinFinalBtn.disabled = nicknameInput.value.trim().length < 1;
-        };
-
+        nicknameInput.oninput = () => joinFinalBtn.disabled = nicknameInput.value.trim().length < 1;
         joinFinalBtn.onclick = () => {
             const name = encodeURIComponent(nicknameInput.value.trim());
-            socket.disconnect();
             window.location.href = `watch.html?join=${currentRoomId}&name=${name}`;
         };
 
-        const body = document.body;
-        const logo = document.getElementById('logo');
         function applyTheme(theme) {
             const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            body.classList.toggle('dark-mode', isDark);
-            logo.src = isDark ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
+            document.body.classList.toggle('dark-mode', isDark);
+            document.getElementById('logo').src = isDark ? "./static/thiraiwhite.png" : "./static/thiraiblack.png";
             document.getElementById('modeIcon').className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
         }
         document.getElementById('toggleDarkMode').onclick = () => {
-            const nt = body.classList.contains('dark-mode') ? 'light' : 'dark';
+            const nt = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
             localStorage.setItem('theme', nt);
             applyTheme(nt);
         };
