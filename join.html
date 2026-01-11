@@ -6,6 +6,7 @@
     <title>Thirai - Watch Party</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -130,43 +131,80 @@
             border-color: #0d6efd; 
         }
 
-        /* Scanner Styling */
-        #cameraContainer {
+        /* Grouping Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
             width: 100%;
-            max-width: 280px;
-            aspect-ratio: 1/1;
-            margin-bottom: 20px;
-            border: 3px solid #0d6efd;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            background: #000;
-            display: none;
         }
 
-        #cameraContainer video {
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .qr-btn {
+            width: 54px;
+            background-color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex: none; /* Keep it square */
+        }
+
+        .action-btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+
+        /* QR Scanner Modal */
+        #qr-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qr-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .btn-cancel-clean {
-            background: transparent;
-            color: #6c757d;
-            border: 1px solid #ccc;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 0.85rem;
+        .qr-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            z-index: 2001;
             cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 10px;
-            display: none;
         }
 
-        .btn-cancel-clean:hover {
-            background-color: #dc3545;
-            color: white;
-            border-color: #dc3545;
+        .qr-guide {
+            position: absolute;
+            border: 2px solid #0d6efd;
+            width: 250px;
+            height: 250px;
+            border-radius: 20px;
+            box-shadow: 0 0 0 4000px rgba(0,0,0,0.5);
+            z-index: 2001;
+            pointer-events: none;
         }
 
         #loadingArea { 
@@ -251,23 +289,6 @@
             color: white; 
         }
 
-        .action-btn {
-            width: 100%;
-            padding: 15px;
-            background-color: #0d6efd;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .action-btn:disabled { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-        }
-
         #error-message {
             color: #dc3545;
             font-size: 0.85rem;
@@ -280,17 +301,19 @@
     <button id="toggleDarkMode"><i id="modeIcon" class="bi bi-moon-fill"></i></button>
     
     <div id="backBtn" class="back-button"><i class="bi bi-arrow-left"></i></div>
+
+    <div id="qr-overlay">
+        <div class="qr-close" id="closeScanner"><i class="bi bi-x-lg"></i></div>
+        <div class="qr-guide"></div>
+        <video id="qr-video" playsinline></video>
+        <canvas id="qr-canvas" style="display:none;"></canvas>
+    </div>
     
     <div class="container">
         <img id="logo" src="./static/thiraiblack.png" alt="Thirai Logo">
 
         <div id="codeView">
             <h2 style="font-size: 1.3rem; margin-bottom: 5px;">Enter Party Code</h2>
-            
-            <div id="cameraContainer">
-                <video id="qrVideo"></video>
-            </div>
-
             <div class="code-input-container">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
@@ -299,9 +322,12 @@
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
                 <input type="text" class="code-input" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
             </div>
-
-            <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
-            <button id="cancelScanner" class="btn-cancel-clean">Cancel Scan</button>
+            
+            <div class="btn-group">
+                <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
+                <button class="action-btn qr-btn" id="startScanner"><i class="bi bi-qr-code-scan"></i></button>
+            </div>
+            
             <div id="error-message">Invalid or expired room code.</div>
         </div>
 
@@ -332,22 +358,17 @@
         const backBtn = document.getElementById('backBtn');
         const errorMessage = document.getElementById('error-message');
 
+        // QR Elements
+        const qrOverlay = document.getElementById('qr-overlay');
+        const qrVideo = document.getElementById('qr-video');
+        const startScanner = document.getElementById('startScanner');
+        const closeScanner = document.getElementById('closeScanner');
+        const qrCanvas = document.getElementById('qr-canvas');
+        const qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
+        let scanning = false;
+
         let currentRoomId = '';
         const socket = io("https://watchpartybackend-b5a2.onrender.com");
-
-        // Logic for auto-filling Join Code from URL
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const joinParam = urlParams.get('join');
-            if (joinParam && joinParam.length === 6) {
-                const chars = joinParam.toUpperCase().split('');
-                chars.forEach((char, i) => {
-                    if (codeInputs[i]) codeInputs[i].value = char;
-                });
-                checkCodeBtn.disabled = false;
-                checkCodeBtn.click();
-            }
-        });
 
         backBtn.onclick = () => {
             if (codeView.style.display === 'none') {
@@ -389,26 +410,26 @@
                 e.preventDefault();
                 const data = e.clipboardData.getData('text').toUpperCase().trim();
                 const chars = data.split('');
-                chars.forEach((char, i) => {
-                    if (codeInputs[index + i]) {
-                        codeInputs[index + i].value = char;
-                    }
-                });
+                chars.forEach((char, i) => { if (codeInputs[index + i]) codeInputs[index + i].value = char; });
                 const nextIndex = Math.min(index + chars.length, 5);
                 codeInputs[nextIndex].focus();
                 checkCodeBtn.disabled = Array.from(codeInputs).some(i => !i.value);
             });
         });
 
+        // Search Trigger
         checkCodeBtn.onclick = () => {
             currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
+            initiateRoomCheck(currentRoomId);
+        };
+
+        function initiateRoomCheck(roomId) {
+            currentRoomId = roomId;
             codeView.style.display = 'none';
             loadingArea.style.display = 'flex';
             
             const roomCheckTimeout = setTimeout(() => {
-                if (lobbyView.style.display !== 'block') {
-                    showError();
-                }
+                if (lobbyView.style.display !== 'block') showError();
             }, 6000);
 
             socket.emit('join-room', { roomId: currentRoomId, userName: "Preview_User" });
@@ -421,7 +442,7 @@
                     showError();
                 }
             });
-        };
+        }
 
         async function processRoomData(data) {
             const filmMatch = data.movieUrl.match(/film=([^&]+)/) || data.movieUrl.match(/watch\/(\d+)/);
@@ -453,6 +474,64 @@
             loadingArea.style.display = 'none';
             lobbyView.style.display = 'block';
         }
+
+        // --- QR SCANNER LOGIC ---
+
+        startScanner.onclick = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                qrVideo.srcObject = stream;
+                qrVideo.setAttribute("playsinline", true);
+                qrVideo.play();
+                qrOverlay.style.display = 'flex';
+                scanning = true;
+                requestAnimationFrame(scanFrame);
+            } catch (err) {
+                alert("Camera access denied or not available.");
+            }
+        };
+
+        function stopScannerFunc() {
+            scanning = false;
+            if (qrVideo.srcObject) {
+                qrVideo.srcObject.getTracks().forEach(track => track.stop());
+            }
+            qrOverlay.style.display = 'none';
+        }
+
+        closeScanner.onclick = stopScannerFunc;
+
+        function scanFrame() {
+            if (!scanning) return;
+            if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+                qrCanvas.height = qrVideo.videoHeight;
+                qrCanvas.width = qrVideo.videoWidth;
+                qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+                const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (code) {
+                    const url = code.data;
+                    // Detect pattern: join=XXXXXX
+                    const match = url.match(/join=([A-Z0-9]{6})/i);
+                    if (match && match[1]) {
+                        const foundCode = match[1].toUpperCase();
+                        stopScannerFunc();
+                        // Fill inputs for visual feedback
+                        foundCode.split('').forEach((char, i) => {
+                            if (codeInputs[i]) codeInputs[i].value = char;
+                        });
+                        initiateRoomCheck(foundCode);
+                        return;
+                    }
+                }
+            }
+            requestAnimationFrame(scanFrame);
+        }
+
+        // --- END QR LOGIC ---
 
         socket.on('user-list', (users) => {
             const list = document.getElementById('userList');
