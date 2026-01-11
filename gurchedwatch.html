@@ -1069,6 +1069,8 @@ function generateHostUI(roomId) {
         });
 
         socket.on('user-list', (users) => {
+            // Filter out Preview_User
+            users = users.filter(u => u && u.name !== 'Preview_User');
             const hostList = document.getElementById('hostUserList');
             const guestList = document.getElementById('lobbyUserList');
             
@@ -1659,5 +1661,28 @@ window.addEventListener('load', () => {
         
         document.addEventListener('DOMContentLoaded', showControls);
     </script>
+
+<script>
+(function(){
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    const joinName = params.get('name');
+    if(joinCode && joinName){
+        const tryJoin = () => {
+            if(window.socket && socket.connected){
+                document.getElementById('joinName').value = joinName;
+                document.getElementById('joinCode').value = joinCode;
+                document.getElementById('partyModal').style.display = 'none';
+                document.getElementById('modalBackdrop').style.display = 'none';
+                socket.emit('join-room', { roomId: joinCode.toUpperCase(), userName: joinName });
+            } else {
+                setTimeout(tryJoin, 200);
+            }
+        };
+        tryJoin();
+    }
+})();
+</script>
+
 </body>
 </html>
