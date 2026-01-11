@@ -882,7 +882,6 @@
 
         // Watch Party Variables
         let socket;
-let AUTO_JOIN_ONCE = false;
         let isHost = false;
         let currentRoomId = null;
         let hostNickname = "Host";
@@ -1021,14 +1020,7 @@ function generateHostUI(roomId) {
 
         // Joining Logic
         const joinBtn = document.getElementById('startJoinBtn');
-        
-joinBtn.onclick = () => {
-    if (AUTO_JOIN_ONCE) {
-        AUTO_JOIN_ONCE = false; // allow only this click
-    } else {
-        return;
-    }
-
+        joinBtn.onclick = () => {
             const name = document.getElementById('joinName').value || "Guest";
             const code = document.getElementById('joinCode').value.trim().toUpperCase();
             if(!code) return;
@@ -1261,35 +1253,29 @@ joinBtn.onclick = () => {
 
 window.addEventListener('load', () => {
     const params = new URLSearchParams(window.location.search);
+
     const code = params.get('code') || params.get('join');
     const name = params.get('name');
 
-    if (!code || AUTO_JOIN_ONCE) {
+    if (code) {
+        document.getElementById('joinCode').value = code.toUpperCase();
+        if (name) {
+            document.getElementById('joinName').value = decodeURIComponent(name);
+        }
+
+        partyToggleBtn.click();
+        document.getElementById('chooseJoin').click();
+
+        setTimeout(() => {
+            document.getElementById('startJoinBtn').click();
+        }, 300);
+    } else {
         fetchMovieSource();
-        return;
     }
-
-    AUTO_JOIN_ONCE = true;
-
-    // Open modal ONCE
-    partyToggleBtn.click();
-    document.getElementById('chooseJoin').click();
-
-    // Fill fields
-    document.getElementById('joinCode').value = code.toUpperCase();
-    if (name) {
-        document.getElementById('joinName').value = decodeURIComponent(name);
-    }
-
-    // Hide modal visually but keep DOM active
-    partyModal.style.opacity = '0';
-    modalBackdrop.style.opacity = '0';
-
-    setTimeout(() => {
-        document.getElementById('startJoinBtn').click();
-    }, 400);
 });
-// --- CORE VIDEO PLAYER LOGIC ---
+
+
+        // --- CORE VIDEO PLAYER LOGIC ---
 
         const CACHE_KEY = 'thirai_continue_watching';
 
@@ -1665,28 +1651,6 @@ window.addEventListener('load', () => {
         
         document.addEventListener('DOMContentLoaded', showControls);
     </script>
-
-<script>
-(function(){
-    const params = new URLSearchParams(window.location.search);
-    const joinCode = params.get('join');
-    const joinName = params.get('name');
-    if(joinCode && joinName){
-        const tryJoin = () => {
-            if(window.socket && socket.connected){
-                document.getElementById('joinName').value = joinName;
-                document.getElementById('joinCode').value = joinCode;
-                document.getElementById('partyModal').style.display = 'none';
-                document.getElementById('modalBackdrop').style.display = 'none';
-                socket.emit('join-room', { roomId: joinCode.toUpperCase(), userName: joinName });
-            } else {
-                setTimeout(tryJoin, 200);
-            }
-        };
-        tryJoin();
-    }
-})();
-</script>
 
 </body>
 </html>
