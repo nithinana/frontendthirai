@@ -185,7 +185,10 @@
 
         @media (max-width: 991.98px) {
             /* Adjusted body padding to tighten gap on mobile */
-            body { padding-top: 120px; }
+            body { padding-top: 130px; }
+            .header-logo { height: 26px; }
+            .settings-btn { font-size: 1.25rem !important; width: 35px !important; height: 35px !important; margin-right: 4px !important; }
+            .app-header { padding: 0.5rem 0.75rem; }
         }
         
         .settings-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; }
@@ -202,7 +205,7 @@
             .header-search { max-width: 600px; width: 100%; }
         }
         @media (max-width: 991.98px) {
-            .header-main-content { order: 3; width: 100%; margin-top: 1rem; }
+            .header-main-content { order: 3; width: 100%; margin-top: 0.75rem; }
             .header-search { flex-grow: 1; }
         }
 
@@ -776,8 +779,7 @@
             max-width: 80%;
             text-align: center;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            align-items: center; gap: 8px;
         }
 
         @keyframes pulse-logo {
@@ -807,6 +809,9 @@
             </a>
 
             <div class="d-flex align-items-center ms-auto order-lg-3">
+                 <a href="/join" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Watch Party" style="text-decoration: none; width: 40px; height: 40px;">
+                    <i class="bi bi-people-fill"></i>
+                </a>
                  <button class="settings-btn d-flex align-items-center justify-content-center me-2" onclick="togglePopup()" title="Filter" style="width: 40px; height: 40px;">
                     <i class="bi bi-funnel"></i>
                 </button>
@@ -818,6 +823,8 @@
                         <i class="bi bi-gear-fill"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item fw-bold text-primary" href="/premium"><i class="bi bi-shield-lock-fill me-2"></i>Restricted</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header">Preferred Language</h6></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="all">All Languages</a></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
@@ -829,15 +836,6 @@
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="marathi">Marathi</a></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="punjabi">Punjabi</a></li>
                         <li id="disableLangOptionLi" style="display: none;"><a class="dropdown-item text-danger" href="#" id="disablePreferredLanguage">Disable Preference</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header">Translate</h6></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('ta')">Tamil</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('ml')">Malayalam</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('te')">Telugu</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('hi')">Hindi</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('pa')">Punjabi</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('mr')">Marathi</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="translatePage('bn')">Bengali</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header">Appearance</h6></li>
                         <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
@@ -982,7 +980,7 @@
                 <div class="movies-scroller-wrapper">
                     <div class="movies-scroller">
                         <div class="movies-row" id="movies-row-collections">
-                        </div>
+                            </div>
                     </div>
                 </div>
                 <button class="btn scroll-btn scroll-btn-next" id="next-btn-collections" aria-label="Next">
@@ -991,75 +989,61 @@
             </div>
         </div>
 
-        <div id="movie-sections-container">
+        <div id="language-sections-container">
             </div>
     </main>
 
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Thirai is a modern movie discovery platform designed to provide a seamless browsing experience for Indian cinema lovers.</p>
+                    <p>Version: 1.0.5</p>
+                    <p>&copy; 2024 Thirai. All rights reserved.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobileInstallNotice" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--card-bg-color); border-top: 1px solid var(--border-color); padding: 1rem; z-index: 1050; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); flex-direction: column; align-items: center; text-align: center;">
+  <p class="mb-3">Install Thirai for a better experience on your home screen.</p>
+  <div class="d-flex gap-2">
+    <button id="installAppButtonInline" class="btn btn-primary rounded-pill px-4">Install App</button>
+    <button onclick="document.getElementById('mobileInstallNotice').style.display='none'" class="btn btn-outline-secondary rounded-pill px-4">Not Now</button>
+  </div>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="/static/script.js"></script>
+
     <script>
-        function translatePage(langCode) {
-            const currentUrl = window.location.href;
-            window.location.href = `https://translate.google.com/translate?sl=auto&tl=${langCode}&u=${encodeURIComponent(currentUrl)}`;
-        }
-
-        function togglePopup() {
-            document.getElementById('filterOverlay').classList.toggle('active');
-            document.body.classList.toggle('no-scroll');
-        }
-
-        function closePopupOnOutsideClick(event) {
-            if (event.target.id === 'filterOverlay') {
-                togglePopup();
-            }
-        }
-
-        function toggleGenre(btn) {
-            btn.classList.toggle('active');
-        }
-
-        function toggleCustom() {
-            document.getElementById('customSection').classList.toggle('expanded');
-        }
-
-        function showYears(decade, btn) {
-            const container = document.getElementById('yearExpandSection');
-            const grid = document.getElementById('yearGridContent');
+        // Smooth scroll visibility for buttons
+        function updateScrollButtonsVisibility(scrollContainer, prevBtn, nextBtn) {
+            if (!scrollContainer || !prevBtn || !nextBtn) return;
             
-            document.querySelectorAll('.decade-selector').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            grid.innerHTML = '';
-            for (let year = decade + 9; year >= decade; year--) {
-                const yBtn = document.createElement('button');
-                yBtn.className = 'year-btn';
-                yBtn.textContent = year;
-                yBtn.onclick = () => { console.log(year); togglePopup(); };
-                grid.appendChild(yBtn);
-            }
-            container.classList.add('expanded');
-        }
+            const scrollLeft = scrollContainer.scrollLeft;
+            const scrollWidth = scrollContainer.scrollWidth;
+            const clientWidth = scrollContainer.clientWidth;
 
-        function updateScrollButtonsVisibility(container, prevBtn, nextBtn) {
-            if (!container || !prevBtn || !nextBtn) return;
-            const scrollLeft = container.scrollLeft;
-            const maxScrollLeft = container.scrollWidth - container.clientWidth;
-            prevBtn.disabled = scrollLeft <= 0;
-            nextBtn.disabled = scrollLeft >= maxScrollLeft - 1;
-            const wrapper = container.closest('.movies-scroller-wrapper');
+            prevBtn.disabled = scrollLeft <= 1;
+            nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 1;
+
+            const wrapper = scrollContainer.closest('.movies-scroller-wrapper');
             if (wrapper) {
-                wrapper.classList.toggle('is-at-start', scrollLeft <= 5);
-                wrapper.classList.toggle('is-at-end', scrollLeft >= maxScrollLeft - 5);
+                if (prevBtn.disabled) wrapper.classList.add('is-at-start');
+                else wrapper.classList.remove('is-at-start');
+
+                if (nextBtn.disabled) wrapper.classList.add('is-at-end');
+                else wrapper.classList.remove('is-at-end');
             }
         }
-
-        window.addEventListener('load', () => {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) {
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.style.display = 'none', 500);
-            }
-        });
 
         const allSections = document.querySelectorAll('.language-section'); 
         allSections.forEach(section => {
