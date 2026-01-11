@@ -789,7 +789,19 @@
             }
         }
 
-    </style>
+    
+        @media (max-width: 991.98px) {
+            .app-header .container-fluid {
+                gap: 6px;
+            }
+            .settings-btn {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1.2rem;
+            }
+        }
+
+</style>
 </head>
   
 <body>
@@ -810,6 +822,10 @@
                  <button class="settings-btn d-flex align-items-center justify-content-center me-2" onclick="togglePopup()" title="Filter" style="width: 40px; height: 40px;">
                     <i class="bi bi-funnel"></i>
                 </button>
+
+                <a href="/join" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Watch Party" style="text-decoration: none; width: 40px; height: 40px;">
+                    <i class="bi bi-people-fill"></i>
+                </a>
                 <a href="/install.html" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Install App" style="text-decoration: none; width: 40px; height: 40px;">
                     <i class="bi bi-download"></i>
                 </a>
@@ -818,8 +834,11 @@
                         <i class="bi bi-gear-fill"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Restricted</h6></li>
+                        <li><a class="dropdown-item" href="/premium">Beta</a></li>
+                        <li><hr class="dropdown-divider"></li>
+
                         <li><h6 class="dropdown-header">Preferred Language</h6></li>
-                        <li><a class="dropdown-item preferred-lang-option" href="#" data-language="all">All Languages</a></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="hindi">Hindi</a></li>
                         <li><a class="dropdown-item preferred-lang-option" href="#" data-language="telugu">Telugu</a></li>
@@ -1263,7 +1282,7 @@
           <div class="modal-body">
             <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
             <p class="text-muted mt-3">
-                <i class="bi bi-filetype-py"></i> Powered by Python, Go-Gin and HTML
+                <i class="bi bi-filetype-py"></i> Powered by Python
             </p>
           </div>
           <div class="modal-footer">
