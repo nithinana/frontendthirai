@@ -131,7 +131,6 @@
             border-color: #0d6efd; 
         }
 
-        /* Grouping Buttons */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -157,7 +156,7 @@
             align-items: center;
             justify-content: center;
             font-size: 1.4rem;
-            flex: none; /* Keep it square */
+            flex: none;
         }
 
         .action-btn:disabled { 
@@ -165,7 +164,19 @@
             cursor: not-allowed; 
         }
 
-        /* QR Scanner Modal */
+        /* Beta Note Styling */
+        .beta-note {
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.4;
+            max-width: 90%;
+        }
+
+        body.dark-mode .beta-note {
+            color: #999;
+        }
+
         #qr-overlay {
             position: fixed;
             top: 0;
@@ -299,7 +310,6 @@
 </head>
 <body>
     <button id="toggleDarkMode"><i id="modeIcon" class="bi bi-moon-fill"></i></button>
-    
     <div id="backBtn" class="back-button"><i class="bi bi-arrow-left"></i></div>
 
     <div id="qr-overlay">
@@ -326,6 +336,10 @@
             <div class="btn-group">
                 <button class="action-btn" id="checkCodeBtn" disabled>Search</button>
                 <button class="action-btn qr-btn" id="startScanner"><i class="bi bi-qr-code-scan"></i></button>
+            </div>
+
+            <div class="beta-note">
+                ⓘ Currently not a publicly available feature. Lmk if you want to try it out early.
             </div>
             
             <div id="error-message">Invalid or expired room code.</div>
@@ -358,7 +372,6 @@
         const backBtn = document.getElementById('backBtn');
         const errorMessage = document.getElementById('error-message');
 
-        // QR Elements
         const qrOverlay = document.getElementById('qr-overlay');
         const qrVideo = document.getElementById('qr-video');
         const startScanner = document.getElementById('startScanner');
@@ -417,7 +430,6 @@
             });
         });
 
-        // Search Trigger
         checkCodeBtn.onclick = () => {
             currentRoomId = Array.from(codeInputs).map(i => i.value).join('');
             initiateRoomCheck(currentRoomId);
@@ -475,8 +487,7 @@
             lobbyView.style.display = 'block';
         }
 
-        // --- QR SCANNER LOGIC ---
-
+        // QR SCANNER
         startScanner.onclick = async () => {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -508,21 +519,15 @@
                 qrCanvas.width = qrVideo.videoWidth;
                 qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
                 const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
-                });
+                const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
 
                 if (code) {
                     const url = code.data;
-                    // Detect pattern: join=XXXXXX
                     const match = url.match(/join=([A-Z0-9]{6})/i);
                     if (match && match[1]) {
                         const foundCode = match[1].toUpperCase();
                         stopScannerFunc();
-                        // Fill inputs for visual feedback
-                        foundCode.split('').forEach((char, i) => {
-                            if (codeInputs[i]) codeInputs[i].value = char;
-                        });
+                        foundCode.split('').forEach((char, i) => { if (codeInputs[i]) codeInputs[i].value = char; });
                         initiateRoomCheck(foundCode);
                         return;
                     }
@@ -530,8 +535,6 @@
             }
             requestAnimationFrame(scanFrame);
         }
-
-        // --- END QR LOGIC ---
 
         socket.on('user-list', (users) => {
             const list = document.getElementById('userList');
