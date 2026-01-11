@@ -965,26 +965,27 @@
             }
         }
 
-        function getJoinLink(code) {
-             const urlParams = new URLSearchParams(window.location.search);
-             urlParams.set('join', code);
-             return window.location.origin + window.location.pathname + '?' + urlParams.toString();
-        }
+function getJoinLink(code) {
+    // This creates the clean format: https://yourdomain.com/join?code=ABCDEF
+    return window.location.origin + '/join?code=' + code;
+}
 
         document.getElementById('copyCodeBtn').onclick = (e) => copyToClipboard(currentRoomId, e.currentTarget);
         document.getElementById('copyLinkBtn').onclick = (e) => copyToClipboard(getJoinLink(currentRoomId), e.currentTarget);
         document.getElementById('lobbyCopyCodeBtn').onclick = (e) => copyToClipboard(currentRoomId, e.currentTarget);
         document.getElementById('lobbyCopyLinkBtn').onclick = (e) => copyToClipboard(getJoinLink(currentRoomId), e.currentTarget);
 
-        function generateHostUI(roomId) {
-            document.getElementById('displayCode').innerText = roomId;
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), {
-                text: getJoinLink(roomId),
-                width: 128,
-                height: 128
-            });
-        }
+function generateHostUI(roomId) {
+    document.getElementById('displayCode').innerText = roomId;
+    document.getElementById('qrcode').innerHTML = "";
+    
+    // This uses the updated getJoinLink function above
+    new QRCode(document.getElementById('qrcode'), {
+        text: getJoinLink(roomId),
+        width: 128,
+        height: 128
+    });
+}
 
         function showInternalToast(msg) {
             const toast = document.getElementById('thiraiToast');
@@ -1247,30 +1248,40 @@
             if(isHost) socket.emit('sync-video', { roomId: currentRoomId, state: 'seek', time: moviePlayer.currentTime });
         });
 
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('join')) {
-                document.getElementById('joinCode').value = urlParams.get('join');
-                
-                // AUTO-JOIN LOGIC ADDED HERE
-                if (urlParams.has('name')) {
-                     const name = decodeURIComponent(urlParams.get('name'));
-                     document.getElementById('joinName').value = name;
-                     
-                     partyToggleBtn.click(); 
-                     document.getElementById('chooseJoin').click();
-                     
-                     setTimeout(() => {
-                         document.getElementById('startJoinBtn').click();
-                     }, 300);
-                } else {
-                    partyToggleBtn.click();
-                    document.getElementById('chooseJoin').click();
-                }
-            } else {
-                fetchMovieSource();
-            }
-        });
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Updated to check for 'code' instead of 'join'
+    if(urlParams.has('code')) {
+        const roomCode = urlParams.get('code');
+        document.getElementById('joinCode').value = roomCode;
+        
+        // AUTO-JOIN LOGIC
+        if (urlParams.has('name')) {
+             const name = decodeURIComponent(urlParams.get('name'));
+             document.getElementById('joinName').value = name;
+             
+             partyToggleBtn.click(); 
+             document.getElementById('chooseJoin').click();
+             
+             setTimeout(() => {
+                 document.getElementById('startJoinBtn').click();
+             }, 300);
+        } else {
+            partyToggleBtn.click();
+            document.getElementById('chooseJoin').click();
+        }
+    } 
+    // Backward compatibility: still checks for 'join' just in case
+    else if(urlParams.has('join')) {
+        document.getElementById('joinCode').value = urlParams.get('join');
+        partyToggleBtn.click();
+        document.getElementById('chooseJoin').click();
+    } 
+    else {
+        fetchMovieSource();
+    }
+});
 
         // --- CORE VIDEO PLAYER LOGIC ---
 
