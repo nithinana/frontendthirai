@@ -915,9 +915,10 @@
         partyToggleBtn.onclick = () => { 
             partyModal.style.display = 'block';
             modalBackdrop.style.display = 'block';
+            resetModal();
         };
 
-        const isJoinLink = new URLSearchParams(window.location.search).has('join');
+        const isJoinLink = new URLSearchParams(window.location.search).has('join') || new URLSearchParams(window.location.search).has('code');
         if (isJoinLink) {
             closePartyX.style.display = 'none';
         }
@@ -940,6 +941,15 @@
             joinSetup.style.display = 'none';
             activeHostInfo.style.display = 'none';
             lobbyScreen.style.display = 'none';
+            
+            // Fix: Hide host button if no film/url parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasVideo = urlParams.has('film') || urlParams.has('url');
+            if (!hasVideo) {
+                 document.getElementById('chooseHost').style.display = 'none';
+            } else {
+                 document.getElementById('chooseHost').style.display = 'flex';
+            }
         }
 
         document.getElementById('chooseHost').onclick = () => {
@@ -948,8 +958,8 @@
         };
 
         document.getElementById('chooseJoin').onclick = () => {
-            selectionScreen.style.display = 'none';
-            joinSetup.style.display = 'block';
+            // Fix: Redirect to join.html
+            window.location.href = 'join.html';
         };
 
         async function copyToClipboard(text, element) {
@@ -1072,8 +1082,11 @@ function generateHostUI(roomId) {
             const hostList = document.getElementById('hostUserList');
             const guestList = document.getElementById('lobbyUserList');
             
+            // Fix: Filter out Preview_User
+            const visibleUsers = users.filter(u => u.name !== 'Preview_User');
+            
             // Show/Hide container based on user count
-            if (users.length > 0) {
+            if (visibleUsers.length > 0) {
                 hostList.style.display = 'block';
                 guestList.style.display = 'block';
             } else {
@@ -1089,7 +1102,7 @@ function generateHostUI(roomId) {
                 socket.emit('sync-video', { roomId: currentRoomId, state: state, time: moviePlayer.currentTime });
             }
 
-            const userItems = users.map(user => {
+            const userItems = visibleUsers.map(user => {
                 let label = '';
                 if(user.isHost) {
                     label = '<span style="color: #ffc107; font-size: 0.6rem; margin-left:5px;">(HOST)</span>';
@@ -1256,27 +1269,45 @@ window.addEventListener('load', () => {
         const roomCode = urlParams.get('code');
         document.getElementById('joinCode').value = roomCode;
         
-        // AUTO-JOIN LOGIC
+        // Fix: Auto-join logic completely rewritten to avoid double submission
         if (urlParams.has('name')) {
              const name = decodeURIComponent(urlParams.get('name'));
              document.getElementById('joinName').value = name;
              
-             partyToggleBtn.click(); 
-             document.getElementById('chooseJoin').click();
+             // Directly join without UI clicks
+             isHost = false;
+             currentRoomId = roomCode;
              
-             setTimeout(() => {
-                 document.getElementById('startJoinBtn').click();
-             }, 300);
+             // Open modal just for visual context (loading state)
+             partyModal.style.display = 'block';
+             modalBackdrop.style.display = 'block';
+             selectionScreen.style.display = 'none';
+             joinSetup.style.display = 'none';
+             
+             joinBtn.disabled = true;
+             joinBtn.innerText = 'Joining...';
+             
+             // Ensure socket is ready then emit
+             if(socket && socket.connected) {
+                 socket.emit('join-room', { roomId: currentRoomId, userName: name });
+             } else if (socket) {
+                 socket.on('connect', () => {
+                     socket.emit('join-room', { roomId: currentRoomId, userName: name });
+                 });
+             }
         } else {
             partyToggleBtn.click();
-            document.getElementById('chooseJoin').click();
+            document.getElementById('chooseJoin').click(); // Will redirect to join.html
         }
     } 
     // Backward compatibility: still checks for 'join' just in case
     else if(urlParams.has('join')) {
         document.getElementById('joinCode').value = urlParams.get('join');
         partyToggleBtn.click();
-        document.getElementById('chooseJoin').click();
+        
+        // If it's just a join link with no name, show manual entry
+        selectionScreen.style.display = 'none';
+        joinSetup.style.display = 'block';
     } 
     else {
         fetchMovieSource();
