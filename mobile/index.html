@@ -408,32 +408,27 @@ window.renderContinueWatching = function(){
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
     
 
-/* ===== Continue Watching Clean Remove X ===== */
+
+/* ===== Continue Watching Mobile Remove X (Always Visible) ===== */
 .cw-remove-btn{
   position:absolute;
   top:6px;
   right:6px;
-  width:20px;
-  height:20px;
+  width:22px;
+  height:22px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:16px;
-  font-weight:600;
+  font-size:18px;
+  font-weight:700;
   line-height:1;
   color:#ffffff;
   cursor:pointer;
-  z-index:10;
-  opacity:0;
-  text-shadow:0 2px 6px rgba(0,0,0,0.9);
-  transition:opacity .15s ease, transform .15s ease;
-}
-.card:hover .cw-remove-btn,
-.card.cw-touch .cw-remove-btn{
+  z-index:20;
   opacity:1;
-}
-.cw-remove-btn:hover{
-  transform:scale(1.15);
+  text-shadow:
+    0 2px 6px rgba(0,0,0,0.95),
+    0 0 2px rgba(0,0,0,0.8);
 }
 
 </style>
@@ -2460,11 +2455,6 @@ const hindiData = {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2931-04ff.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2931/?lang=hindi",
       "title": "Ki & Ka"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2382-7339.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2382/?lang=hindi",
-      "title": "Main Tera Hero"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2678-d9e2.jpg",
