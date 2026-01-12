@@ -2570,14 +2570,30 @@ const teluguData = {
             }
             return einthusanUrl;
         }
+/**
+ * Creates a movie card with an optional delete button for the Continue Watching section.
+ * @param {Object} item - The movie/item data
+ * @param {boolean} isContinueWatching - If true, shows the 'X' button
+ */
+function createCard(item, isContinueWatching = false) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    
+    // Use the image URL from the item
+    let html = `<img src="${item.img_url}" loading="lazy" alt="${item.title}">`;
 
-        function createCard(item) {
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.innerHTML = `<img src="${item.img_url}" loading="lazy" alt="${item.title}">`;
-            div.onclick = () => window.location.href = getRedirectUrl(item.page_url);
-            return div;
-        }
+    // Only add the X button if this is for the Continue Watching section
+    if (isContinueWatching) {
+        html += `
+            <button class="delete-btn" onclick="deleteFromContinueWatching(event, '${item.id || item.movie_id}')">
+                <i class="fas fa-times"></i>
+            </button>`;
+    }
+
+    div.innerHTML = html;
+    div.onclick = () => window.location.href = getRedirectUrl(item.page_url);
+    return div;
+}
 
         function setLoading(elementId, isLoading, append = false) {
             const el = document.getElementById(elementId);
@@ -3158,27 +3174,22 @@ window.addEventListener("load", () => {
 });
 </script>
 <script>
-  /**
- * Deletes a movie from the local cache and updates the UI.
- * @param {Event} event - The click event object
- * @param {string} movieId - The ID of the movie to remove
- * @param {string} lang - The language category of the movie
+/**
+ * Removes a movie specifically from the Continue Watching local storage.
  */
-async function deleteMovieFromCache(event, movieId, lang) {
-    // 1. Prevent the card's onclick (navigation) from firing
-    event.stopPropagation();
-
-    // 2. Identify the cache key based on language
-    const cacheKey = `${lang}popular.json`;
+async function deleteMovieFromContinueWatching(event, movieId) {
+    event.stopPropagation(); // Prevents movie from opening
 
     try {
-        // Note: In a real PWA environment, you would use the Cache API 
-        // or update LocalStorage here. Example for LocalStorage:
-        // let cachedData = JSON.parse(localStorage.getItem(cacheKey));
-        // cachedData.movies = cachedData.movies.filter(m => m.id !== movieId);
-        // localStorage.setItem(cacheKey, JSON.stringify(cachedData));
+        // 1. Update LocalStorage
+        const storageKey = 'continue_watching'; // Match the key used in your app
+        let list = JSON.parse(localStorage.getItem(storageKey)) || [];
+        
+        // Filter out the movie
+        list = list.filter(m => m.id !== movieId && m.movie_id !== movieId);
+        localStorage.setItem(storageKey, JSON.stringify(list));
 
-        // 3. Visual feedback: Animate and remove the card from the UI
+        // 2. Visual Feedback
         const button = event.currentTarget;
         const card = button.closest('.card');
         
@@ -3187,15 +3198,18 @@ async function deleteMovieFromCache(event, movieId, lang) {
             card.style.transform = 'scale(0)';
             card.style.opacity = '0';
             
-            // Remove from DOM after animation
             setTimeout(() => {
                 card.remove();
+                // Hide the title if no movies are left
+                const row = document.getElementById('continue-watching-row');
+                if (row && row.children.length === 0) {
+                    document.getElementById('cw-title').classList.add('visually-hidden');
+                    row.classList.add('visually-hidden');
+                }
             }, 300);
         }
-
-        console.log(`Removed movie ${movieId} from ${lang} cache.`);
     } catch (err) {
-        console.error("Error removing movie from cache:", err);
+        console.error("Error updating Continue Watching:", err);
     }
 }
 </script>
