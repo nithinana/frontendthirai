@@ -2,53 +2,7 @@
 <html lang="en">
 <head>
 
-	  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F">
-/* ===== Continue Watching Remove Logic ===== */
-function attachCWRemoveButtons(){
-  const row = document.getElementById('continue-watching-row');
-  if(!row) return;
-
-  row.querySelectorAll('.card').forEach(card=>{
-    if(card.querySelector('.cw-remove-btn')) return;
-
-    const btn = document.createElement('div');
-    btn.className = 'cw-remove-btn';
-    btn.innerHTML = '&times;';
-
-    btn.onclick = (e)=>{
-      e.stopPropagation();
-      const link = card.querySelector('a');
-      const key = link ? link.href : null;
-      if(!key) return;
-
-      let cw = JSON.parse(localStorage.getItem('continueWatching') || '[]');
-      cw = cw.filter(i => i.page_url !== key);
-      localStorage.setItem('continueWatching', JSON.stringify(cw));
-
-      card.remove();
-      if(!row.children.length){
-        document.getElementById('cw-title')?.classList.add('visually-hidden');
-      }
-    };
-
-    card.appendChild(btn);
-  });
-}
-
-/* touch support */
-document.addEventListener('touchstart',e=>{
-  const c = e.target.closest('.card');
-  if(c) c.classList.add('cw-touch');
-});
-
-/* run after CW renders */
-const _origRenderCW = window.renderContinueWatching;
-window.renderContinueWatching = function(){
-  if(_origRenderCW) _origRenderCW();
-  attachCWRemoveButtons();
-};
-
-</script>
+	  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -406,38 +360,7 @@ window.renderContinueWatching = function(){
 }
         .bottom-nav .nav-item.active { color: white; }
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
-    
-
-
-
-/* ===== Continue Watching Mobile Remove X (Correct Position) ===== */
-#continue-watching-row .card{
-  position:relative;
-}
-
-.cw-remove-btn{
-  position:absolute;
-  top:4px;
-  right:4px;
-  width:auto;
-  height:auto;
-  padding:2px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:17px;
-  font-weight:700;
-  line-height:1;
-  color:#ffffff;
-  cursor:pointer;
-  z-index:25;
-  opacity:1;
-  text-shadow:
-    0 2px 6px rgba(0,0,0,0.95),
-    0 0 2px rgba(0,0,0,0.8);
-}
-
-</style>
+    </style>
 </head>
 <body>
 
