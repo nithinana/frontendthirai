@@ -389,6 +389,10 @@
         </div>
 
         <div class="home-content-wrapper">
+
+            <div class="section-title visually-hidden" id="cw-title">Continue Watching</div>
+            <div class="row-container visually-hidden" id="continue-watching-row"></div>
+
             <div class="section-title">Tamil</div>
             <div class="row-container" id="row-tamil"></div>
 
@@ -2593,5 +2597,67 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+
+<script>
+(function () {
+    const STORAGE_KEY = 'thirai_continue_watching';
+
+    function renderContinueWatching() {
+        const row = document.getElementById('continue-watching-row');
+        const title = document.getElementById('cw-title');
+        if (!row || !title) return;
+
+        let items;
+        try {
+            items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+            items = [];
+        }
+
+        row.innerHTML = '';
+
+        if (!items.length) {
+            row.classList.add('visually-hidden');
+            title.classList.add('visually-hidden');
+            return;
+        }
+
+        title.classList.remove('visually-hidden');
+        row.classList.remove('visually-hidden');
+
+        items.forEach(item => {
+            if (!item.poster || !item.url) return;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            card.innerHTML = `
+                <img src="${item.poster}" alt="">
+                <div class="remove-watch-item">&times;</div>
+            `;
+
+            card.onclick = () => {
+                window.location.href = item.url;
+            };
+
+            card.querySelector('.remove-watch-item').onclick = (e) => {
+                e.stopPropagation();
+                removeItem(item.id);
+            };
+
+            row.appendChild(card);
+        });
+    }
+
+    function removeItem(id) {
+        let items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        items = items.filter(i => i.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        renderContinueWatching();
+    }
+
+    document.addEventListener('DOMContentLoaded', renderContinueWatching);
+})();
+</script>
 </body>
 </html>
