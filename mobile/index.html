@@ -2600,19 +2600,17 @@ if ('serviceWorker' in navigator) {
 
 <script>
 (function () {
-    const STORAGE_KEY = 'thirai_continue_watching';
+    const CACHE_KEY = 'thirai_continue_watching';
 
     function renderContinueWatching() {
         const row = document.getElementById('continue-watching-row');
         const title = document.getElementById('cw-title');
         if (!row || !title) return;
 
-        let items;
+        let items = [];
         try {
-            items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        } catch {
-            items = [];
-        }
+            items = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+        } catch {}
 
         row.innerHTML = '';
 
@@ -2625,14 +2623,14 @@ if ('serviceWorker' in navigator) {
         title.classList.remove('visually-hidden');
         row.classList.remove('visually-hidden');
 
-        items.forEach(item => {
-            if (!item.poster || !item.url) return;
+        items.forEach((item, index) => {
+            if (!item.url || !item.img) return;
 
             const card = document.createElement('div');
             card.className = 'card';
 
             card.innerHTML = `
-                <img src="${item.poster}" alt="">
+                <img src="${item.img}" alt="${item.title || ''}">
                 <div class="remove-watch-item">&times;</div>
             `;
 
@@ -2642,17 +2640,17 @@ if ('serviceWorker' in navigator) {
 
             card.querySelector('.remove-watch-item').onclick = (e) => {
                 e.stopPropagation();
-                removeItem(item.id);
+                removeItem(index);
             };
 
             row.appendChild(card);
         });
     }
 
-    function removeItem(id) {
-        let items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        items = items.filter(i => i.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    function removeItem(index) {
+        let items = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
+        items.splice(index, 1);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(items));
         renderContinueWatching();
     }
 
