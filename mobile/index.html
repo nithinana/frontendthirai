@@ -3,10 +3,12 @@
 <head>
 
 	  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F">
+</script>
+<script>
 function goExtra() {
-    window.location.href = "/beta";
+    // PWA-safe same-tab navigation (no new tab, no history entry)
+    window.location.replace("/root/mobile/beta.html");
 }
-
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
