@@ -66,7 +66,42 @@
 
         .logo-large {
             max-width: 160px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+        }
+
+        /* TV Selector Styles */
+        .tv-controls {
+            display: none;
+            background: #111;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #222;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .tv-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .tv-input-group label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .tv-select {
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
         }
 
         .section-label {
@@ -76,7 +111,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: #666;
-            margin: 30px 0 15px;
+            margin: 20px 0 15px;
             border-bottom: 1px solid #222;
             padding-bottom: 8px;
         }
@@ -97,33 +132,17 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
         }
 
         .server-card:hover { transform: translateY(-5px); }
 
-        /* Rakan Specific Style */
-        .card-rakan {
-            border-color: rgba(255, 140, 0, 0.3);
-        }
-        .card-rakan:hover {
-            border-color: var(--rakan-orange);
-            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.1);
-        }
+        .card-rakan { border-color: rgba(255, 140, 0, 0.2); }
+        .card-rakan:hover { border-color: var(--rakan-orange); }
 
-        .card-vidking {
-            border-color: rgba(0, 255, 136, 0.2);
-        }
-        .card-vidking:hover {
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
-        }
+        .card-vidking { border-color: rgba(0, 255, 136, 0.1); }
+        .card-vidking:hover { border-color: var(--accent); }
 
-        .server-card i {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            display: block;
-        }
+        .server-card i { font-size: 1.8rem; margin-bottom: 8px; display: block; }
 
         .reliable-note {
             display: block;
@@ -131,21 +150,17 @@
             color: var(--rakan-orange);
             margin-top: 5px;
             font-weight: 600;
-            text-transform: uppercase;
         }
 
         .badge {
             font-size: 0.6rem;
-            background: var(--accent);
-            color: #000;
+            background: #333;
+            color: #888;
             padding: 2px 10px;
             border-radius: 20px;
             font-weight: 800;
-            position: absolute;
-            top: 12px; right: 12px;
+            float: right;
         }
-
-        .ad-badge { background: #333; color: #888; }
 
         /* --- PIN SCREEN --- */
         #unlock-screen {
@@ -220,8 +235,6 @@
         }
 
         #movie-iframe { width: 100%; height: 100%; border: none; }
-
-        .error-txt { color: #ff5555; font-size: 0.85rem; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -235,16 +248,25 @@
     <div id="selection-screen">
         <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai Logo">
         
-        <div class="section-label">Recommended</div>
+        <div id="tv-selector" class="tv-controls">
+            <div class="tv-input-group">
+                <label>Season</label>
+                <input type="number" id="s-input" class="tv-select" value="1" min="1" style="width: 60px;">
+            </div>
+            <div class="tv-input-group">
+                <label>Episode</label>
+                <input type="number" id="e-input" class="tv-select" value="1" min="1" style="width: 60px;">
+            </div>
+        </div>
+
+        <div class="section-label">Recommended (Fast & No Ads)</div>
         <div class="server-grid">
             <div class="server-card card-vidking" onclick="selectServer(7)">
-                <span class="badge">SECURE</span>
-                <i class="bi bi-patch-check-fill" style="color: var(--accent)"></i>
+                <i class="bi bi-lightning-charge-fill" style="color: var(--accent)"></i>
                 VidKing
             </div>
             <div class="server-card card-rakan" onclick="selectServer(1)">
-                <span class="badge" style="background: var(--rakan-orange)">SECURE</span>
-                <i class="bi bi-shield-lock-fill" style="color: var(--rakan-orange)"></i>
+                <i class="bi bi-shield-fill" style="color: var(--rakan-orange)"></i>
                 Rakan
                 <span class="reliable-note">Reliable</span>
             </div>
@@ -253,23 +275,23 @@
         <div class="section-label">Alternative Servers</div>
         <div class="server-grid">
             <div class="server-card" onclick="selectServer(2)">
-                <span class="badge ad-badge">ADS</span>
+                <span class="badge">ADS</span>
                 Bard
             </div>
             <div class="server-card" onclick="selectServer(6)">
-                <span class="badge ad-badge">ADS</span>
+                <span class="badge">ADS</span>
                 Ryze
             </div>
             <div class="server-card" onclick="selectServer(4)">
-                <span class="badge ad-badge">ADS</span>
+                <span class="badge">ADS</span>
                 Ekko
             </div>
             <div class="server-card" onclick="selectServer(5)">
-                <span class="badge ad-badge">ADS</span>
+                <span class="badge">ADS</span>
                 Naafiri
             </div>
             <div class="server-card" onclick="selectServer(3)">
-                <span class="badge ad-badge">ADS</span>
+                <span class="badge">ADS</span>
                 Xayah
             </div>
         </div>
@@ -286,7 +308,7 @@
             </div>
             <button class="unlock-btn" onclick="validatePin()">Unlock Stream</button>
             <button class="pin-back-btn" onclick="closePinScreen()">Go Back</button>
-            <div class="error-txt" id="pin-error"></div>
+            <div id="pin-error" style="color:#ff5555; font-size:0.8rem; margin-top:10px;"></div>
         </div>
     </div>
 
@@ -294,6 +316,7 @@
 
     <script>
         const PIN = "1451";
+        const TMDB_KEY = "926e94b0f70b5bed8417b679652366ab";
         const SERVERS = {
             1: { name: "Rakan", movie: "https://vidsrc.cc/v2/embed/movie/", tv: "https://vidsrc.cc/v2/embed/tv/", secure: true },
             2: { name: "Bard", movie: "https://moviesapi.club/movie/", tv: "https://moviesapi.club/tv/", secure: false },
@@ -305,20 +328,37 @@
         };
 
         let selectedId = null;
-        let videoData = { type: null, id: null, s: null, e: null };
+        let videoData = { type: null, id: null, s: 1, e: 1 };
 
         function parseUrl() {
             const query = window.location.search.substring(1);
             if (!query) return false;
+            
             if (query.startsWith('tv=')) {
                 const parts = query.substring(3).split('/');
-                videoData = { type: 'tv', id: parts[0], s: parts[1], e: parts[2] };
-            } else { videoData = { type: 'movie', id: query }; }
+                videoData = { 
+                    type: 'tv', 
+                    id: parts[0], 
+                    s: parts[1] || 1, 
+                    e: parts[2] || 1 
+                };
+                document.getElementById('tv-selector').style.display = 'flex';
+                document.getElementById('s-input').value = videoData.s;
+                document.getElementById('e-input').value = videoData.e;
+            } else {
+                videoData = { type: 'movie', id: query };
+            }
             return !!videoData.id;
         }
 
         function selectServer(id) {
             selectedId = id;
+            // Update local video data with current input values if TV
+            if (videoData.type === 'tv') {
+                videoData.s = document.getElementById('s-input').value;
+                videoData.e = document.getElementById('e-input').value;
+            }
+
             if (localStorage.getItem('isUnlocked') === 'true') {
                 launchStream();
             } else {
@@ -347,8 +387,10 @@
         function launchStream() {
             const server = SERVERS[selectedId];
             let url = "";
-            if (videoData.type === 'movie') url = server.movie + videoData.id;
-            else {
+            
+            if (videoData.type === 'movie') {
+                url = server.movie + videoData.id;
+            } else {
                 if (selectedId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
                 else if (selectedId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
                 else url = `${server.tv}${videoData.id}/${videoData.s}/${videoData.e}`;
@@ -367,6 +409,7 @@
             ifr.setAttribute('allowfullscreen', 'true');
             ifr.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
 
+            // Sandbox VidKing and Rakan to stop popups
             if (server.secure) {
                 ifr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
             }
@@ -375,12 +418,13 @@
             playerDiv.appendChild(ifr);
         }
 
+        // UI Helpers
         document.querySelectorAll('.code-input').forEach((el, i, arr) => {
             el.addEventListener('input', () => { if (el.value && i < arr.length - 1) arr[i+1].focus(); });
             el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
 
-        window.onload = () => { if (!parseUrl()) document.body.innerHTML = "<center><h2>Invalid Link</h2></center>"; };
+        window.onload = () => { if (!parseUrl()) document.body.innerHTML = "<center><h2>No ID Provided</h2></center>"; };
         (function() { window.open = function() { return null; }; })();
     </script>
 </body>
