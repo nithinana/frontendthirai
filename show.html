@@ -40,8 +40,6 @@
             --input-border-color: #ced4da;
             --primary-color: #e50914; /* Netflix Red-like for a pop of color */
             --primary-hover-color: #b2070f;
-            --header-bg: rgba(248, 249, 250, 0.85);
-            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             --scrollbar-thumb-color: #ccc;
             --show-banner-bg: #000; /* New variable for the dark banner base */
         }
@@ -57,8 +55,6 @@
             --border-color: #333;
             --input-bg-color: #282828;
             --input-border-color: #444;
-            --header-bg: rgba(12, 12, 12, 0.85);
-            --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
             --scrollbar-thumb-color: #555;
             --show-banner-bg: #000;
         }
@@ -68,67 +64,43 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            padding-top: 80px;
+            /* REMOVED: padding-top: 80px; - No longer needed with overlay header */
+            padding-top: 0;
+            margin: 0;
         }
 
         body.no-scroll {
             overflow: hidden;
-        }
-
-        @media (max-width: 991.98px) {
-            main {
-                padding-top: 2rem !important; /* Adjust this value as needed */
-            }
         }
         
         .text-muted {
             color: var(--muted-text-color) !important;
         }
 
-        /* --- Header and Navigation (Modified - Search Bar Styles Removed) --- */
+        /* --- Header and Navigation (Modified - Centered Fade) --- */
         .app-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
-            padding: 1rem 1rem;
-            background-color: var(--header-bg);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            position: absolute; /* Changed from fixed to absolute to overlay banner */
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 1030;
+            padding: 1.5rem 1rem;
+            /* Black Fade Gradient */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            border-bottom: none; 
+            box-shadow: none;
+            display: flex;
+            justify-content: center; /* Center the logo */
+            align-items: center;
         }
-        .header-logo { width: auto; }
-        .nav-link {
-            color: var(--text-color); font-weight: 500; padding: 0.5rem 1rem;
-            border-radius: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .nav-link:hover { background-color: var(--card-bg-color); }
-        .nav-link.active { color: var(--primary-color); font-weight: 600; }
         
-        .settings-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; }
-        .dropdown-menu {
-            background-color: var(--card-bg-color); border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow); border-radius: 0.5rem;
+        .header-logo { 
+            width: auto; 
+            height: 40px; /* Specific height for the logo */
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
-        .dropdown-item { color: var(--text-color); }
-        .dropdown-item:hover { background-color: rgba(0,0,0,0.05); }
-        body.dark-mode .dropdown-item:hover { background-color: rgba(255,255,255,0.05); }
 
-        /* Header layout */
-        @media (min-width: 992px) {
-            .header-main-content { flex-grow: 1; justify-content: center; }
-            /* Search-specific styles removed */
-        }
-        @media (max-width: 991.98px) {
-            .header-main-content { order: 3; width: 100%; margin-top: 0; } /* Adjusted margin-top */
-            /* Search-specific styles removed */
-        }
-        
-        .highlight-red {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-        }
-        body.dark-mode .highlight-red {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.4);
-        }
+        /* Removed .nav-link, .settings-btn, etc. as they are no longer used in header */
         
         /* --- MODAL STYLES (Unchanged) --- */
         .modal-content {
@@ -194,7 +166,7 @@
             50% { opacity: 1; }
         }
         
-        /* --- === Show Details Page Styles - MODIFIED (Backshadow Added) === --- */
+        /* --- === Show Details Page Styles - MODIFIED === --- */
         
         #show-banner {
             background-color: var(--show-banner-bg);
@@ -203,7 +175,7 @@
             padding: 0;
             position: relative;
             color: #fff;
-            min-height: 80vh; 
+            min-height: 85vh; /* Increased slightly for visual impact */
             display: flex;
             align-items: flex-end; 
             overflow: hidden;
@@ -213,8 +185,9 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 40%, transparent 80%),
-                        linear-gradient(to top, rgba(0,0,0,1.0) 0%, rgba(0,0,0,0.8) 15%, transparent 70%);
+            /* Enhanced gradient for better text readability */
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 40%, transparent 80%),
+                        linear-gradient(to top, rgba(0,0,0,1.0) 0%, rgba(0,0,0,0.8) 20%, transparent 60%);
             z-index: 1;
             opacity: 1; 
         }
@@ -222,14 +195,14 @@
         #show-content-wrapper {
             position: relative;
             z-index: 2;
-            padding-top: 10rem; 
-            padding-bottom: 7rem; 
+            padding-top: 120px; /* Padding for top spacing */
+            padding-bottom: 4rem; 
             width: 100%;
             background: transparent; 
         }
 
         #show-banner .container {
-            padding: 0;
+            padding: 0 1.5rem; /* Ensure padding on sides */
             align-items: flex-start;
         }
         
@@ -239,7 +212,7 @@
 
         #show-title, #show-logo {
             font-weight: 900;
-            font-size: 4rem; 
+            font-size: 3.5rem; 
             line-height: 1.1;
             text-shadow: 2px 2px 8px rgba(0,0,0,1);
             margin-bottom: 1rem;
@@ -248,7 +221,7 @@
         
         /* Style for the image logo when present */
         #show-logo img {
-            max-width: 400px; 
+            max-width: 350px; 
             height: auto;
             filter: drop-shadow(0 8px 12px rgba(0,0,0,1)); 
         }
@@ -258,16 +231,15 @@
             font-weight: 500;
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem 2rem;
+            gap: 0.5rem 1.5rem;
             margin-top: 0.5rem;
-            color: #aaa; 
+            color: #ccc; 
         }
         
         #show-meta span {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            /* Backshadow added */
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); 
         }
 
@@ -279,30 +251,33 @@
         }
 
         #show-genres .badge {
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
             color: #fff;
             font-size: 0.9rem;
             font-weight: 500;
             padding: 0.5em 1em;
             border-radius: 0.25rem;
             border: none;
-            /* Backshadow added */
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); 
         }
         
         #show-overview {
             font-size: 1.1rem;
+            line-height: 1.6;
             margin-top: 1.5rem;
             max-width: 800px; 
-            color: #ddd;
+            color: #e0e0e0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
         
         /* === NEW: Action Button Styles === */
         .action-button {
             /* Transparent Gray Background */
-            background-color: rgba(108, 117, 125, 0.3); 
+            background-color: rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(5px);
             color: #fff; /* White text/icon */
-            border: none;
+            border: 1px solid rgba(255,255,255,0.3);
             font-weight: 600;
             font-size: 1.1rem;
             padding: 0.75rem 2rem;
@@ -316,7 +291,8 @@
         }
 
         .action-button:hover {
-            background-color: rgba(108, 117, 125, 0.5);
+            background-color: rgba(255, 255, 255, 0.35);
+            color: #fff;
             transform: translateY(-1px);
         }
 
@@ -324,54 +300,75 @@
             transform: translateY(0);
         }
 
-        /* Responsive Banner */
+        /* Responsive Banner & Mobile Fixes */
+        @media (max-width: 991.98px) {
+             #show-banner {
+                min-height: 70vh;
+             }
+        }
+
         @media (max-width: 767.98px) {
+            .app-header {
+                padding: 1rem;
+            }
+            
+            .header-logo {
+                height: 30px; /* Smaller logo on mobile */
+            }
+
             #show-banner {
-                min-height: 50vh;
+                min-height: 60vh; /* Reduced height for mobile */
                 align-items: flex-end; 
             }
             
             #show-content-wrapper {
-                 padding-bottom: 7rem; 
-                 padding-top: 5rem; 
-                 padding-left: 1.25rem; 
-                 padding-right: 1.25rem;
+                 padding-bottom: 4rem; 
+                 padding-top: 80px; /* Less top padding needed on mobile */
+            }
+            
+            /* Ensure container has padding */
+            #show-banner .container {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
             }
 
             #show-title, #show-logo {
-                font-size: 2.5rem;
-                margin-bottom: 2rem; 
+                font-size: 2.2rem; /* Better scaling */
+                margin-bottom: 0.5rem; 
             }
             
             #show-logo img {
-                max-width: 250px;
+                max-width: 200px;
             }
             
             #show-meta {
-                justify-content: flex-start;
-                gap: 0.75rem 1.5rem; 
-                margin-top: 0.75rem; 
-                font-size: 1rem; 
+                gap: 0.5rem 1rem; 
+                font-size: 0.95rem; 
             }
             
             #show-genres {
-                justify-content: flex-start;
-                margin-top: 2rem; 
-                gap: 0.6rem; 
+                margin-top: 1rem; 
+                gap: 0.5rem; 
+            }
+
+            #show-genres .badge {
+                font-size: 0.8rem;
+                padding: 0.4em 0.8em;
             }
             
             #show-overview {
-                display: none; 
+                display: none; /* Keep hidden on mobile as per design, or uncomment to show: display: block; font-size: 0.95rem; */
             }
             
             #show-content-wrapper h5 {
-                margin-top: 2.5rem !important; 
+                margin-top: 1.5rem !important; 
                 margin-bottom: 0.5rem; 
+                font-size: 1rem;
             }
             
             #show-cast {
                 margin-top: 0;
-                font-size: 0.95rem; 
+                font-size: 0.9rem; 
             }
             
             .show-poster-col {
@@ -379,20 +376,23 @@
             }
             
             .action-button {
-                margin-top: 1rem; /* Adjust margin for mobile */
+                margin-top: 1.5rem; 
                 padding: 0.6rem 1.5rem;
                 font-size: 1rem;
+                width: 100%; /* Full width button on mobile */
+                justify-content: center;
             }
         }
         
         /* --- Seasons/Episodes Styling (Unchanged) --- */
         #seasons-container {
-            padding-top: 3rem;
+            padding-top: 2rem;
             padding-bottom: 3rem;
         }
 
         .season-selector-group {
-            width: 300px; 
+            width: 100%;
+            max-width: 300px; 
             margin-bottom: 2rem;
         }
 
@@ -401,7 +401,7 @@
             border: 1px solid var(--border-color);
             color: var(--text-color);
             font-weight: 600;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             padding: 0.75rem 1.25rem;
             border-radius: 0.5rem;
             appearance: menulist-button; 
@@ -429,14 +429,30 @@
         }
         
         .episode-thumbnail-placeholder {
-            width: 150px; 
-            height: 85px; 
+            width: 140px; 
+            height: 80px; 
             background-color: #333;
             border-radius: 4px;
             margin-right: 15px;
             flex-shrink: 0;
             position: relative;
         }
+        /* Mobile adjustment for episode list */
+        @media (max-width: 576px) {
+            .episode-thumbnail-placeholder {
+                width: 110px;
+                height: 62px;
+                margin-right: 10px;
+            }
+            .episode-details strong {
+                font-size: 0.95rem;
+            }
+            .episode-details .text-muted {
+                font-size: 0.8rem;
+                -webkit-line-clamp: 1; /* Limit text on mobile */
+            }
+        }
+
         .episode-thumbnail-placeholder img {
             width: 100%;
             height: 100%;
@@ -499,22 +515,9 @@
     </div>
     
     <header class="app-header">
-        <div class="container-fluid d-flex flex-wrap align-items-center">
-            <a href="/" class="d-flex align-items-center me-lg-4" id="logoLink">
-                <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
-            </a>
-
-            <div class="d-flex justify-content-center flex-grow-1 header-main-content">
-            </div>
-
-            <div class="d-flex align-items: center ms-auto">
-                <div class="dropdown">
-                    <button class="settings-btn" type="button" id="aboutButton" title="About">
-                        <i class="bi bi-info-circle-fill"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <a href="/" id="logoLink">
+            <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="40">
+        </a>
     </header>
 
     <main>
@@ -573,6 +576,7 @@
         </div>
 
     </main>
+
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -651,16 +655,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Call the function to set dark mode permanently
             forceDarkMode(); 
-            
-            // REMOVED: All previous theme-related event listeners and media queries.
         });
         
-        // The 'About' button is now the only one in the header's right corner
-        document.getElementById('aboutButton').addEventListener('click', function (event) {
-            event.preventDefault();
-            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-            aboutModal.show();
-        });
+        // REMOVED: About button event listener as the button is gone.
 
         // --- NEW: Action Button Logic ---
         function isUnlocked() {
