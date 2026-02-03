@@ -162,6 +162,12 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Centering fix applied here */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
 
         .server-card:hover { transform: translateY(-5px); }
@@ -174,7 +180,6 @@
             display: block;
             font-size: 0.7rem;
             color: var(--rakan-orange);
-            margin-top: 5px;
             font-weight: 600;
         }
 
@@ -185,7 +190,6 @@
             padding: 2px 10px;
             border-radius: 20px;
             font-weight: 800;
-            float: right;
         }
 
         #unlock-screen {
@@ -422,12 +426,14 @@
 
         function updateSelection() {
             const eSelect = document.getElementById('e-select');
+            if (!eSelect.options[eSelect.selectedIndex]) return;
+
             videoData.e = eSelect.value;
-            const epName = eSelect.options[eSelect.selectedIndex]?.text.split(': ')[1] || "";
+            const epName = eSelect.options[eSelect.selectedIndex].text.split(': ')[1] || "";
             document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
             
-            // If already playing, refresh stream
-            if (document.getElementById('player-screen').style.display === 'block') {
+            // Logic updated to ensure stream updates on selection
+            if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
                 launchStream();
             }
         }
