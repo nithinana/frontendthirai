@@ -26,14 +26,33 @@
 
         /* --- NAVIGATION --- */
         .top-nav {
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            background: rgba(0,0,0,0.9);
             position: fixed;
             top: 0; width: 100%; z-index: 100;
             box-sizing: border-box;
+            border-bottom: 1px solid #222;
+        }
+
+        .title-display {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+
+        #movie-title {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        #episode-info {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
         }
 
         .back-btn {
@@ -69,38 +88,49 @@
             margin-bottom: 30px;
         }
 
-        /* TV Selector Styles */
         .tv-controls {
             display: none;
             background: #111;
-            padding: 15px;
+            padding: 20px;
             border-radius: 12px;
             margin-bottom: 25px;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             border: 1px solid #222;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .tv-input-group {
-            display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 15px;
         }
 
-        .tv-input-group label {
-            font-size: 0.7rem;
-            color: #666;
-            text-transform: uppercase;
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
+
+        .nav-btn {
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover { background: var(--primary); }
 
         .tv-select {
+            flex-grow: 1;
             background: #222;
             color: white;
             border: 1px solid #333;
-            padding: 8px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 8px;
             outline: none;
         }
 
@@ -135,14 +165,10 @@
         }
 
         .server-card:hover { transform: translateY(-5px); }
-
         .card-rakan { border-color: rgba(255, 140, 0, 0.2); }
         .card-rakan:hover { border-color: var(--rakan-orange); }
-
         .card-vidking { border-color: rgba(0, 255, 136, 0.1); }
         .card-vidking:hover { border-color: var(--accent); }
-
-        .server-card i { font-size: 1.8rem; margin-bottom: 8px; display: block; }
 
         .reliable-note {
             display: block;
@@ -162,7 +188,6 @@
             float: right;
         }
 
-        /* --- PIN SCREEN --- */
         #unlock-screen {
             display: none;
             position: fixed;
@@ -203,8 +228,6 @@
             outline: none;
         }
 
-        .code-input:focus { border-color: var(--primary); }
-
         .unlock-btn {
             width: 100%;
             padding: 16px;
@@ -217,21 +240,13 @@
             margin-bottom: 15px;
         }
 
-        .pin-back-btn {
-            background: transparent;
-            color: #777;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: underline;
-        }
-
-        /* --- PLAYER --- */
         #player-screen {
             display: none;
             width: 100vw;
             height: 100vh;
             background: #000;
+            padding-top: 65px;
+            box-sizing: border-box;
         }
 
         #movie-iframe { width: 100%; height: 100%; border: none; }
@@ -243,19 +258,25 @@
         <div class="back-btn" onclick="location.reload()">
             <i class="bi bi-arrow-left"></i> Back
         </div>
+        <div class="title-display">
+            <span id="movie-title">Loading...</span>
+            <span id="episode-info"></span>
+        </div>
     </nav>
 
     <div id="selection-screen">
         <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai Logo">
         
         <div id="tv-selector" class="tv-controls">
-            <div class="tv-input-group">
-                <label>Season</label>
-                <input type="number" id="s-input" class="tv-select" value="1" min="1" style="width: 60px;">
+            <div class="control-row">
+                <label style="width: 60px; font-size: 0.8rem;">SEASON</label>
+                <select id="s-select" class="tv-select" onchange="fetchEpisodes()"></select>
             </div>
-            <div class="tv-input-group">
-                <label>Episode</label>
-                <input type="number" id="e-input" class="tv-select" value="1" min="1" style="width: 60px;">
+            <div class="control-row">
+                <label style="width: 60px; font-size: 0.8rem;">EPISODE</label>
+                <button class="nav-btn" onclick="navEpisode(-1)"><i class="bi bi-chevron-left"></i></button>
+                <select id="e-select" class="tv-select" onchange="updateSelection()"></select>
+                <button class="nav-btn" onclick="navEpisode(1)"><i class="bi bi-chevron-right"></i></button>
             </div>
         </div>
 
@@ -275,24 +296,19 @@
         <div class="section-label">Alternative Servers</div>
         <div class="server-grid">
             <div class="server-card" onclick="selectServer(2)">
-                <span class="badge">ADS</span>
-                Bard
+                <span class="badge">ADS</span> Bard
             </div>
             <div class="server-card" onclick="selectServer(6)">
-                <span class="badge">ADS</span>
-                Ryze
+                <span class="badge">ADS</span> Ryze
             </div>
             <div class="server-card" onclick="selectServer(4)">
-                <span class="badge">ADS</span>
-                Ekko
+                <span class="badge">ADS</span> Ekko
             </div>
             <div class="server-card" onclick="selectServer(5)">
-                <span class="badge">ADS</span>
-                Naafiri
+                <span class="badge">ADS</span> Naafiri
             </div>
             <div class="server-card" onclick="selectServer(3)">
-                <span class="badge">ADS</span>
-                Xayah
+                <span class="badge">ADS</span> Xayah
             </div>
         </div>
     </div>
@@ -307,7 +323,7 @@
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
             </div>
             <button class="unlock-btn" onclick="validatePin()">Unlock Stream</button>
-            <button class="pin-back-btn" onclick="closePinScreen()">Go Back</button>
+            <button onclick="document.getElementById('unlock-screen').style.display='none'" style="background:none; border:none; color:#777; cursor:pointer; text-decoration:underline;">Go Back</button>
             <div id="pin-error" style="color:#ff5555; font-size:0.8rem; margin-top:10px;"></div>
         </div>
     </div>
@@ -327,72 +343,130 @@
             7: { name: "VidKing", movie: "https://www.vidking.net/embed/movie/", tv: "https://www.vidking.net/embed/tv/", secure: true }
         };
 
-        let selectedId = null;
-        let videoData = { type: null, id: null, s: 1, e: 1 };
+        let selectedServerId = null;
+        let videoData = { type: null, id: null, s: 1, e: 1, title: "" };
+        let currentEpisodes = [];
 
-        function parseUrl() {
+        async function parseUrl() {
             const query = window.location.search.substring(1);
             if (!query) return false;
             
             if (query.startsWith('tv=')) {
                 const parts = query.substring(3).split('/');
-                videoData = { 
-                    type: 'tv', 
-                    id: parts[0], 
-                    s: parts[1] || 1, 
-                    e: parts[2] || 1 
-                };
+                videoData.type = 'tv';
+                videoData.id = parts[0];
+                videoData.s = parts[1] || 1;
+                videoData.e = parts[2] || 1;
                 document.getElementById('tv-selector').style.display = 'flex';
-                document.getElementById('s-input').value = videoData.s;
-                document.getElementById('e-input').value = videoData.e;
+                await fetchShowDetails();
             } else {
-                videoData = { type: 'movie', id: query };
+                videoData.type = 'movie';
+                videoData.id = query;
+                await fetchMovieDetails();
             }
             return !!videoData.id;
         }
 
-        function selectServer(id) {
-            selectedId = id;
-            // Update local video data with current input values if TV
-            if (videoData.type === 'tv') {
-                videoData.s = document.getElementById('s-input').value;
-                videoData.e = document.getElementById('e-input').value;
-            }
+        async function fetchShowDetails() {
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/tv/${videoData.id}?api_key=${TMDB_KEY}`);
+                const data = await res.json();
+                videoData.title = data.name;
+                document.getElementById('movie-title').innerText = data.name;
+                
+                const sSelect = document.getElementById('s-select');
+                sSelect.innerHTML = '';
+                data.seasons.forEach(s => {
+                    if (s.season_number > 0) {
+                        const opt = document.createElement('option');
+                        opt.value = s.season_number;
+                        opt.textContent = `Season ${s.season_number}`;
+                        if (s.season_number == videoData.s) opt.selected = true;
+                        sSelect.appendChild(opt);
+                    }
+                });
+                await fetchEpisodes();
+            } catch (e) { console.error(e); }
+        }
 
-            if (localStorage.getItem('isUnlocked') === 'true') {
+        async function fetchEpisodes() {
+            const s = document.getElementById('s-select').value;
+            videoData.s = s;
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/tv/${videoData.id}/season/${s}?api_key=${TMDB_KEY}`);
+                const data = await res.json();
+                currentEpisodes = data.episodes;
+                
+                const eSelect = document.getElementById('e-select');
+                eSelect.innerHTML = '';
+                data.episodes.forEach(ep => {
+                    const opt = document.createElement('option');
+                    opt.value = ep.episode_number;
+                    opt.textContent = `E${ep.episode_number}: ${ep.name}`;
+                    if (ep.episode_number == videoData.e) opt.selected = true;
+                    eSelect.appendChild(opt);
+                });
+                updateSelection();
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchMovieDetails() {
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/movie/${videoData.id}?api_key=${TMDB_KEY}`);
+                const data = await res.json();
+                videoData.title = data.title;
+                document.getElementById('movie-title').innerText = data.title;
+                document.getElementById('episode-info').innerText = "";
+            } catch (e) { console.error(e); }
+        }
+
+        function updateSelection() {
+            const eSelect = document.getElementById('e-select');
+            videoData.e = eSelect.value;
+            const epName = eSelect.options[eSelect.selectedIndex]?.text.split(': ')[1] || "";
+            document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
+            
+            // If already playing, refresh stream
+            if (document.getElementById('player-screen').style.display === 'block') {
                 launchStream();
-            } else {
+            }
+        }
+
+        function navEpisode(dir) {
+            const select = document.getElementById('e-select');
+            const newIdx = select.selectedIndex + dir;
+            if (newIdx >= 0 && newIdx < select.length) {
+                select.selectedIndex = newIdx;
+                updateSelection();
+            }
+        }
+
+        function selectServer(id) {
+            selectedServerId = id;
+            if (localStorage.getItem('isUnlocked') === 'true') launchStream();
+            else {
                 document.getElementById('unlock-screen').style.display = 'flex';
                 document.querySelectorAll('.code-input')[0].focus();
             }
         }
 
-        function closePinScreen() {
-            document.getElementById('unlock-screen').style.display = 'none';
-        }
-
         function validatePin() {
-            const inputs = document.querySelectorAll('.code-input');
-            const entered = Array.from(inputs).map(i => i.value).join('');
+            const entered = Array.from(document.querySelectorAll('.code-input')).map(i => i.value).join('');
             if (entered === PIN) {
                 localStorage.setItem('isUnlocked', 'true');
                 launchStream();
             } else {
                 document.getElementById('pin-error').innerText = "Incorrect PIN.";
-                inputs.forEach(i => i.value = '');
-                inputs[0].focus();
             }
         }
 
         function launchStream() {
-            const server = SERVERS[selectedId];
+            const server = SERVERS[selectedServerId];
             let url = "";
-            
-            if (videoData.type === 'movie') {
-                url = server.movie + videoData.id;
-            } else {
-                if (selectedId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
-                else if (selectedId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
+            if (videoData.type === 'movie') url = server.movie + videoData.id;
+            else {
+                if (selectedServerId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
+                else if (selectedServerId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
                 else url = `${server.tv}${videoData.id}/${videoData.s}/${videoData.e}`;
             }
 
@@ -402,29 +476,15 @@
             
             const playerDiv = document.getElementById('player-screen');
             playerDiv.style.display = 'block';
-            
-            const ifr = document.createElement('iframe');
-            ifr.id = "movie-iframe";
-            ifr.src = url;
-            ifr.setAttribute('allowfullscreen', 'true');
-            ifr.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-
-            // Sandbox VidKing and Rakan to stop popups
-            if (server.secure) {
-                ifr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
-            }
-
-            playerDiv.innerHTML = '';
-            playerDiv.appendChild(ifr);
+            playerDiv.innerHTML = `<iframe id="movie-iframe" src="${url}" allowfullscreen="true" allow="autoplay; encrypted-media" ${server.secure ? 'sandbox="allow-scripts allow-same-origin allow-forms"' : ''}></iframe>`;
         }
 
-        // UI Helpers
         document.querySelectorAll('.code-input').forEach((el, i, arr) => {
             el.addEventListener('input', () => { if (el.value && i < arr.length - 1) arr[i+1].focus(); });
             el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
 
-        window.onload = () => { if (!parseUrl()) document.body.innerHTML = "<center><h2>No ID Provided</h2></center>"; };
+        window.onload = () => { parseUrl(); };
         (function() { window.open = function() { return null; }; })();
     </script>
 </body>
