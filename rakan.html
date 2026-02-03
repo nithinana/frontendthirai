@@ -3,140 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Overlay Sandbox</title>
+    <title>Thirai - Clean Player</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        :root {
-            --primary-color: #007bff;
-            --overlay-bg: rgba(0, 0, 0, 0.8);
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; }
+        
+        /* Back Button - Top Left */
+        .header-controls {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 9999;
         }
 
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
+        .back-btn {
+            background: rgba(40, 40, 40, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-family: sans-serif;
+            border: 1px solid #444;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            background-color: #f4f4f9;
-            padding: 20px;
+            gap: 8px;
         }
 
-        /* The Frame Container */
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        video {
+        iframe#movie-player {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-
-        /* The Popup Overlay */
-        .video-popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            z-index: 10;
-            display: none; /* Hidden by default */
-            transition: all 0.3s ease;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
-        .video-popup.active {
-            display: block;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .close-btn {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: var(--primary-color);
-            color: white;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        /* Control Panel (The "Sandbox" part) */
-        .sandbox-controls {
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        button.trigger {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 
-    <h2>Interactive Video Sandbox</h2>
-    <p>Wait for 3 seconds or use the button below to trigger the internal popup.</p>
-
-    <div class="video-container" id="videoWrapper">
-        <video id="myVideo" controls>
-            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-
-        <div id="videoPopup" class="video-popup">
-            <h3>Special Offer!</h3>
-            <p>Don't miss out on our mid-video deals.</p>
-            <button class="close-btn" onclick="togglePopup(false)">Resume Video</button>
-        </div>
+    <div class="header-controls">
+        <a href="javascript:history.back()" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 
-    <div class="sandbox-controls">
-        <button class="trigger" onclick="togglePopup(true)">Trigger Manual Popup</button>
-        <button onclick="document.getElementById('myVideo').play()">Play Video</button>
-    </div>
+    <div id="player-container" style="width:100%; height:100%;"></div>
 
     <script>
-        const video = document.getElementById('myVideo');
-        const popup = document.getElementById('videoPopup');
+        (function() {
+            // 1. URL PARSING (Same logic as Rakan)
+            const query = window.location.search.substring(1);
+            const container = document.getElementById('player-container');
+            let videoUrl = "";
 
-        // Function to show/hide popup
-        function togglePopup(show) {
-            if (show) {
-                popup.classList.add('active');
-                video.pause(); // Usually you want to pause when a popup appears
+            if (query.startsWith('tv=')) {
+                const parts = query.substring(3).split('/'); 
+                videoUrl = `https://vidsrc.cc/v2/embed/tv/${parts[0]}/${parts[1]}/${parts[2]}?autoPlay=false`;
             } else {
-                popup.classList.remove('active');
-                video.play();
+                videoUrl = `https://vidsrc.cc/v2/embed/movie/${query}?autoPlay=false`;
             }
-        }
 
-        // Automated behavior: Show popup after 3 seconds of playtime
-        video.addEventListener('timeupdate', () => {
-            if (Math.floor(video.currentTime) === 3) {
-                // To prevent it from firing multiple times per second
-                if (!popup.classList.contains('active') && !popup.dataset.fired) {
-                    togglePopup(true);
-                    popup.dataset.fired = "true"; 
+            // 2. INJECT PLAYER
+            if (query) {
+                container.innerHTML = `<iframe id="movie-player" src="${videoUrl}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+            }
+
+            // 3. AGGRESSIVE AD-BLOCKING SUITE
+            // Kill new window/tab attempts
+            window.open = function() { return null; };
+
+            // Block click-jackers and transparent overlays
+            document.addEventListener('click', function(e) {
+                const target = e.target;
+                // If user didn't click the back button or the player itself, kill the click
+                if (!target.closest('.back-btn') && !target.closest('#movie-player')) {
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
-            }
-        });
-    </script>
+            }, true);
 
+            // Mutation Observer to delete injected ad-elements instantly
+            const adKiller = new MutationObserver(() => {
+                // Remove any iframe that isn't our Rakan video
+                document.querySelectorAll('iframe').forEach(frame => {
+                    if (!frame.src.includes('vidsrc.cc')) {
+                        frame.remove();
+                    }
+                });
+                // Remove common ad-container classes
+                document.querySelectorAll('.ad-container, [class*="ad-"], [id*="pop-"]').forEach(el => el.remove());
+            });
+
+            adKiller.observe(document.body, { childList: true, subtree: true });
+
+            // Final fallback: check every half-second for hidden pop-unders
+            setInterval(() => {
+                if (document.activeElement && document.activeElement.tagName === "IFRAME") {
+                    // Reset focus to body to prevent hidden ad-focus
+                    window.focus();
+                }
+            }, 500);
+        })();
+    </script>
 </body>
 </html>
