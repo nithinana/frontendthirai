@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thirai Player</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; }
+        
+        /* Back Button Top Left */
+        .back-layer {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: sans-serif;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="back-layer">
+        <a href="javascript:history.back()" class="back-btn">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div id="player" style="width:100%; height:100%;"></div>
+
+    <script>
+        // 1. Get the movie ID from the URL (e.g., ?12345)
+        const query = window.location.search.substring(1);
+        const playerDiv = document.getElementById('player');
+
+        if (query) {
+            let src = "";
+            // Check if it's TV or Movie
+            if (query.startsWith('tv=')) {
+                const parts = query.substring(3).split('/'); // tv=ID/S/E
+                src = `https://vidsrc.cc/v2/embed/tv/${parts[0]}/${parts[1]}/${parts[2]}?autoPlay=false`;
+            } else {
+                src = `https://vidsrc.cc/v2/embed/movie/${query}?autoPlay=false`;
+            }
+
+            // 2. Load Rakan API
+            playerDiv.innerHTML = `<iframe src="${src}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+        } else {
+            playerDiv.innerHTML = `<p style="color:white; text-align:center; margin-top:50px;">No Movie ID found in URL.</p>`;
+        }
+
+        // 3. AGGRESSIVE POPUP BLOCKER
+        (function() {
+            // Block window.open
+            window.open = function() { return null; };
+
+            // Stop clicks from opening new tabs
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && link.target === '_blank') {
+                    e.preventDefault();
+                    window.location.href = link.href; // Open in same tab instead of popup
+                }
+            }, true);
+
+            // Periodically kill any ad-iframes that try to sneak in
+            setInterval(() => {
+                document.querySelectorAll('iframe').forEach(frame => {
+                    // If it's not our Rakan player, delete it
+                    if (!frame.src.includes('vidsrc.cc')) {
+                        frame.remove();
+                    }
+                });
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>
