@@ -90,81 +90,70 @@
             border-radius: 30px 30px 0 0;
             z-index: 2000;
             transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
-            max-height: 70vh;
+            transition: transform 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+            max-height: 65vh;
             display: flex;
             flex-direction: column;
-            padding: 25px;
+            padding: 20px;
         }
 
-        #episode-drawer.open {
-            transform: translateY(0);
-        }
+        #episode-drawer.open { transform: translateY(0); }
 
         .drawer-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .drawer-season-select {
             background: #222;
             color: white;
-            border: 1px solid #444;
-            padding: 8px 15px;
-            border-radius: 10px;
-            font-size: 1rem;
-        }
-
-        .close-drawer {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 1px solid #333;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
         }
 
         .episodes-scroll-container {
-            overflow-y: auto;
-            flex-grow: 1;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding-bottom: 20px;
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
         }
 
+        .episodes-scroll-container::-webkit-scrollbar { display: none; }
+
         .ep-card {
-            background: #1a1a1a;
-            border-radius: 12px;
+            min-width: 220px;
+            max-width: 220px;
+            background: #121212;
+            border-radius: 14px;
             overflow: hidden;
-            border: 1px solid #333;
             cursor: pointer;
+            border: 1px solid #222;
+            scroll-snap-align: start;
             transition: 0.2s;
         }
 
-        .ep-card:hover { border-color: var(--primary); transform: scale(1.02); }
-        .ep-card.active { border-color: var(--primary); background: rgba(13, 110, 253, 0.1); }
+        .ep-card.active {
+            border-color: var(--primary);
+            background: rgba(13,110,253,0.15);
+        }
 
         .ep-thumb {
             width: 100%;
-            aspect-ratio: 16/9;
+            height: 125px;
             background-size: cover;
             background-position: center;
             background-color: #222;
         }
 
-        .ep-meta {
-            padding: 12px;
-        }
+        .ep-meta { padding: 10px; }
 
         .ep-title {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 4px;
             white-space: nowrap;
@@ -173,7 +162,7 @@
         }
 
         .ep-desc {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #888;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -386,8 +375,8 @@
             <span id="episode-info"></span>
         </div>
         <div class="nav-right">
-            <button id="episodes-btn" class="episodes-toggle-btn" onclick="toggleEpisodesDrawer()" style="display: none;">
-                <i class="bi bi-collection-play-fill"></i> Episodes
+            <button id="episodes-btn" class="episodes-toggle-btn" onclick="toggleEpisodesDrawer()" style="display: none; padding:8px 10px">
+                <i class="bi bi-collection-play-fill"></i>
             </button>
         </div>
     </nav>
@@ -569,6 +558,7 @@
                     card.onclick = () => {
                         videoData.e = ep.episode_number;
                         updateSelection();
+                        fetchEpisodes();
                         toggleEpisodesDrawer();
                     };
                     drawerEpList.appendChild(card);
