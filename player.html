@@ -162,7 +162,7 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Centering fix applied here */
+            /* Center Content */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -429,10 +429,18 @@
             if (!eSelect.options[eSelect.selectedIndex]) return;
 
             videoData.e = eSelect.value;
+            videoData.s = document.getElementById('s-select').value;
+            
             const epName = eSelect.options[eSelect.selectedIndex].text.split(': ')[1] || "";
             document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
             
-            // Logic updated to ensure stream updates on selection
+            // UPDATE BROWSER URL
+            if (videoData.type === 'tv') {
+                const newUrl = `${window.location.pathname}?tv=${videoData.id}/${videoData.s}/${videoData.e}`;
+                window.history.replaceState({path: newUrl}, '', newUrl);
+            }
+
+            // AUTO-RELOAD STREAM IF PLAYING
             if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
                 launchStream();
             }
