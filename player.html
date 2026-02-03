@@ -21,18 +21,19 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        /* --- NAVIGATION & TV CONTROLS --- */
-        .header-bar {
-            padding: 15px 20px;
+        /* --- NAVIGATION --- */
+        .top-nav {
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
-            background: #111;
-            border-bottom: 1px solid #222;
-            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            position: fixed;
+            top: 0; width: 100%; z-index: 100;
+            box-sizing: border-box;
         }
 
         .back-btn {
@@ -41,123 +42,258 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 500;
+            opacity: 0.8;
+            transition: 0.3s;
             cursor: pointer;
+            background: rgba(255,255,255,0.1);
             padding: 8px 15px;
             border-radius: 8px;
-            background: #222;
+            backdrop-filter: blur(5px);
         }
 
-        .tv-nav-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tv-select {
-            background: #222;
-            color: white;
-            border: 1px solid #333;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            outline: none;
-        }
-
-        .nav-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .nav-btn:disabled { background: #333; cursor: not-allowed; }
+        .back-btn:hover { opacity: 1; transform: translateX(-3px); background: rgba(255,255,255,0.2); }
 
         /* --- SELECTION SCREEN --- */
         #selection-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 80px 20px;
-            height: 100vh;
-            overflow-y: auto;
+            padding: 80px 20px 40px;
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
-        .logo-large { max-width: 150px; margin-bottom: 40px; }
+        .logo-large {
+            max-width: 160px;
+            margin-bottom: 30px;
+        }
+
+        /* TV Selector Styles */
+        .tv-controls {
+            display: none;
+            background: #111;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #222;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .tv-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .tv-input-group label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .tv-select {
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+        }
 
         .section-label {
-            width: 100%; max-width: 800px;
-            font-size: 0.8rem; color: #666;
-            text-transform: uppercase; letter-spacing: 2px;
-            margin: 20px 0 10px; border-bottom: 1px solid #222;
+            width: 100%;
+            max-width: 800px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666;
+            margin: 20px 0 15px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 8px;
         }
 
         .server-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px; width: 100%; max-width: 800px;
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
         }
 
         .server-card {
             background: var(--card-bg);
             border: 1px solid #222;
-            padding: 20px;
+            padding: 25px 20px;
             border-radius: 12px;
             text-align: center;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .server-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+        .server-card:hover { transform: translateY(-5px); }
+
+        .card-rakan { border-color: rgba(255, 140, 0, 0.2); }
         .card-rakan:hover { border-color: var(--rakan-orange); }
-        .reliable-note { display: block; font-size: 0.7rem; color: var(--rakan-orange); font-weight: bold; }
+
+        .card-vidking { border-color: rgba(0, 255, 136, 0.1); }
+        .card-vidking:hover { border-color: var(--accent); }
+
+        .server-card i { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+
+        .reliable-note {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--rakan-orange);
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 0.6rem;
+            background: #333;
+            color: #888;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 800;
+            float: right;
+        }
 
         /* --- PIN SCREEN --- */
         #unlock-screen {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.98); z-index: 1000;
-            justify-content: center; align-items: center;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(15px);
         }
 
         .pin-container {
-            background: var(--card-bg); padding: 40px; border-radius: 20px;
-            text-align: center; width: 360px; border: 1px solid #333;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 360px;
+            border: 1px solid #333;
         }
 
-        .code-input-container { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .code-input { width: 50px; height: 60px; background: #222; border: 2px solid #333; border-radius: 10px; color: white; font-size: 24px; text-align: center; }
-        .code-input:focus { border-color: var(--primary); outline: none; }
+        .code-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .code-input {
+            width: 50px;
+            height: 65px;
+            background: #222;
+            border: 2px solid #333;
+            border-radius: 12px;
+            color: white;
+            font-size: 28px;
+            text-align: center;
+            outline: none;
+        }
+
+        .code-input:focus { border-color: var(--primary); }
+
+        .unlock-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .pin-back-btn {
+            background: transparent;
+            color: #777;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
 
         /* --- PLAYER --- */
-        #player-area { display: none; height: 100vh; flex-direction: column; }
-        #movie-iframe { flex-grow: 1; width: 100%; border: none; background: #000; }
+        #player-screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+        }
+
+        #movie-iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
+    <nav class="top-nav" id="ui-nav" style="display: none;">
+        <div class="back-btn" onclick="location.reload()">
+            <i class="bi bi-arrow-left"></i> Back
+        </div>
+    </nav>
+
     <div id="selection-screen">
-        <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai">
+        <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai Logo">
         
-        <div class="section-label">Premium (Ad-Free)</div>
+        <div id="tv-selector" class="tv-controls">
+            <div class="tv-input-group">
+                <label>Season</label>
+                <input type="number" id="s-input" class="tv-select" value="1" min="1" style="width: 60px;">
+            </div>
+            <div class="tv-input-group">
+                <label>Episode</label>
+                <input type="number" id="e-input" class="tv-select" value="1" min="1" style="width: 60px;">
+            </div>
+        </div>
+
+        <div class="section-label">Recommended (Fast & No Ads)</div>
         <div class="server-grid">
             <div class="server-card card-vidking" onclick="selectServer(7)">
-                <i class="bi bi-lightning-charge-fill" style="color: var(--accent)"></i> VidKing
+                <i class="bi bi-lightning-charge-fill" style="color: var(--accent)"></i>
+                VidKing
             </div>
             <div class="server-card card-rakan" onclick="selectServer(1)">
-                <i class="bi bi-shield-fill" style="color: var(--rakan-orange)"></i> Rakan
+                <i class="bi bi-shield-fill" style="color: var(--rakan-orange)"></i>
+                Rakan
                 <span class="reliable-note">Reliable</span>
             </div>
         </div>
 
-        <div class="section-label">Others</div>
+        <div class="section-label">Alternative Servers</div>
         <div class="server-grid">
-            <div id="other-servers"></div>
+            <div class="server-card" onclick="selectServer(2)">
+                <span class="badge">ADS</span>
+                Bard
+            </div>
+            <div class="server-card" onclick="selectServer(6)">
+                <span class="badge">ADS</span>
+                Ryze
+            </div>
+            <div class="server-card" onclick="selectServer(4)">
+                <span class="badge">ADS</span>
+                Ekko
+            </div>
+            <div class="server-card" onclick="selectServer(5)">
+                <span class="badge">ADS</span>
+                Naafiri
+            </div>
+            <div class="server-card" onclick="selectServer(3)">
+                <span class="badge">ADS</span>
+                Xayah
+            </div>
         </div>
     </div>
 
@@ -170,27 +306,13 @@
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
             </div>
-            <button class="nav-btn" style="width:100%; margin-bottom:10px;" onclick="validatePin()">Unlock</button>
-            <button class="back-btn" style="width:100%; justify-content:center;" onclick="document.getElementById('unlock-screen').style.display='none'">Go Back</button>
-            <div id="pin-error" style="color:red; margin-top:10px;"></div>
+            <button class="unlock-btn" onclick="validatePin()">Unlock Stream</button>
+            <button class="pin-back-btn" onclick="closePinScreen()">Go Back</button>
+            <div id="pin-error" style="color:#ff5555; font-size:0.8rem; margin-top:10px;"></div>
         </div>
     </div>
 
-    <div id="player-area">
-        <div class="header-bar">
-            <div class="back-btn" onclick="location.reload()"><i class="bi bi-arrow-left"></i></div>
-            
-            <div class="tv-nav-controls" id="tv-nav">
-                <button class="nav-btn" onclick="changeEp(-1)"><i class="bi bi-chevron-left"></i></button>
-                <select id="s-select" class="tv-select"></select>
-                <select id="e-select" class="tv-select"></select>
-                <button class="nav-btn" onclick="changeEp(1)"><i class="bi bi-chevron-right"></i></button>
-                <button class="nav-btn" style="background:var(--accent); color:#000" onclick="launchStream()">GO</button>
-            </div>
-
-            <div style="width:40px"></div> </div>
-        <iframe id="movie-iframe" allowfullscreen></iframe>
-    </div>
+    <div id="player-screen"></div>
 
     <script>
         const PIN = "1451";
@@ -205,125 +327,105 @@
             7: { name: "VidKing", movie: "https://www.vidking.net/embed/movie/", tv: "https://www.vidking.net/embed/tv/", secure: true }
         };
 
-        let currentId = null;
-        let selectedServer = null;
-        let isTV = false;
-        let tvData = { seasons: [] };
+        let selectedId = null;
+        let videoData = { type: null, id: null, s: 1, e: 1 };
 
-        async function init() {
+        function parseUrl() {
             const query = window.location.search.substring(1);
-            if (!query) return;
-
+            if (!query) return false;
+            
             if (query.startsWith('tv=')) {
-                isTV = true;
-                currentId = query.substring(3).split('/')[0];
-                await fetchTvMetadata();
+                const parts = query.substring(3).split('/');
+                videoData = { 
+                    type: 'tv', 
+                    id: parts[0], 
+                    s: parts[1] || 1, 
+                    e: parts[2] || 1 
+                };
+                document.getElementById('tv-selector').style.display = 'flex';
+                document.getElementById('s-input').value = videoData.s;
+                document.getElementById('e-input').value = videoData.e;
             } else {
-                currentId = query;
+                videoData = { type: 'movie', id: query };
             }
-
-            // Populate other servers
-            const grid = document.getElementById('other-servers');
-            [2, 6, 4, 5, 3].forEach(id => {
-                grid.innerHTML += `<div class="server-card" onclick="selectServer(${id})">${SERVERS[id].name}</div>`;
-            });
-        }
-
-        async function fetchTvMetadata() {
-            try {
-                const res = await fetch(`https://api.themoviedb.org/3/tv/${currentId}?api_key=${TMDB_KEY}`);
-                const data = await res.json();
-                tvData.seasons = data.seasons.filter(s => s.season_number > 0);
-                
-                const sSelect = document.getElementById('s-select');
-                tvData.seasons.forEach(s => {
-                    sSelect.innerHTML += `<option value="${s.season_number}">Season ${s.season_number}</option>`;
-                });
-
-                sSelect.onchange = () => updateEpisodeList();
-                updateEpisodeList();
-            } catch (e) { console.error("Metadata fetch failed"); }
-        }
-
-        function updateEpisodeList() {
-            const sNum = document.getElementById('s-select').value;
-            const season = tvData.seasons.find(s => s.season_number == sNum);
-            const eSelect = document.getElementById('e-select');
-            eSelect.innerHTML = "";
-            for (let i = 1; i <= season.episode_count; i++) {
-                eSelect.innerHTML += `<option value="${i}">Episode ${i}</option>`;
-            }
+            return !!videoData.id;
         }
 
         function selectServer(id) {
-            selectedServer = id;
-            if (localStorage.getItem('isUnlocked') === 'true') launchStream();
-            else document.getElementById('unlock-screen').style.display = 'flex';
+            selectedId = id;
+            // Update local video data with current input values if TV
+            if (videoData.type === 'tv') {
+                videoData.s = document.getElementById('s-input').value;
+                videoData.e = document.getElementById('e-input').value;
+            }
+
+            if (localStorage.getItem('isUnlocked') === 'true') {
+                launchStream();
+            } else {
+                document.getElementById('unlock-screen').style.display = 'flex';
+                document.querySelectorAll('.code-input')[0].focus();
+            }
+        }
+
+        function closePinScreen() {
+            document.getElementById('unlock-screen').style.display = 'none';
         }
 
         function validatePin() {
-            const entered = Array.from(document.querySelectorAll('.code-input')).map(i => i.value).join('');
+            const inputs = document.querySelectorAll('.code-input');
+            const entered = Array.from(inputs).map(i => i.value).join('');
             if (entered === PIN) {
                 localStorage.setItem('isUnlocked', 'true');
                 launchStream();
             } else {
-                document.getElementById('pin-error').innerText = "Wrong PIN";
+                document.getElementById('pin-error').innerText = "Incorrect PIN.";
+                inputs.forEach(i => i.value = '');
+                inputs[0].focus();
             }
         }
 
         function launchStream() {
-            const server = SERVERS[selectedServer];
-            const s = document.getElementById('s-select').value;
-            const e = document.getElementById('e-select').value;
+            const server = SERVERS[selectedId];
+            let url = "";
             
-            let url = isTV ? 
-                (selectedServer === 3 ? `${server.tv}${currentId}&season=${s}&episode=${e}` :
-                 selectedServer === 2 ? `${server.tv}${currentId}-${s}-${e}` :
-                 `${server.tv}${currentId}/${s}/${e}`) : 
-                server.movie + currentId;
+            if (videoData.type === 'movie') {
+                url = server.movie + videoData.id;
+            } else {
+                if (selectedId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
+                else if (selectedId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
+                else url = `${server.tv}${videoData.id}/${videoData.s}/${videoData.e}`;
+            }
 
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('unlock-screen').style.display = 'none';
-            document.getElementById('player-area').style.display = 'flex';
-            document.getElementById('tv-nav').style.visibility = isTV ? 'visible' : 'hidden';
-
-            const ifr = document.getElementById('movie-iframe');
+            document.getElementById('ui-nav').style.display = 'flex';
+            
+            const playerDiv = document.getElementById('player-screen');
+            playerDiv.style.display = 'block';
+            
+            const ifr = document.createElement('iframe');
+            ifr.id = "movie-iframe";
             ifr.src = url;
-            if (server.secure) ifr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
-            else ifr.removeAttribute('sandbox');
-        }
+            ifr.setAttribute('allowfullscreen', 'true');
+            ifr.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
 
-        function changeEp(dir) {
-            const sSelect = document.getElementById('s-select');
-            const eSelect = document.getElementById('e-select');
-            let s = parseInt(sSelect.value);
-            let e = parseInt(eSelect.value);
-
-            if (dir === 1) { // Next
-                if (e < eSelect.length) e++;
-                else if (s < tvData.seasons.length) { s++; e = 1; }
-            } else { // Prev
-                if (e > 1) e--;
-                else if (s > 1) { 
-                    s--; 
-                    sSelect.value = s; 
-                    updateEpisodeList(); 
-                    e = eSelect.length; 
-                }
+            // Sandbox VidKing and Rakan to stop popups
+            if (server.secure) {
+                ifr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
             }
-            sSelect.value = s;
-            updateEpisodeList();
-            eSelect.value = e;
-            launchStream();
+
+            playerDiv.innerHTML = '';
+            playerDiv.appendChild(ifr);
         }
 
-        // PIN jumping logic
+        // UI Helpers
         document.querySelectorAll('.code-input').forEach((el, i, arr) => {
-            el.addEventListener('input', () => { if (el.value && i < 3) arr[i+1].focus(); });
+            el.addEventListener('input', () => { if (el.value && i < arr.length - 1) arr[i+1].focus(); });
             el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
 
-        init();
+        window.onload = () => { if (!parseUrl()) document.body.innerHTML = "<center><h2>No ID Provided</h2></center>"; };
+        (function() { window.open = function() { return null; }; })();
     </script>
 </body>
 </html>
