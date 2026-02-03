@@ -8,6 +8,7 @@
     <style>
         :root {
             --primary: #0d6efd;
+            --rakan-orange: #ff8c00;
             --bg: #0a0a0a;
             --card-bg: #161616;
             --text: #e0e0e0;
@@ -27,7 +28,7 @@
         .top-nav {
             padding: 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
             position: fixed;
@@ -45,22 +46,26 @@
             opacity: 0.8;
             transition: 0.3s;
             cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
         }
 
-        .back-btn:hover { opacity: 1; transform: translateX(-3px); }
+        .back-btn:hover { opacity: 1; transform: translateX(-3px); background: rgba(255,255,255,0.2); }
 
         /* --- SELECTION SCREEN --- */
         #selection-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 100px 20px 40px;
+            padding: 80px 20px 40px;
             min-height: 100vh;
             box-sizing: border-box;
         }
 
         .logo-large {
-            max-width: 180px;
+            max-width: 160px;
             margin-bottom: 40px;
         }
 
@@ -95,26 +100,38 @@
             position: relative;
         }
 
-        .server-card:hover {
-            border-color: var(--primary);
-            background: #1c1c1c;
-            transform: translateY(-5px);
+        .server-card:hover { transform: translateY(-5px); }
+
+        /* Rakan Specific Style */
+        .card-rakan {
+            border-color: rgba(255, 140, 0, 0.3);
+        }
+        .card-rakan:hover {
+            border-color: var(--rakan-orange);
+            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.1);
         }
 
-        .server-card.recommended {
+        .card-vidking {
             border-color: rgba(0, 255, 136, 0.2);
-            background: linear-gradient(145deg, #161616, #1a1a1a);
         }
-
-        .server-card.recommended:hover {
+        .card-vidking:hover {
             border-color: var(--accent);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
         }
 
         .server-card i {
             font-size: 1.8rem;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: block;
+        }
+
+        .reliable-note {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--rakan-orange);
+            margin-top: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .badge {
@@ -128,21 +145,18 @@
             top: 12px; right: 12px;
         }
 
-        .ad-badge {
-            background: #333;
-            color: #888;
-        }
+        .ad-badge { background: #333; color: #888; }
 
         /* --- PIN SCREEN --- */
         #unlock-screen {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.98);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
         .pin-container {
@@ -153,14 +167,13 @@
             width: 90%;
             max-width: 360px;
             border: 1px solid #333;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         .code-input-container {
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin: 30px 0;
+            margin: 25px 0;
         }
 
         .code-input {
@@ -171,13 +184,11 @@
             border-radius: 12px;
             color: white;
             font-size: 28px;
-            font-weight: bold;
             text-align: center;
             outline: none;
-            transition: 0.2s;
         }
 
-        .code-input:focus { border-color: var(--primary); background: #2a2a2a; }
+        .code-input:focus { border-color: var(--primary); }
 
         .unlock-btn {
             width: 100%;
@@ -187,14 +198,20 @@
             border-radius: 12px;
             color: white;
             font-weight: 600;
-            font-size: 1rem;
             cursor: pointer;
-            transition: 0.2s;
+            margin-bottom: 15px;
         }
 
-        .unlock-btn:hover { background: #0b5ed7; }
+        .pin-back-btn {
+            background: transparent;
+            color: #777;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
 
-        /* --- PLAYER AREA --- */
+        /* --- PLAYER --- */
         #player-screen {
             display: none;
             width: 100vw;
@@ -204,38 +221,36 @@
 
         #movie-iframe { width: 100%; height: 100%; border: none; }
 
-        .error-txt { color: #ff5555; font-size: 0.85rem; margin-top: 15px; min-height: 1.2em; }
+        .error-txt { color: #ff5555; font-size: 0.85rem; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <nav class="top-nav" id="ui-nav" style="display: none;">
         <div class="back-btn" onclick="location.reload()">
-            <i class="bi bi-arrow-left"></i> Switch Server
-        </div>
-        <div id="active-server-display" style="font-size: 0.9rem; letter-spacing: 1px;">
-            SERVER: <span id="server-name-tag" style="color: var(--primary); font-weight: bold;"></span>
+            <i class="bi bi-arrow-left"></i> Back
         </div>
     </nav>
 
     <div id="selection-screen">
         <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai Logo">
         
-        <div class="section-label">Verified & Ad-Free</div>
+        <div class="section-label">Recommended (Fast & No Ads)</div>
         <div class="server-grid">
-            <div class="server-card recommended" onclick="selectServer(7)">
+            <div class="server-card card-vidking" onclick="selectServer(7)">
                 <span class="badge">SECURE</span>
                 <i class="bi bi-patch-check-fill" style="color: var(--accent)"></i>
                 VidKing
             </div>
-            <div class="server-card recommended" onclick="selectServer(1)">
-                <span class="badge">SECURE</span>
-                <i class="bi bi-shield-lock-fill" style="color: var(--accent)"></i>
+            <div class="server-card card-rakan" onclick="selectServer(1)">
+                <span class="badge" style="background: var(--rakan-orange)">SECURE</span>
+                <i class="bi bi-shield-lock-fill" style="color: var(--rakan-orange)"></i>
                 Rakan
+                <span class="reliable-note">Reliable</span>
             </div>
         </div>
 
-        <div class="section-label">Standard Servers</div>
+        <div class="section-label">Alternative Servers</div>
         <div class="server-grid">
             <div class="server-card" onclick="selectServer(2)">
                 <span class="badge ad-badge">ADS</span>
@@ -262,15 +277,15 @@
 
     <div id="unlock-screen">
         <div class="pin-container">
-            <h3>Enter Access PIN</h3>
-            <p style="color: #777; font-size: 0.9rem;">Please enter the 4-digit security code</p>
+            <h3>Enter PIN</h3>
             <div class="code-input-container">
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
                 <input type="text" class="code-input" maxlength="1" inputmode="numeric">
             </div>
-            <button class="unlock-btn" onclick="validatePin()">Unlock Server</button>
+            <button class="unlock-btn" onclick="validatePin()">Unlock Stream</button>
+            <button class="pin-back-btn" onclick="closePinScreen()">Go Back</button>
             <div class="error-txt" id="pin-error"></div>
         </div>
     </div>
@@ -298,9 +313,7 @@
             if (query.startsWith('tv=')) {
                 const parts = query.substring(3).split('/');
                 videoData = { type: 'tv', id: parts[0], s: parts[1], e: parts[2] };
-            } else {
-                videoData = { type: 'movie', id: query };
-            }
+            } else { videoData = { type: 'movie', id: query }; }
             return !!videoData.id;
         }
 
@@ -314,6 +327,10 @@
             }
         }
 
+        function closePinScreen() {
+            document.getElementById('unlock-screen').style.display = 'none';
+        }
+
         function validatePin() {
             const inputs = document.querySelectorAll('.code-input');
             const entered = Array.from(inputs).map(i => i.value).join('');
@@ -321,7 +338,7 @@
                 localStorage.setItem('isUnlocked', 'true');
                 launchStream();
             } else {
-                document.getElementById('pin-error').innerText = "Incorrect PIN. Please try again.";
+                document.getElementById('pin-error').innerText = "Incorrect PIN.";
                 inputs.forEach(i => i.value = '');
                 inputs[0].focus();
             }
@@ -330,11 +347,8 @@
         function launchStream() {
             const server = SERVERS[selectedId];
             let url = "";
-            
-            // Generate appropriate URL
-            if (videoData.type === 'movie') {
-                url = server.movie + videoData.id;
-            } else {
+            if (videoData.type === 'movie') url = server.movie + videoData.id;
+            else {
                 if (selectedId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
                 else if (selectedId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
                 else url = `${server.tv}${videoData.id}/${videoData.s}/${videoData.e}`;
@@ -343,7 +357,6 @@
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('unlock-screen').style.display = 'none';
             document.getElementById('ui-nav').style.display = 'flex';
-            document.getElementById('server-name-tag').innerText = server.name.toUpperCase();
             
             const playerDiv = document.getElementById('player-screen');
             playerDiv.style.display = 'block';
@@ -354,7 +367,6 @@
             ifr.setAttribute('allowfullscreen', 'true');
             ifr.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
 
-            // Apply strict sandbox ONLY to Secure Servers (VidKing & Rakan)
             if (server.secure) {
                 ifr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
             }
@@ -363,22 +375,13 @@
             playerDiv.appendChild(ifr);
         }
 
-        // Logic for PIN input jumping
         document.querySelectorAll('.code-input').forEach((el, i, arr) => {
             el.addEventListener('input', () => { if (el.value && i < arr.length - 1) arr[i+1].focus(); });
             el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
 
-        window.onload = () => {
-            if (!parseUrl()) {
-                document.body.innerHTML = "<div style='padding:100px; text-align:center;'><h2>Error</h2><p>No Movie or TV ID provided.</p></div>";
-            }
-        };
-
-        // Ad-blocker helper
-        (function() {
-            window.open = function() { return null; };
-        })();
+        window.onload = () => { if (!parseUrl()) document.body.innerHTML = "<center><h2>Invalid Link</h2></center>"; };
+        (function() { window.open = function() { return null; }; })();
     </script>
 </body>
 </html>
