@@ -55,23 +55,143 @@
             margin-top: 2px;
         }
 
-        .back-btn {
+        .nav-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .back-btn, .episodes-toggle-btn {
             color: white;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 500;
-            opacity: 0.8;
-            transition: 0.3s;
             cursor: pointer;
             background: rgba(255,255,255,0.1);
             padding: 8px 15px;
             border-radius: 8px;
             backdrop-filter: blur(5px);
+            border: none;
+            transition: 0.3s;
         }
 
-        .back-btn:hover { opacity: 1; transform: translateX(-3px); background: rgba(255,255,255,0.2); }
+        .back-btn:hover, .episodes-toggle-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+
+        /* --- EPISODE DRAWER --- */
+        #episode-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #333;
+            border-radius: 30px 30px 0 0;
+            z-index: 2000;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+        }
+
+        #episode-drawer.open {
+            transform: translateY(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .drawer-season-select {
+            background: #222;
+            color: white;
+            border: 1px solid #444;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .close-drawer {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .episodes-scroll-container {
+            overflow-y: auto;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding-bottom: 20px;
+        }
+
+        .ep-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .ep-card:hover { border-color: var(--primary); transform: scale(1.02); }
+        .ep-card.active { border-color: var(--primary); background: rgba(13, 110, 253, 0.1); }
+
+        .ep-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-size: cover;
+            background-position: center;
+            background-color: #222;
+        }
+
+        .ep-meta {
+            padding: 12px;
+        }
+
+        .ep-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ep-desc {
+            font-size: 0.75rem;
+            color: #888;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            #episode-drawer {
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            .episodes-scroll-container {
+                grid-template-columns: 1fr;
+            }
+        }
 
         /* --- SELECTION SCREEN --- */
         #selection-screen {
@@ -162,7 +282,6 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Center Content */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -266,6 +385,11 @@
             <span id="movie-title">Loading...</span>
             <span id="episode-info"></span>
         </div>
+        <div class="nav-right">
+            <button id="episodes-btn" class="episodes-toggle-btn" onclick="toggleEpisodesDrawer()" style="display: none;">
+                <i class="bi bi-collection-play-fill"></i> Episodes
+            </button>
+        </div>
     </nav>
 
     <div id="selection-screen">
@@ -317,6 +441,17 @@
         </div>
     </div>
 
+    <div id="episode-drawer">
+        <div class="drawer-header">
+            <select id="drawer-s-select" class="drawer-season-select" onchange="syncSeason(this.value)"></select>
+            <button class="close-drawer" onclick="toggleEpisodesDrawer()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div id="drawer-ep-list" class="episodes-scroll-container">
+            </div>
+    </div>
+
     <div id="unlock-screen">
         <div class="pin-container">
             <h3>Enter PIN</h3>
@@ -362,6 +497,7 @@
                 videoData.s = parts[1] || 1;
                 videoData.e = parts[2] || 1;
                 document.getElementById('tv-selector').style.display = 'flex';
+                document.getElementById('episodes-btn').style.display = 'flex';
                 await fetchShowDetails();
             } else {
                 videoData.type = 'movie';
@@ -379,7 +515,10 @@
                 document.getElementById('movie-title').innerText = data.name;
                 
                 const sSelect = document.getElementById('s-select');
+                const drawerSSelect = document.getElementById('drawer-s-select');
                 sSelect.innerHTML = '';
+                drawerSSelect.innerHTML = '';
+                
                 data.seasons.forEach(s => {
                     if (s.season_number > 0) {
                         const opt = document.createElement('option');
@@ -387,6 +526,7 @@
                         opt.textContent = `Season ${s.season_number}`;
                         if (s.season_number == videoData.s) opt.selected = true;
                         sSelect.appendChild(opt);
+                        drawerSSelect.appendChild(opt.cloneNode(true));
                     }
                 });
                 await fetchEpisodes();
@@ -402,13 +542,36 @@
                 currentEpisodes = data.episodes;
                 
                 const eSelect = document.getElementById('e-select');
+                const drawerEpList = document.getElementById('drawer-ep-list');
+                
                 eSelect.innerHTML = '';
+                drawerEpList.innerHTML = '';
+
                 data.episodes.forEach(ep => {
+                    // Standard Select
                     const opt = document.createElement('option');
                     opt.value = ep.episode_number;
                     opt.textContent = `E${ep.episode_number}: ${ep.name}`;
                     if (ep.episode_number == videoData.e) opt.selected = true;
                     eSelect.appendChild(opt);
+
+                    // Drawer Cards
+                    const card = document.createElement('div');
+                    card.className = `ep-card ${ep.episode_number == videoData.e ? 'active' : ''}`;
+                    const thumbUrl = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '';
+                    card.innerHTML = `
+                        <div class="ep-thumb" style="background-image: url('${thumbUrl}')"></div>
+                        <div class="ep-meta">
+                            <div class="ep-title">E${ep.episode_number}: ${ep.name}</div>
+                            <div class="ep-desc">${ep.overview || 'No description available.'}</div>
+                        </div>
+                    `;
+                    card.onclick = () => {
+                        videoData.e = ep.episode_number;
+                        updateSelection();
+                        toggleEpisodesDrawer();
+                    };
+                    drawerEpList.appendChild(card);
                 });
                 updateSelection();
             } catch (e) { console.error(e); }
@@ -424,23 +587,31 @@
             } catch (e) { console.error(e); }
         }
 
+        function toggleEpisodesDrawer() {
+            document.getElementById('episode-drawer').classList.toggle('open');
+        }
+
+        function syncSeason(val) {
+            document.getElementById('s-select').value = val;
+            fetchEpisodes();
+        }
+
         function updateSelection() {
             const eSelect = document.getElementById('e-select');
             if (!eSelect.options[eSelect.selectedIndex]) return;
 
             videoData.e = eSelect.value;
             videoData.s = document.getElementById('s-select').value;
+            document.getElementById('drawer-s-select').value = videoData.s;
             
             const epName = eSelect.options[eSelect.selectedIndex].text.split(': ')[1] || "";
             document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
             
-            // UPDATE BROWSER URL
             if (videoData.type === 'tv') {
                 const newUrl = `${window.location.pathname}?tv=${videoData.id}/${videoData.s}/${videoData.e}`;
                 window.history.replaceState({path: newUrl}, '', newUrl);
             }
 
-            // AUTO-RELOAD STREAM IF PLAYING
             if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
                 launchStream();
             }
