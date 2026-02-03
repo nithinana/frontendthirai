@@ -6,63 +6,100 @@
     <title>Thirai - Video Player</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        /* Base Styles for the entire page */
+        /* --- BASE STYLES --- */
         body, html {
             margin: 0;
             padding: 0;
             overflow: hidden; 
             height: 100%;
             width: 100%;
-            font-family: Arial, sans-serif;
-            transition: background-color 0.5s ease, color 0.5s ease; /* Added transition */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: #e0e0e0;
         }
 
-        /* --- Global Styles: PERMANENT DARK MODE --- */
-
-        body {
-            background-color: #121212; /* Dark mode background */
-            color: #e0e0e0; /* Dark mode text color */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* --- BACK BUTTON STYLES (MATCHED DARK MODE) --- */
-        .back-button {
+        /* --- CONTROLS OVERLAY (Header) --- */
+        /* This container holds both the back button and the server switcher */
+        .controls-layer {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 1001;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out, transform 0.3s ease;
+            pointer-events: auto; /* Allow clicking buttons */
+        }
+
+        /* Hide controls when AFK */
+        .controls-layer.afk-fade {
+            opacity: 0; 
+            pointer-events: none;
+        }
+
+        /* --- BACK BUTTON --- */
+        .back-button {
+            font-size: 20px;
             text-decoration: none;
             cursor: pointer;
-            z-index: 1001;
-            padding: 10px;
+            padding: 10px 15px;
             border-radius: 8px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Stronger shadow for contrast */
-            
-            /* Dark grey, semi-transparent look */
-            background-color: rgba(33, 37, 41, 0.7); /* Slightly darker/more opaque than before */
-            color: #ffffff; /* White icon/text */
-            opacity: 1; 
-            transition: opacity 0.5s ease-in-out, background-color 0.2s ease, box-shadow 0.5s ease; 
+            background-color: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(5px);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s ease;
         }
 
         .back-button:hover {
-            /* Hover feedback with darker color */
-            background-color: rgba(51, 51, 51, 0.9); /* #333 with high opacity */
-            opacity: 1; 
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
         }
-        
-        .back-button.afk-fade {
-            opacity: 0; 
-            pointer-events: none; 
-        }
-        
-        /* --- UNLOCK SCREEN STYLES (UPDATED FOR DARK MODE) --- */
 
+        /* --- SERVER SWITCHER --- */
+        .server-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+            max-width: 70%;
+        }
+
+        .server-btn {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-transform: capitalize;
+        }
+
+        .server-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .server-btn.active {
+            background-color: #0d6efd; /* Blue accent */
+            color: white;
+            border-color: #0d6efd;
+            box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+        }
+
+        /* --- UNLOCK SCREEN --- */
         #unlock-screen {
             display: none; 
             justify-content: center;
@@ -72,109 +109,101 @@
             flex-direction: column;
             position: absolute; 
             top: 0; left: 0;
-            background-color: #121212; /* Match body background */
-            z-index: 999; 
+            background-color: #121212;
+            z-index: 2000; /* Above controls */
         }
         
         .container {
             text-align: center;
-            background-color: #111; /* Match join.html container background */
+            background-color: #1a1a1a;
             padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Match join.html shadow */
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             max-width: 90%;
             width: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: background-color 0.5s ease, box-shadow 0.5s ease; /* Added transition */
         }
         
         #logo {
             max-width: 175px;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
-        /* Ensure heading is visible */
         #unlock-screen h2 {
             color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: 400;
         }
 
         .code-input-container {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 12px;
+            margin-bottom: 30px;
         }
 
         .code-input {
-            width: 40px;
-            height: 50px;
+            width: 45px;
+            height: 55px;
             text-align: center;
-            font-size: 1.8em;
+            font-size: 24px;
             font-weight: bold;
-            color: #fff; /* White text */
-            background-color: #222; /* Dark input background */
-            border: 2px solid #333; /* Darker border */
+            color: #fff;
+            background-color: #2c2c2c;
+            border: 2px solid #3d3d3d;
             border-radius: 8px;
             outline: none;
-            transition: border-color 0.2s ease, background-color 0.5s ease, color 0.5s ease;
+            transition: all 0.3s ease;
         }
         
         .code-input:focus {
             border-color: #0d6efd;
+            background-color: #333;
+            transform: translateY(-2px);
         }
 
-        /* --- Input Autofill Styling for Dark Mode --- */
-        input::-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #222 inset !important; /* Match input background */
-            -webkit-text-fill-color: #fff !important; /* Match input text color */
-        }
-        
-        /* Join Button styles remain for good contrast */
         .join-button {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             background-color: #0d6efd;
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .join-button:hover {
-            background-color: #0b5ed7; /* Darken slightly on hover */
+            background-color: #0b5ed7;
         }
 
         .join-button:disabled {
-            background-color: #555;
+            background-color: #444;
+            color: #888;
             cursor: not-allowed;
         }
 
         #error-message {
-            color: #dc3545;
+            color: #ff6b6b;
             font-size: 0.9em;
             display: none;
-            margin-top: 25px;
-            text-align: center;
+            margin-top: 10px;
         }
         
-        /* --- PLAYER SCREEN STYLES (Unchanged) --- */
-
+        /* --- PLAYER AREA --- */
         #player-screen {
             width: 100vw;
             height: 100vh;
+            background: #000;
             display: flex; 
             flex-direction: column; 
             justify-content: center;
             align-items: center;
-            text-align: center; 
         }
         
         #movie-iframe {
@@ -184,34 +213,41 @@
         }
         
         #player-error {
-            color: #dc3545; /* Error message color remains bright red for visibility */
+            color: #ff6b6b;
             font-size: 1.2em;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
     
-    <a href="javascript:history.back()" class="back-button" aria-label="Go back">
-        <i class="bi bi-arrow-left"></i>
-    </a>
+    <div class="controls-layer" id="controlsLayer">
+        <a href="javascript:history.back()" class="back-button" aria-label="Go back">
+            <i class="bi bi-arrow-left"></i> &nbsp; Back
+        </a>
+
+        <div class="server-list" id="serverList">
+            </div>
+    </div>
     
     <div id="unlock-screen">
         <div class="container">
             <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo"> 
-            <h2>Enter the unlock PIN</h2>
+            <h2>Enter PIN</h2>
             <div class="code-input-container" id="codeInputContainer">
-                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
-                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" autocapitalize="none">
+                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
             </div>
-            <button class="join-button" id="unlockButton" disabled>Unlock Access</button>
+            <button class="join-button" id="unlockButton" disabled>Unlock</button>
             <div id="error-message"></div>
         </div>
     </div>
 
     <div id="player-screen">
-        <p>Loading content...</p>
+        <p>Initializing Player...</p>
     </div>
 
     <script>
@@ -220,10 +256,19 @@
             const CORRECT_PIN = "1451"; 
             const MAX_ATTEMPTS = 5;
             const LOCKOUT_DURATION_MS = 15 * 60 * 1000; 
-            const AFK_TIMEOUT_MS = 3000; // 3 seconds for inactivity fade
+            const AFK_TIMEOUT_MS = 3000; 
             const TV_PREFIX = 'tv=';
-            const BASE_MOVIE_EMBED_URL = "https://www.vidking.net/embed/movie/";
-            const BASE_TV_EMBED_URL = "https://www.vidking.net/embed/tv/";
+
+            // --- SERVERS CONFIGURATION ---
+            // Mapping names to IDs for the UI
+            const SERVERS = [
+                { id: 1, name: "Rakan" },
+                { id: 2, name: "Bard" },
+                { id: 3, name: "Xayah" },
+                { id: 4, name: "Ekko" },
+                { id: 5, name: "Naafiri" },
+                { id: 6, name: "Ryze" }
+            ];
 
             // --- DOM ELEMENTS ---
             const unlockScreen = document.getElementById('unlock-screen');
@@ -231,118 +276,176 @@
             const inputs = document.querySelectorAll('.code-input');
             const unlockButton = document.getElementById('unlockButton');
             const errorMessage = document.getElementById('error-message');
-            const backButton = document.querySelector('.back-button'); 
-            const logo = document.getElementById('logo'); // Added reference for the logo
+            const controlsLayer = document.getElementById('controlsLayer');
+            const serverList = document.getElementById('serverList');
+            const logo = document.getElementById('logo'); 
 
             let lockoutInterval = null;
             let afkTimer; 
             
+            // Current Video State
+            let currentParams = {
+                type: null, // 'movie' or 'tv'
+                id: null,
+                season: null,
+                episode: null
+            };
+
             // =================================================================
-            // === 1. USER ACTIVITY HANDLER (Unchanged) ========================
+            // === 1. USER ACTIVITY & UI FADING ================================
             // =================================================================
 
-            function hideBackButton() {
+            function hideControls() {
                 if (playerScreen.style.display !== 'none') {
-                     backButton.classList.add('afk-fade');
+                     controlsLayer.classList.add('afk-fade');
                 }
             }
 
-            function showBackButton() {
-                backButton.classList.remove('afk-fade');
+            function showControls() {
+                controlsLayer.classList.remove('afk-fade');
                 clearTimeout(afkTimer);
                 if (playerScreen.style.display !== 'none') {
-                    afkTimer = setTimeout(hideBackButton, AFK_TIMEOUT_MS);
+                    afkTimer = setTimeout(hideControls, AFK_TIMEOUT_MS);
                 }
             }
             
             function handleUserActivity() {
-                showBackButton();
+                showControls();
             }
 
             // =================================================================
-            // === 2. PLAYER EMBED LOGIC (Unchanged) ===========================
+            // === 2. URL PARSING & SERVER LOGIC ===============================
             // =================================================================
 
             function displayPlayerError(message) {
-                playerScreen.innerHTML = `<h1>Error: Missing or Invalid Data</h1><p id="player-error">${message}</p>`;
-                console.error(message);
+                playerScreen.innerHTML = `<h1>Error</h1><p id="player-error">${message}</p>`;
             }
 
-            function loadEmbed() {
+            function parseUrl() {
                 const queryString = window.location.search.substring(1);
-                let fullEmbedUrl = null;
-                let contentType = null;
-
+                
                 if (!queryString) {
-                    displayPlayerError('No ID provided in the URL. Please use: `?12345` for a movie or `?tv=12345/1/5` for a TV show.');
-                    return;
+                    return false;
                 }
 
                 if (queryString.startsWith(TV_PREFIX)) {
-                    contentType = 'TV Show';
+                    // TV Format: ?tv=ID/SEASON/EPISODE
+                    currentParams.type = 'tv';
                     const tvDetails = queryString.substring(TV_PREFIX.length); 
                     const parts = tvDetails.split('/'); 
 
                     if (parts.length === 3 && parts.every(p => p)) {
-                        const [id, season, episode] = parts;
-                        fullEmbedUrl = `${BASE_TV_EMBED_URL}${id}/${season}/${episode}`;
-                    } else {
-                        displayPlayerError('Invalid TV show format. Please use: `?tv=**ID/SEASON/EPISODE**`. Example: `?tv=12345/1/5`');
-                    }
+                        currentParams.id = parts[0];
+                        currentParams.season = parts[1];
+                        currentParams.episode = parts[2];
+                        return true;
+                    } 
                 } else {
-                    contentType = 'Movie';
-                    const movieId = queryString; 
-                    
-                    if (movieId) {
-                        fullEmbedUrl = `${BASE_MOVIE_EMBED_URL}${movieId}`;
-                    } else {
-                        displayPlayerError('Movie ID is missing. Please use: `?**12345**`');
+                    // Movie Format: ?ID
+                    currentParams.type = 'movie';
+                    currentParams.id = queryString;
+                    if (currentParams.id) return true;
+                }
+                return false;
+            }
+
+            function getEmbedUrl(serverNumber, params) {
+                let src = "";
+                
+                if (params.type === 'movie') {
+                    switch (serverNumber) {
+                        case 1: src = `https://vidsrc.cc/v2/embed/movie/${params.id}?autoPlay=false`; break; // Rakan
+                        case 2: src = `https://moviesapi.club/movie/${params.id}`; break; // Bard
+                        case 3: src = `https://vidsrc.me/embed/movie?tmdb=${params.id}`; break; // Xayah
+                        case 4: src = `https://player.videasy.net/movie/${params.id}`; break; // Ekko
+                        case 5: src = `https://vidfast.pro/movie/${params.id}`; break; // Naafiri
+                        case 6: src = `https://vidlink.pro/movie/${params.id}?title=true&poster=true&autoplay=false`; break; // Ryze
+                    }
+                } else if (params.type === 'tv') {
+                    switch (serverNumber) {
+                        case 1: src = `https://vidsrc.cc/v2/embed/tv/${params.id}/${params.season}/${params.episode}?autoPlay=false`; break; // Rakan
+                        case 2: src = `https://moviesapi.club/tv/${params.id}-${params.season}-${params.episode}`; break; // Bard
+                        case 3: src = `https://vidsrc.me/embed/tv?tmdb=${params.id}&season=${params.season}&episode=${params.episode}`; break; // Xayah
+                        case 4: src = `https://player.videasy.net/tv/${params.id}/${params.season}/${params.episode}?nextEpisode=true&episodeSelector=true`; break; // Ekko
+                        case 5: src = `https://vidfast.pro/tv/${params.id}/${params.season}/${params.episode}`; break; // Naafiri
+                        case 6: src = `https://vidlink.pro/tv/${params.id}/${params.season}/${params.episode}?title=true&poster=true&autoplay=false&nextbutton=true`; break; // Ryze
                     }
                 }
+                return src;
+            }
 
-                if (fullEmbedUrl) {
+            function loadServer(serverNumber) {
+                // Save preference
+                localStorage.setItem('preferredServer', serverNumber);
+
+                // Update UI Buttons
+                document.querySelectorAll('.server-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (parseInt(btn.dataset.server) === serverNumber) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                const embedSrc = getEmbedUrl(serverNumber, currentParams);
+                
+                if (embedSrc) {
                     const iframe = document.createElement('iframe');
                     iframe.setAttribute('id', 'movie-iframe');
-                    iframe.setAttribute('src', fullEmbedUrl);
+                    iframe.setAttribute('src', embedSrc);
                     iframe.setAttribute('allowfullscreen', 'true');
+                    // Allow necessary scripts for these providers
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
                     
                     playerScreen.innerHTML = '';
                     playerScreen.appendChild(iframe);
-                    console.log(`Successfully embedded ${contentType} from URL: ${fullEmbedUrl}`);
+                    console.log(`Loaded ${currentParams.type} on Server ${serverNumber} (${SERVERS[serverNumber-1].name})`);
+                } else {
+                    displayPlayerError("Could not generate stream URL.");
                 }
             }
 
-            // =================================================================
-            // === 3. UNLOCK & DISPLAY MANAGER (Modified for Logo Update) ======
-            // =================================================================
-            
-            function updateLogo(isUnlockScreen) {
-                // If on the unlock screen (which is now permanently dark theme), show the white logo.
-                // The player screen covers the whole area, so the logo won't be visible there anyway, 
-                // but we set it just in case.
-                logo.src = isUnlockScreen ? "./static/thiraiwhite.png" : "./static/thiraiwhite.png";
+            function initPlayer() {
+                const isValid = parseUrl();
+                if (!isValid) {
+                    displayPlayerError('Invalid URL format.<br>Movie: <code>?12345</code><br>TV: <code>?tv=12345/1/1</code>');
+                    return;
+                }
+
+                // Create Server Buttons
+                serverList.innerHTML = '';
+                SERVERS.forEach(server => {
+                    const btn = document.createElement('div');
+                    btn.className = 'server-btn';
+                    btn.textContent = server.name;
+                    btn.dataset.server = server.id;
+                    btn.addEventListener('click', () => loadServer(server.id));
+                    serverList.appendChild(btn);
+                });
+
+                // Load preferred server or default to 1 (Rakan)
+                const savedServer = parseInt(localStorage.getItem('preferredServer') || '1');
+                loadServer(savedServer);
             }
 
+            // =================================================================
+            // === 3. UNLOCK LOGIC (Standard) ==================================
+            // =================================================================
+            
             function showPlayer() {
                 unlockScreen.style.display = 'none';
                 playerScreen.style.display = 'flex';
-                loadEmbed();
+                controlsLayer.style.display = 'flex'; // Show controls
                 
-                showBackButton(); 
-                updateLogo(false); // Player screen
+                initPlayer();
+                showControls(); 
             }
 
             function showUnlock() {
                 playerScreen.style.display = 'none';
+                controlsLayer.style.display = 'none'; // Hide controls on lock screen
                 unlockScreen.style.display = 'flex';
                 checkLockoutStatus();
-                backButton.classList.remove('afk-fade');
-                clearTimeout(afkTimer);
-                updateLogo(true); // Unlock screen
             }
-            
-            // ... (checkInputs, isLockedOut, checkLockoutStatus, and event listeners remain the same)
             
             function checkInputs() {
                 let allFilled = true;
@@ -354,9 +457,7 @@
                 const isLocked = isLockedOut();
                 unlockButton.disabled = !allFilled || isLocked;
                 
-                if (allFilled && !isLocked) {
-                    errorMessage.style.display = 'none';
-                }
+                if (allFilled && !isLocked) errorMessage.style.display = 'none';
             }
             
             function isLockedOut() {
@@ -370,7 +471,6 @@
                         const totalSeconds = Math.ceil(remainingTimeMs / 1000);
                         const remainingMinutes = Math.floor(totalSeconds / 60);
                         const remainingSeconds = totalSeconds % 60;
-
                         errorMessage.textContent = `Too many failed attempts. Try again in ${remainingMinutes}:${remainingSeconds.toString().padStart(2, '0')}.`;
                         errorMessage.style.display = 'block';
                         return true;
@@ -389,20 +489,14 @@
             function checkLockoutStatus() {
                 if (isLockedOut()) {
                     unlockButton.disabled = true;
-                    if (!lockoutInterval) {
-                        lockoutInterval = setInterval(checkLockoutStatus, 1000); 
-                    }
+                    if (!lockoutInterval) lockoutInterval = setInterval(checkLockoutStatus, 1000); 
                 } else {
-                    if (lockoutInterval) {
-                        clearInterval(lockoutInterval);
-                        lockoutInterval = null;
-                    }
+                    if (lockoutInterval) { clearInterval(lockoutInterval); lockoutInterval = null; }
                     checkInputs(); 
                 }
             }
 
-            // --- Event Listeners for Unlock Form (Unchanged) ---
-            
+            // --- Event Listeners for Input ---
             inputs.forEach((input, index) => {
                 input.addEventListener('keyup', (e) => {
                     if (e.key === 'Backspace' && input.value === '') {
@@ -410,11 +504,9 @@
                     }
                     checkInputs();
                 });
-                
                 input.addEventListener('input', () => {
                     let value = input.value.replace(/[^0-9]/g, '').charAt(0);
                     input.value = value;
-                    
                     if (input.value.length === 1 && index < inputs.length - 1) {
                         inputs[index + 1].focus();
                     } else if (index === inputs.length - 1) {
@@ -422,54 +514,36 @@
                     }
                     checkInputs();
                 });
-                
                 input.addEventListener('paste', (e) => {
                     e.preventDefault();
                     const pasteCode = (e.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '').slice(0, 4);
-
-                    for (let i = 0; i < pasteCode.length; i++) {
-                        if (inputs[i]) inputs[i].value = pasteCode[i];
-                    }
-
-                    const lastFilledIndex = pasteCode.length > 0 ? pasteCode.length - 1 : 0;
-                    if (inputs[lastFilledIndex + 1]) {
-                        inputs[lastFilledIndex + 1].focus();
-                    } else if (inputs[lastFilledIndex]) {
-                        inputs[lastFilledIndex].blur();
-                    }
+                    for (let i = 0; i < pasteCode.length; i++) if (inputs[i]) inputs[i].value = pasteCode[i];
                     checkInputs();
                 });
             });
 
             unlockButton.addEventListener('click', () => {
                 if (isLockedOut()) return;
-                
                 let enteredPin = Array.from(inputs).map(input => input.value).join('');
 
                 if (enteredPin === CORRECT_PIN) {
-                    // --- SUCCESS ---
                     localStorage.setItem('isUnlocked', 'true'); 
-                    localStorage.setItem('premium_isUnlocked', 'true'); 
                     localStorage.setItem('attemptCount', '0');
                     localStorage.removeItem('lockoutTimestamp');
-                    
                     showPlayer();
                 } else {
-                    // --- FAILURE ---
                     let currentAttempts = parseInt(localStorage.getItem('attemptCount') || '0');
                     currentAttempts++;
                     localStorage.setItem('attemptCount', currentAttempts.toString());
                     
                     if (currentAttempts >= MAX_ATTEMPTS) {
                         localStorage.setItem('lockoutTimestamp', new Date().getTime().toString());
-                        errorMessage.textContent = `Maximum attempts reached (${MAX_ATTEMPTS}). Access locked.`;
+                        errorMessage.textContent = `Access locked.`;
                         checkLockoutStatus(); 
                     } else {
-                        const remaining = MAX_ATTEMPTS - currentAttempts;
-                        errorMessage.textContent = `Incorrect PIN. ${remaining} attempts remaining.`;
+                        errorMessage.textContent = `Incorrect PIN. ${MAX_ATTEMPTS - currentAttempts} attempts remaining.`;
                         errorMessage.style.display = 'block';
                     }
-                    
                     inputs.forEach(input => input.value = '');
                     inputs[0].focus();
                     unlockButton.disabled = true;
@@ -477,12 +551,10 @@
             });
             
             // =================================================================
-            // === 4. INITIALIZATION & AFK SETUP ===============================
+            // === 4. INITIALIZATION ===========================================
             // =================================================================
 
             document.addEventListener('DOMContentLoaded', () => {
-                // The unlock check logic remains, ensuring the PIN must be entered 
-                // unless previously unlocked in this session.
                 const isUnlocked = localStorage.getItem('isUnlocked');
                 
                 if (isUnlocked === 'true') {
@@ -491,10 +563,11 @@
                     showUnlock();
                 }
 
-                // Setup the global event listeners for AFK check
+                // Global Activity Listeners
                 document.addEventListener('mousemove', handleUserActivity);
                 document.addEventListener('keypress', handleUserActivity);
                 document.addEventListener('click', handleUserActivity);
+                document.addEventListener('touchstart', handleUserActivity);
             });
         })();
     </script>
