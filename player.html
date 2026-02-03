@@ -3,612 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thirai - Video Player</title>
+    <title>Thirai - Select Server</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        /* --- BASE STYLES --- */
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden; 
-            height: 100%;
-            width: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #000;
-            color: #e0e0e0;
+        :root {
+            --primary: #0d6efd;
+            --bg: #0a0a0a;
+            --card-bg: #161616;
+            --text: #e0e0e0;
+            --accent: #00ff88;
         }
 
-        /* --- CONTROLS OVERLAY (Header) --- */
-        /* This container holds both the back button and the server switcher */
-        .controls-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* --- NAVIGATION --- */
+        .top-nav {
             padding: 20px;
-            box-sizing: border-box;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            z-index: 1001;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
-            opacity: 1;
-            transition: opacity 0.5s ease-in-out, transform 0.3s ease;
-            pointer-events: auto; /* Allow clicking buttons */
-        }
-
-        /* Hide controls when AFK */
-        .controls-layer.afk-fade {
-            opacity: 0; 
-            pointer-events: none;
-        }
-
-        /* --- BACK BUTTON --- */
-        .back-button {
-            font-size: 20px;
-            text-decoration: none;
-            cursor: pointer;
-            padding: 10px 15px;
-            border-radius: 8px;
-            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            background-color: rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(5px);
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s ease;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            position: fixed;
+            top: 0; width: 100%; z-index: 100;
+            box-sizing: border-box;
         }
 
-        .back-button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        /* --- SERVER SWITCHER --- */
-        .server-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: flex-end;
-            max-width: 70%;
-        }
-
-        .server-btn {
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #aaa;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-transform: capitalize;
-        }
-
-        .server-btn:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: #fff;
-        }
-
-        .server-btn.active {
-            background-color: #0d6efd; /* Blue accent */
+        .back-btn {
             color: white;
-            border-color: #0d6efd;
-            box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            opacity: 0.8;
+            transition: 0.3s;
         }
 
-        /* --- UNLOCK SCREEN --- */
-        #unlock-screen {
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100%;
-            flex-direction: column;
-            position: absolute; 
-            top: 0; left: 0;
-            background-color: #121212;
-            z-index: 2000; /* Above controls */
-        }
-        
-        .container {
-            text-align: center;
-            background-color: #1a1a1a;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            max-width: 90%;
-            width: 400px;
+        .back-btn:hover { opacity: 1; transform: translateX(-3px); }
+
+        /* --- SELECTION SCREEN --- */
+        #selection-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        
-        #logo {
-            max-width: 175px;
-            margin-bottom: 20px;
+            padding: 100px 20px 40px;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
-        #unlock-screen h2 {
-            color: #ffffff;
-            margin-bottom: 20px;
-            font-weight: 400;
+        .logo-large {
+            max-width: 180px;
+            margin-bottom: 40px;
+        }
+
+        .section-label {
+            width: 100%;
+            max-width: 800px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666;
+            margin: 30px 0 15px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 8px;
+        }
+
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .server-card {
+            background: var(--card-bg);
+            border: 1px solid #222;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .server-card:hover {
+            border-color: var(--primary);
+            background: #1c1c1c;
+            transform: translateY(-5px);
+        }
+
+        .server-card.recommended {
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .server-card.recommended:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .server-card i {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 800;
+            position: absolute;
+            top: 10px; right: 10px;
+        }
+
+        .ad-badge {
+            background: #333;
+            color: #999;
+        }
+
+        /* --- PIN SCREEN --- */
+        #unlock-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .pin-container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+            border: 1px solid #333;
         }
 
         .code-input-container {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin: 25px 0;
         }
 
         .code-input {
-            width: 45px;
-            height: 55px;
-            text-align: center;
+            width: 50px;
+            height: 60px;
+            background: #222;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: white;
             font-size: 24px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #2c2c2c;
-            border: 2px solid #3d3d3d;
-            border-radius: 8px;
+            text-align: center;
             outline: none;
-            transition: all 0.3s ease;
-        }
-        
-        .code-input:focus {
-            border-color: #0d6efd;
-            background-color: #333;
-            transform: translateY(-2px);
         }
 
-        .join-button {
+        .code-input:focus { border-color: var(--primary); }
+
+        .unlock-btn {
             width: 100%;
-            padding: 14px;
-            background-color: #0d6efd;
-            color: #fff;
+            padding: 15px;
+            background: var(--primary);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            color: white;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            margin-bottom: 20px;
-        }
-        
-        .join-button:hover {
-            background-color: #0b5ed7;
         }
 
-        .join-button:disabled {
-            background-color: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        #error-message {
-            color: #ff6b6b;
-            font-size: 0.9em;
-            display: none;
-            margin-top: 10px;
-        }
-        
-        /* --- PLAYER AREA --- */
+        /* --- PLAYER --- */
         #player-screen {
+            display: none;
             width: 100vw;
             height: 100vh;
             background: #000;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-            align-items: center;
         }
-        
-        #movie-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        #player-error {
-            color: #ff6b6b;
-            font-size: 1.2em;
-            text-align: center;
-            padding: 20px;
-        }
+
+        #movie-iframe { width: 100%; height: 100%; border: none; }
+
+        .error-txt { color: #ff4444; font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
     </style>
 </head>
 <body>
-    
-    <div class="controls-layer" id="controlsLayer">
-        <a href="javascript:history.back()" class="back-button" aria-label="Go back">
-            <i class="bi bi-arrow-left"></i> &nbsp; Back
-        </a>
 
-        <div class="server-list" id="serverList">
+    <nav class="top-nav" id="ui-nav">
+        <a href="javascript:location.reload()" class="back-btn">
+            <i class="bi bi-chevron-left"></i> Change Server
+        </a>
+        <div id="active-server-name" style="font-weight: bold; color: var(--primary)"></div>
+    </nav>
+
+    <div id="selection-screen">
+        <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai">
+        
+        <div class="section-label">Recommended (Fast & No Ads)</div>
+        <div class="server-grid">
+            <div class="server-card recommended" onclick="selectServer(7)">
+                <span class="badge">NO ADS</span>
+                <i class="bi bi-lightning-charge-fill" style="color: var(--accent)"></i>
+                VidKing
             </div>
-    </div>
-    
-    <div id="unlock-screen">
-        <div class="container">
-            <img id="logo" src="./static/thiraiwhite.png" alt="Thirai Logo"> 
-            <h2>Enter PIN</h2>
-            <div class="code-input-container" id="codeInputContainer">
-                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+            <div class="server-card recommended" onclick="selectServer(1)">
+                <span class="badge">NO ADS</span>
+                <i class="bi bi-shield-check" style="color: var(--accent)"></i>
+                Rakan
             </div>
-            <button class="join-button" id="unlockButton" disabled>Unlock</button>
-            <div id="error-message"></div>
+        </div>
+
+        <div class="section-label">Alternative Servers (May contain ads)</div>
+        <div class="server-grid">
+            <div class="server-card" onclick="selectServer(2)">
+                <span class="badge ad-badge">ADS</span>
+                Bard
+            </div>
+            <div class="server-card" onclick="selectServer(3)">
+                <span class="badge ad-badge">ADS</span>
+                Xayah
+            </div>
+            <div class="server-card" onclick="selectServer(4)">
+                <span class="badge ad-badge">ADS</span>
+                Ekko
+            </div>
+            <div class="server-card" onclick="selectServer(5)">
+                <span class="badge ad-badge">ADS</span>
+                Naafiri
+            </div>
+            <div class="server-card" onclick="selectServer(6)">
+                <span class="badge ad-badge">ADS</span>
+                Ryze
+            </div>
         </div>
     </div>
 
-    <div id="player-screen">
-        <p>Initializing Player...</p>
+    <div id="unlock-screen">
+        <div class="pin-container">
+            <h3>Enter Security PIN</h3>
+            <p style="color: #666; font-size: 0.85rem;">Required to access secure stream</p>
+            <div class="code-input-container">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+            </div>
+            <button class="unlock-btn" onclick="validatePin()">Unlock Stream</button>
+            <div class="error-txt" id="pin-error"></div>
+        </div>
     </div>
 
+    <div id="player-screen"></div>
+
     <script>
-        (function() { 
-            // --- CONSTANTS ---
-            const CORRECT_PIN = "1451"; 
-            const MAX_ATTEMPTS = 5;
-            const LOCKOUT_DURATION_MS = 15 * 60 * 1000; 
-            const AFK_TIMEOUT_MS = 3000; 
-            const TV_PREFIX = 'tv=';
+        const PIN = "1451";
+        const SERVERS = {
+            1: { name: "Rakan", movie: "https://vidsrc.cc/v2/embed/movie/", tv: "https://vidsrc.cc/v2/embed/tv/" },
+            2: { name: "Bard", movie: "https://moviesapi.club/movie/", tv: "https://moviesapi.club/tv/" },
+            3: { name: "Xayah", movie: "https://vidsrc.me/embed/movie?tmdb=", tv: "https://vidsrc.me/embed/tv?tmdb=" },
+            4: { name: "Ekko", movie: "https://player.videasy.net/movie/", tv: "https://player.videasy.net/tv/" },
+            5: { name: "Naafiri", movie: "https://vidfast.pro/movie/", tv: "https://vidfast.pro/tv/" },
+            6: { name: "Ryze", movie: "https://vidlink.pro/movie/", tv: "https://vidlink.pro/tv/" },
+            7: { name: "VidKing", movie: "https://www.vidking.net/embed/movie/", tv: "https://www.vidking.net/embed/tv/" }
+        };
 
-            // --- SERVERS CONFIGURATION ---
-            // Mapping names to IDs for the UI
-            const SERVERS = [
-                { id: 1, name: "Rakan" },
-                { id: 2, name: "Bard" },
-                { id: 3, name: "Xayah" },
-                { id: 4, name: "Ekko" },
-                { id: 5, name: "Naafiri" },
-                { id: 6, name: "Ryze" },
-                { id: 7, name: "VidKing" }
-            ];
+        let selectedServerId = null;
+        let videoParams = { type: null, id: null, s: null, e: null };
 
-            // --- DOM ELEMENTS ---
-            const unlockScreen = document.getElementById('unlock-screen');
-            const playerScreen = document.getElementById('player-screen');
-            const inputs = document.querySelectorAll('.code-input');
-            const unlockButton = document.getElementById('unlockButton');
-            const errorMessage = document.getElementById('error-message');
-            const controlsLayer = document.getElementById('controlsLayer');
-            const serverList = document.getElementById('serverList');
-            const logo = document.getElementById('logo'); 
-
-            let lockoutInterval = null;
-            let afkTimer; 
-            
-            // Current Video State
-            let currentParams = {
-                type: null, // 'movie' or 'tv'
-                id: null,
-                season: null,
-                episode: null
-            };
-
-            // =================================================================
-            // === 1. USER ACTIVITY & UI FADING ================================
-            // =================================================================
-
-            function hideControls() {
-                if (playerScreen.style.display !== 'none') {
-                     controlsLayer.classList.add('afk-fade');
-                }
+        // Parse URL on Load
+        function parseUrl() {
+            const query = window.location.search.substring(1);
+            if (!query) return false;
+            if (query.startsWith('tv=')) {
+                const parts = query.substring(3).split('/');
+                videoParams = { type: 'tv', id: parts[0], s: parts[1], e: parts[2] };
+            } else {
+                videoParams = { type: 'movie', id: query };
             }
-
-            function showControls() {
-                controlsLayer.classList.remove('afk-fade');
-                clearTimeout(afkTimer);
-                if (playerScreen.style.display !== 'none') {
-                    afkTimer = setTimeout(hideControls, AFK_TIMEOUT_MS);
-                }
-            }
-            
-            function handleUserActivity() {
-                showControls();
-            }
-
-            // =================================================================
-            // === 2. URL PARSING & SERVER LOGIC ===============================
-            // =================================================================
-
-            function displayPlayerError(message) {
-                playerScreen.innerHTML = `<h1>Error</h1><p id="player-error">${message}</p>`;
-            }
-
-            function parseUrl() {
-                const queryString = window.location.search.substring(1);
-                
-                if (!queryString) {
-                    return false;
-                }
-
-                if (queryString.startsWith(TV_PREFIX)) {
-                    // TV Format: ?tv=ID/SEASON/EPISODE
-                    currentParams.type = 'tv';
-                    const tvDetails = queryString.substring(TV_PREFIX.length); 
-                    const parts = tvDetails.split('/'); 
-
-                    if (parts.length === 3 && parts.every(p => p)) {
-                        currentParams.id = parts[0];
-                        currentParams.season = parts[1];
-                        currentParams.episode = parts[2];
-                        return true;
-                    } 
-                } else {
-                    // Movie Format: ?ID
-                    currentParams.type = 'movie';
-                    currentParams.id = queryString;
-                    if (currentParams.id) return true;
-                }
-                return false;
-            }
-
-            function getEmbedUrl(serverNumber, params) {
-                let src = "";
-                
-                if (params.type === 'movie') {
-                    switch (serverNumber) {
-                        case 1: src = `https://vidsrc.cc/v2/embed/movie/${params.id}?autoPlay=false`; break; // Rakan
-                        case 2: src = `https://moviesapi.club/movie/${params.id}`; break; // Bard
-                        case 3: src = `https://vidsrc.me/embed/movie?tmdb=${params.id}`; break; // Xayah
-                        case 4: src = `https://player.videasy.net/movie/${params.id}`; break; // Ekko
-                        case 5: src = `https://vidfast.pro/movie/${params.id}`; break; // Naafiri
-                        case 6: src = `https://vidlink.pro/movie/${params.id}?title=true&poster=true&autoplay=false`; break; // Ryze
-                        case 7: src = `https://www.vidking.net/embed/movie/${params.id}`; break; // VidKing
-                    }
-                } else if (params.type === 'tv') {
-                    switch (serverNumber) {
-                        case 1: src = `https://vidsrc.cc/v2/embed/tv/${params.id}/${params.season}/${params.episode}?autoPlay=false`; break; // Rakan
-                        case 2: src = `https://moviesapi.club/tv/${params.id}-${params.season}-${params.episode}`; break; // Bard
-                        case 3: src = `https://vidsrc.me/embed/tv?tmdb=${params.id}&season=${params.season}&episode=${params.episode}`; break; // Xayah
-                        case 4: src = `https://player.videasy.net/tv/${params.id}/${params.season}/${params.episode}?nextEpisode=true&episodeSelector=true`; break; // Ekko
-                        case 5: src = `https://vidfast.pro/tv/${params.id}/${params.season}/${params.episode}`; break; // Naafiri
-                        case 6: src = `https://vidlink.pro/tv/${params.id}/${params.season}/${params.episode}?title=true&poster=true&autoplay=false&nextbutton=true`; break; // Ryze
-                        case 7: src = `https://www.vidking.net/embed/tv/${params.id}/${params.season}/${params.episode}`; break; // VidKing
-                    }
-                }
-                return src;
-            }
-
-            function loadServer(serverNumber) {
-                // Save preference
-                localStorage.setItem('preferredServer', serverNumber);
-
-                // Update UI Buttons
-                document.querySelectorAll('.server-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (parseInt(btn.dataset.server) === serverNumber) {
-                        btn.classList.add('active');
-                    }
-                });
-
-                const embedSrc = getEmbedUrl(serverNumber, currentParams);
-                
-                if (embedSrc) {
-                    const iframe = document.createElement('iframe');
-                    iframe.setAttribute('id', 'movie-iframe');
-                    iframe.setAttribute('src', embedSrc);
-                    iframe.setAttribute('allowfullscreen', 'true');
-iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write');
-
-                    // Allow necessary scripts for these providers
-// Updated sandbox settings to allow more compatibility with video providers
-
-                    
-                    playerScreen.innerHTML = '';
-                    playerScreen.appendChild(iframe);
-                    console.log(`Loaded ${currentParams.type} on Server ${serverNumber} (${SERVERS[serverNumber-1].name})`);
-                } else {
-                    displayPlayerError("Could not generate stream URL.");
-                }
-            }
-
-            function initPlayer() {
-                const isValid = parseUrl();
-                if (!isValid) {
-                    displayPlayerError('Invalid URL format.<br>Movie: <code>?12345</code><br>TV: <code>?tv=12345/1/1</code>');
-                    return;
-                }
-
-                // Create Server Buttons
-                serverList.innerHTML = '';
-                SERVERS.forEach(server => {
-                    const btn = document.createElement('div');
-                    btn.className = 'server-btn';
-                    btn.textContent = server.name;
-                    btn.dataset.server = server.id;
-                    btn.addEventListener('click', () => loadServer(server.id));
-                    serverList.appendChild(btn);
-                });
-
-                // Load preferred server or default to 1 (Rakan)
-                const savedServer = parseInt(localStorage.getItem('preferredServer') || '1');
-                loadServer(savedServer);
-            }
-
-            // =================================================================
-            // === 3. UNLOCK LOGIC (Standard) ==================================
-            // =================================================================
-            
-            function showPlayer() {
-                unlockScreen.style.display = 'none';
-                playerScreen.style.display = 'flex';
-                controlsLayer.style.display = 'flex'; // Show controls
-                
-                initPlayer();
-                showControls(); 
-            }
-
-            function showUnlock() {
-                playerScreen.style.display = 'none';
-                controlsLayer.style.display = 'none'; // Hide controls on lock screen
-                unlockScreen.style.display = 'flex';
-                checkLockoutStatus();
-            }
-            
-            function checkInputs() {
-                let allFilled = true;
-                inputs.forEach(input => {
-                    if (input.value.length === 0 || !/^\d$/.test(input.value)) {
-                        allFilled = false;
-                    }
-                });
-                const isLocked = isLockedOut();
-                unlockButton.disabled = !allFilled || isLocked;
-                
-                if (allFilled && !isLocked) errorMessage.style.display = 'none';
-            }
-            
-            function isLockedOut() {
-                const lockoutTimestamp = localStorage.getItem('lockoutTimestamp');
-                if (lockoutTimestamp) {
-                    const now = new Date().getTime();
-                    const lockoutEnd = parseInt(lockoutTimestamp) + LOCKOUT_DURATION_MS;
-                    
-                    if (now < lockoutEnd) {
-                        const remainingTimeMs = lockoutEnd - now;
-                        const totalSeconds = Math.ceil(remainingTimeMs / 1000);
-                        const remainingMinutes = Math.floor(totalSeconds / 60);
-                        const remainingSeconds = totalSeconds % 60;
-                        errorMessage.textContent = `Too many failed attempts. Try again in ${remainingMinutes}:${remainingSeconds.toString().padStart(2, '0')}.`;
-                        errorMessage.style.display = 'block';
-                        return true;
-                    } else {
-                        localStorage.removeItem('lockoutTimestamp');
-                        localStorage.setItem('attemptCount', '0');
-                        clearInterval(lockoutInterval);
-                        lockoutInterval = null;
-                        errorMessage.style.display = 'none';
-                        return false;
-                    }
-                }
-                return false;
-            }
-            
-            function checkLockoutStatus() {
-                if (isLockedOut()) {
-                    unlockButton.disabled = true;
-                    if (!lockoutInterval) lockoutInterval = setInterval(checkLockoutStatus, 1000); 
-                } else {
-                    if (lockoutInterval) { clearInterval(lockoutInterval); lockoutInterval = null; }
-                    checkInputs(); 
-                }
-            }
-
-            // --- Event Listeners for Input ---
-            inputs.forEach((input, index) => {
-                input.addEventListener('keyup', (e) => {
-                    if (e.key === 'Backspace' && input.value === '') {
-                        if (index > 0) inputs[index - 1].focus();
-                    }
-                    checkInputs();
-                });
-                input.addEventListener('input', () => {
-                    let value = input.value.replace(/[^0-9]/g, '').charAt(0);
-                    input.value = value;
-                    if (input.value.length === 1 && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    } else if (index === inputs.length - 1) {
-                         unlockButton.focus(); 
-                    }
-                    checkInputs();
-                });
-                input.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const pasteCode = (e.clipboardData || window.clipboardData).getData('text').trim().replace(/[^0-9]/g, '').slice(0, 4);
-                    for (let i = 0; i < pasteCode.length; i++) if (inputs[i]) inputs[i].value = pasteCode[i];
-                    checkInputs();
-                });
-            });
-
-            unlockButton.addEventListener('click', () => {
-                if (isLockedOut()) return;
-                let enteredPin = Array.from(inputs).map(input => input.value).join('');
-
-                if (enteredPin === CORRECT_PIN) {
-                    localStorage.setItem('isUnlocked', 'true'); 
-                    localStorage.setItem('attemptCount', '0');
-                    localStorage.removeItem('lockoutTimestamp');
-                    showPlayer();
-                } else {
-                    let currentAttempts = parseInt(localStorage.getItem('attemptCount') || '0');
-                    currentAttempts++;
-                    localStorage.setItem('attemptCount', currentAttempts.toString());
-                    
-                    if (currentAttempts >= MAX_ATTEMPTS) {
-                        localStorage.setItem('lockoutTimestamp', new Date().getTime().toString());
-                        errorMessage.textContent = `Access locked.`;
-                        checkLockoutStatus(); 
-                    } else {
-                        errorMessage.textContent = `Incorrect PIN. ${MAX_ATTEMPTS - currentAttempts} attempts remaining.`;
-                        errorMessage.style.display = 'block';
-                    }
-                    inputs.forEach(input => input.value = '');
-                    inputs[0].focus();
-                    unlockButton.disabled = true;
-                }
-            });
-            
-            // =================================================================
-            // === 4. INITIALIZATION ===========================================
-            // =================================================================
-
-            document.addEventListener('DOMContentLoaded', () => {
-                const isUnlocked = localStorage.getItem('isUnlocked');
-                
-                if (isUnlocked === 'true') {
-                    showPlayer();
-                } else {
-                    showUnlock();
-                }
-
-                // Global Activity Listeners
-                document.addEventListener('mousemove', handleUserActivity);
-                document.addEventListener('keypress', handleUserActivity);
-                document.addEventListener('click', handleUserActivity);
-                document.addEventListener('touchstart', handleUserActivity);
-            });
-        })();
-    </script>
-
-<script>
-// === POPUP / AD BLOCKER ===
-(function() {
-    const originalOpen = window.open;
-    window.open = function(url, name, features) {
-        console.warn('Popup blocked:', url);
-        return null;
-    };
-
-    document.addEventListener('click', function(e) {
-        const a = e.target.closest('a');
-        if (a && a.target === '_blank') {
-            e.preventDefault();
-            console.warn('Blocked external ad link:', a.href);
+            return !!videoParams.id;
         }
-    }, true);
 
-    // Remove suspicious iframes injected by ads
-    const observer = new MutationObserver(() => {
-        document.querySelectorAll('iframe').forEach(frame => {
-            const src = frame.src || '';
-            if (/ads|doubleclick|propeller|pop|banner|promo/i.test(src)) {
-                frame.remove();
-                console.warn('Removed ad iframe:', src);
+        function selectServer(id) {
+            selectedServerId = id;
+            if (localStorage.getItem('isUnlocked') === 'true') {
+                startPlayer();
+            } else {
+                document.getElementById('unlock-screen').style.display = 'flex';
+                document.querySelectorAll('.code-input')[0].focus();
             }
+        }
+
+        function validatePin() {
+            const inputs = document.querySelectorAll('.code-input');
+            const entered = Array.from(inputs).map(i => i.value).join('');
+            if (entered === PIN) {
+                localStorage.setItem('isUnlocked', 'true');
+                startPlayer();
+            } else {
+                document.getElementById('pin-error').innerText = "Invalid PIN. Try again.";
+                inputs.forEach(i => i.value = '');
+                inputs[0].focus();
+            }
+        }
+
+        function startPlayer() {
+            const server = SERVERS[selectedServerId];
+            let url = "";
+            
+            if (videoParams.type === 'movie') {
+                url = server.movie + videoParams.id + (selectedServerId === 3 ? "" : "");
+            } else {
+                url = (selectedServerId === 3) 
+                    ? `${server.tv}${videoParams.id}&season=${videoParams.s}&episode=${videoParams.e}`
+                    : (selectedServerId === 2) 
+                    ? `${server.tv}${videoParams.id}-${videoParams.s}-${videoParams.e}`
+                    : `${server.tv}${videoParams.id}/${videoParams.s}/${videoParams.e}`;
+            }
+
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('unlock-screen').style.display = 'none';
+            document.getElementById('ui-nav').style.display = 'flex';
+            document.getElementById('active-server-name').innerText = server.name;
+            
+            const player = document.getElementById('player-screen');
+            player.style.display = 'block';
+            player.innerHTML = `<iframe id="movie-iframe" src="${url}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+        }
+
+        // Input Auto-focus Logic
+        document.querySelectorAll('.code-input').forEach((input, idx, all) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value && idx < all.length - 1) all[idx+1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && idx > 0) all[idx-1].focus();
+            });
         });
-    });
 
-    observer.observe(document.body, { childList: true, subtree: true });
-})();
-</script>
-
+        // Init
+        window.onload = () => {
+            if (!parseUrl()) {
+                document.body.innerHTML = "<div style='padding:50px; text-align:center'><h1>Invalid Link</h1><p>Please use a valid TMDB URL.</p></div>";
+            }
+            document.getElementById('ui-nav').style.display = 'none';
+        };
+    </script>
 </body>
 </html>
