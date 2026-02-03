@@ -577,5 +577,38 @@ iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-
             });
         })();
     </script>
+
+<script>
+// === POPUP / AD BLOCKER ===
+(function() {
+    const originalOpen = window.open;
+    window.open = function(url, name, features) {
+        console.warn('Popup blocked:', url);
+        return null;
+    };
+
+    document.addEventListener('click', function(e) {
+        const a = e.target.closest('a');
+        if (a && a.target === '_blank') {
+            e.preventDefault();
+            console.warn('Blocked external ad link:', a.href);
+        }
+    }, true);
+
+    // Remove suspicious iframes injected by ads
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('iframe').forEach(frame => {
+            const src = frame.src || '';
+            if (/ads|doubleclick|propeller|pop|banner|promo/i.test(src)) {
+                frame.remove();
+                console.warn('Removed ad iframe:', src);
+            }
+        });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
 </body>
 </html>
