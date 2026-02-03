@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thirai Player</title>
+    <title>Thirai</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; }
         
-        /* Back Button Top Left */
-        .back-layer {
+        /* Back Button - Top Left */
+        .header-controls {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 15px;
+            left: 15px;
             z-index: 9999;
         }
 
         .back-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(40, 40, 40, 0.8);
             color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             text-decoration: none;
             font-family: sans-serif;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        iframe {
+        iframe#movie-player {
             width: 100%;
             height: 100%;
             border: none;
@@ -36,58 +38,68 @@
 </head>
 <body>
 
-    <div class="back-layer">
+    <div class="header-controls">
         <a href="javascript:history.back()" class="back-btn">
             <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
 
-    <div id="player" style="width:100%; height:100%;"></div>
+    <div id="player-container" style="width:100%; height:100%;"></div>
 
     <script>
-        // 1. Get the movie ID from the URL (e.g., ?12345)
-        const query = window.location.search.substring(1);
-        const playerDiv = document.getElementById('player');
+        (function() {
+            // 1. URL PARSING (Same logic as Rakan)
+            const query = window.location.search.substring(1);
+            const container = document.getElementById('player-container');
+            let videoUrl = "";
 
-        if (query) {
-            let src = "";
-            // Check if it's TV or Movie
             if (query.startsWith('tv=')) {
-                const parts = query.substring(3).split('/'); // tv=ID/S/E
-                src = `https://vidsrc.cc/v2/embed/tv/${parts[0]}/${parts[1]}/${parts[2]}?autoPlay=false`;
+                const parts = query.substring(3).split('/'); 
+                videoUrl = `https://vidsrc.cc/v2/embed/tv/${parts[0]}/${parts[1]}/${parts[2]}?autoPlay=false`;
             } else {
-                src = `https://vidsrc.cc/v2/embed/movie/${query}?autoPlay=false`;
+                videoUrl = `https://vidsrc.cc/v2/embed/movie/${query}?autoPlay=false`;
             }
 
-            // 2. Load Rakan API
-            playerDiv.innerHTML = `<iframe src="${src}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
-        } else {
-            playerDiv.innerHTML = `<p style="color:white; text-align:center; margin-top:50px;">No Movie ID found in URL.</p>`;
-        }
+            // 2. INJECT PLAYER
+            if (query) {
+                container.innerHTML = `<iframe id="movie-player" src="${videoUrl}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+            }
 
-        // 3. AGGRESSIVE POPUP BLOCKER
-        (function() {
-            // Block window.open
+            // 3. AGGRESSIVE AD-BLOCKING SUITE
+            // Kill new window/tab attempts
             window.open = function() { return null; };
 
-            // Stop clicks from opening new tabs
+            // Block click-jackers and transparent overlays
             document.addEventListener('click', function(e) {
-                const link = e.target.closest('a');
-                if (link && link.target === '_blank') {
+                const target = e.target;
+                // If user didn't click the back button or the player itself, kill the click
+                if (!target.closest('.back-btn') && !target.closest('#movie-player')) {
                     e.preventDefault();
-                    window.location.href = link.href; // Open in same tab instead of popup
+                    e.stopPropagation();
                 }
             }, true);
 
-            // Periodically kill any ad-iframes that try to sneak in
-            setInterval(() => {
+            // Mutation Observer to delete injected ad-elements instantly
+            const adKiller = new MutationObserver(() => {
+                // Remove any iframe that isn't our Rakan video
                 document.querySelectorAll('iframe').forEach(frame => {
-                    // If it's not our Rakan player, delete it
                     if (!frame.src.includes('vidsrc.cc')) {
                         frame.remove();
                     }
                 });
-            }, 1000);
+                // Remove common ad-container classes
+                document.querySelectorAll('.ad-container, [class*="ad-"], [id*="pop-"]').forEach(el => el.remove());
+            });
+
+            adKiller.observe(document.body, { childList: true, subtree: true });
+
+            // Final fallback: check every half-second for hidden pop-unders
+            setInterval(() => {
+                if (document.activeElement && document.activeElement.tagName === "IFRAME") {
+                    // Reset focus to body to prevent hidden ad-focus
+                    window.focus();
+                }
+            }, 500);
         })();
     </script>
 </body>
