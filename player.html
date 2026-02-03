@@ -394,7 +394,8 @@
                     iframe.setAttribute('src', embedSrc);
                     iframe.setAttribute('allowfullscreen', 'true');
                     // Allow necessary scripts for these providers
-                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+// Updated sandbox settings to allow more compatibility with video providers
+iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock');
                     
                     playerScreen.innerHTML = '';
                     playerScreen.appendChild(iframe);
