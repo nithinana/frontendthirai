@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Thirai - Select Server</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
@@ -84,7 +84,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(15, 15, 15, 0.95);
+            background: rgba(15, 15, 15, 0.98);
             backdrop-filter: blur(20px);
             border-top: 1px solid #333;
             border-radius: 30px 30px 0 0;
@@ -95,6 +95,7 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
 
         #episode-drawer.open { transform: translateY(0); }
@@ -103,16 +104,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 15px;
+            position: relative;
+            padding-right: 40px; /* Space for close button */
         }
 
         .drawer-season-select {
+            background: transparent;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            padding: 5px 0;
+        }
+        
+        .drawer-season-select option {
             background: #222;
             color: white;
-            border: 1px solid #333;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 0.85rem;
+        }
+
+        /* Desktop Scroll Container & Controls */
+        .episodes-wrapper {
+            position: relative;
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
         }
 
         .episodes-scroll-container {
@@ -120,10 +139,45 @@
             gap: 14px;
             overflow-x: auto;
             padding-bottom: 10px;
-            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            width: 100%;
+            scrollbar-width: none; /* Firefox */
         }
+        
+        .episodes-scroll-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
-        .episodes-scroll-container::-webkit-scrollbar { display: none; }
+        /* Scroll Buttons (Desktop) */
+        .scroll-btn {
+            position: absolute;
+            top: 0;
+            bottom: 10px; /* match padding of container */
+            width: 60px;
+            z-index: 10;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            transition: opacity 0.2s;
+        }
+        
+        .scroll-left {
+            left: 0;
+            background: linear-gradient(to right, rgba(15,15,15,1) 0%, rgba(15,15,15,0) 100%);
+            justify-content: flex-start;
+            padding-left: 10px;
+        }
+        
+        .scroll-right {
+            right: 0;
+            background: linear-gradient(to left, rgba(15,15,15,1) 0%, rgba(15,15,15,0) 100%);
+            justify-content: flex-end;
+            padding-right: 10px;
+        }
+        
+        .scroll-btn:hover { color: var(--primary); }
 
         .ep-card {
             min-width: 220px;
@@ -133,8 +187,8 @@
             overflow: hidden;
             cursor: pointer;
             border: 1px solid #222;
-            scroll-snap-align: start;
             transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .ep-card.active {
@@ -170,15 +224,97 @@
             overflow: hidden;
         }
 
-        /* Mobile adjustments */
+        .close-drawer {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 20;
+        }
+        
+        .close-drawer:hover { color: white; }
+
+        /* --- MOBILE ADJUSTMENTS --- */
         @media (max-width: 768px) {
             #episode-drawer {
                 height: 100%;
-                max-height: 100vh;
+                max-height: 100vh; /* Full screen */
                 border-radius: 0;
+                padding: 0;
+                /* Safe area for notches */
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                background: #000;
             }
+
+            .drawer-header {
+                padding: 20px;
+                border-bottom: 1px solid #222;
+                background: #0a0a0a;
+                margin-bottom: 0;
+            }
+
+            /* Mobile Close Button - Top Right */
+            .close-drawer {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            
+            /* Hide desktop scroll buttons */
+            .scroll-btn { display: none !important; }
+
+            .episodes-wrapper {
+                flex-direction: column;
+                height: 100%;
+            }
+
             .episodes-scroll-container {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding: 15px;
+                gap: 10px;
+                /* Ensure bottom content isn't cut off */
+                padding-bottom: 80px; 
+            }
+
+            /* Mobile List Card Style */
+            .ep-card {
+                min-width: 100%;
+                max-width: 100%;
+                display: flex;
+                flex-direction: row;
+                height: 90px;
+                border-radius: 12px;
+                background: #141414;
+            }
+
+            .ep-thumb {
+                width: 140px;
+                height: 100%;
+                border-radius: 0;
+                flex-shrink: 0;
+            }
+
+            .ep-meta {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                flex-grow: 1;
+                width: 0; /* Flex fix for truncation */
+            }
+
+            .ep-title {
+                font-size: 0.95rem;
+                white-space: nowrap;
+            }
+            
+            .ep-desc {
+                font-size: 0.8rem;
+                -webkit-line-clamp: 2;
             }
         }
 
@@ -352,16 +488,26 @@
             margin-bottom: 15px;
         }
 
+        /* --- PLAYER SCREEN --- */
         #player-screen {
             display: none;
-            width: 100vw;
-            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: #000;
-            padding-top: 65px;
-            box-sizing: border-box;
+            z-index: 50; /* Below top-nav (100) but above everything else */
+            overflow: hidden;
         }
 
-        #movie-iframe { width: 100%; height: 100%; border: none; }
+        #movie-iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            display: block;
+        }
+
     </style>
 </head>
 <body>
@@ -387,7 +533,7 @@
         <div id="tv-selector" class="tv-controls">
             <div class="control-row">
                 <label style="width: 60px; font-size: 0.8rem;">SEASON</label>
-                <select id="s-select" class="tv-select" onchange="fetchEpisodes()"></select>
+                <select id="s-select" class="tv-select" onchange="syncSeason(this.value)"></select>
             </div>
             <div class="control-row">
                 <label style="width: 60px; font-size: 0.8rem;">EPISODE</label>
@@ -437,8 +583,19 @@
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        <div id="drawer-ep-list" class="episodes-scroll-container">
-            </div>
+        
+        <div class="episodes-wrapper">
+            <button class="scroll-btn scroll-left" onclick="scrollEpisodes(-300)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div id="drawer-ep-list" class="episodes-scroll-container">
+                </div>
+            
+            <button class="scroll-btn scroll-right" onclick="scrollEpisodes(300)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
     </div>
 
     <div id="unlock-screen">
@@ -545,7 +702,7 @@
                     eSelect.appendChild(opt);
 
                     // Drawer Cards
-                    const card = document.createElement('div');
+                    const card = document.createElement('div'); 
                     card.className = `ep-card ${ep.episode_number == videoData.e ? 'active' : ''}`;
                     const thumbUrl = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '';
                     card.innerHTML = `
@@ -555,11 +712,20 @@
                             <div class="ep-desc">${ep.overview || 'No description available.'}</div>
                         </div>
                     `;
+                    
+                    // Fixed Click Logic
                     card.onclick = () => {
+                        // 1. Update Data
                         videoData.e = ep.episode_number;
+                        // 2. Sync UI
+                        eSelect.value = ep.episode_number;
                         updateSelection();
-                        fetchEpisodes();
+                        // 3. Close Drawer
                         toggleEpisodesDrawer();
+                        // 4. Force player refresh if active
+                        if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
+                            launchStream();
+                        }
                     };
                     drawerEpList.appendChild(card);
                 });
@@ -581,29 +747,38 @@
             document.getElementById('episode-drawer').classList.toggle('open');
         }
 
+        // Reset episode to 1 when changing seasons
         function syncSeason(val) {
             document.getElementById('s-select').value = val;
+            document.getElementById('drawer-s-select').value = val;
+            videoData.e = 1;
             fetchEpisodes();
         }
 
         function updateSelection() {
             const eSelect = document.getElementById('e-select');
-            if (!eSelect.options[eSelect.selectedIndex]) return;
+            if (!eSelect || !eSelect.options[eSelect.selectedIndex]) return;
 
             videoData.e = eSelect.value;
             videoData.s = document.getElementById('s-select').value;
             document.getElementById('drawer-s-select').value = videoData.s;
             
+            // Highlight active card in drawer
+            document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+            // Find card by text content index (fallback approach) or rebuild cards
+            // Rebuilding is safer via fetch, but visual update is enough:
+            const cards = document.querySelectorAll('.ep-card');
+            if (cards.length > 0) {
+                 // Try to match index based on select index (usually matches)
+                 if (cards[eSelect.selectedIndex]) cards[eSelect.selectedIndex].classList.add('active');
+            }
+
             const epName = eSelect.options[eSelect.selectedIndex].text.split(': ')[1] || "";
             document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
             
             if (videoData.type === 'tv') {
                 const newUrl = `${window.location.pathname}?tv=${videoData.id}/${videoData.s}/${videoData.e}`;
                 window.history.replaceState({path: newUrl}, '', newUrl);
-            }
-
-            if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
-                launchStream();
             }
         }
 
@@ -613,7 +788,17 @@
             if (newIdx >= 0 && newIdx < select.length) {
                 select.selectedIndex = newIdx;
                 updateSelection();
+                if (document.getElementById('player-screen').style.display === 'block') {
+                    launchStream();
+                }
             }
+        }
+
+        function scrollEpisodes(amount) {
+            document.getElementById('drawer-ep-list').scrollBy({
+                left: amount,
+                behavior: 'smooth'
+            });
         }
 
         function selectServer(id) {
