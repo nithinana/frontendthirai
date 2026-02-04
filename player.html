@@ -94,7 +94,7 @@
             max-height: 65vh;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 25px 30px; /* Increased padding for cleaner look */
             box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
 
@@ -104,26 +104,49 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             position: relative;
-            padding-right: 40px; /* Space for close button */
+            /* No right padding needed here, flex handles it */
         }
 
         .drawer-season-select {
-            background: transparent;
+            background: rgba(255,255,255,0.05);
             color: white;
-            border: none;
-            font-size: 1.2rem;
-            font-weight: 700;
+            border: 1px solid #333;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
             outline: none;
-            padding: 5px 0;
+            padding: 8px 15px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+        
+        .drawer-season-select:hover {
+            background: rgba(255,255,255,0.1);
         }
         
         .drawer-season-select option {
             background: #222;
             color: white;
         }
+
+        .close-drawer {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            color: #eee;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%; /* Make it circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        
+        .close-drawer:hover { background: rgba(255,255,255,0.15); color: white; }
 
         /* Desktop Scroll Container & Controls */
         .episodes-wrapper {
@@ -160,21 +183,28 @@
             justify-content: center;
             color: white;
             font-size: 1.5rem;
-            transition: opacity 0.2s;
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
-        
+
+        /* Cleaned up gradients and logic */
         .scroll-left {
             left: 0;
-            background: linear-gradient(to right, rgba(15,15,15,1) 0%, rgba(15,15,15,0) 100%);
+            background: linear-gradient(to right, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%);
             justify-content: flex-start;
-            padding-left: 10px;
+            padding-left: 15px;
         }
         
         .scroll-right {
             right: 0;
-            background: linear-gradient(to left, rgba(15,15,15,1) 0%, rgba(15,15,15,0) 100%);
+            background: linear-gradient(to left, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%);
             justify-content: flex-end;
-            padding-right: 10px;
+            padding-right: 15px;
+        }
+        
+        /* Class to hide buttons via JS */
+        .scroll-btn.hidden {
+            opacity: 0;
+            pointer-events: none; /* Ensures clicks pass through to video/cards */
         }
         
         .scroll-btn:hover { color: var(--primary); }
@@ -224,18 +254,6 @@
             overflow: hidden;
         }
 
-        .close-drawer {
-            background: transparent;
-            border: none;
-            color: #aaa;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            z-index: 20;
-        }
-        
-        .close-drawer:hover { color: white; }
-
         /* --- MOBILE ADJUSTMENTS --- */
         @media (max-width: 768px) {
             #episode-drawer {
@@ -250,17 +268,28 @@
             }
 
             .drawer-header {
-                padding: 20px;
+                padding: 20px 25px; /* Clean spacing */
                 border-bottom: 1px solid #222;
                 background: #0a0a0a;
                 margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
             }
 
-            /* Mobile Close Button - Top Right */
+            .drawer-season-select {
+                padding: 6px 10px;
+                font-size: 1rem;
+                background: #222;
+            }
+
+            /* Mobile Close Button - integrated into header flex */
             .close-drawer {
-                position: absolute;
-                top: 20px;
-                right: 20px;
+                position: static; /* Remove absolute positioning */
+                width: 36px;
+                height: 36px;
+                background: #222;
+                border: 1px solid #333;
             }
             
             /* Hide desktop scroll buttons */
@@ -275,10 +304,10 @@
                 flex-direction: column;
                 overflow-y: auto;
                 overflow-x: hidden;
-                padding: 15px;
-                gap: 10px;
+                padding: 20px; /* Better side padding */
+                gap: 15px;
                 /* Ensure bottom content isn't cut off */
-                padding-bottom: 80px; 
+                padding-bottom: 100px; 
             }
 
             /* Mobile List Card Style */
@@ -305,6 +334,7 @@
                 justify-content: center;
                 flex-grow: 1;
                 width: 0; /* Flex fix for truncation */
+                padding-right: 10px;
             }
 
             .ep-title {
@@ -326,6 +356,24 @@
             padding: 80px 20px 40px;
             min-height: 100vh;
             box-sizing: border-box;
+        }
+
+        /* Optimized mobile padding */
+        @media (max-width: 768px) {
+            #selection-screen {
+                padding: 40px 25px 40px; /* Reduced top padding, added side padding */
+            }
+            .logo-large {
+                max-width: 130px; /* Smaller logo for mobile */
+                margin-bottom: 20px;
+            }
+            /* Ensure server grid items don't stretch weirdly */
+            .server-grid {
+                grid-template-columns: 1fr; /* Single column on mobile */
+            }
+            .tv-controls {
+                padding: 15px; /* Tighter padding */
+            }
         }
 
         .logo-large {
@@ -365,6 +413,7 @@
             align-items: center;
             justify-content: center;
             transition: 0.2s;
+            flex-shrink: 0; /* Prevent squishing */
         }
 
         .nav-btn:hover { background: var(--primary); }
@@ -377,6 +426,8 @@
             padding: 10px;
             border-radius: 8px;
             outline: none;
+            width: 100%; /* Ensure it fills space */
+            min-width: 0; /* Flexbox fix for truncation */
         }
 
         .section-label {
@@ -585,7 +636,7 @@
         </div>
         
         <div class="episodes-wrapper">
-            <button class="scroll-btn scroll-left" onclick="scrollEpisodes(-300)">
+            <button class="scroll-btn scroll-left hidden" onclick="scrollEpisodes(-300)">
                 <i class="bi bi-chevron-left"></i>
             </button>
             
@@ -730,6 +781,8 @@
                     drawerEpList.appendChild(card);
                 });
                 updateSelection();
+                // Check scroll buttons after content load
+                setTimeout(updateScrollButtons, 100);
             } catch (e) { console.error(e); }
         }
 
@@ -744,7 +797,12 @@
         }
 
         function toggleEpisodesDrawer() {
-            document.getElementById('episode-drawer').classList.toggle('open');
+            const drawer = document.getElementById('episode-drawer');
+            drawer.classList.toggle('open');
+            // If opening, check scroll buttons
+            if (drawer.classList.contains('open')) {
+                setTimeout(updateScrollButtons, 300); // Wait for transition
+            }
         }
 
         // Reset episode to 1 when changing seasons
@@ -766,7 +824,6 @@
             // Highlight active card in drawer
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
             // Find card by text content index (fallback approach) or rebuild cards
-            // Rebuilding is safer via fetch, but visual update is enough:
             const cards = document.querySelectorAll('.ep-card');
             if (cards.length > 0) {
                  // Try to match index based on select index (usually matches)
@@ -799,6 +856,28 @@
                 left: amount,
                 behavior: 'smooth'
             });
+        }
+
+        // --- SCROLL BUTTON VISIBILITY LOGIC ---
+        function updateScrollButtons() {
+            const container = document.getElementById('drawer-ep-list');
+            const leftBtn = document.querySelector('.scroll-left');
+            const rightBtn = document.querySelector('.scroll-right');
+
+            // Hide/Show Left Button
+            if (container.scrollLeft <= 10) {
+                leftBtn.classList.add('hidden');
+            } else {
+                leftBtn.classList.remove('hidden');
+            }
+
+            // Hide/Show Right Button
+            // tolerance of 10px
+            if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+                rightBtn.classList.add('hidden');
+            } else {
+                rightBtn.classList.remove('hidden');
+            }
         }
 
         function selectServer(id) {
@@ -843,6 +922,14 @@
             el.addEventListener('input', () => { if (el.value && i < arr.length - 1) arr[i+1].focus(); });
             el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
+
+        // Add Scroll Listener
+        const epListContainer = document.getElementById('drawer-ep-list');
+        epListContainer.addEventListener('scroll', () => {
+            // Debounce slightly or just run
+            requestAnimationFrame(updateScrollButtons);
+        });
+        window.addEventListener('resize', updateScrollButtons);
 
         window.onload = () => { parseUrl(); };
         (function() { window.open = function() { return null; }; })();
