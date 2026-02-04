@@ -362,7 +362,50 @@
         }
 
         #movie-iframe { width: 100%; height: 100%; border: none; }
-    </style>
+    
+/* Desktop: make episode scroller clearly scrollable */
+.episodes-scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Remove ugly rounded season box */
+.drawer-season-select {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Cleaner season dropdown look */
+.drawer-season-select:focus {
+    outline: none;
+}
+
+/* Mobile UI fixes */
+@media (max-width: 768px) {
+    .drawer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .episodes-scroll-container {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        gap: 12px;
+    }
+
+    .ep-card {
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
+
+</style>
 </head>
 <body>
 
@@ -522,7 +565,63 @@
             } catch (e) { console.error(e); }
         }
 
-        async function fetchEpisodes() {
+        
+// FIX: Reset episode when season changes if episode not found
+async function fetchEpisodes() {
+    const s = document.getElementById('s-select').value;
+    videoData.s = s;
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/tv/${videoData.id}/season/${s}?api_key=${TMDB_KEY}`);
+        const data = await res.json();
+        currentEpisodes = data.episodes;
+
+        // If current episode doesn't exist in new season, reset to 1
+        if (!data.episodes.find(ep => ep.episode_number == videoData.e)) {
+            videoData.e = 1;
+        }
+
+        const eSelect = document.getElementById('e-select');
+        const drawerEpList = document.getElementById('drawer-ep-list');
+
+        eSelect.innerHTML = '';
+        drawerEpList.innerHTML = '';
+
+        data.episodes.forEach(ep => {
+            const opt = document.createElement('option');
+            opt.value = ep.episode_number;
+            opt.textContent = `E${ep.episode_number}: ${ep.name}`;
+            if (ep.episode_number == videoData.e) opt.selected = true;
+            eSelect.appendChild(opt);
+
+            const card = document.createElement('div');
+            card.className = `ep-card ${ep.episode_number == videoData.e ? 'active' : ''}`;
+            const thumbUrl = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '';
+            card.innerHTML = `
+                <div class="ep-thumb" style="background-image: url('${thumbUrl}')"></div>
+                <div class="ep-meta">
+                    <div class="ep-title">E${ep.episode_number}: ${ep.name}</div>
+                    <div class="ep-desc">${ep.overview || 'No description available.'}</div>
+                </div>
+            `;
+            card.onclick = () => {
+                videoData.e = ep.episode_number;
+                updateSelection();
+                toggleEpisodesDrawer();
+            };
+            drawerEpList.appendChild(card);
+        });
+
+        updateSelection();
+    } catch (e) { console.error(e); }
+}
+
+// FIX: When season changes from drawer, reset episode cleanly
+function syncSeason(val) {
+    document.getElementById('s-select').value = val;
+    videoData.e = 1;
+    fetchEpisodes();
+}
+
             const s = document.getElementById('s-select').value;
             videoData.s = s;
             try {
