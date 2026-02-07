@@ -92,7 +92,7 @@
         
         .header-logo { 
             width: auto; 
-            height: 40px; /* Specific height for the logo */
+            height: 32px; /* Specific height for the logo */
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
@@ -312,7 +312,7 @@
             }
             
             .header-logo {
-                height: 30px; /* Smaller logo on mobile */
+                height: 24px; /* Smaller logo on mobile */
             }
 
             #show-banner {
@@ -471,25 +471,25 @@
         }
 
         .season-selector-group {
-            width: 100%;
-            max-width: 300px; 
-            margin-bottom: 2rem;
+            width: auto;
+            margin-bottom: 1.25rem;
         }
 
         #season-dropdown {
-            background-color: var(--card-bg-color); 
-            border: 1px solid var(--border-color);
+            background: transparent;
+            border: 0;
             color: var(--text-color);
-            font-weight: 600;
-            font-size: 1.1rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.5rem;
-            appearance: menulist-button; 
-        }
-        #season-dropdown:focus {
+            font-weight: 700;
+            font-size: 1.15rem;
+            padding: 0;
+            border-radius: 0;
             box-shadow: none;
-            border-color: var(--primary-color);
+            width: auto;
+            max-width: 100%;
+            cursor: pointer;
+            appearance: menulist-button;
         }
+        #season-dropdown:focus { outline: none; box-shadow: none; }
         .list-group-item {
             background-color: transparent;
             color: var(--text-color);
@@ -595,7 +595,7 @@
 </div>
 <header class="app-header">
 <a href="/" id="logoLink">
-<img alt="Thirai Logo" class="header-logo" data-height="40" id="headerLogo" src="/static/thiraiblack.png"/>
+<img alt="Thirai Logo" class="header-logo" data-height="32" id="headerLogo" src="/static/thiraiblack.png"/>
 </a>
 </header>
 <main>
@@ -628,10 +628,9 @@
 </div>
 
 <div class="container" id="seasons-container">
-<h2 class="mb-3">Episodes</h2>
 <div class="season-selector-group">
 <select aria-label="Season selection" class="form-select" id="season-dropdown">
-<option selected="">Season 1</option>
+<option value="" selected disabled>Seasons</option>
 </select>
 </div>
 <div class="accordion" id="seasons-accordion">
@@ -867,13 +866,20 @@
                 renderMobileDetails(show);
 
                 // --- Step 3: Populate Season Dropdown (Unchanged) ---
-                seasonDropdown.innerHTML = allSeasons.map(season => `
-                    <option value="${season.season_number}">
-                        ${season.name} (${season.episode_count} Episodes)
-                    </option>
-                `).join('');
                 
-                // --- Step 4/5: Load and Display Episodes ---
+// Season dropdown: simple list (no episode counts)
+seasonDropdown.innerHTML = `
+    <option value="" selected disabled>Seasons</option>
+    ${allSeasons.map(season => `
+        <option value="${season.season_number}">
+            ${season.name}
+        </option>
+    `).join('')}
+`;
+// Keep the placeholder selected so tapping shows the full list, but load S1 episodes by default.
+seasonDropdown.value = "";
+
+// --- Step 4/5: Load and Display Episodes ---
                 if (allSeasons.length > 0) {
                     const firstSeasonNumber = allSeasons[0].season_number;
                     // NEW: Render the action button immediately after determining the first season number
@@ -887,10 +893,10 @@
                 
                 seasonDropdown.addEventListener('change', (e) => {
                     const selectedSeasonNumber = e.target.value;
+                    if (!selectedSeasonNumber) return;
                     loadSeasonEpisodes(showId, selectedSeasonNumber);
                 });
-
-            } catch (error) {
+} catch (error) {
                 console.error('Error loading show details:', error);
                 mainContainer.innerHTML = `
                     <div class="container text-center my-5">
