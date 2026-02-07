@@ -21,6 +21,7 @@
             --muted-text: #a0a0a0;
             --accent-color: #e50914;
             --card-bg: #141414;
+            --border-color: #333;
         }
 
         body {
@@ -87,6 +88,7 @@
             font-weight: 700; font-size: 0.95rem; transition: 0.2s; 
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             text-decoration: none;
+            cursor: pointer;
         }
         .btn-play:hover { background: #dcdcdc; transform: scale(1.03); color: #000; }
         
@@ -99,91 +101,93 @@
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
 
-        .btn-lang-circle {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: rgba(109, 109, 110, 0.4);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-            display: none; /* Hidden by default */
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            text-decoration: none;
-            transition: 0.2s;
-            font-size: 1.2rem;
-        }
-        .btn-lang-circle:hover { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
-
         /* --- INFO SECTIONS --- */
         .info-container { padding: 1rem 0; }
-        
-        .meta-group { 
-            display: flex; gap: 18px; align-items: center; 
-            margin-bottom: 1rem; color: var(--muted-text); font-size: 0.95rem;
-        }
+        .meta-group { display: flex; gap: 18px; align-items: center; margin-bottom: 1rem; color: var(--muted-text); font-size: 0.95rem; }
         .rating-box { background: #46d369; color: #000; padding: 1px 6px; border-radius: 4px; font-weight: 800; }
-
-        .movie-description { 
-            font-size: 1.05rem; line-height: 1.5; color: #d2d2d2; 
-            max-width: 800px; margin-bottom: 2rem; 
-        }
+        .movie-description { font-size: 1.05rem; line-height: 1.5; color: #d2d2d2; max-width: 800px; margin-bottom: 2rem; }
 
         /* --- HORIZONTAL SCROLLERS --- */
         .section-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 1rem; display: block; }
-        .h-scroll-wrapper {
-            display: flex;
-            overflow-x: auto;
-            gap: 15px;
-            padding-bottom: 10px;
-        }
+        .h-scroll-wrapper { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; }
         .h-scroll-wrapper::-webkit-scrollbar { height: 4px; }
         .h-scroll-wrapper::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-        /* Cast Items */
         .cast-item { min-width: 130px; flex-shrink: 0; }
         .cast-img { width: 130px; height: 180px; object-fit: cover; border-radius: 8px; background: #222; }
         .cast-name { font-size: 0.85rem; font-weight: 700; color: #fff; margin-top: 8px; line-height: 1.2; }
+        .cast-char { font-size: 0.75rem; color: #777; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height: 2.2em; }
         
-        /* Truncate character description to keep spacing even */
-        .cast-char { 
-            font-size: 0.75rem; color: #777; margin-top: 2px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-height: 2.2em; /* Ensures boxes stay aligned */
-        }
-
-        /* Movie Recommendation Items */
         .rec-item { min-width: 140px; flex-shrink: 0; cursor: pointer; transition: 0.2s; }
         .rec-item:hover { transform: scale(1.05); }
         .rec-img { width: 140px; height: 210px; object-fit: cover; border-radius: 8px; background: #222; }
         .rec-title { font-size: 0.85rem; font-weight: 600; color: #fff; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* --- DETAILS GRID --- */
         .details-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 20px;
-            background: #111;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 2rem;
-            border: 1px solid #1a1a1a;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px;
+            background: #111; padding: 20px; border-radius: 12px; margin-top: 2rem; border: 1px solid #1a1a1a;
         }
         .detail-item label { display: block; color: #555; font-size: 0.65rem; text-transform: uppercase; font-weight: 800; margin-bottom: 2px; }
         .detail-item p { font-size: 0.9rem; margin: 0; color: #eee; }
 
-        /* --- OVERLAY --- */
+        /* --- SERVER SELECTION OVERLAY (Synced with Show.html) --- */
         #server-overlay {
-            position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.9);
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; transition: opacity 0.3s ease;
         }
-        .server-card { background: #161616; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid #333; }
-        .server-link { background: #222; color: #fff; padding: 14px; margin: 8px 0; border-radius: 10px; display: flex; justify-content: space-between; text-decoration: none; border: 1px solid #333; }
+
+        #server-overlay.active { display: flex; opacity: 1; }
+
+        .server-modal {
+            position: relative; background: #161616; border: 1px solid #333; border-radius: 24px;
+            width: 100%; max-width: 500px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transform: translateY(20px); transition: transform 0.3s ease;
+        }
+
+        #server-overlay.active .server-modal { transform: translateY(0); }
+
+        .server-header { text-align: center; margin-bottom: 25px; }
+        .server-grid-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* Exclusive Thirai Server Row Styling */
+        .thirai-server-row {
+            grid-column: 1 / -1; /* Spans full width of the grid */
+            margin-bottom: 8px;
+        }
+
+        .server-option {
+            position: relative; background: #222; border: 1px solid #333; border-radius: 12px;
+            padding: 15px; color: #fff; text-align: center; cursor: pointer; transition: 0.2s;
+            text-decoration: none; display: flex; flex-direction: column; align-items: center;
+            gap: 5px; font-size: 0.9rem; font-weight: 500; overflow: hidden;
+        }
+
+        .server-option:hover { background: #2a2a2a; border-color: #0d6efd; transform: scale(1.02); }
+
+        .server-option.recommended { border-color: rgba(255, 140, 0, 0.3); }
+        .server-option.recommended i { color: #ff8c00; }
+
+        .server-option.thirai-exclusive {
+            border-color: #46d369;
+            background: rgba(70, 211, 105, 0.1);
+            flex-direction: column;
+            padding: 20px;
+        }
+        .server-option.thirai-exclusive img { height: 22px; width: auto; }
+        .server-option.thirai-exclusive .server-status-tag { color: #46d369; opacity: 1; }
+
+        .server-status-tag {
+            position: absolute; top: 5px; right: 8px; font-size: 0.65rem;
+            font-weight: 700; text-transform: uppercase; opacity: 0.6; letter-spacing: 0.5px;
+        }
+
+        .server-close-x {
+            position: absolute; top: 14px; right: 14px; width: 40px; height: 40px;
+            border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: #fff;
+            display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .server-close-x:hover { background: #2a2a2a; border-color: #0d6efd; }
 
         #loadingScreen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
 
@@ -191,12 +195,13 @@
             #movie-banner { height: 50vh; }
             .banner-content { text-align: center; }
             #movie-logo-img { margin: 0 auto 1rem; max-width: 240px; }
-            .action-btns { justify-content: center; padding: 0 15px; }
+            .action-btns { justify-content: center; padding: 0 15px; flex-wrap: wrap; }
             .btn-play { width: 100%; }
             .btn-trailer { width: 100%; }
             .meta-group { justify-content: center; }
             .movie-description { text-align: center; font-size: 0.95rem; }
-            .details-grid { grid-template-columns: 1fr 1fr; }
+            .server-grid-mini { grid-template-columns: 1fr; }
+            .thirai-server-row { grid-column: auto; }
         }
     </style>
 </head>
@@ -222,9 +227,8 @@
             </div>
 
             <div class="action-btns">
-                <button class="btn-play" onclick="openServers()"><i class="bi bi-play-fill"></i> Play Now</button>
+                <button class="btn-play" onclick="openServerOverlay()"><i class="bi bi-play-fill"></i> Play Now</button>
                 <a id="btn-trailer" target="_blank" class="btn-trailer" style="display: none;"><i class="bi bi-collection-play"></i> Trailer</a>
-                <a id="btn-lang" class="btn-lang-circle"><i class="bi bi-globe"></i></a>
             </div>
         </div>
     </div>
@@ -248,63 +252,65 @@
     </div>
 </main>
 
-<div id="server-overlay" onclick="closeServers()">
-    <div class="server-card" onclick="event.stopPropagation()">
-        <h5 class="text-center mb-4">Select Source</h5>
-        <div id="server-options"></div>
-        <button class="btn btn-link text-muted w-100 mt-2 text-decoration-none" onclick="closeServers()">Close</button>
+<div id="server-overlay">
+    <div class="server-modal" id="server-modal">
+        <button class="server-close-x" type="button" aria-label="Close" onclick="closeServerOverlay()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="server-header">
+            <h4 class="mb-1">Select Server</h4>
+            <p class="text-muted small" id="target-movie-label">Movie</p>
+        </div>
+        <div class="server-grid-mini" id="server-options-list">
+            </div>
     </div>
 </div>
 
 <script>
     const KEY = '926e94b0f70b5bed8417b679652366ab';
     const ID = window.location.search.substring(1);
+    let movieData = null;
+
+    const SERVERS = [
+        { name: "VidKing", slug: "vidking", icon: "bi-shield-fill", recommended: true, status: " " },
+        { name: "Rakan", slug: "rakan", icon: "bi-lightning-charge-fill", recommended: true, status: " " },
+        { name: "Bard", slug: "bard", icon: "bi-play-circle", status: "Ads" },
+        { name: "Ekko", slug: "ekko", icon: "bi-play-circle", status: "Ads" },
+        { name: "Naafiri", slug: "naafiri", icon: "bi-play-circle", status: "Ads" },
+        { name: "Xayah", slug: "xayah", icon: "bi-play-circle", status: "Ads" },
+        { name: "Ryze", slug: "ryze", icon: "bi-play-circle", status: "Ads" }
+    ];
 
     async function loadMovie() {
         if (!ID) return;
         try {
             const r = await fetch(`https://api.themoviedb.org/3/movie/${ID}?api_key=${KEY}&append_to_response=credits,images,videos,recommendations`);
-            const movie = await r.json();
+            movieData = await r.json();
 
-            // Background
-            document.getElementById('movie-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`;
+            document.title = `${movieData.title} - Thirai`;
+            document.getElementById('movie-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movieData.backdrop_path})`;
             
-            // Logo Logic
-            const logo = movie.images.logos.find(l => l.iso_639_1 === 'en' || !l.iso_639_1);
+            const logo = movieData.images.logos.find(l => l.iso_639_1 === 'en' || !l.iso_639_1);
             if (logo) {
                 document.getElementById('branding-zone').innerHTML = `<img src="https://image.tmdb.org/t/p/w500${logo.file_path}" id="movie-logo-img">`;
             } else {
-                document.getElementById('fallback-title').innerText = movie.title;
+                document.getElementById('fallback-title').innerText = movieData.title;
             }
 
-            // Meta Info
-            document.getElementById('m-rating').innerText = movie.vote_average.toFixed(1);
-            document.getElementById('m-year').innerText = movie.release_date.split('-')[0];
-            document.getElementById('m-runtime').innerText = `${movie.runtime}m`;
-            document.getElementById('m-genres').innerText = movie.genres.slice(0, 3).map(g => g.name).join(', ');
-            document.getElementById('m-overview').innerText = movie.overview;
+            document.getElementById('m-rating').innerText = movieData.vote_average.toFixed(1);
+            document.getElementById('m-year').innerText = movieData.release_date.split('-')[0];
+            document.getElementById('m-runtime').innerText = `${movieData.runtime}m`;
+            document.getElementById('m-genres').innerText = movieData.genres.slice(0, 3).map(g => g.name).join(', ');
+            document.getElementById('m-overview').innerText = movieData.overview;
 
-            // Trailer
-            const trailer = movie.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            const trailer = movieData.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             if (trailer) {
                 const b = document.getElementById('btn-trailer');
                 b.href = `https://www.youtube.com/watch?v=${trailer.key}`;
                 b.style.display = 'inline-flex';
             }
 
-            // Language Circle Button Logic
-            const targetLangs = ['ta', 'hi', 'ml', 'kn', 'te', 'bn', 'pa'];
-            const langMap = { 'ta':'tamil', 'hi':'hindi', 'ml':'malayalam', 'kn':'kannada', 'te':'telugu', 'bn':'bengali', 'pa':'punjabi' };
-            
-            if (targetLangs.includes(movie.original_language)) {
-                const lb = document.getElementById('btn-lang');
-                const langWord = langMap[movie.original_language];
-                lb.href = `https://thirai.me/language?lang=${langWord}&q=${encodeURIComponent(movie.title)}`;
-                lb.style.display = 'flex';
-            }
-
-            // Cast: Only show if they have a profile photo
-            document.getElementById('m-cast').innerHTML = movie.credits.cast
+            document.getElementById('m-cast').innerHTML = movieData.credits.cast
                 .filter(c => c.profile_path)
                 .slice(0, 15)
                 .map(c => `
@@ -317,29 +323,18 @@
                     </div>
                 `).join('');
 
-            // Recommendations
-            document.getElementById('m-rec').innerHTML = movie.recommendations.results.slice(0, 10).map(m => `
+            document.getElementById('m-rec').innerHTML = movieData.recommendations.results.slice(0, 10).map(m => `
                 <div class="rec-item" onclick="window.location.href='?${m.id}'">
                     <img src="https://image.tmdb.org/t/p/w185${m.poster_path}" class="rec-img">
                     <div class="rec-title">${m.title}</div>
                 </div>
             `).join('');
 
-            // Details Grid
-            document.getElementById('d-status').innerText = movie.status;
-            document.getElementById('d-otitle').innerText = movie.original_title;
-            document.getElementById('d-lang').innerText = movie.original_language.toUpperCase();
-            document.getElementById('d-budget').innerText = movie.budget ? `$${(movie.budget / 1000000).toFixed(1)}M` : 'N/A';
-            document.getElementById('d-revenue').innerText = movie.revenue ? `$${(movie.revenue / 1000000).toFixed(1)}M` : 'N/A';
-
-            // Server Selection
-            const srvs = [{n:'VidKing',s:'vidking'}, {n:'Rakan',s:'rakan'}, {n:'Ekko',s:'ekko'}];
-            document.getElementById('server-options').innerHTML = srvs.map(s => `
-                <a href="https://thirai.me/player.html?server=${s.s}&movie=${ID}" class="server-link">
-                    <span>${s.n}</span>
-                    <i class="bi bi-chevron-right opacity-50"></i>
-                </a>
-            `).join('');
+            document.getElementById('d-status').innerText = movieData.status;
+            document.getElementById('d-otitle').innerText = movieData.original_title;
+            document.getElementById('d-lang').innerText = movieData.original_language.toUpperCase();
+            document.getElementById('d-budget').innerText = movieData.budget ? `$${(movieData.budget / 1000000).toFixed(1)}M` : 'N/A';
+            document.getElementById('d-revenue').innerText = movieData.revenue ? `$${(movieData.revenue / 1000000).toFixed(1)}M` : 'N/A';
 
             document.getElementById('movie-page').style.display = 'block';
             document.getElementById('loadingScreen').style.display = 'none';
@@ -347,8 +342,64 @@
         } catch (e) { console.error(e); }
     }
 
-    function openServers() { document.getElementById('server-overlay').style.display = 'flex'; }
-    function closeServers() { document.getElementById('server-overlay').style.display = 'none'; }
+    function openServerOverlay() {
+        const overlay = document.getElementById('server-overlay');
+        const list = document.getElementById('server-options-list');
+        const label = document.getElementById('target-movie-label');
+        
+        label.innerText = movieData.title;
+        list.innerHTML = "";
+        
+        // Regional Language Detection for Exclusive Server
+        const targetLangs = ['ta', 'hi', 'ml', 'kn', 'te', 'bn', 'pa'];
+        const langMap = { 'ta':'tamil', 'hi':'hindi', 'ml':'malayalam', 'kn':'kannada', 'te':'telugu', 'bn':'bengali', 'pa':'punjabi' };
+
+        if (targetLangs.includes(movieData.original_language)) {
+            const langWord = langMap[movieData.original_language];
+            const thiraiContainer = document.createElement('div');
+            thiraiContainer.className = 'thirai-server-row';
+            
+            thiraiContainer.innerHTML = `
+                <div class="server-option thirai-exclusive">
+                    <span class="server-status-tag">SECURE</span>
+                    <img src="/static/thiraiwhite.png" alt="Thirai Logo">
+                </div>
+            `;
+            
+            thiraiContainer.onclick = () => {
+                window.location.href = `https://thirai.me/language?lang=${langWord}&q=${encodeURIComponent(movieData.title)}`;
+            };
+            list.appendChild(thiraiContainer);
+        }
+
+        SERVERS.forEach(server => {
+            const btn = document.createElement('div');
+            btn.className = `server-option ${server.recommended ? 'recommended' : ''}`;
+            btn.innerHTML = `
+                <span class="server-status-tag">${server.status}</span>
+                <i class="bi ${server.icon}"></i>
+                <span>${server.name}</span>
+            `;
+            btn.onclick = () => {
+                window.location.href = `https://thirai.me/player.html?server=${encodeURIComponent(server.slug)}&movie=${ID}`;
+            };
+            list.appendChild(btn);
+        });
+
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeServerOverlay() {
+        const overlay = document.getElementById('server-overlay');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Dismiss on backdrop click
+    document.getElementById('server-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeServerOverlay();
+    });
 
     loadMovie();
 </script>
