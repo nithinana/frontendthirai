@@ -203,6 +203,72 @@
             .server-grid-mini { grid-template-columns: 1fr; }
             .thirai-server-row { grid-column: auto; }
         }
+    
+        /* --- MOBILE OVERCROWDING FIXES --- */
+        @media (max-width: 768px) {
+            /* Keep header from colliding with banner content */
+            .app-header {
+                position: fixed;
+                padding: 0.75rem 1rem;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.15) 70%, transparent 100%);
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+            }
+            .header-logo { height: 22px; }
+
+            /* Give the banner a bit more breathing room on small screens */
+            #movie-banner { height: 60vh; }
+
+            /* Prevent meta + buttons from overlapping/feeling cramped */
+            .banner-content { padding-bottom: 1.25rem; }
+            .meta-group {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                padding: 0 10px;
+                margin-bottom: 0.75rem;
+            }
+            #movie-logo-img {
+                max-width: min(240px, 78vw);
+                max-height: 110px;
+                margin-bottom: 0.75rem;
+            }
+            #fallback-title { padding: 0 12px; }
+
+            /* Server modal: make long lists scroll inside the modal (no overlap) */
+            .server-modal {
+                max-height: calc(100vh - 40px);
+                overflow: hidden; /* keep header/close button visible while list scrolls */
+                padding: 22px;
+                border-radius: 18px;
+            }
+            #server-options-list {
+                max-height: calc(100vh - 260px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-right: 6px;
+            }
+            #server-options-list::-webkit-scrollbar { width: 4px; }
+            #server-options-list::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+            /* Compact server buttons slightly on mobile */
+            .server-option { padding: 12px; border-radius: 12px; }
+            .server-option.thirai-exclusive { padding: 16px; }
+        }
+
+        /* Tighter phones: use 2 columns so the server list isn't insanely tall */
+        @media (max-width: 480px) {
+            .server-grid-mini { grid-template-columns: 1fr 1fr; }
+            .thirai-server-row { grid-column: 1 / -1; }
+            .server-option { font-size: 0.85rem; }
+        }
+
+        /* iOS safe-area support */
+        @supports (padding: max(0px)) {
+            .app-header { padding-top: max(0.75rem, env(safe-area-inset-top)); }
+            #server-overlay { padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)) 20px; }
+        }
+
     </style>
 </head>
 <body>
