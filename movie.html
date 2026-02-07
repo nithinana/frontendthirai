@@ -43,7 +43,7 @@
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
         }
-        .header-logo { height: 28px; }
+        .header-logo { height: 24px; }
 
         /* --- BANNER --- */
         #movie-banner {
@@ -153,6 +153,13 @@
         .server-header { text-align: center; margin-bottom: 25px; }
         .server-grid-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+        @media (max-width: 480px) {
+            .server-modal { padding: 18px; border-radius: 18px; max-height: 85vh; overflow-y: auto; }
+            .server-grid-mini { grid-template-columns: 1fr; gap: 10px; }
+            .server-option { padding: 14px; }
+            .server-option i { font-size: 1.1rem; }
+        }
+
         /* Exclusive Thirai Server Row Styling */
         .thirai-server-row {
             grid-column: 1 / -1; /* Spans full width of the grid */
@@ -233,15 +240,7 @@
         <div class="container banner-content">
             <div id="branding-zone"></div>
             <h1 id="fallback-title" class="fw-bold"></h1>
-            
-            <div class="meta-group">
-                <span><span class="rating-box" id="m-rating"></span></span>
-                <span id="m-year"></span>
-                <span id="m-runtime"></span>
-                <span id="m-genres"></span>
-            </div>
-
-            <div class="action-btns">
+<div class="action-btns">
                 <button class="btn-play" onclick="openServerOverlay()"><i class="bi bi-play-fill"></i> Play Now</button>
                 <a id="btn-trailer" target="_blank" class="btn-trailer" style="display: none;"><i class="bi bi-collection-play"></i> Trailer</a>
             </div>
@@ -261,7 +260,11 @@
             <div class="detail-item"><label>Status</label><p id="d-status">-</p></div>
             <div class="detail-item"><label>Original Title</label><p id="d-otitle">-</p></div>
             <div class="detail-item"><label>Language</label><p id="d-lang">-</p></div>
-            <div class="detail-item"><label>Budget</label><p id="d-budget">-</p></div>
+                        <div class="detail-item"><label>Rating</label><p><span class="rating-box" id="m-rating"></span></p></div>
+            <div class="detail-item"><label>Year</label><p id="m-year">-</p></div>
+            <div class="detail-item"><label>Runtime</label><p id="m-runtime">-</p></div>
+            <div class="detail-item"><label>Genres</label><p id="m-genres">-</p></div>
+<div class="detail-item"><label>Budget</label><p id="d-budget">-</p></div>
             <div class="detail-item"><label>Revenue</label><p id="d-revenue">-</p></div>
         </div>
     </div>
