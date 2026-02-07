@@ -81,28 +81,37 @@ if (!currentSeason && seasons && seasons.length) {
         }
 
         /* --- Header and Navigation (Modified - Centered Fade) --- */
-        .app-header {
-            position: absolute; /* Changed from fixed to absolute to overlay banner */
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            z-index: 1030;
-            padding: 1.5rem 1rem;
-            /* Black Fade Gradient */
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-            border-bottom: none; 
-            box-shadow: none;
-            display: flex;
-            justify-content: center; /* Center the logo */
-            align-items: center;
-        }
-        
-        .header-logo { 
-            width: auto; 
-            height: 40px; /* Specific height for the logo */
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
+/* --- Header and Navigation (Centered & Smaller) --- */
+.app-header {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    z-index: 1030;
+    /* Reduced padding to 1rem for a slimmer, more balanced look */
+    padding: 1rem; 
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+    border-bottom: none; 
+    box-shadow: none;
+    display: flex;
+    justify-content: center; /* Keeps the logo perfectly centered */
+    align-items: center;
+}
 
+.header-logo { 
+    width: auto; 
+    /* Reduced from 40px to 28px for a cleaner aesthetic */
+    height: 28px; 
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    transition: height 0.3s ease;
+}
+
+/* Ensure it stays appropriately sized on mobile */
+@media (max-width: 767.98px) {
+    .header-logo {
+        height: 24px; 
+    }
+}
         /* Removed .nav-link, .settings-btn, etc. as they are no longer used in header */
         
         /* --- MODAL STYLES (Unchanged) --- */
@@ -722,17 +731,18 @@ if (!currentSeason && seasons && seasons.length) {
             overlayLogo.src = darkLogo;
         }
 
-        function forceDarkMode() {
-            // 1. Force dark mode class
-            body.classList.add('dark-mode');
-            // 2. Update logos/favicon to their dark mode versions
-            updateThemeAssets();
-            // 3. Ensure the logo height is applied
-            const logoHeight = headerLogo.getAttribute('data-height');
-            if (logoHeight) {
-                headerLogo.style.height = `${logoHeight}px`;
-            }
-        }
+function forceDarkMode() {
+    // 1. Force dark mode class
+    body.classList.add('dark-mode');
+    
+    // 2. Update logos/favicon to their dark mode versions
+    updateThemeAssets();
+    
+    // 3. Updated height logic
+    // We remove the manual style assignment to let the CSS handle the 28px height,
+    // or manually set the new desired height here.
+    headerLogo.style.height = '28px'; 
+}
         
         // This DOMContentLoaded block is now much simpler
         document.addEventListener('DOMContentLoaded', function() {
