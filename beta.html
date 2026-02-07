@@ -1163,7 +1163,7 @@
                         if (mediaType === 'tv') {
                             detailsUrl = `/show.html?${item.id}`; 
                         } else {
-                            detailsUrl = `/player.html?${item.id}`;
+                            detailsUrl = `/player.html?movie=${item.id}`;
                         }
 
                         return `
@@ -1330,7 +1330,7 @@
                 const posterPath = item.poster_path ? `${TMDB_IMG_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
                 
                 // Use the correct detail page based on media type
-                const detailsUrl = type === 'tv' ? `/show.html?${item.id}` : `/player.html?${item.id}`;
+                const detailsUrl = type === 'tv' ? `/show.html?${item.id}` : `/player.html?movie=${item.id}`;
 
                 return `
                     <div class="col">
@@ -1410,7 +1410,7 @@
                     const backdropUrl = `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}`;
                     
                     // Determine the correct detail URL based on the media type
-                    const playerUrl = type === 'tv' ? `/show.html?${item.id}` : `/player.html?${item.id}`;
+                    const playerUrl = type === 'tv' ? `/show.html?${item.id}` : `/player.html?movie=${item.id}`;
 
                     // Add indicator
                     indicatorsHtml += `
