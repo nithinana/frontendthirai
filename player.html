@@ -60,7 +60,7 @@
             gap: 10px;
         }
 
-        .back-btn, .episodes-toggle-btn {
+        .back-btn, .episodes-toggle-btn, .servers-toggle-btn {
             color: white;
             text-decoration: none;
             display: flex;
@@ -76,10 +76,10 @@
             transition: 0.3s;
         }
 
-        .back-btn:hover, .episodes-toggle-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+        .back-btn:hover, .episodes-toggle-btn:hover, .servers-toggle-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
 
-        /* --- EPISODE DRAWER --- */
-        #episode-drawer {
+        /* --- DRAWERS (Shared Styles) --- */
+        .drawer {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -98,7 +98,7 @@
             box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
 
-        #episode-drawer.open { transform: translateY(0); }
+        .drawer.open { transform: translateY(0); }
 
         .drawer-header {
             display: flex;
@@ -121,14 +121,8 @@
             transition: 0.2s;
         }
         
-        .drawer-season-select:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .drawer-season-select option {
-            background: #222;
-            color: white;
-        }
+        .drawer-season-select:hover { background: rgba(255,255,255,0.1); }
+        .drawer-season-select option { background: #222; color: white; }
 
         .close-drawer {
             background: rgba(255,255,255,0.05);
@@ -147,6 +141,7 @@
         
         .close-drawer:hover { background: rgba(255,255,255,0.15); color: white; }
 
+        /* --- EPISODE DRAWER SPECIFICS --- */
         .episodes-wrapper {
             position: relative;
             flex-grow: 1;
@@ -183,25 +178,9 @@
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
-        .scroll-left {
-            left: 0;
-            background: linear-gradient(to right, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%);
-            justify-content: flex-start;
-            padding-left: 15px;
-        }
-        
-        .scroll-right {
-            right: 0;
-            background: linear-gradient(to left, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%);
-            justify-content: flex-end;
-            padding-right: 15px;
-        }
-        
-        .scroll-btn.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
+        .scroll-left { left: 0; background: linear-gradient(to right, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%); justify-content: flex-start; padding-left: 15px; }
+        .scroll-right { right: 0; background: linear-gradient(to left, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%); justify-content: flex-end; padding-right: 15px; }
+        .scroll-btn.hidden { opacity: 0; pointer-events: none; }
         .scroll-btn:hover { color: var(--primary); }
 
         .ep-card {
@@ -216,41 +195,41 @@
             flex-shrink: 0;
         }
 
-        .ep-card.active {
-            border-color: var(--primary);
-            background: rgba(13,110,253,0.15);
-        }
-
-        .ep-thumb {
-            width: 100%;
-            height: 125px;
-            background-size: cover;
-            background-position: center;
-            background-color: #222;
-        }
-
+        .ep-card.active { border-color: var(--primary); background: rgba(13,110,253,0.15); }
+        .ep-thumb { width: 100%; height: 125px; background-size: cover; background-position: center; background-color: #222; }
         .ep-meta { padding: 10px; }
+        .ep-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ep-desc { font-size: 0.7rem; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        .ep-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* --- SERVER DRAWER SPECIFICS --- */
+        .drawer-server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            overflow-y: auto;
+            padding-bottom: 20px;
         }
 
-        .ep-desc {
-            font-size: 0.7rem;
-            color: #888;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .drawer-server-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .drawer-server-card.active {
+            border-color: var(--primary);
+            background: rgba(13,110,253,0.1);
+            color: var(--primary);
         }
 
         @media (max-width: 768px) {
-            #episode-drawer {
+            .drawer {
                 height: 100%;
                 max-height: 100vh;
                 border-radius: 0;
@@ -265,32 +244,12 @@
                 border-bottom: 1px solid #222;
                 background: #0a0a0a;
                 margin-bottom: 0;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
             }
 
-            .drawer-season-select {
-                padding: 6px 10px;
-                font-size: 1rem;
-                background: #222;
-            }
-
-            .close-drawer {
-                position: static;
-                width: 36px;
-                height: 36px;
-                background: #222;
-                border: 1px solid #333;
-            }
-            
+            .drawer-server-grid { padding: 20px; }
             .scroll-btn { display: none !important; }
 
-            .episodes-wrapper {
-                flex-direction: column;
-                height: 100%;
-            }
-
+            .episodes-wrapper { flex-direction: column; height: 100%; }
             .episodes-scroll-container {
                 flex-direction: column;
                 overflow-y: auto;
@@ -300,41 +259,11 @@
                 padding-bottom: 100px; 
             }
 
-            .ep-card {
-                min-width: 100%;
-                max-width: 100%;
-                display: flex;
-                flex-direction: row;
-                height: 90px;
-                border-radius: 12px;
-                background: #141414;
-            }
-
-            .ep-thumb {
-                width: 140px;
-                height: 100%;
-                border-radius: 0;
-                flex-shrink: 0;
-            }
-
-            .ep-meta {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                flex-grow: 1;
-                width: 0;
-                padding-right: 10px;
-            }
-
-            .ep-title {
-                font-size: 0.95rem;
-                white-space: nowrap;
-            }
-            
-            .ep-desc {
-                font-size: 0.8rem;
-                -webkit-line-clamp: 2;
-            }
+            .ep-card { min-width: 100%; max-width: 100%; display: flex; flex-direction: row; height: 90px; border-radius: 12px; background: #141414; }
+            .ep-thumb { width: 140px; height: 100%; border-radius: 0; flex-shrink: 0; }
+            .ep-meta { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; width: 0; padding-right: 10px; }
+            .ep-title { font-size: 0.95rem; white-space: nowrap; }
+            .ep-desc { font-size: 0.8rem; -webkit-line-clamp: 2; }
         }
 
         #selection-screen {
@@ -347,25 +276,13 @@
         }
 
         @media (max-width: 768px) {
-            #selection-screen {
-                padding: 40px 25px 40px;
-            }
-            .logo-large {
-                max-width: 130px;
-                margin-bottom: 20px;
-            }
-            .server-grid {
-                grid-template-columns: 1fr;
-            }
-            .tv-controls {
-                padding: 15px;
-            }
+            #selection-screen { padding: 40px 25px 40px; }
+            .logo-large { max-width: 130px; margin-bottom: 20px; }
+            .server-grid { grid-template-columns: 1fr; }
+            .tv-controls { padding: 15px; }
         }
 
-        .logo-large {
-            max-width: 160px;
-            margin-bottom: 30px;
-        }
+        .logo-large { max-width: 160px; margin-bottom: 30px; }
 
         .tv-controls {
             display: none;
@@ -380,12 +297,7 @@
             gap: 15px;
         }
 
-        .control-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
+        .control-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 
         .nav-btn {
             background: #222;
@@ -457,21 +369,8 @@
         .card-vidking { border-color: rgba(0, 255, 136, 0.1); }
         .card-vidking:hover { border-color: var(--accent); }
 
-        .reliable-note {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--rakan-orange);
-            font-weight: 600;
-        }
-
-        .badge {
-            font-size: 0.6rem;
-            background: #333;
-            color: #888;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-weight: 800;
-        }
+        .reliable-note { display: block; font-size: 0.7rem; color: var(--rakan-orange); font-weight: 600; }
+        .badge { font-size: 0.6rem; background: #333; color: #888; padding: 2px 10px; border-radius: 20px; font-weight: 800; }
 
         #unlock-screen {
             display: none;
@@ -494,12 +393,7 @@
             border: 1px solid #333;
         }
 
-        .code-input-container {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin: 25px 0;
-        }
+        .code-input-container { display: flex; justify-content: center; gap: 12px; margin: 25px 0; }
 
         .code-input {
             width: 50px;
@@ -557,6 +451,9 @@
             <span id="episode-info"></span>
         </div>
         <div class="nav-right">
+            <button id="servers-btn" class="servers-toggle-btn" onclick="toggleServersDrawer()" style="padding:8px 10px">
+                <i class="bi bi-hdd-network"></i>
+            </button>
             <button id="episodes-btn" class="episodes-toggle-btn" onclick="toggleEpisodesDrawer()" style="display: none; padding:8px 10px">
                 <i class="bi bi-collection-play-fill"></i>
             </button>
@@ -612,26 +509,32 @@
         </div>
     </div>
 
-    <div id="episode-drawer">
+    <div id="episode-drawer" class="drawer">
         <div class="drawer-header">
             <select id="drawer-s-select" class="drawer-season-select" onchange="syncSeason(this.value)"></select>
             <button class="close-drawer" onclick="toggleEpisodesDrawer()">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        
         <div class="episodes-wrapper">
             <button class="scroll-btn scroll-left hidden" onclick="scrollEpisodes(-300)">
                 <i class="bi bi-chevron-left"></i>
             </button>
-            
-            <div id="drawer-ep-list" class="episodes-scroll-container">
-                </div>
-            
+            <div id="drawer-ep-list" class="episodes-scroll-container"></div>
             <button class="scroll-btn scroll-right" onclick="scrollEpisodes(300)">
                 <i class="bi bi-chevron-right"></i>
             </button>
         </div>
+    </div>
+
+    <div id="server-drawer" class="drawer">
+        <div class="drawer-header">
+            <span style="font-weight: 600; font-size: 1.1rem;">Switch Server</span>
+            <button class="close-drawer" onclick="toggleServersDrawer()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div id="drawer-server-list" class="drawer-server-grid"></div>
     </div>
 
     <div id="unlock-screen">
@@ -704,7 +607,6 @@
         function handleBack() {
             if (isAutoLaunched) {
                 window.close();
-                // Fallback if window.close fails (browsers often block scripts closing tabs)
                 if (!window.closed) history.back();
             } else {
                 location.reload();
@@ -796,11 +698,37 @@
         }
 
         function toggleEpisodesDrawer() {
+            document.getElementById('server-drawer').classList.remove('open');
             const drawer = document.getElementById('episode-drawer');
             drawer.classList.toggle('open');
             if (drawer.classList.contains('open')) {
                 setTimeout(updateScrollButtons, 300);
             }
+        }
+
+        function toggleServersDrawer() {
+            document.getElementById('episode-drawer').classList.remove('open');
+            const drawer = document.getElementById('server-drawer');
+            drawer.classList.toggle('open');
+            if (drawer.classList.contains('open')) {
+                renderServerDrawer();
+            }
+        }
+
+        function renderServerDrawer() {
+            const list = document.getElementById('drawer-server-list');
+            list.innerHTML = '';
+            Object.keys(SERVERS).forEach(id => {
+                const s = SERVERS[id];
+                const card = document.createElement('div');
+                card.className = `drawer-server-card ${selectedServerId == id ? 'active' : ''}`;
+                card.innerText = s.name;
+                card.onclick = () => {
+                    selectServer(parseInt(id));
+                    toggleServersDrawer();
+                };
+                list.appendChild(card);
+            });
         }
 
         function syncSeason(val) {
@@ -847,20 +775,16 @@
         }
 
         function scrollEpisodes(amount) {
-            document.getElementById('drawer-ep-list').scrollBy({
-                left: amount,
-                behavior: 'smooth'
-            });
+            document.getElementById('drawer-ep-list').scrollBy({ left: amount, behavior: 'smooth' });
         }
 
         function updateScrollButtons() {
             const container = document.getElementById('drawer-ep-list');
             const leftBtn = document.querySelector('.scroll-left');
             const rightBtn = document.querySelector('.scroll-right');
-
+            if (!container || !leftBtn || !rightBtn) return;
             if (container.scrollLeft <= 10) leftBtn.classList.add('hidden');
             else leftBtn.classList.remove('hidden');
-
             if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) rightBtn.classList.add('hidden');
             else rightBtn.classList.remove('hidden');
         }
@@ -901,6 +825,11 @@
             const playerDiv = document.getElementById('player-screen');
             playerDiv.style.display = 'block';
             playerDiv.innerHTML = `<iframe id="movie-iframe" src="${url}" allowfullscreen="true" allow="autoplay; encrypted-media" ${server.secure ? 'sandbox="allow-scripts allow-same-origin allow-forms"' : ''}></iframe>`;
+            
+            // Update URL to reflect selected server
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('server', server.name);
+            window.history.replaceState({}, '', currentUrl.toString());
         }
 
         document.querySelectorAll('.code-input').forEach((el, i, arr) => {
@@ -909,9 +838,7 @@
         });
 
         const epListContainer = document.getElementById('drawer-ep-list');
-        epListContainer.addEventListener('scroll', () => {
-            requestAnimationFrame(updateScrollButtons);
-        });
+        epListContainer.addEventListener('scroll', () => { requestAnimationFrame(updateScrollButtons); });
         window.addEventListener('resize', updateScrollButtons);
 
         window.onload = () => { parseUrl(); };
