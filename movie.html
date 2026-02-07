@@ -1,444 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-HKV7GQ766F');
-</script>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Thirai - Movie Details</title>
-<link href="/manifest.json" rel="manifest"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
-<meta content="Thirai" name="apple-mobile-web-app-title"/>
-<link href="/static/ios/icon-192x192.png" rel="apple-touch-icon"/>
-<link href="/static/favicon.png" id="faviconLink" rel="icon" type="image/png">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
-<style>
-        /* CSS Variables for a Themed, Modern UI */
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-HKV7GQ766F');
+    </script>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Thirai - Movie Details</title>
+    <link href="/static/favicon.png" rel="icon" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <style>
         :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --muted-text-color: #6c757d;
-            --card-bg-color: #ffffff;
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            --border-color: #dee2e6;
-            --input-bg-color: #ffffff;
-            --input-border-color: #ced4da;
-            --primary-color: #e50914; 
-            --primary-hover-color: #b2070f;
-            --scrollbar-thumb-color: #ccc;
-            --show-banner-bg: #000; 
-        }
-
-        body.dark-mode {
-            --bg-color: #0c0c0c; 
-            --text-color: #e0e0e0;
-            --muted-text-color: #888;
-            --card-bg-color: #1a1a1a; 
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-            --border-color: #333;
-            --input-bg-color: #282828;
-            --input-border-color: #444;
-            --scrollbar-thumb-color: #555;
-            --show-banner-bg: #000;
+            --bg-color: #080808;
+            --text-color: #ffffff;
+            --muted-text: #a0a0a0;
+            --accent-color: #e50914;
+            --card-bg: #141414;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            padding-top: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
+            overflow-x: hidden;
         }
 
-        body.no-scroll {
-            overflow: hidden;
-        }
-        
-        .text-muted {
-            color: var(--muted-text-color) !important;
-        }
-
+        /* --- HEADER --- */
         .app-header {
             position: absolute;
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            z-index: 1030;
-            padding: 1rem; 
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-            border-bottom: none; 
-            box-shadow: none;
-            display: flex;
-            justify-content: center; 
-            align-items: center;
+            top: 0; left: 0; right: 0; z-index: 1030;
+            padding: 1.25rem;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex; justify-content: center;
         }
+        .header-logo { height: 28px; }
 
-        .header-logo { 
-            width: auto; 
-            height: 28px; 
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-            transition: height 0.3s ease;
-        }
-
-        @media (max-width: 767.98px) {
-            .header-logo {
-                height: 24px; 
-            }
-        }
-        
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--bg-color);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-        #loadingOverlay img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-            animation: pulse-logo 1.5s infinite ease-in-out;
-        }
-        @keyframes pulse-logo {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-        
-        #show-banner {
-            background-color: var(--show-banner-bg);
+        /* --- BANNER --- */
+        #movie-banner {
+            height: 65vh;
             background-size: cover;
-            background-position: center top; 
-            padding: 0;
+            background-position: center 20%;
             position: relative;
-            color: #fff;
-            min-height: 85vh; 
             display: flex;
-            align-items: flex-end; 
-            overflow: hidden;
+            align-items: flex-end;
         }
-
-        #show-banner::after {
+        #movie-banner::after {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.15) 70%, transparent 86%),
-                        linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.65) 22%, rgba(0,0,0,0.25) 55%, transparent 78%);
-            z-index: 1;
-            opacity: 0.95; 
+            inset: 0;
+            background: linear-gradient(to top, var(--bg-color) 2%, transparent 60%),
+                        linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 60%);
         }
-        
-        #show-content-wrapper {
+
+        .banner-content {
             position: relative;
             z-index: 2;
-            padding-top: 120px; 
-            padding-bottom: 4rem; 
+            padding-bottom: 1rem;
             width: 100%;
-            background: transparent; 
         }
 
-        #show-title, #show-logo {
-            font-weight: 900;
-            font-size: 3.5rem; 
-            line-height: 1.1;
-            text-shadow: 2px 2px 8px rgba(0,0,0,1);
+        #movie-logo-img {
+            max-width: 380px;
+            max-height: 150px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
             margin-bottom: 1rem;
-            display: block; 
-        }
-        
-        #show-logo img {
-            max-width: 350px; 
-            height: auto;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,1)); 
-        }
-        
-        #show-meta {
-            font-size: 1.1rem;
-            font-weight: 500;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem 1.5rem;
-            margin-top: 0.5rem;
-            color: #ccc; 
-        }
-        
-        #show-meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); 
         }
 
-        #show-genres {
+        /* --- BUTTONS --- */
+        .action-btns {
+            display: flex;
+            gap: 12px;
             margin-top: 1rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        #show-genres .badge {
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            color: #fff;
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 0.5em 1em;
-            border-radius: 0.25rem;
-            border: none;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); 
-        }
-        
-        .action-button {
-            background-color: rgba(255, 255, 255, 0.2); 
-            backdrop-filter: blur(5px);
-            color: #fff; 
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 1.1rem;
-            padding: 0.75rem 2rem;
-            border-radius: 50px; 
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); 
-            margin-top: 2rem; 
         }
 
-        .action-button:hover {
-            background-color: rgba(255, 255, 255, 0.35);
+        .btn-play { 
+            background: #fff; color: #000; border: none; 
+            padding: 10px 28px; border-radius: 6px; 
+            font-weight: 700; font-size: 0.95rem; transition: 0.2s; 
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            text-decoration: none;
+        }
+        .btn-play:hover { background: #dcdcdc; transform: scale(1.03); color: #000; }
+        
+        .btn-trailer { 
+            background: rgba(109, 109, 110, 0.4); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 24px; border-radius: 6px; 
+            font-weight: 600; font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        .btn-lang-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(109, 109, 110, 0.4);
             color: #fff;
-            transform: translateY(-1px);
-        }
-
-        .desktop-details-panel {
-            margin-top: 1.25rem;
-            max-width: 780px;
-        }
-        .desktop-details-panel .desktop-overview {
-            margin: 0 0 0.75rem;
-            font-size: 1.05rem;
-            line-height: 1.55;
-            color: #e6e6e6;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.75);
-        }
-        .desktop-details-panel .desktop-cast {
-            margin: 0;
-            font-size: 0.95rem;
-            color: rgba(255,255,255,0.75) !important;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.75);
-        }
-
-        @media (max-width: 767.98px) {
-            #show-banner { min-height: 60vh; }
-            #show-title, #show-logo { font-size: 2.2rem; text-align: center; }
-            #show-logo img { max-width: 200px; }
-            .action-button { width: 100%; justify-content: center; }
-            .desktop-details-panel { display: none; }
-        }
-
-        /* --- SERVER SELECTION OVERLAY --- */
-        #server-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            display: none; 
+            border: 1px solid rgba(255,255,255,0.2);
+            display: none; /* Hidden by default */
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        #server-overlay.active { display: flex; opacity: 1; }
-
-        .server-modal {
-            position: relative;
-            background: #161616;
-            border: 1px solid #333;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        .server-grid-mini {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .server-option {
-            position: relative;
-            background: #222;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 15px;
-            color: #fff;
-            text-align: center;
-            cursor: pointer;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
             transition: 0.2s;
+            font-size: 1.2rem;
+        }
+        .btn-lang-circle:hover { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+
+        /* --- INFO SECTIONS --- */
+        .info-container { padding: 1rem 0; }
+        
+        .meta-group { 
+            display: flex; gap: 18px; align-items: center; 
+            margin-bottom: 1rem; color: var(--muted-text); font-size: 0.95rem;
+        }
+        .rating-box { background: #46d369; color: #000; padding: 1px 6px; border-radius: 4px; font-weight: 800; }
+
+        .movie-description { 
+            font-size: 1.05rem; line-height: 1.5; color: #d2d2d2; 
+            max-width: 800px; margin-bottom: 2rem; 
+        }
+
+        /* --- HORIZONTAL SCROLLERS --- */
+        .section-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 1rem; display: block; }
+        .h-scroll-wrapper {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 10px;
+        }
+        .h-scroll-wrapper::-webkit-scrollbar { height: 4px; }
+        .h-scroll-wrapper::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        /* Cast Items */
+        .cast-item { min-width: 130px; flex-shrink: 0; }
+        .cast-img { width: 130px; height: 180px; object-fit: cover; border-radius: 8px; background: #222; }
+        .cast-name { font-size: 0.85rem; font-weight: 700; color: #fff; margin-top: 8px; line-height: 1.2; }
+        
+        /* Truncate character description to keep spacing even */
+        .cast-char { 
+            font-size: 0.75rem; color: #777; margin-top: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.2em; /* Ensures boxes stay aligned */
         }
 
-        .server-option:hover { background: #2a2a2a; border-color: #0d6efd; transform: scale(1.02); }
+        /* Movie Recommendation Items */
+        .rec-item { min-width: 140px; flex-shrink: 0; cursor: pointer; transition: 0.2s; }
+        .rec-item:hover { transform: scale(1.05); }
+        .rec-img { width: 140px; height: 210px; object-fit: cover; border-radius: 8px; background: #222; }
+        .rec-title { font-size: 0.85rem; font-weight: 600; color: #fff; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .server-status-tag { position: absolute; top: 5px; right: 8px; font-size: 0.65rem; opacity: 0.6; }
-
-        .server-close-x {
-            position: absolute; top: 14px; right: 14px; width: 40px; height: 40px;
-            border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: #fff;
-            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+        /* --- DETAILS GRID --- */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            background: #111;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border: 1px solid #1a1a1a;
         }
-</style>
+        .detail-item label { display: block; color: #555; font-size: 0.65rem; text-transform: uppercase; font-weight: 800; margin-bottom: 2px; }
+        .detail-item p { font-size: 0.9rem; margin: 0; color: #eee; }
+
+        /* --- OVERLAY --- */
+        #server-overlay {
+            position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.9);
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+        }
+        .server-card { background: #161616; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid #333; }
+        .server-link { background: #222; color: #fff; padding: 14px; margin: 8px 0; border-radius: 10px; display: flex; justify-content: space-between; text-decoration: none; border: 1px solid #333; }
+
+        #loadingScreen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+
+        @media (max-width: 768px) {
+            #movie-banner { height: 50vh; }
+            .banner-content { text-align: center; }
+            #movie-logo-img { margin: 0 auto 1rem; max-width: 240px; }
+            .action-btns { justify-content: center; padding: 0 15px; }
+            .btn-play { width: 100%; }
+            .btn-trailer { width: 100%; }
+            .meta-group { justify-content: center; }
+            .movie-description { text-align: center; font-size: 0.95rem; }
+            .details-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
 </head>
-<body class="dark-mode">
-<div id="loadingOverlay">
-    <img alt="Thirai Logo" id="overlayLogo" src="/static/thiraiblack.png"/>
-</div>
+<body>
+
+<div id="loadingScreen"><img src="/static/thiraiwhite.png" height="30" alt="Loading"></div>
 
 <header class="app-header">
-    <a href="/" id="logoLink">
-        <img alt="Thirai Logo" class="header-logo" id="headerLogo" src="/static/thiraiblack.png"/>
-    </a>
+    <a href="/"><img src="/static/thiraiwhite.png" class="header-logo" alt="Thirai"></a>
 </header>
 
-<main>
-    <div id="show-banner">
-        <div id="show-content-wrapper">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12 col-lg-8">
-                        <div id="show-logo" style="display: none;"></div>
-                        <h1 id="show-title">Loading...</h1>
-                        <div class="desktop-details-panel">
-                            <p class="desktop-overview" id="desktop-overview"></p>
-                            <p class="desktop-cast text-muted" id="desktop-cast"></p>
-                        </div>
-                        <div class="text-muted" id="show-meta">
-                            <span id="show-rating"><i class="bi bi-star-fill text-warning"></i> ...</span>
-                            <span id="show-year"><i class="bi bi-calendar"></i> ...</span>
-                            <span id="show-runtime"><i class="bi bi-clock"></i> ... min</span>
-                        </div>
-                        <div class="mt-3" id="show-genres"></div>
-                        <div id="action-button-container">
-                            <button class="btn btn-lg action-button" disabled="">Loading...</button>
-                        </div>
-                    </div>
-                </div>
+<main id="movie-page" style="display: none;">
+    <div id="movie-banner">
+        <div class="container banner-content">
+            <div id="branding-zone"></div>
+            <h1 id="fallback-title" class="fw-bold"></h1>
+            
+            <div class="meta-group">
+                <span><span class="rating-box" id="m-rating"></span></span>
+                <span id="m-year"></span>
+                <span id="m-runtime"></span>
+                <span id="m-genres"></span>
             </div>
+
+            <div class="action-btns">
+                <button class="btn-play" onclick="openServers()"><i class="bi bi-play-fill"></i> Play Now</button>
+                <a id="btn-trailer" target="_blank" class="btn-trailer" style="display: none;"><i class="bi bi-collection-play"></i> Trailer</a>
+                <a id="btn-lang" class="btn-lang-circle"><i class="bi bi-globe"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container info-container">
+        <p class="movie-description" id="m-overview"></p>
+
+        <span class="section-header">Cast</span>
+        <div class="h-scroll-wrapper" id="m-cast"></div>
+
+        <span class="section-header mt-4">More like this</span>
+        <div class="h-scroll-wrapper" id="m-rec"></div>
+
+        <div class="details-grid">
+            <div class="detail-item"><label>Status</label><p id="d-status">-</p></div>
+            <div class="detail-item"><label>Original Title</label><p id="d-otitle">-</p></div>
+            <div class="detail-item"><label>Language</label><p id="d-lang">-</p></div>
+            <div class="detail-item"><label>Budget</label><p id="d-budget">-</p></div>
+            <div class="detail-item"><label>Revenue</label><p id="d-revenue">-</p></div>
         </div>
     </div>
 </main>
 
-<div id="server-overlay">
-    <div class="server-modal" id="server-modal">
-        <button class="server-close-x" onclick="closeServerOverlay()"><i class="bi bi-x-lg"></i></button>
-        <div class="server-header text-center mb-4">
-            <h4 class="mb-1">Select Server</h4>
-            <p class="text-muted small" id="target-movie-label">Movie Title</p>
-        </div>
-        <div class="server-grid-mini" id="server-options-list"></div>
+<div id="server-overlay" onclick="closeServers()">
+    <div class="server-card" onclick="event.stopPropagation()">
+        <h5 class="text-center mb-4">Select Source</h5>
+        <div id="server-options"></div>
+        <button class="btn btn-link text-muted w-100 mt-2 text-decoration-none" onclick="closeServers()">Close</button>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-        const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
-        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-        const TMDB_IMG_BASE_URL = 'https://image.tmdb.org/t/p/w500';
-        const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/original'; 
+    const KEY = '926e94b0f70b5bed8417b679652366ab';
+    const ID = window.location.search.substring(1);
 
-        const SERVERS = [
-            { name: "VidKing", slug: "vidking", icon: "bi-shield-fill", recommended: true, status: " " },
-            { name: "Rakan", slug: "rakan", icon: "bi-lightning-charge-fill", recommended: true, status: " " },
-            { name: "Bard", slug: "bard", icon: "bi-play-circle", status: "Ads" },
-            { name: "Ekko", slug: "ekko", icon: "bi-play-circle", status: "Ads" },
-            { name: "Naafiri", slug: "naafiri", icon: "bi-play-circle", status: "Ads" }
-        ];
+    async function loadMovie() {
+        if (!ID) return;
+        try {
+            const r = await fetch(`https://api.themoviedb.org/3/movie/${ID}?api_key=${KEY}&append_to_response=credits,images,videos,recommendations`);
+            const movie = await r.json();
 
-        async function loadMovieDetails(movieId) {
-            try {
-                const res = await fetch(`${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits,images`);
-                const movie = await res.json();
-
-                document.title = `${movie.title} - Thirai`;
-                document.getElementById('show-banner').style.backgroundImage = `url('${TMDB_BACKDROP_BASE_URL}${movie.backdrop_path || movie.poster_path}')`;
-
-                const logo = movie.images.logos.find(l => l.iso_639_1 === 'en' || l.iso_639_1 === null);
-                if (logo) {
-                    document.getElementById('show-logo').innerHTML = `<img src="${TMDB_IMG_BASE_URL}${logo.file_path}" alt="${movie.title}">`;
-                    document.getElementById('show-logo').style.display = 'block';
-                    document.getElementById('show-title').style.display = 'none';
-                } else {
-                    document.getElementById('show-title').innerText = movie.title;
-                }
-
-                document.getElementById('show-rating').innerHTML = `<i class="bi bi-star-fill text-warning"></i> ${movie.vote_average.toFixed(1)}/10`;
-                document.getElementById('show-year').innerHTML = `<i class="bi bi-calendar"></i> ${new Date(movie.release_date).getFullYear()}`;
-                document.getElementById('show-runtime').innerHTML = `<i class="bi bi-clock"></i> ${movie.runtime} min`;
-                document.getElementById('desktop-overview').innerText = movie.overview;
-                document.getElementById('show-genres').innerHTML = movie.genres.map(g => `<span class="badge">${g.name}</span>`).join('');
-                
-                const cast = movie.credits.cast.slice(0, 6).map(c => c.name).join(', ');
-                document.getElementById('desktop-cast').innerHTML = `<strong>Starring:</strong> ${cast}`;
-
-                document.getElementById('action-button-container').innerHTML = `
-                    <button onclick="openServerOverlay('${movieId}', '${movie.title.replace(/'/g, "\\'")}')" class="btn action-button">
-                        <i class="bi bi-play-circle-fill me-2"></i> Watch Now
-                    </button>
-                `;
-            } catch (e) { console.error(e); }
-            finally {
-                document.getElementById('loadingOverlay').style.opacity = '0';
-                setTimeout(() => { document.getElementById('loadingOverlay').style.display = 'none'; }, 500);
+            // Background
+            document.getElementById('movie-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`;
+            
+            // Logo Logic
+            const logo = movie.images.logos.find(l => l.iso_639_1 === 'en' || !l.iso_639_1);
+            if (logo) {
+                document.getElementById('branding-zone').innerHTML = `<img src="https://image.tmdb.org/t/p/w500${logo.file_path}" id="movie-logo-img">`;
+            } else {
+                document.getElementById('fallback-title').innerText = movie.title;
             }
-        }
 
-        function openServerOverlay(id, title) {
-            const overlay = document.getElementById('server-overlay');
-            const list = document.getElementById('server-options-list');
-            document.getElementById('target-movie-label').innerText = title;
-            list.innerHTML = "";
-            SERVERS.forEach(server => {
-                const btn = document.createElement('div');
-                btn.className = `server-option ${server.recommended ? 'recommended' : ''}`;
-                btn.innerHTML = `<span class="server-status-tag">${server.status}</span><i class="bi ${server.icon}"></i><span>${server.name}</span>`;
-                btn.onclick = () => window.location.href = `https://thirai.me/player.html?server=${server.slug}&movie=${id}`;
-                list.appendChild(btn);
-            });
-            overlay.classList.add('active');
-        }
+            // Meta Info
+            document.getElementById('m-rating').innerText = movie.vote_average.toFixed(1);
+            document.getElementById('m-year').innerText = movie.release_date.split('-')[0];
+            document.getElementById('m-runtime').innerText = `${movie.runtime}m`;
+            document.getElementById('m-genres').innerText = movie.genres.slice(0, 3).map(g => g.name).join(', ');
+            document.getElementById('m-overview').innerText = movie.overview;
 
-        function closeServerOverlay() { document.getElementById('server-overlay').classList.remove('active'); }
+            // Trailer
+            const trailer = movie.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            if (trailer) {
+                const b = document.getElementById('btn-trailer');
+                b.href = `https://www.youtube.com/watch?v=${trailer.key}`;
+                b.style.display = 'inline-flex';
+            }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const id = window.location.search.substring(1);
-            if (id) loadMovieDetails(id);
-        });
+            // Language Circle Button Logic
+            const targetLangs = ['ta', 'hi', 'ml', 'kn', 'te', 'bn', 'pa'];
+            const langMap = { 'ta':'tamil', 'hi':'hindi', 'ml':'malayalam', 'kn':'kannada', 'te':'telugu', 'bn':'bengali', 'pa':'punjabi' };
+            
+            if (targetLangs.includes(movie.original_language)) {
+                const lb = document.getElementById('btn-lang');
+                const langWord = langMap[movie.original_language];
+                lb.href = `https://thirai.me/language?lang=${langWord}&q=${encodeURIComponent(movie.title)}`;
+                lb.style.display = 'flex';
+            }
+
+            // Cast: Only show if they have a profile photo
+            document.getElementById('m-cast').innerHTML = movie.credits.cast
+                .filter(c => c.profile_path)
+                .slice(0, 15)
+                .map(c => `
+                    <div class="cast-item">
+                        <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="cast-img">
+                        <div class="cast-info">
+                            <div class="cast-name">${c.name}</div>
+                            <div class="cast-char">${c.character}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+            // Recommendations
+            document.getElementById('m-rec').innerHTML = movie.recommendations.results.slice(0, 10).map(m => `
+                <div class="rec-item" onclick="window.location.href='?${m.id}'">
+                    <img src="https://image.tmdb.org/t/p/w185${m.poster_path}" class="rec-img">
+                    <div class="rec-title">${m.title}</div>
+                </div>
+            `).join('');
+
+            // Details Grid
+            document.getElementById('d-status').innerText = movie.status;
+            document.getElementById('d-otitle').innerText = movie.original_title;
+            document.getElementById('d-lang').innerText = movie.original_language.toUpperCase();
+            document.getElementById('d-budget').innerText = movie.budget ? `$${(movie.budget / 1000000).toFixed(1)}M` : 'N/A';
+            document.getElementById('d-revenue').innerText = movie.revenue ? `$${(movie.revenue / 1000000).toFixed(1)}M` : 'N/A';
+
+            // Server Selection
+            const srvs = [{n:'VidKing',s:'vidking'}, {n:'Rakan',s:'rakan'}, {n:'Ekko',s:'ekko'}];
+            document.getElementById('server-options').innerHTML = srvs.map(s => `
+                <a href="https://thirai.me/player.html?server=${s.s}&movie=${ID}" class="server-link">
+                    <span>${s.n}</span>
+                    <i class="bi bi-chevron-right opacity-50"></i>
+                </a>
+            `).join('');
+
+            document.getElementById('movie-page').style.display = 'block';
+            document.getElementById('loadingScreen').style.display = 'none';
+
+        } catch (e) { console.error(e); }
+    }
+
+    function openServers() { document.getElementById('server-overlay').style.display = 'flex'; }
+    function closeServers() { document.getElementById('server-overlay').style.display = 'none'; }
+
+    loadMovie();
 </script>
 </body>
 </html>
