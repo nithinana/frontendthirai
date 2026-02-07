@@ -3,6 +3,12 @@
 <html lang="en">
 <head>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F">
+// Ensure first available season is selected by default
+if (!currentSeason && seasons && seasons.length) {
+    currentSeason = seasons[0];
+    updateSeasonUI();
+}
+
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -586,52 +592,14 @@
         }
 
     
-
-.season-selector .arrow {
-    margin-left: 0 !important;
-}
-
-
-/* Header logo sizing + spacing */
-header.top-header {
-    padding: 0.35rem 1rem;
-}
-.header-logo {
-    height: 28px !important;
-}
-
-/* Season picker: no box, clean inline text + arrow */
-.season-selector-group {
-    display: flex;
-    justify-content: center;
-}
-.season-picker{
+/* Season selector arrow spacing fix */
+.season-selector {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 0;
-    background: transparent;
-    border: none;
 }
-#season-dropdown{
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: auto;
-    font-weight: 600;
-    font-size: 1.05rem;
-    color: inherit;
-    appearance: none;
-    -webkit-appearance: none;
-    outline: none;
-    box-shadow: none !important;
-}
-.season-arrow{
-    line-height: 1;
-    font-size: 1rem;
-    transform: translateY(1px);
-    pointer-events: none;
+.season-selector .arrow {
+    margin-left: 0 !important;
 }
 
 </style>
@@ -678,11 +646,11 @@ header.top-header {
 </div>
 
 <div class="container" id="seasons-container">
+<h2 class="mb-3">Episodes</h2>
 <div class="season-selector-group">
-  <div class="season-picker" role="group" aria-label="Season selection">
-    <select aria-label="Season selection" class="form-select" id="season-dropdown"></select>
-    <span class="season-arrow" aria-hidden="true">▾</span>
-  </div>
+<select aria-label="Season selection" class="form-select" id="season-dropdown">
+<option selected="">Season 1</option>
+</select>
 </div>
 <div class="accordion" id="seasons-accordion">
 <div class="text-center p-5">
@@ -807,12 +775,6 @@ header.top-header {
             const seasonsCount = show.number_of_seasons || '';
 
             const genresHtml = (show.genres || []).map(g => `<span class="badge">${g.name}</span>`).join('');
-
-                // Default to the first available season
-                if (allSeasons.length > 0) {
-                    seasonDropdown.value = String(allSeasons[0].season_number);
-                }
-
             const castHtml = (show.credits && show.credits.cast)
                 ? show.credits.cast.slice(0, 8).map(c => c.name).join(', ')
                 : '';
@@ -925,7 +887,7 @@ header.top-header {
                 // --- Step 3: Populate Season Dropdown (Unchanged) ---
                 seasonDropdown.innerHTML = allSeasons.map(season => `
                     <option value="${season.season_number}">
-                        ${season.name}
+                        ${season.name} (${season.episode_count} Episodes)
                     </option>
                 `).join('');
                 
