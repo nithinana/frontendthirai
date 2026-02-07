@@ -94,7 +94,7 @@
             max-height: 65vh;
             display: flex;
             flex-direction: column;
-            padding: 25px 30px; /* Increased padding for cleaner look */
+            padding: 25px 30px; 
             box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
 
@@ -106,7 +106,6 @@
             align-items: center;
             margin-bottom: 20px;
             position: relative;
-            /* No right padding needed here, flex handles it */
         }
 
         .drawer-season-select {
@@ -139,7 +138,7 @@
             cursor: pointer;
             width: 40px;
             height: 40px;
-            border-radius: 50%; /* Make it circular */
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -148,7 +147,6 @@
         
         .close-drawer:hover { background: rgba(255,255,255,0.15); color: white; }
 
-        /* Desktop Scroll Container & Controls */
         .episodes-wrapper {
             position: relative;
             flex-grow: 1;
@@ -164,16 +162,15 @@
             padding-bottom: 10px;
             scroll-behavior: smooth;
             width: 100%;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
         }
         
-        .episodes-scroll-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .episodes-scroll-container::-webkit-scrollbar { display: none; }
 
-        /* Scroll Buttons (Desktop) */
         .scroll-btn {
             position: absolute;
             top: 0;
-            bottom: 10px; /* match padding of container */
+            bottom: 10px;
             width: 60px;
             z-index: 10;
             border: none;
@@ -186,7 +183,6 @@
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
-        /* Cleaned up gradients and logic */
         .scroll-left {
             left: 0;
             background: linear-gradient(to right, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%);
@@ -201,10 +197,9 @@
             padding-right: 15px;
         }
         
-        /* Class to hide buttons via JS */
         .scroll-btn.hidden {
             opacity: 0;
-            pointer-events: none; /* Ensures clicks pass through to video/cards */
+            pointer-events: none;
         }
         
         .scroll-btn:hover { color: var(--primary); }
@@ -254,21 +249,19 @@
             overflow: hidden;
         }
 
-        /* --- MOBILE ADJUSTMENTS --- */
         @media (max-width: 768px) {
             #episode-drawer {
                 height: 100%;
-                max-height: 100vh; /* Full screen */
+                max-height: 100vh;
                 border-radius: 0;
                 padding: 0;
-                /* Safe area for notches */
                 padding-top: env(safe-area-inset-top);
                 padding-bottom: env(safe-area-inset-bottom);
                 background: #000;
             }
 
             .drawer-header {
-                padding: 20px 25px; /* Clean spacing */
+                padding: 20px 25px;
                 border-bottom: 1px solid #222;
                 background: #0a0a0a;
                 margin-bottom: 0;
@@ -283,16 +276,14 @@
                 background: #222;
             }
 
-            /* Mobile Close Button - integrated into header flex */
             .close-drawer {
-                position: static; /* Remove absolute positioning */
+                position: static;
                 width: 36px;
                 height: 36px;
                 background: #222;
                 border: 1px solid #333;
             }
             
-            /* Hide desktop scroll buttons */
             .scroll-btn { display: none !important; }
 
             .episodes-wrapper {
@@ -304,13 +295,11 @@
                 flex-direction: column;
                 overflow-y: auto;
                 overflow-x: hidden;
-                padding: 20px; /* Better side padding */
+                padding: 20px;
                 gap: 15px;
-                /* Ensure bottom content isn't cut off */
                 padding-bottom: 100px; 
             }
 
-            /* Mobile List Card Style */
             .ep-card {
                 min-width: 100%;
                 max-width: 100%;
@@ -333,7 +322,7 @@
                 flex-direction: column;
                 justify-content: center;
                 flex-grow: 1;
-                width: 0; /* Flex fix for truncation */
+                width: 0;
                 padding-right: 10px;
             }
 
@@ -348,7 +337,6 @@
             }
         }
 
-        /* --- SELECTION SCREEN --- */
         #selection-screen {
             display: flex;
             flex-direction: column;
@@ -358,21 +346,19 @@
             box-sizing: border-box;
         }
 
-        /* Optimized mobile padding */
         @media (max-width: 768px) {
             #selection-screen {
-                padding: 40px 25px 40px; /* Reduced top padding, added side padding */
+                padding: 40px 25px 40px;
             }
             .logo-large {
-                max-width: 130px; /* Smaller logo for mobile */
+                max-width: 130px;
                 margin-bottom: 20px;
             }
-            /* Ensure server grid items don't stretch weirdly */
             .server-grid {
-                grid-template-columns: 1fr; /* Single column on mobile */
+                grid-template-columns: 1fr;
             }
             .tv-controls {
-                padding: 15px; /* Tighter padding */
+                padding: 15px;
             }
         }
 
@@ -413,7 +399,7 @@
             align-items: center;
             justify-content: center;
             transition: 0.2s;
-            flex-shrink: 0; /* Prevent squishing */
+            flex-shrink: 0;
         }
 
         .nav-btn:hover { background: var(--primary); }
@@ -426,8 +412,8 @@
             padding: 10px;
             border-radius: 8px;
             outline: none;
-            width: 100%; /* Ensure it fills space */
-            min-width: 0; /* Flexbox fix for truncation */
+            width: 100%;
+            min-width: 0;
         }
 
         .section-label {
@@ -539,7 +525,6 @@
             margin-bottom: 15px;
         }
 
-        /* --- PLAYER SCREEN --- */
         #player-screen {
             display: none;
             position: fixed;
@@ -548,7 +533,7 @@
             width: 100%;
             height: 100%;
             background: #000;
-            z-index: 50; /* Below top-nav (100) but above everything else */
+            z-index: 50;
             overflow: hidden;
         }
 
@@ -564,7 +549,7 @@
 <body>
 
     <nav class="top-nav" id="ui-nav" style="display: none;">
-        <div class="back-btn" onclick="location.reload()">
+        <div class="back-btn" onclick="handleBack()">
             <i class="bi bi-arrow-left"></i> Back
         </div>
         <div class="title-display">
@@ -670,25 +655,28 @@
         const PIN = "1451";
         const TMDB_KEY = "926e94b0f70b5bed8417b679652366ab";
         const SERVERS = {
-            1: { name: "Rakan", movie: "https://vidsrc.cc/v2/embed/movie/", tv: "https://vidsrc.cc/v2/embed/tv/", secure: true },
-            2: { name: "Bard", movie: "https://moviesapi.club/movie/", tv: "https://moviesapi.club/tv/", secure: false },
-            3: { name: "Xayah", movie: "https://vidsrc.me/embed/movie?tmdb=", tv: "https://vidsrc.me/embed/tv?tmdb=", secure: false },
-            4: { name: "Ekko", movie: "https://player.videasy.net/movie/", tv: "https://player.videasy.net/tv/", secure: false },
-            5: { name: "Naafiri", movie: "https://vidfast.pro/movie/", tv: "https://vidfast.pro/tv/", secure: false },
-            6: { name: "Ryze", movie: "https://vidlink.pro/movie/", tv: "https://vidlink.pro/tv/", secure: false },
-            7: { name: "VidKing", movie: "https://www.vidking.net/embed/movie/", tv: "https://www.vidking.net/embed/tv/", secure: true }
+            1: { name: "rakan", movie: "https://vidsrc.cc/v2/embed/movie/", tv: "https://vidsrc.cc/v2/embed/tv/", secure: true },
+            2: { name: "bard", movie: "https://moviesapi.club/movie/", tv: "https://moviesapi.club/tv/", secure: false },
+            3: { name: "xayah", movie: "https://vidsrc.me/embed/movie?tmdb=", tv: "https://vidsrc.me/embed/tv?tmdb=", secure: false },
+            4: { name: "ekko", movie: "https://player.videasy.net/movie/", tv: "https://player.videasy.net/tv/", secure: false },
+            5: { name: "naafiri", movie: "https://vidfast.pro/movie/", tv: "https://vidfast.pro/tv/", secure: false },
+            6: { name: "ryze", movie: "https://vidlink.pro/movie/", tv: "https://vidlink.pro/tv/", secure: false },
+            7: { name: "vidking", movie: "https://www.vidking.net/embed/movie/", tv: "https://www.vidking.net/embed/tv/", secure: true }
         };
 
         let selectedServerId = null;
         let videoData = { type: null, id: null, s: 1, e: 1, title: "" };
         let currentEpisodes = [];
+        let isAutoLaunched = false;
 
         async function parseUrl() {
-            const query = window.location.search.substring(1);
-            if (!query) return false;
-            
-            if (query.startsWith('tv=')) {
-                const parts = query.substring(3).split('/');
+            const urlParams = new URLSearchParams(window.location.search);
+            const tvParam = urlParams.get('tv');
+            const movieParam = urlParams.get('movie');
+            const serverParam = urlParams.get('server');
+
+            if (tvParam) {
+                const parts = tvParam.split('/');
                 videoData.type = 'tv';
                 videoData.id = parts[0];
                 videoData.s = parts[1] || 1;
@@ -696,12 +684,31 @@
                 document.getElementById('tv-selector').style.display = 'flex';
                 document.getElementById('episodes-btn').style.display = 'flex';
                 await fetchShowDetails();
-            } else {
+            } else if (movieParam) {
                 videoData.type = 'movie';
-                videoData.id = query;
+                videoData.id = movieParam;
                 await fetchMovieDetails();
             }
+
+            if (serverParam && videoData.id) {
+                const sId = Object.keys(SERVERS).find(key => SERVERS[key].name.toLowerCase() === serverParam.toLowerCase());
+                if (sId) {
+                    isAutoLaunched = true;
+                    selectServer(parseInt(sId));
+                }
+            }
+            
             return !!videoData.id;
+        }
+
+        function handleBack() {
+            if (isAutoLaunched) {
+                window.close();
+                // Fallback if window.close fails (browsers often block scripts closing tabs)
+                if (!window.closed) history.back();
+            } else {
+                location.reload();
+            }
         }
 
         async function fetchShowDetails() {
@@ -745,14 +752,12 @@
                 drawerEpList.innerHTML = '';
 
                 data.episodes.forEach(ep => {
-                    // Standard Select
                     const opt = document.createElement('option');
                     opt.value = ep.episode_number;
                     opt.textContent = `E${ep.episode_number}: ${ep.name}`;
                     if (ep.episode_number == videoData.e) opt.selected = true;
                     eSelect.appendChild(opt);
 
-                    // Drawer Cards
                     const card = document.createElement('div'); 
                     card.className = `ep-card ${ep.episode_number == videoData.e ? 'active' : ''}`;
                     const thumbUrl = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '';
@@ -764,16 +769,11 @@
                         </div>
                     `;
                     
-                    // Fixed Click Logic
                     card.onclick = () => {
-                        // 1. Update Data
                         videoData.e = ep.episode_number;
-                        // 2. Sync UI
                         eSelect.value = ep.episode_number;
                         updateSelection();
-                        // 3. Close Drawer
                         toggleEpisodesDrawer();
-                        // 4. Force player refresh if active
                         if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
                             launchStream();
                         }
@@ -781,7 +781,6 @@
                     drawerEpList.appendChild(card);
                 });
                 updateSelection();
-                // Check scroll buttons after content load
                 setTimeout(updateScrollButtons, 100);
             } catch (e) { console.error(e); }
         }
@@ -799,13 +798,11 @@
         function toggleEpisodesDrawer() {
             const drawer = document.getElementById('episode-drawer');
             drawer.classList.toggle('open');
-            // If opening, check scroll buttons
             if (drawer.classList.contains('open')) {
-                setTimeout(updateScrollButtons, 300); // Wait for transition
+                setTimeout(updateScrollButtons, 300);
             }
         }
 
-        // Reset episode to 1 when changing seasons
         function syncSeason(val) {
             document.getElementById('s-select').value = val;
             document.getElementById('drawer-s-select').value = val;
@@ -821,12 +818,9 @@
             videoData.s = document.getElementById('s-select').value;
             document.getElementById('drawer-s-select').value = videoData.s;
             
-            // Highlight active card in drawer
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            // Find card by text content index (fallback approach) or rebuild cards
             const cards = document.querySelectorAll('.ep-card');
             if (cards.length > 0) {
-                 // Try to match index based on select index (usually matches)
                  if (cards[eSelect.selectedIndex]) cards[eSelect.selectedIndex].classList.add('active');
             }
 
@@ -834,8 +828,9 @@
             document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
             
             if (videoData.type === 'tv') {
-                const newUrl = `${window.location.pathname}?tv=${videoData.id}/${videoData.s}/${videoData.e}`;
-                window.history.replaceState({path: newUrl}, '', newUrl);
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('tv', `${videoData.id}/${videoData.s}/${videoData.e}`);
+                window.history.replaceState({}, '', currentUrl.toString());
             }
         }
 
@@ -858,26 +853,16 @@
             });
         }
 
-        // --- SCROLL BUTTON VISIBILITY LOGIC ---
         function updateScrollButtons() {
             const container = document.getElementById('drawer-ep-list');
             const leftBtn = document.querySelector('.scroll-left');
             const rightBtn = document.querySelector('.scroll-right');
 
-            // Hide/Show Left Button
-            if (container.scrollLeft <= 10) {
-                leftBtn.classList.add('hidden');
-            } else {
-                leftBtn.classList.remove('hidden');
-            }
+            if (container.scrollLeft <= 10) leftBtn.classList.add('hidden');
+            else leftBtn.classList.remove('hidden');
 
-            // Hide/Show Right Button
-            // tolerance of 10px
-            if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
-                rightBtn.classList.add('hidden');
-            } else {
-                rightBtn.classList.remove('hidden');
-            }
+            if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) rightBtn.classList.add('hidden');
+            else rightBtn.classList.remove('hidden');
         }
 
         function selectServer(id) {
@@ -923,10 +908,8 @@
             el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
 
-        // Add Scroll Listener
         const epListContainer = document.getElementById('drawer-ep-list');
         epListContainer.addEventListener('scroll', () => {
-            // Debounce slightly or just run
             requestAnimationFrame(updateScrollButtons);
         });
         window.addEventListener('resize', updateScrollButtons);
