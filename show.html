@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F">
@@ -8,13 +7,11 @@ if (!currentSeason && seasons && seasons.length) {
     currentSeason = seasons[0];
     updateSeasonUI();
 }
-
 </script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-HKV7GQ766F');
 </script>
 <meta charset="utf-8"/>
@@ -602,8 +599,8 @@ if (!currentSeason && seasons && seasons.length) {
         }
 
         .server-modal {
-                        position: relative;
-background: #161616;
+            position: relative;
+            background: #161616;
             border: 1px solid #333;
             border-radius: 24px;
             width: 100%;
@@ -630,6 +627,7 @@ background: #161616;
         }
 
         .server-option {
+            position: relative;
             background: #222;
             border: 1px solid #333;
             border-radius: 12px;
@@ -645,6 +643,7 @@ background: #161616;
             gap: 5px;
             font-size: 0.9rem;
             font-weight: 500;
+            overflow: hidden;
         }
 
         .server-option:hover {
@@ -665,6 +664,17 @@ background: #161616;
             color: #ff8c00;
         }
 
+        .server-status-tag {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+        }
+
         .close-overlay {
             margin-top: 20px;
             background: none;
@@ -675,30 +685,28 @@ background: #161616;
             cursor: pointer;
         }
 
-
-.server-close-x {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    border: 1px solid #333;
-    background: #1e1e1e;
-    color: #fff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.server-close-x:hover {
-    background: #2a2a2a;
-    border-color: #0d6efd;
-    transform: scale(1.02);
-}
-.server-close-x i { font-size: 1rem; }
-
+        .server-close-x {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            background: #1e1e1e;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .server-close-x:hover {
+            background: #2a2a2a;
+            border-color: #0d6efd;
+            transform: scale(1.02);
+        }
+        .server-close-x i { font-size: 1rem; }
 </style>
 </link></head>
 <body>
@@ -813,16 +821,16 @@ background: #161616;
         const actionButtonContainer = document.getElementById('action-button-container');
         const mobileDetailsPanel = document.getElementById('mobile-details');
 
-        // --- Server Configuration (Matching player.html) ---
-const SERVERS = [
-    { name: "VidKing", slug: "vidking", icon: "bi-lightning-charge-fill", recommended: true },
-    { name: "Rakan", slug: "rakan", icon: "bi-shield-fill", recommended: true },
-    { name: "Bard", slug: "bard", icon: "bi-play-circle" },
-    { name: "Ekko", slug: "ekko", icon: "bi-play-circle" },
-    { name: "Naafiri", slug: "naafiri", icon: "bi-play-circle" },
-    { name: "Xayah", slug: "xayah", icon: "bi-play-circle" },
-    { name: "Ryze", slug: "ryze", icon: "bi-play-circle" }
-];
+        // --- Server Configuration (Updated with requested changes) ---
+        const SERVERS = [
+            { name: "VidKing", slug: "vidking", icon: "bi-shield-fill", recommended: true, status: "Secure" },
+            { name: "Rakan", slug: "rakan", icon: "bi-lightning-charge-fill", recommended: true, status: "Reliable" },
+            { name: "Bard", slug: "bard", icon: "bi-play-circle", status: "Ads" },
+            { name: "Ekko", slug: "ekko", icon: "bi-play-circle", status: "Ads" },
+            { name: "Naafiri", slug: "naafiri", icon: "bi-play-circle", status: "Ads" },
+            { name: "Xayah", slug: "xayah", icon: "bi-play-circle", status: "Ads" },
+            { name: "Ryze", slug: "ryze", icon: "bi-play-circle", status: "Ads" }
+        ];
 
         const loadingTimer = setTimeout(() => {
             if (!initialLoadComplete) {
@@ -906,6 +914,7 @@ const SERVERS = [
                 const btn = document.createElement('div');
                 btn.className = `server-option ${server.recommended ? 'recommended' : ''}`;
                 btn.innerHTML = `
+                    <span class="server-status-tag">${server.status}</span>
                     <i class="bi ${server.icon}"></i>
                     <span>${server.name}</span>
                 `;
