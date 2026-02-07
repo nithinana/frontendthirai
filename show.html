@@ -31,7 +31,6 @@ if (!currentSeason && seasons && seasons.length) {
 <style>
         /* CSS Variables for a Themed, Modern UI */
         :root {
-            /* LIGHT MODE - Unchanged for fallback */
             --bg-color: #f8f9fa;
             --text-color: #212529;
             --muted-text-color: #6c757d;
@@ -41,18 +40,17 @@ if (!currentSeason && seasons && seasons.length) {
             --border-color: #dee2e6;
             --input-bg-color: #ffffff;
             --input-border-color: #ced4da;
-            --primary-color: #e50914; /* Netflix Red-like for a pop of color */
+            --primary-color: #e50914; 
             --primary-hover-color: #b2070f;
             --scrollbar-thumb-color: #ccc;
-            --show-banner-bg: #000; /* New variable for the dark banner base */
+            --show-banner-bg: #000; 
         }
 
         body.dark-mode {
-            /* DARK MODE - The primary style we're targeting */
-            --bg-color: #0c0c0c; /* Very dark background */
+            --bg-color: #0c0c0c; 
             --text-color: #e0e0e0;
             --muted-text-color: #888;
-            --card-bg-color: #1a1a1a; /* Darker cards/sections */
+            --card-bg-color: #1a1a1a; 
             --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             --card-hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
             --border-color: #333;
@@ -62,12 +60,10 @@ if (!currentSeason && seasons && seasons.length) {
             --show-banner-bg: #000;
         }
 
-        /* Base Body Styles */
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            /* REMOVED: padding-top: 80px; - No longer needed with overlay header */
             padding-top: 0;
             margin: 0;
         }
@@ -80,41 +76,34 @@ if (!currentSeason && seasons && seasons.length) {
             color: var(--muted-text-color) !important;
         }
 
-        /* --- Header and Navigation (Modified - Centered Fade) --- */
-/* --- Header and Navigation (Centered & Smaller) --- */
-.app-header {
-    position: absolute;
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    z-index: 1030;
-    /* Reduced padding to 1rem for a slimmer, more balanced look */
-    padding: 1rem; 
-    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-    border-bottom: none; 
-    box-shadow: none;
-    display: flex;
-    justify-content: center; /* Keeps the logo perfectly centered */
-    align-items: center;
-}
+        .app-header {
+            position: absolute;
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 1030;
+            padding: 1rem; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            border-bottom: none; 
+            box-shadow: none;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+        }
 
-.header-logo { 
-    width: auto; 
-    /* Reduced from 40px to 28px for a cleaner aesthetic */
-    height: 28px; 
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-    transition: height 0.3s ease;
-}
+        .header-logo { 
+            width: auto; 
+            height: 28px; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            transition: height 0.3s ease;
+        }
 
-/* Ensure it stays appropriately sized on mobile */
-@media (max-width: 767.98px) {
-    .header-logo {
-        height: 24px; 
-    }
-}
-        /* Removed .nav-link, .settings-btn, etc. as they are no longer used in header */
+        @media (max-width: 767.98px) {
+            .header-logo {
+                height: 24px; 
+            }
+        }
         
-        /* --- MODAL STYLES (Unchanged) --- */
         .modal-content {
             background-color: var(--card-bg-color);
             color: var(--text-color);
@@ -137,7 +126,6 @@ if (!currentSeason && seasons && seasons.length) {
             --bs-btn-close-color: #fff;
         }
         
-        /* Loading Overlay Styles (Unchanged) */
         #loadingOverlay {
             position: fixed;
             top: 0;
@@ -178,8 +166,6 @@ if (!currentSeason && seasons && seasons.length) {
             50% { opacity: 1; }
         }
         
-        /* --- === Show Details Page Styles - MODIFIED === --- */
-        
         #show-banner {
             background-color: var(--show-banner-bg);
             background-size: cover;
@@ -187,7 +173,7 @@ if (!currentSeason && seasons && seasons.length) {
             padding: 0;
             position: relative;
             color: #fff;
-            min-height: 85vh; /* Increased slightly for visual impact */
+            min-height: 85vh; 
             display: flex;
             align-items: flex-end; 
             overflow: hidden;
@@ -197,7 +183,6 @@ if (!currentSeason && seasons && seasons.length) {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            /* Enhanced gradient for better text readability */
             background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 40%, transparent 80%),
                         linear-gradient(to top, rgba(0,0,0,1.0) 0%, rgba(0,0,0,0.8) 20%, transparent 60%);
             z-index: 1;
@@ -207,14 +192,14 @@ if (!currentSeason && seasons && seasons.length) {
         #show-content-wrapper {
             position: relative;
             z-index: 2;
-            padding-top: 120px; /* Padding for top spacing */
+            padding-top: 120px; 
             padding-bottom: 4rem; 
             width: 100%;
             background: transparent; 
         }
 
         #show-banner .container {
-            padding: 0 1.5rem; /* Ensure padding on sides */
+            padding: 0 1.5rem; 
             align-items: flex-start;
         }
         
@@ -231,7 +216,6 @@ if (!currentSeason && seasons && seasons.length) {
             display: block; 
         }
         
-        /* Style for the image logo when present */
         #show-logo img {
             max-width: 350px; 
             height: auto;
@@ -283,23 +267,21 @@ if (!currentSeason && seasons && seasons.length) {
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
         
-        /* === NEW: Action Button Styles === */
         .action-button {
-            /* Transparent Gray Background */
             background-color: rgba(255, 255, 255, 0.2); 
             backdrop-filter: blur(5px);
-            color: #fff; /* White text/icon */
+            color: #fff; 
             border: 1px solid rgba(255,255,255,0.3);
             font-weight: 600;
             font-size: 1.1rem;
             padding: 0.75rem 2rem;
-            border-radius: 50px; /* Curved corners */
+            border-radius: 50px; 
             transition: background-color 0.2s ease, transform 0.1s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Text shadow for visibility */
-            margin-top: 2rem; /* Spacing from cast */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); 
+            margin-top: 2rem; 
         }
 
         .action-button:hover {
@@ -312,10 +294,8 @@ if (!currentSeason && seasons && seasons.length) {
             transform: translateY(0);
         }
 
-        /* Mobile details panel (hidden on desktop) */
         .mobile-details-panel { display: none; }
 
-        /* Responsive Banner & Mobile Fixes */
         @media (max-width: 991.98px) {
              #show-banner {
                 min-height: 70vh;
@@ -328,27 +308,26 @@ if (!currentSeason && seasons && seasons.length) {
             }
             
             .header-logo {
-                height: 30px; /* Smaller logo on mobile */
+                height: 30px; 
             }
 
             #show-banner {
-                min-height: 60vh; /* Reduced height for mobile */
+                min-height: 60vh; 
                 align-items: flex-end; 
             }
             
             #show-content-wrapper {
                  padding-bottom: 4rem; 
-                 padding-top: 80px; /* Less top padding needed on mobile */
+                 padding-top: 80px; 
             }
             
-            /* Ensure container has padding */
             #show-banner .container {
                 padding-left: 1.5rem;
                 padding-right: 1.5rem;
             }
 
             #show-title, #show-logo {
-                font-size: 2.2rem; /* Better scaling */
+                font-size: 2.2rem; 
                 margin-bottom: 0.5rem; 
             }
             
@@ -372,7 +351,7 @@ if (!currentSeason && seasons && seasons.length) {
             }
             
             #show-overview {
-                display: none; /* Keep hidden on mobile as per design, or uncomment to show: display: block; font-size: 0.95rem; */
+                display: none; 
             }
             
             #show-content-wrapper h5 {
@@ -394,10 +373,9 @@ if (!currentSeason && seasons && seasons.length) {
                 margin-top: 1.5rem; 
                 padding: 0.6rem 1.5rem;
                 font-size: 1rem;
-                width: 100%; /* Full width button on mobile */
+                width: 100%; 
                 justify-content: center;
             }
-            /* Mobile hero: only logo/title + watch button */
             #show-banner .col-12.col-lg-8 {
                 display: flex;
                 flex-direction: column;
@@ -412,17 +390,16 @@ if (!currentSeason && seasons && seasons.length) {
             #show-overview,
             #show-content-wrapper h5,
             #show-cast {
-                display: none !important; /* moved to bottom details panel on mobile */
+                display: none !important; 
             }
 
-            /* Details (under episodes) */
             body {
-                padding-bottom: 0; /* details are no longer fixed to the bottom */
+                padding-bottom: 0; 
             }
             .mobile-details-panel {
                 display: block;
                 position: static;
-                background: transparent; /* same colour as page bg */
+                background: transparent; 
                 border-top: 1px solid var(--border-color);
                 padding: 1rem 0 0;
                 margin-top: 1.25rem;
@@ -480,7 +457,6 @@ if (!currentSeason && seasons && seasons.length) {
 
         }
         
-        /* --- Seasons/Episodes Styling (Unchanged) --- */
         #seasons-container {
             padding-top: 2rem;
             padding-bottom: 3rem;
@@ -533,7 +509,6 @@ if (!currentSeason && seasons && seasons.length) {
             flex-shrink: 0;
             position: relative;
         }
-        /* Mobile adjustment for episode list */
         @media (max-width: 576px) {
             .episode-thumbnail-placeholder {
                 width: 110px;
@@ -545,7 +520,7 @@ if (!currentSeason && seasons && seasons.length) {
             }
             .episode-details .text-muted {
                 font-size: 0.8rem;
-                -webkit-line-clamp: 1; /* Limit text on mobile */
+                -webkit-line-clamp: 1; 
             }
         }
 
@@ -592,24 +567,112 @@ if (!currentSeason && seasons && seasons.length) {
         .list-group-item .bi-download {
             display: none !important; 
         }
-        .list-group-item .bi-download {
-            display: none !important;
-        }
-        /* Hide the search input next to the season selector */
         #seasons-container .input-group:has(.form-control) {
             display: none !important;
         }
 
-    
-/* Season selector arrow spacing fix */
-.season-selector {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-.season-selector .arrow {
-    margin-left: 0 !important;
-}
+        .season-selector {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .season-selector .arrow {
+            margin-left: 0 !important;
+        }
+
+        /* --- SERVER SELECTION OVERLAY --- */
+        #server-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #server-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .server-modal {
+            background: #161616;
+            border: 1px solid #333;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        #server-overlay.active .server-modal {
+            transform: translateY(0);
+        }
+
+        .server-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .server-grid-mini {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .server-option {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            color: #fff;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .server-option:hover {
+            background: #2a2a2a;
+            border-color: #0d6efd;
+            transform: scale(1.02);
+        }
+
+        .server-option i {
+            font-size: 1.2rem;
+        }
+
+        .server-option.recommended {
+            border-color: rgba(255, 140, 0, 0.3);
+        }
+
+        .server-option.recommended i {
+            color: #ff8c00;
+        }
+
+        .close-overlay {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            color: #888;
+            width: 100%;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
 
 </style>
 </link></head>
@@ -670,6 +733,19 @@ if (!currentSeason && seasons && seasons.length) {
 </div><div aria-label="Show details" class="mobile-details-panel" id="mobile-details"></div>
 </div>
 </main>
+
+<div id="server-overlay">
+    <div class="server-modal">
+        <div class="server-header">
+            <h4 class="mb-1">Select Server</h4>
+            <p class="text-muted small" id="target-episode-label">Season 1, Episode 1</p>
+        </div>
+        <div class="server-grid-mini" id="server-options-list">
+            </div>
+        <button class="close-overlay" onclick="closeServerOverlay()">Cancel</button>
+    </div>
+</div>
+
 <div aria-hidden="true" aria-labelledby="aboutModalLabel" class="modal fade" id="aboutModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content">
@@ -691,13 +767,11 @@ if (!currentSeason && seasons && seasons.length) {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-        // --- TMDB API Configuration (Unchanged) ---
         const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
         const TMDB_IMG_BASE_URL = 'https://image.tmdb.org/t/p/w500';
         const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/original'; 
 
-        // --- Element Selectors (Unchanged) ---
         const body = document.body;
         const faviconLink = document.getElementById('faviconLink');
         const headerLogo = document.getElementById('headerLogo');
@@ -708,51 +782,42 @@ if (!currentSeason && seasons && seasons.length) {
         const logoLink = document.getElementById('logoLink');
         const accordionContainer = document.getElementById('seasons-accordion');
         const seasonDropdown = document.getElementById('season-dropdown');
-        // NEW: Action button container
         const actionButtonContainer = document.getElementById('action-button-container');
         const mobileDetailsPanel = document.getElementById('mobile-details');
 
-        // Loading timer (Unchanged)
+        // --- Server Configuration (Matching player.html) ---
+        const SERVERS = [
+            { id: 7, name: "VidKing", icon: "bi-lightning-charge-fill", recommended: true },
+            { id: 1, name: "Rakan", icon: "bi-shield-fill", recommended: true },
+            { id: 2, name: "Bard", icon: "bi-play-circle" },
+            { id: 6, name: "Ryze", icon: "bi-play-circle" },
+            { id: 4, name: "Ekko", icon: "bi-play-circle" },
+            { id: 3, name: "Xayah", icon: "bi-play-circle" }
+        ];
+
         const loadingTimer = setTimeout(() => {
             if (!initialLoadComplete) {
                 slowNetworkMessage.style.display = 'flex';
             }
         }, 7000);
         
-        // --- THEME/UI LOGIC (MODIFIED: FORCED DARK MODE) (Unchanged) ---
-        
-        // Simplified functions for logo/favicon now that theme is fixed
         function updateThemeAssets() {
             const darkLogo = '/static/thiraiwhite.png';
-            
-            // Set assets for dark mode
             faviconLink.href = '/static/favicon.png'; 
             headerLogo.src = darkLogo;
             overlayLogo.src = darkLogo;
         }
 
-function forceDarkMode() {
-    // 1. Force dark mode class
-    body.classList.add('dark-mode');
-    
-    // 2. Update logos/favicon to their dark mode versions
-    updateThemeAssets();
-    
-    // 3. Updated height logic
-    // We remove the manual style assignment to let the CSS handle the 28px height,
-    // or manually set the new desired height here.
-    headerLogo.style.height = '28px'; 
-}
+        function forceDarkMode() {
+            body.classList.add('dark-mode');
+            updateThemeAssets();
+            headerLogo.style.height = '28px'; 
+        }
         
-        // This DOMContentLoaded block is now much simpler
         document.addEventListener('DOMContentLoaded', function() {
-            // Call the function to set dark mode permanently
             forceDarkMode(); 
         });
         
-        // REMOVED: About button event listener as the button is gone.
-
-        // --- NEW: Action Button Logic ---
         function isUnlocked() {
             return localStorage.getItem('premium_isUnlocked') === 'true' || 
                    localStorage.getItem('isUnlocked') === 'true';
@@ -760,23 +825,20 @@ function forceDarkMode() {
 
         function renderActionButton(showId, firstSeasonNumber) {
             const isUserUnlocked = isUnlocked();
-            const playerUrl = `/player.html?tv=${showId}/${firstSeasonNumber}/1`; // First episode
+            const actionLabel = `Season 1, Episode 1`;
 
-            // Always keep a single "Watch Now" CTA on mobile, with icon reflecting lock state.
             const icon = isUserUnlocked
                 ? '<i class="bi bi-play-circle-fill me-2"></i>'
                 : '<i class="bi bi-lock-fill me-2"></i>';
 
             actionButtonContainer.innerHTML = `
-                <a href="${playerUrl}" class="btn action-button" aria-label="Watch now">
+                <button onclick="openServerOverlay('${showId}', ${firstSeasonNumber}, 1, 'Episode 1')" class="btn action-button" aria-label="Watch now">
                     ${icon}
                     Watch Now
-                </a>
+                </button>
             `;
         }
 
-
-        // --- NEW: Mobile Bottom Details Panel ---
         function renderMobileDetails(show) {
             if (!mobileDetailsPanel) return;
 
@@ -802,15 +864,47 @@ function forceDarkMode() {
             `;
         }
 
-        
-        // --- EPISODE RENDERING (Unchanged) ---
+        // --- Server Overlay Management ---
+        function openServerOverlay(showId, s, e, epName) {
+            const overlay = document.getElementById('server-overlay');
+            const list = document.getElementById('server-options-list');
+            const label = document.getElementById('target-episode-label');
+            
+            label.innerText = `S${s} E${e}: ${epName}`;
+            list.innerHTML = "";
+            
+            SERVERS.forEach(server => {
+                const btn = document.createElement('div');
+                btn.className = `server-option ${server.recommended ? 'recommended' : ''}`;
+                btn.innerHTML = `
+                    <i class="bi ${server.icon}"></i>
+                    <span>${server.name}</span>
+                `;
+                btn.onclick = () => {
+                    window.location.href = `/player.html?tv=${showId}/${s}/${e}&server=${server.id}`;
+                };
+                list.appendChild(btn);
+            });
+
+            overlay.classList.add('active');
+            document.body.classList.add('no-scroll');
+        }
+
+        function closeServerOverlay() {
+            const overlay = document.getElementById('server-overlay');
+            overlay.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        }
+
+        // --- EPISODE RENDERING (Updated to trigger overlay) ---
         function renderEpisodes(seasonData, showId) {
             const episodesHtml = seasonData.episodes.map(ep => {
-                const playerUrl = `/player.html?tv=${showId}/${ep.season_number}/${ep.episode_number}`;
                 const episodeThumbnailUrl = ep.still_path ? `${TMDB_IMG_BASE_URL}${ep.still_path}` : 'https://via.placeholder.com/150x85?text=No+Image';
+                const epTitle = (ep.name || 'Episode ' + ep.episode_number).replace(/'/g, "\\'");
 
                 return `
-                    <a href="${playerUrl}" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <div onclick="openServerOverlay('${showId}', ${ep.season_number}, ${ep.episode_number}, '${epTitle}')" 
+                         class="list-group-item list-group-item-action d-flex align-items-center" style="cursor: pointer;">
                         <div class="episode-thumbnail-placeholder">
                             <span class="episode-number-overlay">${ep.episode_number}</span>
                             <img src="${episodeThumbnailUrl}" alt="Episode ${ep.episode_number} thumbnail">
@@ -819,7 +913,7 @@ function forceDarkMode() {
                             <strong>${ep.name || 'Episode ' + ep.episode_number}</strong>
                             <p class="text-muted">${ep.overview || 'No episode description available.'}</p>
                         </div>
-                    </a>
+                    </div>
                 `;
             }).join('');
             
@@ -830,30 +924,22 @@ function forceDarkMode() {
             `;
         }
 
-        // --- MAIN SHOW LOADING (MODIFIED: call renderActionButton) ---
         async function loadShowDetails(showId) {
             const mainContainer = document.querySelector('main');
             let allSeasons = [];
             
             try {
-                // Fetch Main Show Details (including credits and images for logo)
                 const showUrl = `${TMDB_BASE_URL}/tv/${showId}?api_key=${TMDB_API_KEY}&append_to_response=credits,images`;
                 const res = await fetch(showUrl);
                 if (!res.ok) throw new Error('Failed to fetch show details');
                 const show = await res.json();
                 
-                // Store seasons for later use
                 allSeasons = show.seasons.filter(s => s.season_number !== 0);
 
-                // --- Step 2: Populate the Banner (Unchanged) ---
                 document.title = `${show.name} - Thirai`; 
-                
                 const bannerElement = document.getElementById('show-banner');
-                
-                // FIX: Robust check for backdrop, fall back to poster if backdrop is null
                 const imagePath = show.backdrop_path || show.poster_path;
                 if (imagePath) {
-                    // Use the original size path for the banner, regardless if it's backdrop or poster
                     bannerElement.style.backgroundImage = `url('${TMDB_BACKDROP_BASE_URL}${imagePath}')`;
                 } else {
                     bannerElement.style.backgroundImage = 'none';
@@ -861,7 +947,6 @@ function forceDarkMode() {
                 
                 document.getElementById('show-poster').src = `${TMDB_IMG_BASE_URL}${show.poster_path}`;
                 
-                // Logo/Title Logic (Unchanged)
                 const logoPath = show.images && show.images.logos.length > 0 
                                  ? show.images.logos.find(logo => logo.iso_639_1 === 'en' || logo.iso_639_1 === null)?.file_path
                                  : null;
@@ -879,7 +964,6 @@ function forceDarkMode() {
                     showLogoElement.style.display = 'none'; 
                 }
                 
-                // Meta Data Population (Unchanged)
                 document.getElementById('show-rating').innerHTML = `<i class="bi bi-star-fill text-warning"></i> ${show.vote_average.toFixed(1)}/10`;
                 document.getElementById('show-year').innerHTML = `<i class="bi bi-calendar"></i> ${new Date(show.first_air_date).getFullYear()}`;
                 document.getElementById('show-seasons').innerHTML = `<i class="bi bi-collection-play"></i> ${show.number_of_seasons} Seasons`;
@@ -891,25 +975,20 @@ function forceDarkMode() {
                 const castHtml = show.credits.cast.slice(0, 6).map(c => c.name).join(', ');
                 document.getElementById('show-cast').innerText = castHtml || 'N/A';
 
-                // NEW: Populate the mobile bottom details panel
                 renderMobileDetails(show);
 
-                // --- Step 3: Populate Season Dropdown (Unchanged) ---
                 seasonDropdown.innerHTML = allSeasons.map(season => `
                     <option value="${season.season_number}">
                         ${season.name} (${season.episode_count} Episodes)
                     </option>
                 `).join('');
                 
-                // --- Step 4/5: Load and Display Episodes ---
                 if (allSeasons.length > 0) {
                     const firstSeasonNumber = allSeasons[0].season_number;
-                    // NEW: Render the action button immediately after determining the first season number
                     renderActionButton(showId, firstSeasonNumber); 
                     await loadSeasonEpisodes(showId, firstSeasonNumber);
                 } else {
                      accordionContainer.innerHTML = '<p class="text-muted">No episodes found for this series.</p>';
-                     // NEW: Display a disabled button or clear container if no seasons
                      actionButtonContainer.innerHTML = '';
                 }
                 
@@ -928,7 +1007,6 @@ function forceDarkMode() {
                     </div>
                 `;
             } finally {
-                // --- Step 6: Hide Loading Overlay (Unchanged) ---
                 initialLoadComplete = true;
                 clearTimeout(loadingTimer);
                 loadingOverlay.style.opacity = '0';
@@ -939,7 +1017,6 @@ function forceDarkMode() {
             }
         }
         
-        // --- SEASON EPISODE LOADING (Unchanged) ---
         async function loadSeasonEpisodes(showId, seasonNumber) {
             accordionContainer.innerHTML = `
                 <div class="text-center p-5">
@@ -963,12 +1040,9 @@ function forceDarkMode() {
             }
         }
 
-        // --- Initial Page Load (Unchanged) ---
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('no-scroll');
-            
             const showId = window.location.search.substring(1); 
-
             if (showId) {
                 loadShowDetails(showId);
             } else {
@@ -983,7 +1057,6 @@ function forceDarkMode() {
                 document.body.classList.remove('no-scroll');
             }
         });
-        
     </script>
 </body>
 </html>
