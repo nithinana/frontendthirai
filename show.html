@@ -219,6 +219,15 @@ if (!currentSeason && seasons && seasons.length) {
             filter: drop-shadow(0 8px 12px rgba(0,0,0,1)); 
         }
         
+        /* HIDDEN IN BANNER PER REQUEST */
+        #show-content-wrapper #show-meta,
+        #show-content-wrapper #show-genres,
+        #show-content-wrapper #show-overview,
+        #show-content-wrapper h5,
+        #show-content-wrapper #show-cast {
+            display: none !important;
+        }
+        
         #show-meta {
             font-size: 1.1rem;
             font-weight: 500;
@@ -332,36 +341,6 @@ if (!currentSeason && seasons && seasons.length) {
                 max-width: 200px;
             }
             
-            #show-meta {
-                gap: 0.5rem 1rem; 
-                font-size: 0.95rem; 
-            }
-            
-            #show-genres {
-                margin-top: 1rem; 
-                gap: 0.5rem; 
-            }
-
-            #show-genres .badge {
-                font-size: 0.8rem;
-                padding: 0.4em 0.8em;
-            }
-            
-            #show-overview {
-                display: none; 
-            }
-            
-            #show-content-wrapper h5 {
-                margin-top: 1.5rem !important; 
-                margin-bottom: 0.5rem; 
-                font-size: 1rem;
-            }
-            
-            #show-cast {
-                margin-top: 0;
-                font-size: 0.9rem; 
-            }
-            
             .show-poster-col {
                 display: none !important;
             }
@@ -381,13 +360,6 @@ if (!currentSeason && seasons && seasons.length) {
             }
             #show-title, #show-logo {
                 text-align: center;
-            }
-            #show-meta,
-            #show-genres,
-            #show-overview,
-            #show-content-wrapper h5,
-            #show-cast {
-                display: none !important; 
             }
 
             body {
@@ -708,7 +680,7 @@ if (!currentSeason && seasons && seasons.length) {
         }
         .server-close-x i { font-size: 1rem; }
 </style>
-</link></head>
+</head>
 <body>
 <div id="loadingOverlay">
 <img alt="Thirai Logo" id="overlayLogo" src="/static/thiraiblack.png"/>
@@ -751,7 +723,6 @@ if (!currentSeason && seasons && seasons.length) {
 </div>
 
 <div class="container" id="seasons-container">
-<h2 class="mb-3">Episodes</h2>
 <div class="season-selector-group">
 <select aria-label="Season selection" class="form-select" id="season-dropdown">
 <option selected="">Season 1</option>
@@ -821,7 +792,6 @@ if (!currentSeason && seasons && seasons.length) {
         const actionButtonContainer = document.getElementById('action-button-container');
         const mobileDetailsPanel = document.getElementById('mobile-details');
 
-        // --- Server Configuration (Updated with requested changes) ---
         const SERVERS = [
             { name: "VidKing", slug: "vidking", icon: "bi-shield-fill", recommended: true, status: " " },
             { name: "Rakan", slug: "rakan", icon: "bi-lightning-charge-fill", recommended: true, status: " " },
@@ -901,7 +871,6 @@ if (!currentSeason && seasons && seasons.length) {
             `;
         }
 
-        // --- Server Overlay Management ---
         function openServerOverlay(showId, s, e, epName) {
             const overlay = document.getElementById('server-overlay');
             const list = document.getElementById('server-options-list');
@@ -934,7 +903,6 @@ if (!currentSeason && seasons && seasons.length) {
             document.body.classList.remove('no-scroll');
         }
 
-// Close overlay when clicking outside the modal
 (function initServerOverlayDismiss() {
     const overlay = document.getElementById('server-overlay');
     const modal = document.getElementById('server-modal');
@@ -945,7 +913,6 @@ if (!currentSeason && seasons && seasons.length) {
     modal.addEventListener('click', (ev) => ev.stopPropagation());
 })();
 
-        // --- EPISODE RENDERING (Updated to trigger overlay) ---
         function renderEpisodes(seasonData, showId) {
             const episodesHtml = seasonData.episodes.map(ep => {
                 const episodeThumbnailUrl = ep.still_path ? `${TMDB_IMG_BASE_URL}${ep.still_path}` : 'https://via.placeholder.com/150x85?text=No+Image';
@@ -1028,14 +995,22 @@ if (!currentSeason && seasons && seasons.length) {
 
                 seasonDropdown.innerHTML = allSeasons.map(season => `
                     <option value="${season.season_number}">
-                        ${season.name} (${season.episode_count} Episodes)
+                        ${season.name}
                     </option>
                 `).join('');
                 
                 if (allSeasons.length > 0) {
                     const firstSeasonNumber = allSeasons[0].season_number;
                     renderActionButton(showId, firstSeasonNumber); 
-                    await loadSeasonEpisodes(showId, firstSeasonNumber);
+                    
+                    // CACHE LOGIC: Check for last saved season for this specific show
+                    const lastSeason = localStorage.getItem(`last_season_${showId}`);
+                    const seasonToLoad = lastSeason && allSeasons.some(s => s.season_number == lastSeason) 
+                                        ? lastSeason 
+                                        : firstSeasonNumber;
+                    
+                    seasonDropdown.value = seasonToLoad;
+                    await loadSeasonEpisodes(showId, seasonToLoad);
                 } else {
                      accordionContainer.innerHTML = '<p class="text-muted">No episodes found for this series.</p>';
                      actionButtonContainer.innerHTML = '';
@@ -1043,6 +1018,8 @@ if (!currentSeason && seasons && seasons.length) {
                 
                 seasonDropdown.addEventListener('change', (e) => {
                     const selectedSeasonNumber = e.target.value;
+                    // Save to cache
+                    localStorage.setItem(`last_season_${showId}`, selectedSeasonNumber);
                     loadSeasonEpisodes(showId, selectedSeasonNumber);
                 });
 
