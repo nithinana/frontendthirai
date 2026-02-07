@@ -863,6 +863,137 @@
             }
         }
 
+
+        /* --- MOBILE TABBED VIEWS (Home / Collections / Search) --- */
+        .mobile-view { display: block; }
+        @media (max-width: 991.98px) {
+            .mobile-view { display: none; }
+            .mobile-view.active { display: block; }
+            /* Hide the inline header search on mobile - Search is now a full screen tab */
+            .header-main-content { display: none !important; }
+            /* Show mobile-only header icons */
+            .mobile-only-nav { display: flex !important; }
+        }
+        @media (min-width: 992px) {
+            .mobile-only-nav { display: none !important; }
+        }
+
+        /* --- Search page (mobile) --- */
+        #view-search .search-area { padding: 0 15px; margin-top: 10px; }
+        #view-search .search-controls { display:flex; gap: 8px; align-items:center; }
+        #view-search .search-input {
+            flex: 2; min-width: 0;
+            background: var(--input-bg-color); color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 12px; padding: 12px; font-size: 1rem;
+        }
+        #view-search .lang-select {
+            flex: 1; max-width: 110px;
+            background: var(--input-bg-color); color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 12px; padding: 10px 8px; font-size: 0.95rem;
+        }
+        #view-search .btn-search-trigger {
+            flex-shrink: 0;
+            height: 44px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-size: 1.1rem;
+        }
+
+        /* --- Settings full-screen overlay (mobile) --- */
+        #settingsOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        #settingsOverlay.active { display: flex; }
+        .settings-card {
+            background: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 22px;
+            position: relative;
+            color: var(--text-color);
+            animation: slideIn 0.3s ease-out;
+        }
+        @media (max-width: 991.98px) {
+            .settings-card {
+                border-radius: 18px;
+                max-width: none;
+                height: 100%;
+                max-height: none;
+            }
+        }
+        .settings-menu .dropdown-header { color: var(--muted-text-color); }
+        .settings-menu .dropdown-item {
+            display: block;
+            padding: 10px 12px;
+            border-radius: 12px;
+            color: var(--text-color);
+        }
+        .settings-menu .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        body.dark-mode .settings-menu .dropdown-item:hover { background: rgba(255,255,255,0.05); }
+
+        /* --- Promo banner (mobile) styled like the index hero --- */
+        @media (max-width: 767.98px) {
+            .promo-banner {
+                height: 60vh;
+                max-height: 550px;
+                border-radius: 0;
+                margin: -10px -12px 0; /* pull banner to edges */
+                box-shadow: none;
+                justify-content: flex-end;
+                padding: 0;
+                background-position: top center;
+            }
+            .promo-banner::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(0deg, var(--bg-color) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.12) 100%);
+                pointer-events: none;
+            }
+            .promo-banner .movie-logo,
+            .promo-banner .btn {
+                position: relative;
+                z-index: 2;
+                margin-left: 0;
+            }
+            .promo-banner {
+                position: relative;
+                align-items: center;
+                text-align: center;
+            }
+            .promo-banner .movie-logo {
+                max-width: 240px;
+                margin-bottom: 14px;
+            }
+            .promo-banner .btn {
+                font-size: 1rem;
+                padding: 10px 22px;
+                border-radius: 10px;
+                background-color: rgba(255,255,255,0.95);
+                color: #000;
+            }
+            .promo-banner .btn i { color: #000; }
+        }
 </style>
 </head>
   
@@ -879,6 +1010,12 @@
             <a href="/" class="d-flex align-items-center" id="logoLink">
                 <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="30">
             </a>
+            <div class="mobile-only-nav ms-auto d-flex align-items-center">
+                <button class="settings-btn d-flex align-items-center justify-content-center" onclick="togglePopup()" title="Filter" style="width: 40px; height: 40px;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+            </div>
+
 
             <div class="d-flex align-items-center ms-auto order-lg-3 desktop-only-nav">
                  <button class="settings-btn d-flex align-items-center justify-content-center me-2" onclick="togglePopup()" title="Filter" style="width: 40px; height: 40px;">
@@ -996,9 +1133,39 @@
                 <div id="yearExpandSection">
                     <div id="yearGridContent" class="year-grid"></div>
                 </div>
+            
+        <div id="settingsOverlay" onclick="closeSettingsOnOutsideClick(event)">
+            <div class="settings-card">
+                <button class="close-popup" onclick="toggleSettings()">&times;</button>
+                <h5 class="mb-3" style="font-weight:800;">Settings</h5>
+                <ul class="list-unstyled settings-menu">
+                    
+                <li><h6 class="dropdown-header">Preferred Language</h6></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="hindi">Hindi</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="telugu">Telugu</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="malayalam">Malayalam</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="kannada">Kannada</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="bengali">Bengali</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="marathi">Marathi</a></li>
+                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="punjabi">Punjabi</a></li>
+                <li class="mobile-disable-lang" style="display: none;"><a class="dropdown-item text-danger" href="#" id="mobileDisablePreferredLanguage">Disable Preference</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Appearance</h6></li>
+                <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
+                <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
+                <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" onclick="const m=new bootstrap.Modal(document.getElementById('aboutModal'));m.show();">About</a></li>
+            
+                </ul>
             </div>
         </div>
-        <div class="promo-banner">
+</div>
+        </div>
+        
+<div id="view-home" class="mobile-view active">
+<div class="promo-banner">
             <img src="https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png" alt="Movie Logo" class="movie-logo">
             <a href="/watch.html?film=3QoX" class="btn">
                 <i class="bi bi-play-fill"></i> Watch Now
@@ -1028,31 +1195,9 @@
             </div>
         </div>
 
-        <div class="language-section" id="section-collections">
-            <div class="language-header">
-                <h2 class="language-title">Collections
-                    <a href="/actors" class="explore-link" title="Explore All Actors">
-                        <i class="bi bi-chevron-right"></i>
-                        <span class="explore-text">Explore</span>
-                    </a>
-                </h2>
-                <div class="collection-toggle">
-                    <input type="radio" id="toggle-stars" name="collection-type" value="actors" checked>
-                    <label for="toggle-stars">Actors</label>
-                    <input type="radio" id="toggle-actresses" name="collection-type" value="actresses">
-                    <label for="toggle-actresses">Actresses</label>
-                </div>
-            </div>
-            <div class="movies-scroller-container">
-                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-collections" aria-label="Previous">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="movies-scroller-wrapper">
-                    <div class="movies-scroller">
-                        <div class="movies-row" id="movies-row-collections">
-                        </div>
-                    </div>
-                </div>
+        
+<!-- collections moved to collections tab view -->
+
                 <button class="btn scroll-btn scroll-btn-next" id="next-btn-collections" aria-label="Next">
                     <i class="bi bi-chevron-right"></i>
                 </button>
@@ -1319,7 +1464,64 @@
                 </div>
                 <button class="btn scroll-btn scroll-btn-next" id="next-btn-punjabi" aria-label="Next">
                     <i class="bi bi-chevron-right"></i>
+               
+</div><!-- /#view-home -->
+
+<div id="view-collections" class="mobile-view view-padded">
+<div class="language-section" id="section-collections">
+            <div class="language-header">
+                <h2 class="language-title">Collections
+                    <a href="/actors" class="explore-link" title="Explore All Actors">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
+                </h2>
+                <div class="collection-toggle">
+                    <input type="radio" id="toggle-stars" name="collection-type" value="actors" checked>
+                    <label for="toggle-stars">Actors</label>
+                    <input type="radio" id="toggle-actresses" name="collection-type" value="actresses">
+                    <label for="toggle-actresses">Actresses</label>
+                </div>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-collections" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
                 </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-collections">
+                        </div>
+                    </div>
+                </div>
+</div><!-- /#view-collections -->
+
+<div id="view-search" class="mobile-view view-padded">
+  <div class="search-page">
+    <div class="search-area">
+      <div class="search-controls">
+        <input type="text" class="search-input" id="searchInputMobile" placeholder="Search movies...">
+        <select id="languageSelectMobile" class="lang-select" aria-label="Language">
+          <option value="tamil">Tamil</option>
+          <option value="hindi">Hindi</option>
+          <option value="telugu">Telugu</option>
+          <option value="malayalam">Malayalam</option>
+          <option value="kannada">Kannada</option>
+          <option value="bengali">Bengali</option>
+          <option value="marathi">Marathi</option>
+          <option value="punjabi">Punjabi</option>
+        </select>
+        <button class="btn-search-trigger" id="searchBtnMobile" aria-label="Search">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+      <div class="text-muted mt-2" style="font-size: 0.85rem; padding: 0 2px;">
+        Search will open results in the language page.
+      </div>
+    </div>
+  </div>
+</div><!-- /#view-search -->
+
+ </button>
             </div>
         </div>
     </main>
@@ -1330,49 +1532,30 @@
         </p>
     </footer>
     
-    <nav class="mobile-bottom-nav">
-        <a href="#" class="nav-item active" onclick="window.scrollTo(0,0); return false;">
+    
+<nav class="mobile-bottom-nav">
+        <button class="nav-item active" id="btm-home" onclick="switchMobileTab('home'); return false;">
             <i class="bi bi-house-door"></i>
             <span>Home</span>
-        </a>
-        <a href="#" class="nav-item" onclick="document.getElementById('searchInput').focus(); return false;">
+        </button>
+        <button class="nav-item" id="btm-collections" onclick="switchMobileTab('collections'); return false;">
+            <i class="bi bi-collection-play"></i>
+            <span>Collections</span>
+        </button>
+        <button class="nav-item" id="btm-search" onclick="switchMobileTab('search'); return false;">
             <i class="bi bi-search"></i>
             <span>Search</span>
-        </a>
-        <a href="#" class="nav-item" onclick="togglePopup(); return false;">
-            <i class="bi bi-funnel"></i>
-            <span>Filter</span>
-        </a>
-        <a href="/join" class="nav-item">
+        </button>
+        <a href="/join" class="nav-item" id="btm-party">
             <i class="bi bi-people"></i>
             <span>Party</span>
         </a>
-        <div class="nav-item dropup">
-            <button class="nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 100%;">
-                 <i class="bi bi-gear"></i>
-                 <span>Settings</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" id="mobileSettingsMenu">
-                <li><h6 class="dropdown-header">Preferred Language</h6></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="tamil">Tamil</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="hindi">Hindi</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="telugu">Telugu</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="malayalam">Malayalam</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="kannada">Kannada</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="bengali">Bengali</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="marathi">Marathi</a></li>
-                <li><a class="dropdown-item preferred-lang-option" href="#" data-language="punjabi">Punjabi</a></li>
-                <li class="mobile-disable-lang" style="display: none;"><a class="dropdown-item text-danger" href="#" id="mobileDisablePreferredLanguage">Disable Preference</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><h6 class="dropdown-header">Appearance</h6></li>
-                <li><a class="dropdown-item theme-option" href="#" data-theme="light">Light</a></li>
-                <li><a class="dropdown-item theme-option" href="#" data-theme="dark">Dark</a></li>
-                <li><a class="dropdown-item theme-option" href="#" data-theme="system">System Default</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#" onclick="const m=new bootstrap.Modal(document.getElementById('aboutModal'));m.show();">About</a></li>
-            </ul>
-        </div>
+        <button class="nav-item" id="btm-settings" onclick="toggleSettings(); return false;">
+            <i class="bi bi-gear"></i>
+            <span>Settings</span>
+        </button>
     </nav>
+
 
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -2189,6 +2372,114 @@ document.getElementById('installAppButtonInline')?.addEventListener('click', () 
     deferredPromptInline.prompt();
   }
 });
+
+            // --- MOBILE TAB NAV (Home / Collections / Search) ---
+            function isMobileLayout() {
+                return window.matchMedia && window.matchMedia('(max-width: 991.98px)').matches;
+            }
+
+            function switchMobileTab(tab) {
+                if (!isMobileLayout()) {
+                    // On desktop keep legacy behavior (single page)
+                    if (tab === 'search') {
+                        const si = document.getElementById('searchInput');
+                        if (si) si.focus();
+                    } else if (tab === 'home') {
+                        window.scrollTo(0, 0);
+                    }
+                    return;
+                }
+
+                const views = {
+                    home: document.getElementById('view-home'),
+                    collections: document.getElementById('view-collections'),
+                    search: document.getElementById('view-search'),
+                };
+
+                Object.values(views).forEach(v => v && v.classList.remove('active'));
+                if (views[tab]) views[tab].classList.add('active');
+
+                // Update bottom nav active state
+                ['home','collections','search','party','settings'].forEach(id => {
+                    const el = document.getElementById('btm-' + id);
+                    if (el) el.classList.remove('active');
+                });
+                const activeEl = document.getElementById('btm-' + tab);
+                if (activeEl) activeEl.classList.add('active');
+
+                // Close overlays when switching
+                const fo = document.getElementById('filterOverlay');
+                if (fo && fo.classList.contains('active')) fo.classList.remove('active');
+                const so = document.getElementById('settingsOverlay');
+                if (so && so.classList.contains('active')) so.classList.remove('active');
+
+                window.scrollTo(0, 0);
+
+                if (tab === 'search') {
+                    setTimeout(() => {
+                        const input = document.getElementById('searchInputMobile');
+                        if (input) input.focus();
+                    }, 50);
+                }
+            }
+
+            // --- SETTINGS OVERLAY (mobile) ---
+            function toggleSettings() {
+                const overlay = document.getElementById('settingsOverlay');
+                if (!overlay) return;
+                overlay.classList.toggle('active');
+                document.body.classList.toggle('no-scroll', overlay.classList.contains('active'));
+            }
+
+            function closeSettingsOnOutsideClick(e) {
+                if (e.target && e.target.id === 'settingsOverlay') {
+                    const overlay = document.getElementById('settingsOverlay');
+                    if (!overlay) return;
+                    overlay.classList.remove('active');
+                    document.body.classList.remove('no-scroll');
+                }
+            }
+
+            // --- Mobile search submit (redirects to language search page) ---
+            (function initMobileSearch() {
+                const input = document.getElementById('searchInputMobile');
+                const lang = document.getElementById('languageSelectMobile');
+                const btn = document.getElementById('searchBtnMobile');
+
+                function go() {
+                    const q = (input ? input.value : '').trim();
+                    if (!q) {
+                        if (input) {
+                            input.classList.add('highlight-red');
+                            input.focus();
+                        }
+                        return;
+                    }
+                    if (input) input.classList.remove('highlight-red');
+                    const selectedLanguage = (lang && lang.value) ? lang.value : 'tamil';
+                    const newUrl = `/language?lang=${selectedLanguage}&q=${encodeURIComponent(q)}`;
+                    window.location.href = newUrl;
+                }
+
+                if (btn) btn.addEventListener('click', go);
+                if (input) input.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') {
+                        ev.preventDefault();
+                        go();
+                    }
+                });
+                if (input) input.addEventListener('input', () => {
+                    if (input.value.trim() !== '') input.classList.remove('highlight-red');
+                });
+            })();
+
+            // Default to Home tab on mobile (prevents weird state when navigating back)
+            window.addEventListener('resize', () => {
+                if (isMobileLayout()) {
+                    const anyActive = document.querySelector('.mobile-view.active');
+                    if (!anyActive) switchMobileTab('home');
+                }
+            });
 </script>
 </body>
 
