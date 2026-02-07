@@ -1,8 +1,8 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -10,22 +10,18 @@
 
   gtag('config', 'G-HKV7GQ766F');
 </script>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thirai - Show Details</title>
-
-    <link rel="manifest" href="/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Thirai">
-    <link rel="apple-touch-icon" href="/static/ios/icon-192x192.png">
-    <link rel="icon" type="image/png" href="/static/favicon.png" id="faviconLink"/>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Thirai - Show Details</title>
+<link href="/manifest.json" rel="manifest"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Thirai" name="apple-mobile-web-app-title"/>
+<link href="/static/ios/icon-192x192.png" rel="apple-touch-icon"/>
+<link href="/static/favicon.png" id="faviconLink" rel="icon" type="image/png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<style>
         /* CSS Variables for a Themed, Modern UI */
         :root {
             /* LIGHT MODE - Unchanged for fallback */
@@ -300,6 +296,9 @@
             transform: translateY(0);
         }
 
+        /* Mobile details panel (hidden on desktop) */
+        .mobile-details-panel { display: none; }
+
         /* Responsive Banner & Mobile Fixes */
         @media (max-width: 991.98px) {
              #show-banner {
@@ -382,6 +381,87 @@
                 width: 100%; /* Full width button on mobile */
                 justify-content: center;
             }
+            /* Mobile hero: only logo/title + watch button */
+            #show-banner .col-12.col-lg-8 {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            #show-title, #show-logo {
+                text-align: center;
+            }
+            #show-meta,
+            #show-genres,
+            #show-overview,
+            #show-content-wrapper h5,
+            #show-cast {
+                display: none !important; /* moved to bottom details panel on mobile */
+            }
+
+            /* Details (under episodes) */
+            body {
+                padding-bottom: 0; /* details are no longer fixed to the bottom */
+            }
+            .mobile-details-panel {
+                display: block;
+                position: static;
+                background: transparent; /* same colour as page bg */
+                border-top: 1px solid var(--border-color);
+                padding: 1rem 0 0;
+                margin-top: 1.25rem;
+                max-height: none;
+                overflow: visible;
+                backdrop-filter: none;
+            }
+            .mobile-details-panel .details-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                margin: 0 0 0.75rem;
+                color: var(--text-color);
+                text-align: left;
+            }
+            .mobile-details-panel .details-meta {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.5rem 1rem;
+                color: var(--muted-text-color);
+                font-size: 0.9rem;
+                margin: 0 0 0.75rem;
+            }
+            .mobile-details-panel .details-meta span {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45rem;
+                white-space: nowrap;
+            }
+            .mobile-details-panel .details-genres {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+                margin: 0 0 0.75rem;
+            }
+            .mobile-details-panel .genre-pill {
+                background: rgba(255,255,255,0.04);
+                border: 1px solid var(--border-color);
+                color: var(--text-color);
+                padding: 0.25rem 0.6rem;
+                border-radius: 999px;
+                font-size: 0.8rem;
+                line-height: 1.2;
+            }
+            .mobile-details-panel .details-overview {
+                color: var(--text-color);
+                font-size: 0.95rem;
+                line-height: 1.45;
+                margin: 0 0 0.75rem;
+            }
+            .mobile-details-panel .details-cast {
+                color: var(--muted-text-color);
+                font-size: 0.9rem;
+                margin: 0;
+            }
+
         }
         
         /* --- Seasons/Episodes Styling (Unchanged) --- */
@@ -505,101 +585,85 @@
         }
 
     </style>
-</head>
+</link></head>
 <body>
-    <div id="loadingOverlay">
-        <img id="overlayLogo" src="/static/thiraiblack.png" alt="Thirai Logo">
-        <div id="slowNetworkMessage" class="text-muted" style="display: none;">
-            <i class="bi bi-info-circle"></i> <span>If our servers are slow, consider choosing a specific language or use the search bar at the main site to reduce loading times.</span>
-        </div>
-    </div>
-    
-    <header class="app-header">
-        <a href="/" id="logoLink">
-            <img id="headerLogo" src="/static/thiraiblack.png" alt="Thirai Logo" class="header-logo" data-height="40">
-        </a>
-    </header>
+<div id="loadingOverlay">
+<img alt="Thirai Logo" id="overlayLogo" src="/static/thiraiblack.png"/>
+<div class="text-muted" id="slowNetworkMessage" style="display: none;">
+<i class="bi bi-info-circle"></i> <span>If our servers are slow, consider choosing a specific language or use the search bar at the main site to reduce loading times.</span>
+</div>
+</div>
+<header class="app-header">
+<a href="/" id="logoLink">
+<img alt="Thirai Logo" class="header-logo" data-height="40" id="headerLogo" src="/static/thiraiblack.png"/>
+</a>
+</header>
+<main>
+<div id="show-banner">
+<div id="show-content-wrapper">
+<div class="container">
+<div class="row">
+<div class="col-12 col-lg-8">
+<div id="show-logo" style="display: none;">
+</div>
+<h1 id="show-title">Loading...</h1>
+<div class="text-muted" id="show-meta">
+<span id="show-rating"><i class="bi bi-star-fill text-warning"></i> ...</span>
+<span id="show-year"><i class="bi bi-calendar"></i> ...</span>
+<span id="show-seasons"><i class="bi bi-collection-play"></i> ... Seasons</span>
+</div>
+<div class="mt-3" id="show-genres">
+</div>
+<p id="show-overview">Loading show details...</p>
+<h5 class="mt-4">Starring</h5>
+<p class="text-muted" id="show-cast">Loading...</p>
+<div id="action-button-container">
+<button class="btn btn-lg action-button" disabled="">Loading...</button>
+</div>
+<img alt="Show Poster" class="img-fluid" id="show-poster" src="https://via.placeholder.com/300x450?text=Loading..." style="display: none;"/>
+</div>
+</div>
+</div>
+</div>
+</div>
 
-    <main>
-        
-        <div id="show-banner">
-            <div id="show-content-wrapper">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-12 col-lg-8"> 
-                            
-                            <div id="show-logo" style="display: none;">
-                            </div>
-                            <h1 id="show-title">Loading...</h1>
-                            
-                            <div id="show-meta" class="text-muted">
-                                <span id="show-rating"><i class="bi bi-star-fill text-warning"></i> ...</span>
-                                <span id="show-year"><i class="bi bi-calendar"></i> ...</span>
-                                <span id="show-seasons"><i class="bi bi-collection-play"></i> ... Seasons</span>
-                            </div>
-
-                            <div id="show-genres" class="mt-3">
-                                </div>
-                            
-                            <p id="show-overview">Loading show details...</p>
-                            
-                            <h5 class="mt-4">Starring</h5>
-                            <p id="show-cast" class="text-muted">Loading...</p>
-                            
-                            <div id="action-button-container">
-                                <button class="btn btn-lg action-button" disabled>Loading...</button>
-                            </div>
-                            
-                            <img id="show-poster" src="https://via.placeholder.com/300x450?text=Loading..." alt="Show Poster" class="img-fluid" style="display: none;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="seasons-container" class="container">
-            <h2 class="mb-3">Episodes</h2>
-            
-            <div class="season-selector-group">
-                <select class="form-select" id="season-dropdown" aria-label="Season selection">
-                    <option selected>Season 1</option>
-                </select>
-            </div>
-
-            <div id="seasons-accordion" class="accordion">
-                <div class="text-center p-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
-            <p class="text-muted mt-3">
-                <i class="bi bi-filetype-py"></i> Powered by Python
+<div class="container" id="seasons-container">
+<h2 class="mb-3">Episodes</h2>
+<div class="season-selector-group">
+<select aria-label="Season selection" class="form-select" id="season-dropdown">
+<option selected="">Season 1</option>
+</select>
+</div>
+<div class="accordion" id="seasons-accordion">
+<div class="text-center p-5">
+<div class="spinner-border text-primary" role="status">
+<span class="visually-hidden">Loading...</span>
+</div>
+</div>
+</div><div aria-label="Show details" class="mobile-details-panel" id="mobile-details"></div>
+</div>
+</main>
+<div aria-hidden="true" aria-labelledby="aboutModalLabel" class="modal fade" id="aboutModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="aboutModalLabel">About Thirai</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<p>Thirai does not store any media on its servers, and only embeds media hosted by 3rd party services.</p>
+<p class="text-muted mt-3">
+<i class="bi bi-filetype-py"></i> Powered by Python
             </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+</div>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
         // --- TMDB API Configuration (Unchanged) ---
         const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
         const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -619,6 +683,7 @@
         const seasonDropdown = document.getElementById('season-dropdown');
         // NEW: Action button container
         const actionButtonContainer = document.getElementById('action-button-container');
+        const mobileDetailsPanel = document.getElementById('mobile-details');
 
         // Loading timer (Unchanged)
         const loadingTimer = setTimeout(() => {
@@ -667,27 +732,48 @@
 
         function renderActionButton(showId, firstSeasonNumber) {
             const isUserUnlocked = isUnlocked();
-            const playerUrl = `/player.html?tv=${showId}/${firstSeasonNumber}/1`; // Assuming first episode is Episode 1
-            
-            let buttonContent;
-            let buttonClass;
-            let icon;
-            
-            if (isUserUnlocked) {
-                buttonContent = 'Play First Episode';
-                icon = '<i class="bi bi-play-circle-fill me-2"></i>';
-            } else {
-                buttonContent = 'Unlock Now';
-                icon = '<i class="bi bi-lock-fill me-2"></i>';
-            }
-            
+            const playerUrl = `/player.html?tv=${showId}/${firstSeasonNumber}/1`; // First episode
+
+            // Always keep a single "Watch Now" CTA on mobile, with icon reflecting lock state.
+            const icon = isUserUnlocked
+                ? '<i class="bi bi-play-circle-fill me-2"></i>'
+                : '<i class="bi bi-lock-fill me-2"></i>';
+
             actionButtonContainer.innerHTML = `
-                <a href="${playerUrl}" class="btn action-button">
+                <a href="${playerUrl}" class="btn action-button" aria-label="Watch now">
                     ${icon}
-                    ${buttonContent}
+                    Watch Now
                 </a>
             `;
         }
+
+
+        // --- NEW: Mobile Bottom Details Panel ---
+        function renderMobileDetails(show) {
+            if (!mobileDetailsPanel) return;
+
+            const year = show.first_air_date ? new Date(show.first_air_date).getFullYear() : '';
+            const rating = (typeof show.vote_average === 'number') ? show.vote_average.toFixed(1) : '';
+            const seasonsCount = show.number_of_seasons || '';
+
+            const genresHtml = (show.genres || []).map(g => `<span class="badge">${g.name}</span>`).join('');
+            const castHtml = (show.credits && show.credits.cast)
+                ? show.credits.cast.slice(0, 8).map(c => c.name).join(', ')
+                : '';
+
+            mobileDetailsPanel.innerHTML = `
+                <div class="details-title">Details</div>
+                <div class="details-meta">
+                    ${rating ? `<span><i class="bi bi-star-fill text-warning"></i> ${rating}/10</span>` : ''}
+                    ${year ? `<span><i class="bi bi-calendar"></i> ${year}</span>` : ''}
+                    ${seasonsCount ? `<span><i class="bi bi-collection-play"></i> ${seasonsCount} Seasons</span>` : ''}
+                </div>
+                ${genresHtml ? `<div class="details-genres">${genresHtml}</div>` : ''}
+                ${show.overview ? `<p class="details-overview">${show.overview}</p>` : ''}
+                ${castHtml ? `<p class="details-cast"><strong class="me-1">Starring:</strong> ${castHtml}</p>` : ''}
+            `;
+        }
+
         
         // --- EPISODE RENDERING (Unchanged) ---
         function renderEpisodes(seasonData, showId) {
@@ -776,6 +862,9 @@
                 
                 const castHtml = show.credits.cast.slice(0, 6).map(c => c.name).join(', ');
                 document.getElementById('show-cast').innerText = castHtml || 'N/A';
+
+                // NEW: Populate the mobile bottom details panel
+                renderMobileDetails(show);
 
                 // --- Step 3: Populate Season Dropdown (Unchanged) ---
                 seasonDropdown.innerHTML = allSeasons.map(season => `
