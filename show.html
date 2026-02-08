@@ -863,6 +863,22 @@ if (!currentSeason && seasons && seasons.length) {
                    localStorage.getItem('isUnlocked') === 'true';
         }
 
+        function buildCastLinks(castArr, limit) {
+            if (!Array.isArray(castArr)) return '';
+            return castArr.slice(0, limit).map(c => {
+                const id = (c && (c.id || c.id === 0)) ? String(c.id) : '';
+                const name = (c && c.name) ? String(c.name) : '';
+                if (!id || !name) return '';
+                return `<a class="cast-link" href="/cast.html?${encodeURIComponent(id)}">${name}</a>`;
+            }).filter(Boolean).join(', ');
+        }
+
+        function goToCast(id) {
+            if (id === undefined || id === null) return;
+            window.location.href = `/cast.html?${encodeURIComponent(String(id))}`;
+        }
+
+
         function renderActionButton(showId, firstSeasonNumber) {
             const isUserUnlocked = isUnlocked();
             const actionLabel = `Season 1, Episode 1`;
@@ -888,7 +904,7 @@ if (!currentSeason && seasons && seasons.length) {
 
             const genresHtml = (show.genres || []).map(g => `<span class="badge">${g.name}</span>`).join('');
             const castHtml = (show.credits && show.credits.cast)
-                ? show.credits.cast.slice(0, 8).map(c => c.name).join(', ')
+                ? buildCastLinks(show.credits.cast, 8)
                 : '';
 
             mobileDetailsPanel.innerHTML = `
@@ -1021,8 +1037,9 @@ if (!currentSeason && seasons && seasons.length) {
                 const genresHtml = show.genres.map(g => `<span class="badge">${g.name}</span>`).join('');
                 document.getElementById('show-genres').innerHTML = genresHtml;
                 
-                const castHtml = show.credits.cast.slice(0, 6).map(c => c.name).join(', ');
-                document.getElementById('show-cast').innerText = castHtml || 'N/A';
+                const castHtml = buildCastLinks(show.credits.cast, 6);
+                const showCastEl = document.getElementById('show-cast');
+                showCastEl.innerHTML = castHtml || 'N/A';
 
                 // Desktop hero details (below logo, above Watch Now)
                 if (desktopOverviewEl) {
