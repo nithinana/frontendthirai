@@ -612,6 +612,7 @@
         const loadMoreBtn = document.getElementById('loadMoreBtn');
         const spinner = document.getElementById('loadingSpinner');
         const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
         const searchLangInput = document.getElementById('searchLangInput');
         const langSelector = document.getElementById('langSelector');
         const recentLink = document.getElementById('recentLink');
@@ -1032,20 +1033,13 @@
             }
 
             if (langSelector) {
-                langSelector.addEventListener('change', () => {
-                    const selected = langSelector.value;
-                    localStorage.setItem('last-selected-lang', selected);
-                    // Keep category/search behavior consistent with current page
-                    const params = new URLSearchParams(window.location.search);
-                    const q = params.get('q');
-                    const category = params.get('category') || 'recent';
-                    if (q) {
-                        window.location.href = `./language?lang=${selected}&q=${encodeURIComponent(q)}`;
-                    } else {
-                        window.location.href = `./language?lang=${selected}&category=${category}`;
-                    }
-                });
-            }
+    // Language selection should only take effect when the user presses "Go" (search button).
+    // So on change we just remember the selection.
+    langSelector.addEventListener('change', () => {
+        const selected = langSelector.value;
+        localStorage.setItem('last-selected-lang', selected);
+    });
+}
 
 
             loadingTimer = setTimeout(() => {
@@ -1088,27 +1082,86 @@
             popularLink.href = `./language?lang=${lang}&category=popular`;
             
             if (lang === 'tmdb') {
-                // In TMDB mode:
-                // - Search uses TMDB (Movies + TV Shows)
-                // - Recent/Popular tabs show TMDB trending / popular (grid + Load More)
-                categoryNav.style.display = 'flex';
-                recentLink.href = '#';
-                popularLink.href = '#';
+    // In TMDB mode:
+    // - Search uses TMDB (Movies + TV Shows)
+    // - Recent/Popular tabs show TMDB trending / popular (grid + Load More)
+    categoryNav.style.display = 'flex';
 
-                const loadTMDBRecent = (append=false) => { setActiveCategoryLink('recent'); fetchAndRenderTMDB({ mode: 'recent', append }); };
-                const loadTMDBPopular = (append=false) => { setActiveCategoryLink('popular'); fetchAndRenderTMDB({ mode: 'popular', append }); };
+    // Give the tabs real URLs (and we also update URL via history on click)
+    recentLink.href = `./language?lang=tmdb&category=recent`;
+    popularLink.href = `./language?lang=tmdb&category=popular`;
 
-                recentLink.onclick = (e) => { e.preventDefault(); loadTMDBRecent(false); };
-                popularLink.onclick = (e) => { e.preventDefault(); loadTMDBPopular(false); };
+    const setTMDBUrl = ({ category = 'recent', q = '' } = {}) => {
+        const u = new URL(window.location.href);
+        u.searchParams.set('lang', 'tmdb');
 
-                if (searchQuery) {
-                    searchInput.value = searchQuery;
-                    categoryNav.style.display = 'none';
-                    fetchAndRenderTMDB({ mode: 'search', query: searchQuery, append: false });
-                } else {
-                    // Default TMDB view shows "Recent" (trending)
-                    loadTMDBRecent(false);
-                }
+        const cleanQ = (q || '').trim();
+        if (cleanQ) {
+            u.searchParams.set('q', cleanQ);
+            u.searchParams.delete('category');
+        } else {
+            u.searchParams.delete('q');
+            u.searchParams.set('category', category || 'recent');
+        }
+        history.pushState(null, '', u.pathname + u.search);
+    };
+
+    const loadTMDBRecent = (append = false, updateUrl = true) => {
+        setActiveCategoryLink('recent');
+        if (!append && updateUrl) setTMDBUrl({ category: 'recent' });
+        fetchAndRenderTMDB({ mode: 'recent', append });
+    };
+
+    const loadTMDBPopular = (append = false, updateUrl = true) => {
+        setActiveCategoryLink('popular');
+        if (!append && updateUrl) setTMDBUrl({ category: 'popular' });
+        fetchAndRenderTMDB({ mode: 'popular', append });
+    };
+
+    recentLink.onclick = (e) => {
+        e.preventDefault();
+        // Keep TMDB view clean: if you switch tabs, clear any existing search text.
+        searchInput.value = '';
+        categoryNav.style.display = 'flex';
+        loadTMDBRecent(false, true);
+    };
+
+    popularLink.onclick = (e) => {
+        e.preventDefault();
+        searchInput.value = '';
+        categoryNav.style.display = 'flex';
+        loadTMDBPopular(false, true);
+    };
+
+    // Initial TMDB load based on URL
+    if (searchQuery) {
+        searchInput.value = searchQuery;
+        categoryNav.style.display = 'none';
+        fetchAndRenderTMDB({ mode: 'search', query: searchQuery, append: false });
+    } else {
+        // Ensure the search box is empty when browsing TMDB categories
+        searchInput.value = '';
+        if (category === 'popular') loadTMDBPopular(false, true);
+        else loadTMDBRecent(false, true);
+    }
+
+    // Back/forward should re-load the right TMDB view without forcing a full refresh
+    window.addEventListener('popstate', () => {
+        const p = new URLSearchParams(window.location.search);
+        const q = p.get('q');
+        const cat = p.get('category') || 'recent';
+
+        if (q) {
+            searchInput.value = q;
+            categoryNav.style.display = 'none';
+            fetchAndRenderTMDB({ mode: 'search', query: q, append: false });
+        } else {
+            searchInput.value = '';
+            categoryNav.style.display = 'flex';
+            if (cat === 'popular') loadTMDBPopular(false, false);
+            else loadTMDBRecent(false, false);
+        }
+    });
             } else if (searchQuery) {
                 searchInput.value = searchQuery;
                 categoryNav.style.display = 'none';
@@ -1163,13 +1216,34 @@
         });
 
         searchForm.addEventListener('submit', function(event) {
-            if (searchInput.value.trim() === '') {
-                event.preventDefault(); 
-                searchInput.focus();
-            }
-        });
+    event.preventDefault();
 
-        const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
+    const selectedLang = (langSelector && langSelector.value) ? langSelector.value : (new URLSearchParams(window.location.search).get('lang') || localStorage.getItem('last-selected-lang') || 'tmdb');
+    const q = (searchInput.value || '').trim();
+
+    // Persist selection
+    localStorage.setItem('last-selected-lang', selectedLang);
+
+    // Build a clean URL. If there's a query, it's a search URL.
+    // If not, it's a category URL (default: recent).
+    const currentParams = new URLSearchParams(window.location.search);
+    const currentCategory = currentParams.get('category') || 'recent';
+
+    const u = new URL('./language', window.location.href);
+    u.searchParams.set('lang', selectedLang);
+
+    if (q) {
+        u.searchParams.set('q', q);
+        u.searchParams.delete('category');
+    } else {
+        u.searchParams.delete('q');
+        // In TMDB mode, keep whatever tab you're on (recent/popular). Otherwise keep current category.
+        u.searchParams.set('category', currentCategory);
+    }
+
+    window.location.href = u.pathname + u.search;
+});
+const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
         const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
         document.getElementById('aboutButtonInModal').addEventListener('click', function (e) {
             e.preventDefault(); settingsModal.hide(); aboutModal.show();
