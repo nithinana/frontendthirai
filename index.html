@@ -823,8 +823,8 @@
                     <i class="bi bi-funnel"></i>
                 </button>
 
-                <a href="/join" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Watch Party" style="text-decoration: none; width: 40px; height: 40px;">
-                    <i class="bi bi-people-fill"></i>
+                <a href="/premium" id="premiumBtn" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Premium" style="text-decoration: none; width: 40px; height: 40px;">
+                    <i class="bi bi-star-fill"></i>
                 </a>
                 <a href="/install.html" class="settings-btn d-flex align-items-center justify-content-center me-2" title="Install App" style="text-decoration: none; width: 40px; height: 40px;">
                     <i class="bi bi-download"></i>
@@ -1956,7 +1956,13 @@ function updateLogoLink() {
                 tmdbOption.style.display = unlocked ? '' : 'none';
             }
 
-            const sectionMovies = document.getElementById('section-tmdb-movies');
+            
+            const premiumBtn = document.getElementById('premiumBtn');
+            if (premiumBtn) {
+                premiumBtn.style.display = unlocked ? 'none' : '';
+            }
+
+const sectionMovies = document.getElementById('section-tmdb-movies');
             const sectionTv = document.getElementById('section-tmdb-tv');
 
             if (sectionMovies) sectionMovies.style.display = unlocked ? '' : 'none';
@@ -2267,6 +2273,21 @@ document.getElementById('installAppButtonInline')?.addEventListener('click', () 
   }
 });
 </script>
+
+<script>
+(function () {
+  try {
+    const isUnlocked = localStorage.getItem('isUnlocked') === 'true';
+    const premiumBtn = document.getElementById('premiumStarBtn');
+    if (isUnlocked && premiumBtn) {
+      premiumBtn.remove(); // completely remove from DOM
+    }
+  } catch (e) {
+    console.error(e);
+  }
+})();
+</script>
+
 </body>
 
 </html>
