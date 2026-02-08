@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Thirai - Cast Details</title>
+
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#000000"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+  <link rel="preconnect" href="https://image.tmdb.org">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg-color: #050505;
+      --card-bg: #161616;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --accent: #e50914;
+      --border-color: #262626;
+      --nav-height: 60px;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0; padding-bottom: 80px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Loading */
+    #loadingOverlay {
+      position: fixed; inset: 0; background: var(--bg-color); z-index: 2000;
+      display: flex; justify-content: center; align-items: center; transition: opacity 0.4s;
+    }
+    .loader {
+      width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%; border-top-color: var(--accent); animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Header */
+    .app-header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--nav-height);
+      display: flex; align-items: center; padding: 0 1rem; z-index: 1000;
+      background: rgba(5,5,5,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .back-btn { background: none; border: none; color: white; font-size: 1.4rem; margin-right: 1rem; cursor: pointer; }
+
+    /* Hero */
+    .hero {
+      position: relative; padding-top: calc(var(--nav-height) + 20px); min-height: 400px;
+      overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+    }
+    .hero-backdrop {
+      position: absolute; inset: 0; background-size: cover; background-position: center;
+      filter: blur(40px) brightness(0.4); transform: scale(1.1); z-index: 0;
+      mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 1; padding: 20px; max-width: 1200px; margin: 0 auto;
+      width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px;
+    }
+    @media (min-width: 768px) {
+      .hero-content { flex-direction: row; align-items: flex-start; text-align: left; padding-bottom: 40px; }
+      .hero-text { align-items: flex-start; text-align: left; }
+    }
+    
+    .profile-img-container {
+      width: 160px; height: 160px; flex-shrink: 0; border-radius: 50%; overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); background: #222;
+    }
+    .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+    .hero-text { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+    .actor-name { font-size: 2.2rem; font-weight: 800; line-height: 1.1; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    
+    .actor-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; color: rgba(255,255,255,0.8); font-size: 0.95rem; }
+    @media (min-width: 768px) { .actor-meta { justify-content: flex-start; } }
+    .actor-meta span i { margin-right: 6px; color: var(--accent); }
+
+    .bio-container { position: relative; margin-top: 10px; max-width: 700px; }
+    .bio-text {
+      font-size: 1rem; line-height: 1.6; color: #ddd; margin: 0;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .bio-text.expanded { -webkit-line-clamp: unset; }
+    .read-more-btn { background: none; border: none; color: var(--accent); font-weight: 600; padding: 4px 0; cursor: pointer; }
+
+    /* Content */
+    .section-container { max-width: 1200px; margin: 0 auto; padding: 24px 20px 0; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-size: 1.25rem; font-weight: 700; border-left: 4px solid var(--accent); padding-left: 12px; }
+
+    /* Filters */
+    .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    
+    .filter-chip {
+      background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted);
+      padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+      white-space: nowrap; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .filter-chip.hidden { display: none; }
+
+    /* Grid */
+    .media-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 16px 12px; margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .media-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 24px 16px; }
+    }
+
+    .media-card { display: block; text-decoration: none; color: inherit; position: relative; transition: transform 0.2s; }
+    .media-card:active { transform: scale(0.96); }
+    
+    .poster-wrapper {
+      position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background: #222;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .poster-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .rating-badge {
+      position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+      color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 6px;
+    }
+
+    .card-info { padding-top: 8px; }
+    .card-title {
+      font-size: 0.9rem; font-weight: 600; line-height: 1.2; margin-bottom: 4px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  </style>
+</head>
+<body>
+
+  <div id="loadingOverlay"><div class="loader"></div></div>
+
+  <header class="app-header">
+    <button class="back-btn" onclick="history.back()" aria-label="Go Back"><i class="bi bi-arrow-left"></i></button>
+    <div style="font-weight:700; font-size:1.1rem;">Cast Details</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-backdrop" id="hero-backdrop"></div>
+      <div class="hero-content">
+        <div class="profile-img-container">
+          <img id="profile-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Profile">
+        </div>
+        <div class="hero-text">
+          <h1 class="actor-name" id="actor-name">...</h1>
+          <div class="actor-meta" id="actor-meta"></div>
+          <div class="bio-container">
+            <p class="bio-text" id="bio-text"></p>
+            <button class="read-more-btn" id="read-more-btn" style="display:none;">Read More</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-container">
+      <div class="section-header">
+        <div class="section-title">Filmography</div>
+        <div style="font-size:0.9rem; color:var(--text-muted);" id="credit-count"></div>
+      </div>
+
+      <div class="filter-scroll" id="filter-container">
+        <button class="filter-chip active" id="btn-known" data-filter="known">
+          <i class="bi bi-star-fill"></i> Known For
+        </button>
+        <button class="filter-chip" id="btn-movie" data-filter="movie">Movies</button>
+        <button class="filter-chip" id="btn-tv" data-filter="tv">TV Shows</button>
+      </div>
+
+      <div class="media-grid" id="media-grid"></div>
+      <div class="text-center p-5 text-muted" id="empty-state" style="display:none;">Nothing to show here.</div>
+    </section>
+  </main>
+
+  <script>
+    const API_KEY = '926e94b0f70b5bed8417b679652366ab';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+    const BACKDROP_URL = 'https://image.tmdb.org/t/p/w780';
+
+    const els = {
+      loader: document.getElementById('loadingOverlay'),
+      name: document.getElementById('actor-name'),
+      meta: document.getElementById('actor-meta'),
+      bio: document.getElementById('bio-text'),
+      readMore: document.getElementById('read-more-btn'),
+      img: document.getElementById('profile-img'),
+      backdrop: document.getElementById('hero-backdrop'),
+      grid: document.getElementById('media-grid'),
+      count: document.getElementById('credit-count'),
+      empty: document.getElementById('empty-state'),
+      btnKnown: document.getElementById('btn-known'),
+      btnMovie: document.getElementById('btn-movie'),
+      btnTV: document.getElementById('btn-tv'),
+      filters: document.querySelectorAll('.filter-chip')
+    };
+
+    let fullCredits = [];
+    let knownForIds = [];
+    let hasKnownFor = false;
+
+    // --- Helpers ---
+    const formatDate = (str) => str ? str.split('-')[0] : '';
+    const getAge = (bday, dday) => {
+      if(!bday) return null;
+      const start = new Date(bday);
+      const end = dday ? new Date(dday) : new Date();
+      return Math.floor((end - start) / 31557600000);
+    };
+
+    async function fetchPerson() {
+      const id = window.location.search.substring(1).replace(/[^0-9]/g, '');
+      if(!id) return window.location.href = '/';
+
+      try {
+        const url = `${BASE_URL}/person/${id}?api_key=${API_KEY}&append_to_response=combined_credits,external_ids`;
+        const res = await fetch(url);
+        if(!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        
+        renderProfile(data);
+        
+        // Store Known For IDs from the person object
+        if (data.known_for && data.known_for.length > 0) {
+          knownForIds = data.known_for.map(i => i.id);
+          hasKnownFor = true;
+        }
+
+        processCredits(data.combined_credits);
+        updateFilterButtons();
+        
+        // Initial Render: Known For if exists, else All
+        renderGrid('known');
+
+      } catch (e) {
+        console.error(e);
+      } finally {
+        els.loader.style.opacity = '0';
+        setTimeout(() => els.loader.style.display = 'none', 400);
+      }
+    }
+
+    function renderProfile(data) {
+      document.title = data.name;
+      els.name.textContent = data.name;
+      
+      if(data.profile_path) {
+        els.img.src = `${IMG_URL}${data.profile_path}`;
+        els.backdrop.style.backgroundImage = `url(${BACKDROP_URL}${data.profile_path})`;
+      }
+
+      let meta = [];
+      if(data.known_for_department) meta.push(`<span><i class="bi bi-briefcase"></i>${data.known_for_department}</span>`);
+      if(data.birthday) {
+        const age = getAge(data.birthday, data.deathday);
+        meta.push(`<span><i class="bi bi-cake"></i>${age} years</span>`);
+      }
+      els.meta.innerHTML = meta.join('');
+
+      if(data.biography) {
+        els.bio.textContent = data.biography;
+        if(data.biography.length > 200) {
+          els.readMore.style.display = 'inline-block';
+          els.readMore.onclick = () => {
+             const exp = els.bio.classList.toggle('expanded');
+             els.readMore.textContent = exp ? 'Show Less' : 'Read More';
+          };
+        }
+      }
+    }
+
+    function processCredits(data) {
+      if(!data || !data.cast) return;
+
+      const seen = new Set();
+      fullCredits = data.cast
+        .filter(c => c.poster_path && c.id)
+        .filter(c => {
+          const k = `${c.id}|${c.media_type}`;
+          if(seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        })
+        .map(c => ({
+          id: c.id,
+          title: c.title || c.name,
+          poster: c.poster_path,
+          rating: c.vote_average ? c.vote_average.toFixed(1) : null,
+          year: formatDate(c.release_date || c.first_air_date),
+          fullDate: new Date(c.release_date || c.first_air_date || '1900-01-01'),
+          type: c.media_type, // 'movie' or 'tv'
+          role: c.character || 'Unknown'
+        }));
+    }
+
+    function updateFilterButtons() {
+      // 1. Configure the "Star/All" button
+      if (hasKnownFor) {
+        els.btnKnown.innerHTML = '<i class="bi bi-star-fill"></i>';
+        els.btnKnown.setAttribute('aria-label', 'Known For');
+      } else {
+        els.btnKnown.textContent = 'All';
+        els.btnKnown.setAttribute('aria-label', 'All Credits');
+      }
+
+      // 2. Count types
+      const movieCount = fullCredits.filter(c => c.type === 'movie').length;
+      const tvCount = fullCredits.filter(c => c.type === 'tv').length;
+
+      // 3. Hide if empty
+      if (movieCount === 0) els.btnMovie.classList.add('hidden');
+      if (tvCount === 0) els.btnTV.classList.add('hidden');
+    }
+
+    function renderGrid(filterMode) {
+      let list = [];
+
+      // Logic for "Known For" vs "All"
+      if (filterMode === 'known') {
+        if (hasKnownFor) {
+          // Show only items in knownForIds
+          list = fullCredits.filter(c => knownForIds.includes(c.id));
+          // If for some reason local filtering fails (e.g. data mismatch), fallback to All
+          if(list.length === 0) list = fullCredits; 
+        } else {
+          // "All" mode
+          list = fullCredits; 
+          // Default Sort for "All": Popularity or Newest? usually Newest is safer for "All"
+          list.sort((a,b) => b.fullDate - a.fullDate);
+        }
+      } 
+      else if (filterMode === 'movie') {
+        list = fullCredits.filter(c => c.type === 'movie');
+        // Sort Chronologically (Newest First)
+        list.sort((a,b) => b.fullDate - a.fullDate);
+      } 
+      else if (filterMode === 'tv') {
+        list = fullCredits.filter(c => c.type === 'tv');
+        // Sort Chronologically (Newest First)
+        list.sort((a,b) => b.fullDate - a.fullDate);
+      }
+
+      els.count.textContent = `(${list.length})`;
+
+      if(list.length === 0) {
+        els.grid.innerHTML = '';
+        els.empty.style.display = 'block';
+        return;
+      }
+      
+      els.empty.style.display = 'none';
+      els.grid.innerHTML = list.map(item => `
+        <a href="/${item.type === 'movie' ? 'movie' : 'show'}.html?${item.id}" class="media-card">
+          <div class="poster-wrapper">
+            <img src="${IMG_URL}${item.poster}" alt="${item.title}" loading="lazy">
+            ${item.rating ? `<div class="rating-badge"><i class="bi bi-star-fill"></i> ${item.rating}</div>` : ''}
+          </div>
+          <div class="card-info">
+            <div class="card-title">${item.title}</div>
+            <div class="card-meta">
+              <span>${item.year}</span>
+              ${filterMode === 'known' || !hasKnownFor ? `<span>• ${item.type === 'movie' ? 'Movie' : 'TV'}</span>` : ''}
+            </div>
+            <div class="text-muted small text-truncate">${item.role}</div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    els.filters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        els.filters.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderGrid(btn.dataset.filter);
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', fetchPerson);
+  </script>
+</body>
+</html>
