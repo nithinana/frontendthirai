@@ -706,6 +706,22 @@ if (!currentSeason && seasons && seasons.length) {
             transform: scale(1.02);
         }
         .server-close-x i { font-size: 1rem; }
+
+        /* Cast links styling: grey, no underline */
+        a.cast-link,
+        a.cast-link:link,
+        a.cast-link:visited {
+            color: var(--muted-text-color) !important;
+            text-decoration: none !important;
+        }
+        a.cast-link:hover,
+        a.cast-link:active,
+        a.cast-link:focus {
+            color: var(--muted-text-color) !important;
+            text-decoration: none !important;
+            outline: none;
+        }
+
 </style>
 </head>
 <body>
