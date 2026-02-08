@@ -866,7 +866,7 @@
                         <option value="bengali">Bengali</option>
                         <option value="marathi">Marathi</option>
                         <option value="punjabi">Punjabi</option>
-                                              <option value="tmdb">TMDB</option>
+                                              <option value="tmdb" id="tmdbOption">TMDB</option>
                     </select>
                     <input type="text" name="q" id="searchInput" class="form-control" placeholder=" ">
                     <button type="submit" class="btn btn-primary">
@@ -993,6 +993,71 @@
                     </div>
                 </div>
                 <button class="btn scroll-btn scroll-btn-next" id="next-btn-collections" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        
+        <div class="language-section" id="section-tmdb-movies" style="display: none;">
+            <div class="language-header">
+                <h2 class="language-title">TMDB Movies
+                    <a href="/language?lang=tmdb" class="explore-link" title="Explore TMDB">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
+                </h2>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-tmdb-movies">
+                      <span class="visually-hidden">Loading.</span>
+                    </div>
+                    <button class="btn load-more-arrow" data-language="tmdb-movies" data-tmdb="movie" title="Refresh">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tmdb-movies" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-tmdb-movies"></div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-tmdb-movies" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="language-section" id="section-tmdb-tv" style="display: none;">
+            <div class="language-header">
+                <h2 class="language-title">TMDB TV Shows
+                    <a href="/language?lang=tmdb" class="explore-link" title="Explore TMDB">
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="explore-text">Explore</span>
+                    </a>
+                </h2>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="spinner-border spinner-border-sm" role="status" id="spinner-tmdb-tv">
+                      <span class="visually-hidden">Loading.</span>
+                    </div>
+                    <button class="btn load-more-arrow" data-language="tmdb-tv" data-tmdb="tv" title="Refresh">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="movies-scroller-container">
+                <button class="btn scroll-btn scroll-btn-prev" id="prev-btn-tmdb-tv" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="movies-scroller-wrapper">
+                    <div class="movies-scroller">
+                        <div class="movies-row" id="movies-row-tmdb-tv"></div>
+                    </div>
+                </div>
+                <button class="btn scroll-btn scroll-btn-next" id="next-btn-tmdb-tv" aria-label="Next">
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
@@ -1642,6 +1707,11 @@ function normalizeWatchUrl(url) {
             updateLogoHeight();
             updateLogoLink();
             renderContinueWatching(); // Load Continue Watching on startup
+            updateTmdbVisibility();
+            if (isUnlocked()) {
+                loadTmdbPopular('movie');
+                loadTmdbPopular('tv');
+            }
         });
         
         // Listen for system theme changes
@@ -1736,6 +1806,7 @@ function updateLogoLink() {
 
             // Set the initial form action when the page loads
             updateSearchFormAction();
+            updateTmdbVisibility();
 
             if (languageSelect) {
                 languageSelect.addEventListener('change', updateSearchFormAction);
@@ -1859,8 +1930,120 @@ function updateLogoLink() {
         // --- END COLLECTIONS LOGIC ---
 
 
+        
+        // --- TMDB (LOCKED) ROWS LOGIC ---
+        const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
+        const TMDB_BASE = 'https://api.themoviedb.org/3';
+        const TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
+
+        function isUnlocked() {
+            const raw = localStorage.getItem('isUnlocked');
+            if (raw === null || raw === undefined) return false;
+            if (raw === true || raw === 'true') return true;
+            try {
+                const parsed = JSON.parse(raw);
+                return parsed === true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function updateTmdbVisibility() {
+            const unlocked = isUnlocked();
+
+            const tmdbOption = document.getElementById('tmdbOption');
+            if (tmdbOption) {
+                tmdbOption.style.display = unlocked ? '' : 'none';
+            }
+
+            const sectionMovies = document.getElementById('section-tmdb-movies');
+            const sectionTv = document.getElementById('section-tmdb-tv');
+
+            if (sectionMovies) sectionMovies.style.display = unlocked ? '' : 'none';
+            if (sectionTv) sectionTv.style.display = unlocked ? '' : 'none';
+
+            // If TMDB is selected but not unlocked, revert to tamil
+            const languageSelect = document.getElementById('languageSelect');
+            if (languageSelect && !unlocked && languageSelect.value === 'tmdb') {
+                languageSelect.value = 'tamil';
+            }
+        }
+
+        async function loadTmdbPopular(kind) {
+            if (!isUnlocked()) return;
+
+            const isTv = kind === 'tv';
+            const containerId = isTv ? 'movies-row-tmdb-tv' : 'movies-row-tmdb-movies';
+            const spinnerId = isTv ? 'spinner-tmdb-tv' : 'spinner-tmdb-movies';
+            const buttonSelector = isTv ? '.load-more-arrow[data-language="tmdb-tv"]' : '.load-more-arrow[data-language="tmdb-movies"]';
+
+            const container = document.getElementById(containerId);
+            const spinner = document.getElementById(spinnerId);
+            const button = document.querySelector(buttonSelector);
+
+            if (!container) return;
+
+            if (button) button.style.display = 'none';
+            if (spinner) spinner.style.display = 'inline-block';
+
+            try {
+                const endpoint = isTv ? '/tv/popular' : '/movie/popular';
+                const res = await fetch(`${TMDB_BASE}${endpoint}?api_key=${encodeURIComponent(TMDB_API_KEY)}&language=en-US&page=1`);
+                if (!res.ok) throw new Error('TMDB request failed');
+                const data = await res.json();
+
+                const results = Array.isArray(data.results) ? data.results : [];
+                container.innerHTML = '';
+
+                if (results.length === 0) {
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.className = 'text-muted my-3 empty-or-error-message';
+                    emptyMessage.textContent = 'No results found.';
+                    container.appendChild(emptyMessage);
+                    return;
+                }
+
+                const cardsHtml = results.slice(0, 20).map(item => {
+                    const title = (item.title || item.name || 'Untitled').trim();
+                    const poster = item.poster_path ? `${TMDB_IMG}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
+                    // Clicking runs a TMDB search on your existing route (no backend changes needed)
+                    const href = `/language?lang=tmdb&q=${encodeURIComponent(title)}`;
+
+                    return `
+                        <div class="col">
+                            <div class="movie-card">
+                                <a href="${href}" class="movie-link">
+                                    <img src="${poster}" class="movie-img" alt="${title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" loading="lazy">
+                                    <div class="movie-title-text">${title}</div>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.insertAdjacentHTML('beforeend', cardsHtml);
+
+                // Make sure scroll buttons calculate correctly
+                const prevBtn = document.getElementById(isTv ? 'prev-btn-tmdb-tv' : 'prev-btn-tmdb-movies');
+                const nextBtn = document.getElementById(isTv ? 'next-btn-tmdb-tv' : 'next-btn-tmdb-movies');
+                updateScrollButtonsVisibility(container, prevBtn, nextBtn);
+            } catch (e) {
+                console.error('TMDB load error:', e);
+                container.innerHTML = '';
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'text-danger my-3 empty-or-error-message';
+                errorMessage.textContent = 'Could not load TMDB items. Please try again later.';
+                container.appendChild(errorMessage);
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+                if (button) button.style.display = 'flex';
+            }
+        }
+        // --- END TMDB LOGIC ---
+
+
         // --- MOVIE LOADING LOGIC ---
-        const languageSections = document.querySelectorAll('.language-section:not(#section-collections):not(#section-continue-watching)');
+        const languageSections = document.querySelectorAll('.language-section:not(#section-collections):not(#section-continue-watching):not(#section-tmdb-movies):not(#section-tmdb-tv)');
         const languagePages = {};
 
         async function loadMovies(language, category, pageToLoad) {
@@ -1982,6 +2165,11 @@ function updateLogoLink() {
         const loadMoreButtons = document.querySelectorAll('.load-more-arrow');
         loadMoreButtons.forEach(btn => {
             btn.addEventListener('click', function() {
+                // TMDB refresh buttons
+                if (this.dataset.tmdb) {
+                    loadTmdbPopular(this.dataset.tmdb);
+                    return;
+                }
                 const language = this.dataset.language;
                 const category = this.dataset.category;
                 loadMovies(language, category, languagePages[language]);
