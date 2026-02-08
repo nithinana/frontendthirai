@@ -124,7 +124,7 @@
         .h-scroll-wrapper { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; }
         .h-scroll-wrapper::-webkit-scrollbar { height: 4px; }
         .h-scroll-wrapper::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .cast-item { min-width: 130px; flex-shrink: 0; }
+        .cast-item { min-width: 130px; flex-shrink: 0; cursor: pointer; }
         .cast-img { width: 130px; height: 180px; object-fit: cover; border-radius: 8px; background: #222; }
         .cast-name { font-size: 0.85rem; font-weight: 700; color: #fff; margin-top: 8px; line-height: 1.2; }
         .cast-char { font-size: 0.75rem; color: #777; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
@@ -346,8 +346,8 @@
                 .filter(c => c.profile_path)
                 .slice(0, 15)
                 .map(c => `
-                    <div class="cast-item">
-                        <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="cast-img">
+                    <div class="cast-item" role="button" tabindex="0" onclick="window.location.href='/cast.html?${c.id}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); window.location.href='/cast.html?${c.id}';}">
+                        <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="cast-img" alt="${c.name}">
                         <div class="cast-info">
                             <div class="cast-name">${c.name}</div>
                             <div class="cast-char">${c.character}</div>
