@@ -2007,7 +2007,9 @@ function updateLogoLink() {
                     const title = (item.title || item.name || 'Untitled').trim();
                     const poster = item.poster_path ? `${TMDB_IMG}${item.poster_path}` : 'https://via.placeholder.com/400x600?text=No+Image';
                     // Clicking runs a TMDB search on your existing route (no backend changes needed)
-                    const href = `/language?lang=tmdb&q=${encodeURIComponent(title)}`;
+                    const href = (isTv 
+                        ? `https://thirai.me/show.html?${item.id}` 
+                        : `https://thirai.me/movie.html?${item.id}`);
 
                     return `
                         <div class="col">
