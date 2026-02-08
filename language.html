@@ -230,6 +230,58 @@
             object-fit: cover;
             background-color: var(--bg-color);
         }
+
+        /* --- TMDB ROW STYLES --- */
+        .tmdb-row-wrapper {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 0 10px;
+        }
+        .tmdb-row-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding-left: 5px;
+        }
+        .tmdb-scroll-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tmdb-scroll-container::-webkit-scrollbar {
+            display: none; /* Safari/Chrome */
+        }
+        .tmdb-item {
+            flex: 0 0 160px; /* Fixed width for items in the row */
+        }
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .scroll-btn:hover { background: var(--primary-color); }
+        .scroll-btn.left { left: -10px; }
+        .scroll-btn.right { right: -10px; }
+
+        @media (max-width: 768px) {
+            .scroll-btn { display: none; } /* Use native touch swipe on mobile */
+            .tmdb-item { flex: 0 0 130px; }
+        }
         
         /* --- Load More & Spinner --- */
         .load-more-container {
@@ -424,6 +476,34 @@
                 flex: 0 0 auto;
             }
         }
+        .header-search .lang-selector {
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            height: calc(1.5em + 1rem + 2px);
+            padding: 0 0.75rem;
+            max-width: 140px;
+        }
+        .header-search .lang-selector:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+    
+        .header-search .btn-primary {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 0 0.6rem;
+        }
+        .header-search .btn-primary:hover {
+            background: rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+        }
+
     </style>
 </head>
 <body>
@@ -449,7 +529,9 @@
             </div>
             <div class="d-flex justify-content-center flex-grow-1 header-main-content">
                 <form id="searchForm" action="./language" method="GET" class="header-search">
-                    <input type="hidden" name="lang" id="searchLangInput"> <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
+                    <input type="hidden" name="lang" id="searchLangInput">
+                    <select id="langSelector" class="lang-selector" aria-label="Language selector"></select>
+                    <input type="text" name="q" id="searchInput" class="form-control" placeholder="Search movies...">
                     <button type="submit" class="btn btn-primary" title="Search">
                         <i class="bi bi-search"></i>
                     </button>
@@ -466,7 +548,7 @@
     </header>
 
     <main class="container movie-grid">
-        <div class="row" id="moviesContainer"></div>
+        <div id="moviesContainer" class="row"></div>
 
         <div class="load-more-container">
             <button id="loadMoreBtn" class="btn btn-primary">Load More</button>
@@ -519,9 +601,10 @@
     <script>
         const PRIMARY_API_URL = 'https://api.thirai.me';
         const FALLBACK_API_URL = 'https://backendthirai-test.onrender.com';
+        const TMDB_API_KEY = '926e94b0f70b5bed8417b679652366ab';
         let currentApiBase = PRIMARY_API_URL;
 
-        const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi'];
+        const ALL_LANGUAGES = ['tamil', 'hindi', 'telugu', 'malayalam', 'kannada', 'bengali', 'marathi', 'punjabi', 'tmdb'];
 
         // --- Element Selectors ---
         const body = document.body;
@@ -530,6 +613,7 @@
         const spinner = document.getElementById('loadingSpinner');
         const searchInput = document.getElementById('searchInput');
         const searchLangInput = document.getElementById('searchLangInput');
+        const langSelector = document.getElementById('langSelector');
         const recentLink = document.getElementById('recentLink');
         const popularLink = document.getElementById('popularLink');
         const categoryNav = document.getElementById('categoryNav');
@@ -550,32 +634,17 @@
         let currentPage = 1;
         let isLoading = false;
         
-        // --- NEW: Function to wake up the server ---
         async function wakeServer() {
             try {
                 const serverUrl = 'https://thirai-watch.onrender.com/';
-                console.log('Attempting to wake up the server at:', serverUrl);
-
-                await fetch(serverUrl, {
-                    method: 'GET',
-                    mode: 'no-cors'
-                });
-
-                console.log('Server wake-up request sent.');
-
-            } catch (error) {
-                console.error('Failed to send wake-up request:', error);
-            }
+                await fetch(serverUrl, { method: 'GET', mode: 'no-cors' });
+            } catch (error) { console.error('Wake up failed', error); }
         }
 
-        /**
-         * Mobile Header Overlap Fix
-         */
         function adjustBodyPadding() {
             const header = document.querySelector('.app-header');
             if (header) {
-                const headerHeight = header.offsetHeight;
-                body.style.paddingTop = `${headerHeight}px`;
+                body.style.paddingTop = `${header.offsetHeight}px`;
             }
         }
 
@@ -598,7 +667,7 @@
                 body.classList.remove('dark-mode');
                 localStorage.setItem('theme', 'light');
                 isDarkMode = false;
-            } else { // System default
+            } else { 
                 localStorage.removeItem('theme');
                 isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (isDarkMode) body.classList.add('dark-mode');
@@ -622,12 +691,6 @@
                 updateActiveThemeOption(selectedTheme);
             });
         });
-        
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-                if (!localStorage.getItem('theme')) applyTheme('system');
-            });
-        }
 
         // --- Preferred Language ---
         function updateDisableBtnVisibility() {
@@ -675,10 +738,183 @@
             });
         }
 
-        // --- Movie Rendering ---
+        // --- TMDB SPECIAL RENDERING (GRID + LOAD MORE) ---
+        const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+
+        const tmdbState = {
+            mode: null,           // 'search' | 'popular' | 'recent'
+            query: '',
+            moviePage: 1,
+            tvPage: 1,
+            movieTotalPages: 1,
+            tvTotalPages: 1
+        };
+
+        function ensureTMDBSections(reset = false) {
+            if (reset) {
+                moviesContainer.innerHTML = `
+                    <div id="tmdbMoviesSection"></div>
+                    <div id="tmdbTvSection" class="mt-4"></div>
+                `;
+            } else if (!document.getElementById('tmdbMoviesSection')) {
+                moviesContainer.innerHTML = `
+                    <div id="tmdbMoviesSection"></div>
+                    <div id="tmdbTvSection" class="mt-4"></div>
+                `;
+            }
+        }
+
+        function setTMDBLoadMoreVisibility() {
+            const canLoadMoreMovies = tmdbState.moviePage < tmdbState.movieTotalPages;
+            const canLoadMoreTV = tmdbState.tvPage < tmdbState.tvTotalPages;
+            loadMoreBtn.style.display = (canLoadMoreMovies || canLoadMoreTV) ? 'inline-block' : 'none';
+        }
+
+        function renderTMDBItems(sectionId, title, items, type, append = false) {
+            const sectionEl = document.getElementById(sectionId);
+            if (!sectionEl) return;
+
+            const validItems = (items || []).filter(it => it && it.poster_path); // HIDE items without posters
+
+            // If no items, hide the whole section (and title)
+            if (validItems.length === 0 && !append) {
+                sectionEl.innerHTML = '';
+                sectionEl.style.display = 'none';
+                return;
+            }
+
+            sectionEl.style.display = 'block';
+
+            if (!append) {
+                sectionEl.innerHTML = `
+                    <div class="tmdb-row-title">${title}</div>
+                    <div class="row" id="${sectionId}-grid"></div>
+                `;
+            }
+
+            const grid = document.getElementById(`${sectionId}-grid`);
+            if (!grid) return;
+
+            const cardsHtml = validItems.map(it => {
+                const href = type === 'movie'
+                    ? `https://thirai.me/movie.html?${it.id}`
+                    : `https://thirai.me/show.html?${it.id}`;
+                const name = type === 'movie' ? it.title : it.name;
+
+                return `
+                    <div class="col">
+                        <div class="movie-card">
+                            <a href="${href}" class="movie-link">
+                                <img src="${TMDB_IMG_BASE}${it.poster_path}" class="movie-img" alt="${name}" loading="lazy">
+                                <div class="movie-title">${name}</div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            grid.insertAdjacentHTML('beforeend', cardsHtml);
+        }
+
+        async function fetchTMDBPayload(mode, page, query, kind) {
+            // kind: 'movie' | 'tv'
+            const base = 'https://api.themoviedb.org/3';
+            if (mode === 'search') {
+                const endpoint = kind === 'movie' ? '/search/movie' : '/search/tv';
+                return fetch(`${base}${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}`);
+            }
+            if (mode === 'popular') {
+                const endpoint = kind === 'movie' ? '/movie/popular' : '/tv/popular';
+                return fetch(`${base}${endpoint}?api_key=${TMDB_API_KEY}&page=${page}`);
+            }
+            // mode === 'recent' -> trending this week
+            const endpoint = kind === 'movie' ? '/trending/movie/week' : '/trending/tv/week';
+            return fetch(`${base}${endpoint}?api_key=${TMDB_API_KEY}&page=${page}`);
+        }
+
+        async function fetchAndRenderTMDB({ mode, query = '', append = false } = {}) {
+            if (isLoading) return;
+            isLoading = true;
+            spinner.style.display = 'block';
+            if (!append) {
+                ensureTMDBSections(true);
+                tmdbState.moviePage = 1;
+                tmdbState.tvPage = 1;
+                tmdbState.movieTotalPages = 1;
+                tmdbState.tvTotalPages = 1;
+            } else {
+                ensureTMDBSections(false);
+            }
+
+            tmdbState.mode = mode;
+            tmdbState.query = query;
+
+            try {
+                const moviePageToFetch = append ? (tmdbState.moviePage + 1) : 1;
+                const tvPageToFetch = append ? (tmdbState.tvPage + 1) : 1;
+
+                const [movieRes, tvRes] = await Promise.all([
+                    (tmdbState.moviePage < tmdbState.movieTotalPages || !append)
+                        ? fetchTMDBPayload(mode, moviePageToFetch, query, 'movie')
+                        : Promise.resolve(null),
+                    (tmdbState.tvPage < tmdbState.tvTotalPages || !append)
+                        ? fetchTMDBPayload(mode, tvPageToFetch, query, 'tv')
+                        : Promise.resolve(null)
+                ]);
+
+                let movieJson = null, tvJson = null;
+
+                if (movieRes) {
+                    if (!movieRes.ok) throw new Error('TMDB movie fetch failed');
+                    movieJson = await movieRes.json();
+                    tmdbState.moviePage = moviePageToFetch;
+                    tmdbState.movieTotalPages = movieJson.total_pages || 1;
+                    renderTMDBItems('tmdbMoviesSection', 'Movies', movieJson.results || [], 'movie', append);
+                }
+
+                if (tvRes) {
+                    if (!tvRes.ok) throw new Error('TMDB tv fetch failed');
+                    tvJson = await tvRes.json();
+                    tmdbState.tvPage = tvPageToFetch;
+                    tmdbState.tvTotalPages = tvJson.total_pages || 1;
+                    renderTMDBItems('tmdbTvSection', 'TV Shows', tvJson.results || [], 'tv', append);
+                }
+
+                // If both empty (after filtering), show message
+                const moviesVisible = document.getElementById('tmdbMoviesSection')?.style.display !== 'none' && document.getElementById('tmdbMoviesSection')?.innerHTML.trim();
+                const tvVisible = document.getElementById('tmdbTvSection')?.style.display !== 'none' && document.getElementById('tmdbTvSection')?.innerHTML.trim();
+                if (!moviesVisible && !tvVisible) {
+                    moviesContainer.innerHTML = '<p class="text-center text-muted col-12">No results found on TMDB.</p>';
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    setTMDBLoadMoreVisibility();
+                }
+
+            } catch (err) {
+                console.error(err);
+                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Error fetching from TMDB.</p>';
+                loadMoreBtn.style.display = 'none';
+            } finally {
+                spinner.style.display = 'none';
+                isLoading = false;
+                hideOverlay();
+            }
+        }
+
+        function setActiveCategoryLink(which) {
+            recentLink.classList.remove('active');
+            popularLink.classList.remove('active');
+            if (which === 'popular') popularLink.classList.add('active');
+            else recentLink.classList.add('active');
+        }
+
+        // --- Standard Movie Rendering ---
+
         function renderMovies(movies, append = true) {
             if (!append) moviesContainer.innerHTML = '';
-            
+            // Hide items without posters
+            const safeMovies = (movies || []).filter(m => m && m.img_url && String(m.img_url).trim() !== '');
+            movies = safeMovies;
             if (!movies || movies.length === 0) {
                 if (!append) moviesContainer.innerHTML = '<p class="text-center text-muted col-12">No movies found.</p>';
                 loadMoreBtn.style.display = 'none';
@@ -704,7 +940,6 @@
             moviesContainer.insertAdjacentHTML('beforeend', moviesHtml);
         }
 
-        // --- Data Fetching ---
         async function fetchAndRenderMovies(endpoint, append = true, pagesToLoad = 1) {
             if (isLoading) return;
             isLoading = true;
@@ -712,9 +947,8 @@
             spinner.style.display = 'block';
 
             const tryFetch = async (baseUrl, currentEndpoint) => {
-                const fullUrl = `${baseUrl}${currentEndpoint}`;
-                const res = await fetch(fullUrl);
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const res = await fetch(`${baseUrl}${currentEndpoint}`);
+                if (!res.ok) throw new Error();
                 return await res.json();
             };
 
@@ -736,12 +970,9 @@
                     
                     if (data.has_more) {
                         currentPage = data.next_page;
-                        
-                        // Prep for next page in the batch
                         const urlObj = new URL(currentPath, 'https://dummy.com');
                         urlObj.searchParams.set('page', currentPage);
                         currentPath = urlObj.pathname + urlObj.search;
-                        
                         loadMoreBtn.style.display = 'inline-block';
                         pagesFetched++;
                     } else {
@@ -750,21 +981,23 @@
                     }
                 }
             } catch (error) {
-                console.error('Error loading movies:', error);
-                if (!append) moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Failed to load movies. Please try again later.</p>';
+                if (!append) moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Failed to load movies.</p>';
             } finally {
                 spinner.style.display = 'none';
                 isLoading = false;
-                
-                if (!initialLoadComplete) {
-                    initialLoadComplete = true;
-                    clearTimeout(loadingTimer);
-                    loadingOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        body.classList.remove('no-scroll');
-                    }, 500);
-                }
+                hideOverlay();
+            }
+        }
+
+        function hideOverlay() {
+            if (!initialLoadComplete) {
+                initialLoadComplete = true;
+                clearTimeout(loadingTimer);
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    body.classList.remove('no-scroll');
+                }, 500);
             }
         }
         
@@ -778,60 +1011,113 @@
 
             populateLanguageMenus();
             setupPreferredLanguage();
+            function labelForLang(l) {
+                if (l === 'tmdb') return 'TMDB';
+                if (l === 'all') return 'All';
+                return l.charAt(0).toUpperCase() + l.slice(1);
+            }
+
+            function populateLangSelector(currentLang) {
+                if (!langSelector) return;
+                langSelector.innerHTML = '';
+                ALL_LANGUAGES.forEach(l => {
+                    const opt = document.createElement('option');
+                    opt.value = l;
+                    opt.textContent = labelForLang(l);
+                    langSelector.appendChild(opt);
+                });
+                if (currentLang && ALL_LANGUAGES.includes(currentLang)) {
+                    langSelector.value = currentLang;
+                }
+            }
+
+            if (langSelector) {
+                langSelector.addEventListener('change', () => {
+                    const selected = langSelector.value;
+                    localStorage.setItem('last-selected-lang', selected);
+                    // Keep category/search behavior consistent with current page
+                    const params = new URLSearchParams(window.location.search);
+                    const q = params.get('q');
+                    const category = params.get('category') || 'recent';
+                    if (q) {
+                        window.location.href = `./language?lang=${selected}&q=${encodeURIComponent(q)}`;
+                    } else {
+                        window.location.href = `./language?lang=${selected}&category=${category}`;
+                    }
+                });
+            }
+
 
             loadingTimer = setTimeout(() => {
-                if (!initialLoadComplete) {
-                    slowNetworkMessage.style.display = 'flex';
-                }
+                if (!initialLoadComplete) slowNetworkMessage.style.display = 'flex';
             }, 7000);
 
             const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang');
+            const langParam = urlParams.get('lang');
+            const storedLastLang = localStorage.getItem('last-selected-lang');
+            const lang = langParam || storedLastLang;
             const category = urlParams.get('category') || 'recent';
             const searchQuery = urlParams.get('q');
 
-            if (lang === 'all') {
-                window.location.replace('./all');
-                return;
-            }
-            
-            if (!lang || !ALL_LANGUAGES.includes(lang)) {
-                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid or missing language specified in URL.</p>';
-                loadMoreBtn.style.display = 'none';
-                if (!initialLoadComplete) {
-                    initialLoadComplete = true;
-                    clearTimeout(loadingTimer);
-                    loadingOverlay.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        body.classList.remove('no-scroll');
-                    }, 500);
+            if (!langParam && lang) {
+                // Normalize URL to include lang for consistency
+                const normalized = new URL(window.location.href);
+                normalized.searchParams.set('lang', lang);
+                if (!normalized.searchParams.get('category') && !normalized.searchParams.get('q')) {
+                    normalized.searchParams.set('category', 'recent');
                 }
-                document.title = "Error - Thirai";
+                window.location.replace(normalized.pathname + normalized.search);
                 return;
             }
 
-            const capitalizedLang = lang.charAt(0).toUpperCase() + lang.slice(1);
+            if (lang === 'all') { window.location.replace('./all'); return; }
+            
+            if (!lang || !ALL_LANGUAGES.includes(lang)) {
+                moviesContainer.innerHTML = '<p class="text-center text-danger col-12">Invalid language.</p>';
+                hideOverlay();
+                return;
+            }
+
+            localStorage.setItem('last-selected-lang', lang);
+            populateLangSelector(lang);
+            const capitalizedLang = lang.toUpperCase();
             document.title = `Thirai - ${capitalizedLang}`;
-            searchInput.placeholder = `Search ${capitalizedLang} movies...`;
+            searchInput.placeholder = `Search ${capitalizedLang}...`;
             searchLangInput.value = lang;
             recentLink.href = `./language?lang=${lang}&category=recent`;
             popularLink.href = `./language?lang=${lang}&category=popular`;
             
-            if (searchQuery) {
-                document.title = `Search for "${searchQuery}" - Thirai`;
+            if (lang === 'tmdb') {
+                // In TMDB mode:
+                // - Search uses TMDB (Movies + TV Shows)
+                // - Recent/Popular tabs show TMDB trending / popular (grid + Load More)
+                categoryNav.style.display = 'flex';
+                recentLink.href = '#';
+                popularLink.href = '#';
+
+                const loadTMDBRecent = (append=false) => { setActiveCategoryLink('recent'); fetchAndRenderTMDB({ mode: 'recent', append }); };
+                const loadTMDBPopular = (append=false) => { setActiveCategoryLink('popular'); fetchAndRenderTMDB({ mode: 'popular', append }); };
+
+                recentLink.onclick = (e) => { e.preventDefault(); loadTMDBRecent(false); };
+                popularLink.onclick = (e) => { e.preventDefault(); loadTMDBPopular(false); };
+
+                if (searchQuery) {
+                    searchInput.value = searchQuery;
+                    categoryNav.style.display = 'none';
+                    fetchAndRenderTMDB({ mode: 'search', query: searchQuery, append: false });
+                } else {
+                    // Default TMDB view shows "Recent" (trending)
+                    loadTMDBRecent(false);
+                }
+            } else if (searchQuery) {
                 searchInput.value = searchQuery;
                 categoryNav.style.display = 'none';
                 loadMoreBtn.style.display = 'none';
-                const searchEndpoint = `/search/${lang}?q=${encodeURIComponent(searchQuery)}`;
-                fetchAndRenderMovies(searchEndpoint, false, 1);
+                fetchAndRenderMovies(`/search/${lang}?q=${encodeURIComponent(searchQuery)}`, false, 1);
             } else {
                 if (category === 'popular') popularLink.classList.add('active');
                 else recentLink.classList.add('active');
-                
-                // Batch load 2 pages by default
-                const initialEndpoint = `/language/${lang}?category=${category}&page=1`;
-                fetchAndRenderMovies(initialEndpoint, false, 2);
+                fetchAndRenderMovies(`/language/${lang}?category=${category}&page=1`, false, 2);
             }
         });
         
@@ -840,8 +1126,7 @@
             preferredLangList.innerHTML = '<a class="list-group-item list-group-item-action preferred-lang-option" href="#" data-language="all">All Languages</a>';
 
             ALL_LANGUAGES.forEach(lang => {
-                const capitalized = lang.charAt(0).toUpperCase() + lang.slice(1);
-                
+                const capitalized = (lang === 'tmdb') ? 'TMDB' : (lang.charAt(0).toUpperCase() + lang.slice(1));
                 const li = document.createElement('li');
                 li.innerHTML = `<a class="dropdown-item" href="./language?lang=${lang}&category=popular">${capitalized}</a>`;
                 languageDropdownMenu.appendChild(li);
@@ -856,17 +1141,25 @@
             languageDropdownMenu.innerHTML += `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>`;
         }
 
-        // --- Event Listeners ---
         window.addEventListener('resize', adjustBodyPadding);
 
         loadMoreBtn.addEventListener('click', function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang');
+            const lang = urlParams.get('lang') || localStorage.getItem('last-selected-lang');
+
+            if (lang === 'tmdb') {
+                if (tmdbState.mode === 'search') {
+                    fetchAndRenderTMDB({ mode: 'search', query: tmdbState.query, append: true });
+                } else if (tmdbState.mode === 'popular') {
+                    fetchAndRenderTMDB({ mode: 'popular', append: true });
+                } else {
+                    fetchAndRenderTMDB({ mode: 'recent', append: true });
+                }
+                return;
+            }
+
             const category = urlParams.get('category') || 'recent';
-            
-            const endpoint = `/language/${lang}?category=${category}&page=${currentPage}`;
-            // Load another 3 pages
-            fetchAndRenderMovies(endpoint, true, 3);
+            fetchAndRenderMovies(`/language/${lang}?category=${category}&page=${currentPage}`, true, 3);
         });
 
         searchForm.addEventListener('submit', function(event) {
@@ -878,48 +1171,10 @@
 
         const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
         const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-        document.getElementById('aboutButtonInModal').addEventListener('click', function (event) {
-            event.preventDefault();
-            settingsModal.hide();
-            aboutModal.show();
+        document.getElementById('aboutButtonInModal').addEventListener('click', function (e) {
+            e.preventDefault(); settingsModal.hide(); aboutModal.show();
         });
-        document.getElementById('aboutModal').addEventListener('hidden.bs.modal', function () {
-            settingsModal.show();
-        });
-
+        document.getElementById('aboutModal').addEventListener('hidden.bs.modal', () => settingsModal.show());
     </script>
-
-<script>
-    // --- CONTINUE WATCHING CACHE LOGIC ---
-    const CACHE_KEY = 'thirai_continue_watching';
-
-    function saveToContinueWatching(movie) {
-        let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-        history = history.filter(item => item.url !== movie.url);
-        history.unshift(movie);
-        if (history.length > 20) history.pop();
-        localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-    }
-
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('.movie-link');
-        if (!link) return;
-
-        const url = link.getAttribute('href');
-        if (url && url.includes('watch')) {
-            const card = link.closest('.movie-card');
-            if (!card) return;
-
-            const title =
-                card.querySelector('.movie-title-text')?.textContent ||
-                card.querySelector('.movie-title')?.textContent ||
-                '';
-
-            const img = card.querySelector('.movie-img')?.src || '';
-            saveToContinueWatching({ title, img, url });
-        }
-    });
-</script>
-
 </body>
 </html>
