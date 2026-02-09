@@ -24,6 +24,7 @@
            1. CORE VARIABLES & RESET
            ============================================== */
         :root {
+    --sidebar-width: 76px;
             --bg-body: #080808;
             --bg-card: #121212;
             --text-main: #ffffff;
@@ -369,6 +370,30 @@
     margin: 0 auto;
 }
 
+
+/* Desktop sidebar (hidden on mobile) */
+.desktop-sidebar {
+    display: none;
+}
+
+.desktop-sidebar .side-item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.72);
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+.desktop-sidebar .side-item i { font-size: 1.1rem; }
+.desktop-sidebar .side-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); }
+.desktop-sidebar .side-item:active { transform: translateY(1px); }
+.desktop-sidebar .side-item.active { color: #fff; background: rgba(255,255,255,0.08); }
+
 /* Desktop header nav (hidden on mobile) */
 .desktop-nav {
     display: none;
@@ -418,8 +443,42 @@
 
 /* Wider screens */
 @media (min-width: 900px) {
-    body { padding-bottom: 0; } /* bottom nav hidden on desktop */
+    body { padding-bottom: 0; padding-left: var(--sidebar-width); } /* bottom nav hidden on desktop */
     .bottom-nav { display: none; }
+    .desktop-sidebar {
+        display: flex;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        bottom: 0;
+        width: var(--sidebar-width);
+        align-items: center;
+        justify-content: center; /* center the buttons vertically */
+        flex-direction: column;
+        gap: 18px;
+        /* Smooth black fade (matches attached reference vibe) */
+        background: linear-gradient(180deg,
+            rgba(0,0,0,0.65) 0%,
+            rgba(0,0,0,0.38) 45%,
+            rgba(0,0,0,0.38) 55%,
+            rgba(0,0,0,0.65) 100%
+        );
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-right: 1px solid rgba(255,255,255,0.06);
+        z-index: 999;
+    }
+    .desktop-sidebar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -56px;
+        width: 56px;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(0,0,0,0.75), rgba(0,0,0,0));
+        pointer-events: none;
+    }
+
 
     /* Header becomes a clean glass bar */
     .header {
@@ -430,6 +489,8 @@
         -webkit-backdrop-filter: blur(14px);
         border-bottom: 1px solid rgba(255,255,255,0.08);
     }
+    .header { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
+
     .header.scrolled { background: rgba(8, 8, 8, 0.86); }
 
     .header-content {
@@ -438,12 +499,11 @@
         gap: 16px;
     }
 
-    /* Logo left, desktop nav visible */
-    .logo-container { flex: 0; justify-content: flex-start; }
+        /* Centered logo; sidebar handles navigation */
+    .logo-container { flex: 1; justify-content: center; }
     .logo { height: 24px; }
-    .desktop-nav { display: flex; }
-
-    /* Use the right placeholder area for spacing */
+    .desktop-nav { display: none; }
+/* Use the right placeholder area for spacing */
     .header-right-placeholder { width: auto; flex: 1; }
 
     /* Views get centered with comfortable spacing */
@@ -508,16 +568,23 @@
         <div class="logo-container">
             <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
         </div>
-
-        <nav class="desktop-nav" aria-label="Primary">
-            <div class="nav-link" id="desk-home" onclick="switchTab('home')"><i class="fas fa-home"></i> Home</div>
-            <div class="nav-link" id="desk-collections" onclick="switchTab('collections')"><i class="fas fa-layer-group"></i> Collections</div>
-            <div class="nav-link" id="desk-search" onclick="switchTab('search')"><i class="fas fa-search"></i> Search</div>
-        </nav>
-
-        <div class="header-right-placeholder"></div>
+<div class="header-right-placeholder"></div>
     </div>
 </header>
+
+<!-- Desktop Sidebar -->
+<aside class="desktop-sidebar" aria-label="Primary">
+  <button class="side-item" id="desk-home" onclick="switchTab('home')" aria-label="Home" title="Home">
+    <i class="fas fa-home"></i>
+  </button>
+  <button class="side-item" id="desk-search" onclick="switchTab('search')" aria-label="Search" title="Search">
+    <i class="fas fa-search"></i>
+  </button>
+  <button class="side-item" id="desk-collections" onclick="switchTab('collections')" aria-label="Collections" title="Collections">
+    <i class="fas fa-layer-group"></i>
+  </button>
+</aside>
+
 
     <div id="view-home">
         <div class="hero">
