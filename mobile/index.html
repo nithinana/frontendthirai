@@ -24,6 +24,7 @@
            1. CORE VARIABLES & RESET
            ============================================== */
         :root {
+    --sidebar-width: 76px;
             --bg-body: #080808;
             --bg-card: #121212;
             --text-main: #ffffff;
@@ -62,12 +63,11 @@
     align-items: center;
     padding: 0 20px;
     /* Improved Multi-stop Gradient for a smoother transition */
-    background: linear-gradient(
-        180deg, 
-        rgba(0, 0, 0, 0.9) 0%, 
-        rgba(0, 0, 0, 0.7) 30%, 
-        rgba(0, 0, 0, 0.4) 60%, 
-        rgba(0, 0, 0, 0.1) 85%, 
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.95) 22%,
+        rgba(0, 0, 0, 0.60) 55%,
+        rgba(0, 0, 0, 0.18) 78%,
         rgba(0, 0, 0, 0) 100%
     );
     z-index: 100;
@@ -84,14 +84,27 @@
         
 /* Updated Header Layout for better mobile scaling */
 .header-content {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     width: 100%;
-    gap: 12px; /* Adds space between the back button and logo area */
+}
+
+/* Equal left/right space keeps the logo perfectly centered */
+.back-button-wrapper {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+}
+
+.header-right-placeholder {
+    justify-self: end;
+    display: flex;
+    align-items: center;
 }
 
 .logo-container {
-    flex: 1; /* Allows the container to grow/shrink based on screen width */
+    justify-self: center;
     display: flex;
     justify-content: center;
 }
@@ -101,13 +114,6 @@
     cursor: pointer;
     display: block;
 }
-
-.back-button-wrapper, .header-right-placeholder {
-    width: 32px; /* Fixed width for both sides to keep logo perfectly centered */
-    display: flex;
-    justify-content: center;
-}
-
 /* Updated Back Button to not overlap logo */
 .back-button {
     position: static; /* Changed from absolute to flow naturally in flexbox */
@@ -287,14 +293,19 @@
 }
 
 .search-input {
-    flex: 2; /* Takes up most space */
-    min-width: 0; /* Prevents input from forcing other items out */
-    background: #1c1c1c; 
-    border: none; 
-    border-radius: 8px;
-    padding: 12px; 
-    color: white; 
-    font-size: 0.9rem;
+    flex: 2;
+    min-width: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 13px 14px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+.search-input:focus {
+    border-color: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
 }
 /* Prevent blue background on autofill/previous prompts */
 .search-input:-webkit-autofill,
@@ -360,6 +371,206 @@
 }
         .bottom-nav .nav-item.active { color: white; }
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+    /* ==============================================
+   7. DESKTOP FRIENDLY LAYOUT (Responsive Enhancements)
+   ============================================== */
+.page-container {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+
+/* Desktop sidebar (hidden on mobile) */
+.desktop-sidebar {
+    display: none;
+}
+
+.desktop-sidebar .side-item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.72);
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+.desktop-sidebar .side-item i { font-size: 1.1rem; }
+.desktop-sidebar .side-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); }
+.desktop-sidebar .side-item:active { transform: translateY(1px); }
+.desktop-sidebar .side-item:focus { background: transparent; color: rgba(255,255,255,0.92); }
+
+.desktop-sidebar .side-item.active { color: #fff; background: rgba(255,255,255,0.08); }
+
+/* Desktop header nav (hidden on mobile) */
+.desktop-nav {
+    display: none;
+    align-items: center;
+    gap: 10px;
+}
+.desktop-nav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+.desktop-nav .nav-link:hover {
+    transform: translateY(-1px);
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.14);
+}
+.desktop-nav .nav-link.active {
+    background: rgba(255,255,255,0.16);
+    border-color: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
+/* Make horizontal rows feel nicer on desktop */
+.row-container { scroll-snap-type: x proximity; }
+.card { scroll-snap-align: start; }
+.card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
+            rgba(0,0,0,0) 100%
+        );
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    pointer-events:none;
+}
+.card:hover::after { opacity: 1; }
+
+/* Wider screens */
+@media (min-width: 900px) {
+    body { padding-bottom: 0; padding-left: var(--sidebar-width); } /* bottom nav hidden on desktop */
+    .bottom-nav { display: none; }
+    .desktop-sidebar {
+        display: flex;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        bottom: 0;
+        width: var(--sidebar-width);
+        align-items: center;
+        justify-content: center; /* center the buttons vertically */
+        flex-direction: column;
+        gap: 18px;
+        /* Smooth black fade (matches attached reference vibe) */
+        background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
+            rgba(0,0,0,0) 100%
+        );
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-right: 1px solid rgba(255,255,255,0.06);
+        z-index: 999;
+    }
+    .desktop-sidebar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -56px;
+        width: 56px;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+    }
+
+
+    /* Header becomes a clean glass bar */
+    .header {
+        height: 72px;
+        padding: 0 28px;
+        background: rgba(8, 8, 8, 0.72);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .header { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
+
+    .header.scrolled { background: rgba(8, 8, 8, 0.86); }
+
+    .header-content {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+        /* Centered logo; sidebar handles navigation */
+    .logo-container { justify-self: center; }
+    .logo { height: 24px; }
+    .back-button-wrapper { justify-self: start; }
+    .desktop-nav { display: none; }
+    .header-right-placeholder { justify-self: end; width: auto; }
+
+    /* Views get centered with comfortable spacing */
+    #view-home .home-content-wrapper,
+    #view-search,
+    #view-collections,
+    #view-actor-details {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    /* Give the hero a more premium look on desktop */
+    .hero { height: 70vh; max-height: 650px; margin-bottom: -80px; }
+    .hero-content { padding: 0 28px 60px; }
+    .hero-logo { width: 360px; max-width: 360px; margin-bottom: 22px; }
+
+    /* Bigger cards / better spacing for mouse users */
+    .section-title { padding: 0 28px; font-size: 1.2rem; margin-top: 36px; }
+    .row-container { padding: 0 28px 26px; gap: 14px; }
+    .card { width: 150px; border-radius: 12px; }
+    .card:hover { transform: translateY(-2px); transition: transform 0.14s ease; }
+
+    /* Grid sizes for desktop */
+    .grid-layout {
+        padding: 0 28px 36px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 14px;
+    }
+
+    /* Search area centered and wider */
+    .search-area { padding: 0 28px; }
+    .search-controls { max-width: 760px; margin: 0 auto; }
+    .search-input { font-size: 0.95rem; padding: 12px 14px; }
+    .lang-select { max-width: 110px; }
+    .btn-search-trigger { padding: 12px 16px; }
+
+    /* Featured slider feels less cramped */
+    .featured-header { padding: 0 28px; margin-top: 24px; }
+    .featured-slider { padding: 0 28px 34px; gap: 18px; }
+    .featured-card { max-width: 320px; }
+}
+
+/* Ultra-wide: keep things from stretching too much */
+@media (min-width: 1400px) {
+    .section-title { padding: 0 0; }
+    .row-container { padding: 0 0 26px; }
+    .grid-layout { padding: 0 0 36px; }
+    .featured-header { padding: 0 0; }
+    .featured-slider { padding: 0 0 34px; }
+    .search-area { padding: 0 0; }
+}
     </style>
 </head>
 <body>
@@ -373,10 +584,23 @@
         <div class="logo-container">
             <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
         </div>
-
-        <div class="header-right-placeholder"></div>
+<div class="header-right-placeholder"></div>
     </div>
 </header>
+
+<!-- Desktop Sidebar -->
+<aside class="desktop-sidebar" aria-label="Primary">
+  <button class="side-item" id="desk-home" onclick="switchTab('home')" aria-label="Home" title="Home">
+    <i class="fas fa-home"></i>
+  </button>
+  <button class="side-item" id="desk-search" onclick="switchTab('search')" aria-label="Search" title="Search">
+    <i class="fas fa-search"></i>
+  </button>
+  <button class="side-item" id="desk-collections" onclick="switchTab('collections')" aria-label="Collections" title="Collections">
+    <i class="fas fa-layer-group"></i>
+  </button>
+</aside>
+
 
     <div id="view-home">
         <div class="hero">
@@ -405,13 +629,24 @@
             <div class="section-title">Telugu</div>
             <div class="row-container" id="row-telugu"></div>
 
+            <div class="section-title">Punjabi</div>
+            <div class="row-container" id="row-punjabi"></div>
+
+            <div class="section-title">Marathi</div>
+            <div class="row-container" id="row-marathi"></div>
+
+            <div class="section-title">Kannada</div>
+            <div class="row-container" id="row-kannada"></div>
+
+            <div class="section-title">Bengali</div>
+            <div class="row-container" id="row-bengali"></div>
+
             <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
             <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
             <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB TV Shows</div>
             <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
-            </div>
         </div>
     </div>
 
@@ -464,7 +699,7 @@
             </div>
         </div>
         <div class="grid-layout" id="search-results"></div>
-        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="doSearch(searchState.page + 1, false)">Load More</button>
+        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="loadMoreSearch()">Load More</button>
     </div>
 
     <div id="view-actor-details" class="visually-hidden view-padded">
@@ -3067,7 +3302,39 @@ const teluguData = {
 };       
         // State management for pagination
         let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
-        let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
+        // Auto-search debounce (1s) + load 2 pages at a time
+        let _searchDebounce = null;
+
+        async function prefetchNextSearchPageIfAvailable() {
+            if (searchState.hasMore) {
+                await doSearch(searchState.page + 1, false);
+            }
+        }
+
+        function setupAutoSearch() {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+
+            input.addEventListener('input', () => {
+                clearTimeout(_searchDebounce);
+                _searchDebounce = setTimeout(async () => {
+                    // Start a new search and prefetch the next page for fuller results
+                    await doSearch(1, true);
+                    await prefetchNextSearchPageIfAvailable();
+                }, 1000);
+            });
+        }
+
+        async function loadMoreSearch() {
+            // Load 2 pages per click
+            const firstPage = searchState.page + 1;
+            await doSearch(firstPage, false);
+            if (searchState.hasMore) {
+                await doSearch(firstPage + 1, false);
+            }
+        }
+
+let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
 
         // ===============================================
         // UTILS
@@ -3106,7 +3373,7 @@ const teluguData = {
 
         function switchTab(tab) {
             const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details');
-            const navItems = document.querySelectorAll('.nav-link, .nav-item');
+            const navItems = document.querySelectorAll('.nav-link, .nav-item, .side-item');
             const backBtn = document.getElementById('back-button');
 
             // 1. Manage History
@@ -3126,6 +3393,10 @@ const teluguData = {
             document.getElementById(`view-${tab}`).classList.remove('visually-hidden');
             
             if(document.getElementById(`btm-${tab}`)) document.getElementById(`btm-${tab}`).classList.add('active');
+            if(document.getElementById(`desk-${tab}`)) document.getElementById(`desk-${tab}`).classList.add('active');
+            // Prevent sticky focus styling on desktop sidebar buttons
+            const deskBtn = document.getElementById(`desk-${tab}`);
+            if (deskBtn) { setTimeout(() => deskBtn.blur(), 0); }
 
             // Show back button for secondary views (anything that isn't a main bottom-nav tab)
             if (historyStack.length > 1) {
@@ -3558,6 +3829,7 @@ const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searc
 async function init() {
     renderRows(false); // Initial render
     initBanner();
+    setupAutoSearch();
 
     // API Wakeup Call
     try {
