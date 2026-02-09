@@ -404,6 +404,13 @@
 
             <div class="section-title">Telugu</div>
             <div class="row-container" id="row-telugu"></div>
+
+            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
+            <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
+
+            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB TV Shows</div>
+            <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
+
             </div>
         </div>
     </div>
@@ -449,7 +456,8 @@
                     <option value="kannada">Kannada</option>
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
-                </select>
+                                    <option value="tmdb">TMDB</option>
+</select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
                 </button>
@@ -3358,8 +3366,8 @@ if (actorCode === '3TKYioHCAF') {
             const grid = document.getElementById('search-results');
             const loadMoreBtn = document.getElementById('load-more-search');
 
-            if (q.length < 3) {
-                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 3 characters to search.</p>';
+            if (q.length < 1) {
+                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 1 character to search.</p>';
                 loadMoreBtn.classList.add('visually-hidden');
                 return;
             }
@@ -3380,7 +3388,56 @@ if (actorCode === '3TKYioHCAF') {
             }
 
             try {
-                const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
+                
+                if (searchState.lang === 'tmdb') {
+                    const movieUrl = `${TMDB_BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
+                    const tvUrl = `${TMDB_BASE}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
+
+                    const [mr, tr] = await Promise.all([fetch(movieUrl), fetch(tvUrl)]);
+                    const [md, td] = await Promise.all([mr.json(), tr.json()]);
+
+                    if (isNewSearch) grid.innerHTML = ''; // Clear "Loading..."
+
+                    const movieResults = (md.results || []).filter(x => x && x.poster_path);
+                    const tvResults = (td.results || []).filter(x => x && x.poster_path);
+
+                    // Section headers only on new search OR first page
+                    if (pageNumber === 1) {
+                        if (movieResults.length) {
+                            const h = document.createElement('div');
+                            h.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:8px 2px 0;';
+                            h.textContent = 'Movies';
+                            grid.appendChild(h);
+                        }
+                        movieResults.forEach(item => grid.appendChild(createTmdbCard('movie', item)));
+
+                        if (tvResults.length) {
+                            const h2 = document.createElement('div');
+                            h2.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:12px 2px 0;';
+                            h2.textContent = 'TV Shows';
+                            grid.appendChild(h2);
+                        }
+                        tvResults.forEach(item => grid.appendChild(createTmdbCard('tv', item)));
+                    } else {
+                        // Load more: append to the end without repeating headers
+                        movieResults.forEach(item => grid.appendChild(createTmdbCard('movie', item)));
+                        tvResults.forEach(item => grid.appendChild(createTmdbCard('tv', item)));
+                    }
+
+                    // Pagination
+                    const movieHasMore = (md.total_pages || 0) > pageNumber;
+                    const tvHasMore = (td.total_pages || 0) > pageNumber;
+                    searchState.page = pageNumber;
+                    searchState.hasMore = movieHasMore || tvHasMore;
+
+                    if (!movieResults.length && !tvResults.length && isNewSearch) {
+                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in TMDB.</p>`;
+                    }
+
+                    return; // Skip non-TMDB backend search
+                }
+
+const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
                 const r = await fetch(url);
                 const d = await r.json();
 
@@ -3647,9 +3704,82 @@ async function loadHomeFromCache() {
   }
 }
 
+
+
+// ===============================================
+// TMDB HOME ROWS (Premium / isUnlocked)
+// - Hidden by default
+// - Shown only if localStorage.isUnlocked === true (also supports "true")
+// - Uses /movie/popular and /tv/popular
+// - Clicking cards goes to movie.html?{tmdbId} / show.html?{tmdbId}
+// ===============================================
+function isTmdbUnlocked() {
+  // localStorage values are usually strings; support both boolean and "true"
+  return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
+}
+
+function showTmdbHomeRows(show) {
+  const movieTitle = document.getElementById('tmdb-movies-title');
+  const movieRow = document.getElementById('row-tmdb-movies');
+  const tvTitle = document.getElementById('tmdb-tv-title');
+  const tvRow = document.getElementById('row-tmdb-tv');
+
+  [movieTitle, movieRow, tvTitle, tvRow].forEach(el => {
+    if (!el) return;
+    if (show) el.classList.remove('visually-hidden');
+    else el.classList.add('visually-hidden');
+  });
+}
+
+function createTmdbCard(posterPath, altText, onClick) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${posterPath}" loading="lazy" alt="${altText || ''}">`;
+  div.onclick = onClick;
+  return div;
+}
+
+async function loadTmdbPopular(endpoint, rowId, type) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  row.innerHTML = '';
+  try {
+    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}`);
+    const d = await r.json();
+
+    const results = (d && d.results) ? d.results : [];
+    results.forEach(item => {
+      if (!item || !item.id || !item.poster_path) return; // hide items with no poster
+      const title = item.title || item.name || '';
+      const card = createTmdbCard(item.poster_path, title, () => {
+        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
+        else window.location.href = `show.html?${item.id}`;
+      });
+      row.appendChild(card);
+    });
+  } catch (e) {
+    console.error('Failed loading TMDB', endpoint, e);
+  }
+}
+
+async function loadTmdbHomeRows() {
+  if (!isTmdbUnlocked()) {
+    showTmdbHomeRows(false);
+    return;
+  }
+  showTmdbHomeRows(true);
+  await Promise.all([
+    loadTmdbPopular('/movie/popular', 'row-tmdb-movies', 'movie'),
+    loadTmdbPopular('/tv/popular', 'row-tmdb-tv', 'tv')
+  ]);
+}
 /* Run AFTER existing init */
 window.addEventListener("load", () => {
-  setTimeout(loadHomeFromCache, 500);
+  setTimeout(() => {
+    loadHomeFromCache();
+    loadTmdbHomeRows();
+  }, 500);
 });
 </script>
 
