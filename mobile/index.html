@@ -3360,6 +3360,23 @@ if (actorCode === '3TKYioHCAF') {
         // ===============================================
         // SEARCH LOGIC (Dedicated Button)
         // ===============================================
+// TMDB SEARCH CARD (separate from TMDB home rows)
+// NOTE: we already have a createTmdbCard() used by the TMDB home rows below.
+// This one is dedicated to the Search tab to avoid name collisions.
+function createTmdbSearchCard(type, item) {
+    const div = document.createElement('div');
+    div.className = 'card';
+
+    const title = item.title || item.name || '';
+    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" loading="lazy" alt="${title}">`;
+
+    div.onclick = () => {
+        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
+        else window.location.href = `show.html?${item.id}`;
+    };
+    return div;
+}
+
         async function doSearch(pageNumber, isNewSearch) {
             const q = document.getElementById('search-input').value.trim();
             const lang = document.getElementById('lang-select').value;
@@ -3409,7 +3426,7 @@ if (actorCode === '3TKYioHCAF') {
                             h.textContent = 'Movies';
                             grid.appendChild(h);
                         }
-                        movieResults.forEach(item => grid.appendChild(createTmdbCard('movie', item)));
+                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
 
                         if (tvResults.length) {
                             const h2 = document.createElement('div');
@@ -3417,11 +3434,11 @@ if (actorCode === '3TKYioHCAF') {
                             h2.textContent = 'TV Shows';
                             grid.appendChild(h2);
                         }
-                        tvResults.forEach(item => grid.appendChild(createTmdbCard('tv', item)));
+                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
                     } else {
                         // Load more: append to the end without repeating headers
-                        movieResults.forEach(item => grid.appendChild(createTmdbCard('movie', item)));
-                        tvResults.forEach(item => grid.appendChild(createTmdbCard('tv', item)));
+                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
+                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
                     }
 
                     // Pagination
@@ -3717,6 +3734,29 @@ function isTmdbUnlocked() {
   // localStorage values are usually strings; support both boolean and "true"
   return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
 }
+
+// Hide TMDB from the search language selector unless unlocked
+function applyTmdbSearchVisibility() {
+  const sel = document.getElementById('lang-select');
+  if (!sel) return;
+
+  const unlocked = isTmdbUnlocked();
+  const tmdbOpt = sel.querySelector('option[value="tmdb"]');
+
+  if (!unlocked) {
+    if (tmdbOpt) tmdbOpt.remove();
+    // If somehow TMDB was selected via cached state/URL, fall back to first option
+    if (sel.value === 'tmdb') sel.selectedIndex = 0;
+  }
+}
+
+// Run now if DOM is ready, otherwise on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', applyTmdbSearchVisibility);
+} else {
+  applyTmdbSearchVisibility();
+}
+
 
 function showTmdbHomeRows(show) {
   const movieTitle = document.getElementById('tmdb-movies-title');
