@@ -64,9 +64,10 @@
     padding: 0 20px;
     /* Improved Multi-stop Gradient for a smoother transition */
     background: linear-gradient(180deg,
-        rgba(0, 0, 0, 0.92) 0%,
-        rgba(0, 0, 0, 0.62) 38%,
-        rgba(0, 0, 0, 0.22) 74%,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.95) 22%,
+        rgba(0, 0, 0, 0.60) 55%,
+        rgba(0, 0, 0, 0.18) 78%,
         rgba(0, 0, 0, 0) 100%
     );
     z-index: 100;
@@ -292,14 +293,19 @@
 }
 
 .search-input {
-    flex: 2; /* Takes up most space */
-    min-width: 0; /* Prevents input from forcing other items out */
-    background: #1c1c1c; 
-    border: none; 
-    border-radius: 8px;
-    padding: 12px; 
-    color: white; 
-    font-size: 0.9rem;
+    flex: 2;
+    min-width: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 13px 14px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+.search-input:focus {
+    border-color: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
 }
 /* Prevent blue background on autofill/previous prompts */
 .search-input:-webkit-autofill,
@@ -396,6 +402,8 @@
 .desktop-sidebar .side-item i { font-size: 1.1rem; }
 .desktop-sidebar .side-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); }
 .desktop-sidebar .side-item:active { transform: translateY(1px); }
+.desktop-sidebar .side-item:focus { background: transparent; color: rgba(255,255,255,0.92); }
+
 .desktop-sidebar .side-item.active { color: #fff; background: rgba(255,255,255,0.08); }
 
 /* Desktop header nav (hidden on mobile) */
@@ -438,10 +446,10 @@
     content:"";
     position:absolute;
     inset:0;
-    background: linear-gradient(180deg,
-            rgba(0,0,0,0.86) 0%,
-            rgba(0,0,0,0.60) 42%,
-            rgba(0,0,0,0.28) 78%,
+    background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
             rgba(0,0,0,0) 100%
         );
     opacity: 0;
@@ -466,10 +474,10 @@
         flex-direction: column;
         gap: 18px;
         /* Smooth black fade (matches attached reference vibe) */
-        background: linear-gradient(180deg,
-            rgba(0,0,0,0.86) 0%,
-            rgba(0,0,0,0.60) 42%,
-            rgba(0,0,0,0.28) 78%,
+        background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
             rgba(0,0,0,0) 100%
         );
         backdrop-filter: blur(12px);
@@ -691,7 +699,7 @@
             </div>
         </div>
         <div class="grid-layout" id="search-results"></div>
-        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="doSearch(searchState.page + 1, false)">Load More</button>
+        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="loadMoreSearch()">Load More</button>
     </div>
 
     <div id="view-actor-details" class="visually-hidden view-padded">
@@ -3294,7 +3302,39 @@ const teluguData = {
 };       
         // State management for pagination
         let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
-        let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
+        // Auto-search debounce (1s) + load 2 pages at a time
+        let _searchDebounce = null;
+
+        async function prefetchNextSearchPageIfAvailable() {
+            if (searchState.hasMore) {
+                await doSearch(searchState.page + 1, false);
+            }
+        }
+
+        function setupAutoSearch() {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+
+            input.addEventListener('input', () => {
+                clearTimeout(_searchDebounce);
+                _searchDebounce = setTimeout(async () => {
+                    // Start a new search and prefetch the next page for fuller results
+                    await doSearch(1, true);
+                    await prefetchNextSearchPageIfAvailable();
+                }, 1000);
+            });
+        }
+
+        async function loadMoreSearch() {
+            // Load 2 pages per click
+            const firstPage = searchState.page + 1;
+            await doSearch(firstPage, false);
+            if (searchState.hasMore) {
+                await doSearch(firstPage + 1, false);
+            }
+        }
+
+let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
 
         // ===============================================
         // UTILS
@@ -3333,7 +3373,7 @@ const teluguData = {
 
         function switchTab(tab) {
             const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details');
-            const navItems = document.querySelectorAll('.nav-link, .nav-item');
+            const navItems = document.querySelectorAll('.nav-link, .nav-item, .side-item');
             const backBtn = document.getElementById('back-button');
 
             // 1. Manage History
@@ -3354,6 +3394,9 @@ const teluguData = {
             
             if(document.getElementById(`btm-${tab}`)) document.getElementById(`btm-${tab}`).classList.add('active');
             if(document.getElementById(`desk-${tab}`)) document.getElementById(`desk-${tab}`).classList.add('active');
+            // Prevent sticky focus styling on desktop sidebar buttons
+            const deskBtn = document.getElementById(`desk-${tab}`);
+            if (deskBtn) { setTimeout(() => deskBtn.blur(), 0); }
 
             // Show back button for secondary views (anything that isn't a main bottom-nav tab)
             if (historyStack.length > 1) {
@@ -3786,6 +3829,7 @@ const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searc
 async function init() {
     renderRows(false); // Initial render
     initBanner();
+    setupAutoSearch();
 
     // API Wakeup Call
     try {
