@@ -1,0 +1,35 @@
+/* Thirai TV overrides */
+html, body { background: #000; }
+body { cursor: none; } /* Android TV */
+.bottom-nav { display: none !important; } /* use sidebar on TV */
+.desktop-sidebar { display: flex !important; }
+.header { position: sticky !important; top: 0; }
+
+/* Bigger hit targets */
+.side-item, .nav-item, .nav-link, button, input {
+  min-height: 52px;
+  font-size: 18px !important;
+}
+
+/* Cards focus */
+.card { outline: none !important; }
+.card[tabindex="0"]:focus,
+.side-item:focus,
+.nav-item:focus,
+button:focus,
+input:focus,
+a:focus {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.85);
+  border-radius: 10px;
+}
+
+/* Make posters a bit bigger & more spaced on TV */
+.card img {
+  width: 160px !important;
+  height: 240px !important;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.row, .cards-row, .movies-row, [id^="row-"] {
+  scroll-behavior: smooth;
+}
