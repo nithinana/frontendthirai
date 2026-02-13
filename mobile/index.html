@@ -279,8 +279,12 @@
         
         .card:hover { transform: scale(1.03); }
 .grid-layout {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 140px));
-            gap: 10px; justify-content: center; padding: 0 20px 30px;
+            /* Adaptive grid (mobile-first): fills the screen while respecting padding + gaps */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 10px;
+            padding: 0 20px 30px;
+            justify-content: stretch;
         }
         .grid-layout .card { width: 100%; }
 
