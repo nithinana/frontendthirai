@@ -4997,57 +4997,6 @@ window.addEventListener("load", () => {
     
 </script>
 
-
-<script>
-(function(){
-    let autoLoadTriggered = false;
-    let loading = false;
-
-    function isMobile(){
-        return window.innerWidth <= 768;
-    }
-
-    function getLoadMoreButton(){
-        return document.querySelector('.load-more, .load-more-btn, button.load-more');
-    }
-
-    function triggerLoadMore(){
-        if(loading) return;
-        const btn = getLoadMoreButton();
-        if(!btn) return;
-
-        loading = true;
-        btn.click();
-
-        setTimeout(()=>{
-            loading = false;
-            autoLoadTriggered = true;
-        }, 1500);
-    }
-
-    window.addEventListener('scroll', function(){
-        if(!isMobile()) return;
-        if(autoLoadTriggered) return;
-
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const threshold = document.body.offsetHeight - 200;
-
-        if(scrollPosition >= threshold){
-            triggerLoadMore();
-        }
-    }, { passive: true });
-
-    // reset when user manually presses load more
-    document.addEventListener('click', function(e){
-        const btn = e.target.closest('.load-more, .load-more-btn, button.load-more');
-        if(btn){
-            autoLoadTriggered = false;
-        }
-    });
-
-})();
-</script>
-
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
