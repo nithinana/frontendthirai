@@ -183,7 +183,7 @@
 
         /* Wrapper for home page rows to separate them from hero */
         .home-content-wrapper {
-            padding-top: 20px;
+            padding-top: 10px;
         }
 
         /* Padding for non-home views which start at the top of the viewport */
@@ -260,10 +260,10 @@
         /* ==============================================
            5. STANDARD ROWS & GRIDS
            ============================================== */
-        .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
+        .section-title { padding: 0 var(--page-pad); margin-bottom: 10px; font-size: 1.1rem; font-weight: 700; margin-top: 22px; color: #fff; }
         
         .row-container {
-            display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
+            display: flex; gap: 8px; overflow-x: auto; padding: 0 var(--page-pad) 14px;
             scroll-behavior: smooth; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
@@ -925,8 +925,9 @@
 
 /* ===== Mobile home side padding ===== */
 @media (max-width: 700px){
-  #view-home .row-container{ padding-left: 24px; padding-right: 24px; }
-  #view-home .section-title{ padding-left: 24px; padding-right: 24px; }
+  /* Slightly larger left/right inset on home rows (matches your screenshot style) */
+  #view-home .row-container{ padding-left: 30px; padding-right: 30px; }
+  #view-home .section-title{ padding-left: 30px; padding-right: 30px; }
 }
 
 </style>
