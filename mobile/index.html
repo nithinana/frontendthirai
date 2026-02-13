@@ -5104,6 +5104,42 @@ window.addEventListener("load", () => {
     
 </script>
 
+
+<script>
+/* Force scroll to top when switching views */
+function scrollToTopInstant() {
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+/* Wrap openView if it exists */
+if (typeof window.openView === "function") {
+  const originalOpenView = window.openView;
+  window.openView = function(...args) {
+    originalOpenView.apply(this, args);
+    scrollToTopInstant();
+  };
+}
+
+/* Handle navigation clicks */
+document.addEventListener("click", function(e) {
+  const btn = e.target.closest('[data-view], .nav-item, .menu-item, .collections-btn, .home-btn, .search-btn');
+  if (btn) {
+    setTimeout(scrollToTopInstant, 50);
+  }
+});
+
+/* Handle history navigation */
+const originalPushState = history.pushState;
+history.pushState = function(...args) {
+  originalPushState.apply(this, args);
+  scrollToTopInstant();
+};
+
+/* On page load */
+window.addEventListener("load", scrollToTopInstant);
+</script>
+
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
