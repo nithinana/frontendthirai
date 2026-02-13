@@ -183,7 +183,7 @@
 
         /* Wrapper for home page rows to separate them from hero */
         .home-content-wrapper {
-            padding-top: 10px;
+            padding-top: 20px;
         }
 
         /* Padding for non-home views which start at the top of the viewport */
@@ -260,10 +260,10 @@
         /* ==============================================
            5. STANDARD ROWS & GRIDS
            ============================================== */
-        .section-title { padding: 0 var(--page-pad); margin-bottom: 10px; font-size: 1.1rem; font-weight: 700; margin-top: 22px; color: #fff; }
+        .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
         
         .row-container {
-            display: flex; gap: 8px; overflow-x: auto; padding: 0 var(--page-pad) 14px;
+            display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
             scroll-behavior: smooth; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
@@ -923,28 +923,10 @@
 .section-arrow:hover{ color:#fff; }
 .section-arrow span{ display:inline-block; transform: translateY(-1px); }
 
-/* ===== Mobile home padding + tighter vertical spacing (Home) ===== */
-@media (max-width: 900px){
-  /* Use one variable so titles + rows ALWAYS start at the same line */
-  :root{ --page-pad: 26px; }
-
-  /* Keep posters away from the edges */
-  #view-home .row-container{
-    padding-left: var(--page-pad);
-    padding-right: var(--page-pad);
-    padding-bottom: 10px; /* tighter than before */
-  }
-
-  /* Make the title line up exactly with the posters */
-  #view-home .section-title{
-    padding-left: var(--page-pad);
-    padding-right: var(--page-pad);
-    margin-top: 14px;    /* less vertical spacing between categories */
-    margin-bottom: 8px;
-  }
-
-  /* Reduce extra gap above the first rows under the hero */
-  #view-home .home-content-wrapper{ padding-top: 2px; }
+/* ===== Mobile home side padding ===== */
+@media (max-width: 700px){
+  #view-home .row-container{ padding-left: 24px; padding-right: 24px; }
+  #view-home .section-title{ padding-left: 24px; padding-right: 24px; }
 }
 
 </style>
