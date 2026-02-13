@@ -4102,7 +4102,7 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
         // LANGUAGE CATEGORY (Recent/Popular) FULL SCREEN
         // Uses: (API_BASE)/language/(language)?category=recent|popular&page=(number)
         // ===============================================
-        const langCategoryState = { lang: null, category: 'recent', page: 1, hasMore: false };
+        const langCategoryState = { lang: null, category: 'recent', page: 1, nextPage: 2, hasMore: false };
 
         function openLanguageCategory(lang, category='recent'){
             langCategoryState.lang = lang;
@@ -4152,11 +4152,14 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
 
                 if(clear) grid.innerHTML = '';
 
-                const movies = d.movies || d.results || [];
+                const movies = d.movies || [];
                 if(movies.length){
                     movies.forEach(m => grid.appendChild(createCard(m)));
-                    langCategoryState.page = pageNumber;
-                    langCategoryState.hasMore = d.has_more || d.hasMore || false;
+
+                    // ✅ read paging info from API format (page / next_page / has_more)
+                    langCategoryState.page = (typeof d.page === 'number') ? d.page : pageNumber;
+                    langCategoryState.nextPage = (typeof d.next_page === 'number') ? d.next_page : (langCategoryState.page + 1);
+                    langCategoryState.hasMore = !!d.has_more;
                 } else if(clear){
                     grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">No results</p>';
                     langCategoryState.hasMore = false;
@@ -4175,32 +4178,18 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
 
         function loadNextLanguageCategoryPage(){
             if(langCategoryState.hasMore){
-                fetchAndRenderLanguageCategory(langCategoryState.page + 1, false);
+                fetchAndRenderLanguageCategory(langCategoryState.nextPage, false);
             }
+        }
         }
 
         function setLoading(elementId, isLoading, append = false) {
             const el = document.getElementById(elementId);
-            if (!el) return;
-
             if (isLoading) {
-                if (!append) {
-                    el.dataset.loading = "1";
-                    el.innerHTML = '<p class="loading-text" style="color:#777; width:100%; text-align:center; padding: 20px 0;">Loading...</p>';
-                }
-                return;
+                if (!append) el.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Loading...</p>';
+            } else if (!append) {
+                 el.innerHTML = '';
             }
-
-            // When loading finishes, do NOT wipe real results.
-            // Only clear if the element is still showing the loading placeholder.
-            if (!append) {
-                if (el.dataset.loading === "1") {
-                    const onlyChild = el.children.length === 1 && el.children[0].classList.contains('loading-text');
-                    if (onlyChild) el.innerHTML = '';
-                    delete el.dataset.loading;
-                }
-            }
-        }
         }
 
         // ===============================================
@@ -4819,7 +4808,7 @@ async function loadHomeFromCache() {
   for (const cfg of HOME_LANGS) {
     const row = ensureRow(cfg.id, cfg.title);
     try {
-      const r = await fetch(`/cache/${cfg.lang}popular.json`);
+      const r = await fetch(`/cache/${cfg.lang}.json`);
       const d = await r.json();
 
       (d.movies || []).forEach(item => {
