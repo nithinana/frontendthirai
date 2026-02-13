@@ -4166,8 +4166,7 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
                 if(clear) grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">Failed to load</p>';
                 langCategoryState.hasMore = false;
             }finally{
-                setLoading('lang-category-grid', false, false);
-                loadMoreBtn.disabled = !langCategoryState.hasMore;
+loadMoreBtn.disabled = !langCategoryState.hasMore;
                 loadMoreBtn.classList.toggle('visually-hidden', !langCategoryState.hasMore);
                 loadMoreBtn.textContent = 'Load More';
             }
