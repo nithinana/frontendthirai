@@ -876,6 +876,30 @@
   #view-home .section-title{ padding-left: 24px; padding-right: 24px; }
 }
 
+
+
+/* ===== Mobile poster grid sizing (actors/genre/year/decade/search/recent+popular) ===== */
+@media (max-width: 600px){
+  .grid-layout{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    padding: 0 16px 24px;
+    justify-content: stretch;
+  }
+  .grid-layout .card{ width: 100%; }
+}
+
+/* ===== Home page category spacing cleanup ===== */
+@media (max-width: 700px){
+  #view-home .section-title{
+    margin-top: 22px;
+    margin-bottom: 10px;
+  }
+  #view-home .row-container{
+    padding-bottom: 16px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1133,12 +1157,28 @@
         function toggleFilterPopup() {
             const overlay = document.getElementById('filterOverlay');
             if (!overlay) return;
+
             overlay.classList.toggle('active');
             filterPopupOpen = overlay.classList.contains('active');
             setFilterActive(filterPopupOpen);
+
+            const navItems = document.querySelectorAll('.nav-link, .nav-item, .side-item');
+
             if (filterPopupOpen) {
+                // When filter is open, only the filter button should look active
+                navItems.forEach(e => e.classList.remove('active'));
+                setFilterActive(true);
                 document.body.style.overflow = 'hidden';
             } else {
+                document.body.style.overflow = '';
+                // Restore highlight to current main tab
+                navItems.forEach(e => e.classList.remove('active'));
+                const mainTab = historyStack[0] || 'home';
+                if (document.getElementById(`btm-${mainTab}`)) document.getElementById(`btm-${mainTab}`).classList.add('active');
+                if (document.getElementById(`desk-${mainTab}`)) document.getElementById(`desk-${mainTab}`).classList.add('active');
+            }
+        }
+ else {
                 document.body.style.overflow = '';
             }
         }
@@ -4102,7 +4142,7 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
         // LANGUAGE CATEGORY (Recent/Popular) FULL SCREEN
         // Uses: (API_BASE)/language/(language)?category=recent|popular&page=(number)
         // ===============================================
-        const langCategoryState = { lang: null, category: 'recent', page: 1, nextPage: 2, hasMore: false };
+        const langCategoryState = { lang: null, category: 'recent', page: 1, hasMore: false };
 
         function openLanguageCategory(lang, category='recent'){
             langCategoryState.lang = lang;
@@ -4152,14 +4192,11 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
 
                 if(clear) grid.innerHTML = '';
 
-                const movies = d.movies || [];
+                const movies = d.movies || d.results || [];
                 if(movies.length){
                     movies.forEach(m => grid.appendChild(createCard(m)));
-
-                    // ✅ read paging info from API format (page / next_page / has_more)
-                    langCategoryState.page = (typeof d.page === 'number') ? d.page : pageNumber;
-                    langCategoryState.nextPage = (typeof d.next_page === 'number') ? d.next_page : (langCategoryState.page + 1);
-                    langCategoryState.hasMore = !!d.has_more;
+                    langCategoryState.page = pageNumber;
+                    langCategoryState.hasMore = d.has_more || d.hasMore || false;
                 } else if(clear){
                     grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">No results</p>';
                     langCategoryState.hasMore = false;
@@ -4169,8 +4206,7 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
                 if(clear) grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">Failed to load</p>';
                 langCategoryState.hasMore = false;
             }finally{
-                setLoading('lang-category-grid', false, false);
-                loadMoreBtn.disabled = !langCategoryState.hasMore;
+loadMoreBtn.disabled = !langCategoryState.hasMore;
                 loadMoreBtn.classList.toggle('visually-hidden', !langCategoryState.hasMore);
                 loadMoreBtn.textContent = 'Load More';
             }
@@ -4178,9 +4214,8 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
 
         function loadNextLanguageCategoryPage(){
             if(langCategoryState.hasMore){
-                fetchAndRenderLanguageCategory(langCategoryState.nextPage, false);
+                fetchAndRenderLanguageCategory(langCategoryState.page + 1, false);
             }
-        }
         }
 
         function setLoading(elementId, isLoading, append = false) {
@@ -4227,9 +4262,11 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
             } else if (!filterPopupOpen) {
                 setFilterActive(false);
             }
-            if(document.getElementById(`btm-${mainTab}`)) document.getElementById(`btm-${mainTab}`).classList.add('active');
-            if(document.getElementById(`desk-${mainTab}`)) document.getElementById(`desk-${mainTab}`).classList.add('active');
-            // Prevent sticky focus styling on desktop sidebar buttons
+            if (!filterPopupOpen) {
+                if(document.getElementById(`btm-${mainTab}`)) document.getElementById(`btm-${mainTab}`).classList.add('active');
+                if(document.getElementById(`desk-${mainTab}`)) document.getElementById(`desk-${mainTab}`).classList.add('active');
+            }
+// Prevent sticky focus styling on desktop sidebar buttons
             const deskBtn = document.getElementById(`desk-${mainTab}`);
             if (deskBtn) { setTimeout(() => deskBtn.blur(), 0); }// Show back button for secondary views (anything that isn't a main bottom-nav tab)
             if (historyStack.length > 1) {
@@ -4808,7 +4845,7 @@ async function loadHomeFromCache() {
   for (const cfg of HOME_LANGS) {
     const row = ensureRow(cfg.id, cfg.title);
     try {
-      const r = await fetch(`/cache/${cfg.lang}.json`);
+      const r = await fetch(`/cache/${cfg.lang}popular.json`);
       const d = await r.json();
 
       (d.movies || []).forEach(item => {
