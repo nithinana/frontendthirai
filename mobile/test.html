@@ -24,6 +24,8 @@
            1. CORE VARIABLES & RESET
            ============================================== */
         :root {
+    --sidebar-width: 76px;
+    --page-pad: 20px;
             --bg-body: #080808;
             --bg-card: #121212;
             --text-main: #ffffff;
@@ -62,15 +64,17 @@
     align-items: center;
     padding: 0 20px;
     /* Improved Multi-stop Gradient for a smoother transition */
-    background: linear-gradient(
-        180deg, 
-        rgba(0, 0, 0, 0.9) 0%, 
-        rgba(0, 0, 0, 0.7) 30%, 
-        rgba(0, 0, 0, 0.4) 60%, 
-        rgba(0, 0, 0, 0.1) 85%, 
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.96) 0%,
+        rgba(0, 0, 0, 0.92) 25%,
+        rgba(0, 0, 0, 0.65) 55%,
+        rgba(0, 0, 0, 0.30) 75%,
+        rgba(0, 0, 0, 0.08) 90%,
         rgba(0, 0, 0, 0) 100%
     );
     z-index: 100;
+    border-bottom: none;
+    box-shadow: none;
     transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
                 backdrop-filter 0.4s ease;
 }
@@ -79,19 +83,32 @@
     background: rgba(8, 8, 8, 0.95); /* Matches your body background */
     backdrop-filter: blur(10px);    /* Adds a modern glass effect */
     -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: none;
 }
         
 /* Updated Header Layout for better mobile scaling */
 .header-content {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     width: 100%;
-    gap: 12px; /* Adds space between the back button and logo area */
+}
+
+/* Equal left/right space keeps the logo perfectly centered */
+.back-button-wrapper {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+}
+
+.header-right-placeholder {
+    justify-self: end;
+    display: flex;
+    align-items: center;
 }
 
 .logo-container {
-    flex: 1; /* Allows the container to grow/shrink based on screen width */
+    justify-self: center;
     display: flex;
     justify-content: center;
 }
@@ -101,13 +118,6 @@
     cursor: pointer;
     display: block;
 }
-
-.back-button-wrapper, .header-right-placeholder {
-    width: 32px; /* Fixed width for both sides to keep logo perfectly centered */
-    display: flex;
-    justify-content: center;
-}
-
 /* Updated Back Button to not overlap logo */
 .back-button {
     position: static; /* Changed from absolute to flow naturally in flexbox */
@@ -145,7 +155,13 @@
         }
         .hero-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(0deg, var(--bg-body) 0%, rgba(8,8,8,0.6) 50%, rgba(8,8,8,0.3) 100%);
+            /* Smoother top edge to avoid a visible seam under the header fade */
+            background: linear-gradient(0deg,
+                var(--bg-body) 0%,
+                rgba(8,8,8,0.55) 55%,
+                rgba(8,8,8,0.15) 80%,
+                rgba(8,8,8,0) 100%
+            );
             z-index: 2;
         }
         .hero-content {
@@ -244,10 +260,10 @@
         /* ==============================================
            5. STANDARD ROWS & GRIDS
            ============================================== */
-        .section-title { padding: 0 20px; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
+        .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
         
         .row-container {
-            display: flex; gap: 10px; overflow-x: auto; padding: 0 20px 20px;
+            display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
             scroll-behavior: smooth; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
@@ -255,12 +271,16 @@
         .card {
             flex: 0 0 auto; width: 100px; border-radius: var(--radius); overflow: hidden;
             position: relative; background: #1a1a1a; cursor: pointer; aspect-ratio: 2/3;
+        
+            transition: transform 0.16s ease;
         }
         .card img { width: 100%; height: 100%; object-fit: cover; background: #222; }
 
-        .grid-layout {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px; padding: 0 20px 30px;
+        
+        .card:hover { transform: scale(1.03); }
+.grid-layout {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 140px));
+            gap: 10px; justify-content: center; padding: 0 20px 30px;
         }
         .grid-layout .card { width: 100%; }
 
@@ -287,14 +307,19 @@
 }
 
 .search-input {
-    flex: 2; /* Takes up most space */
-    min-width: 0; /* Prevents input from forcing other items out */
-    background: #1c1c1c; 
-    border: none; 
-    border-radius: 8px;
-    padding: 12px; 
-    color: white; 
-    font-size: 0.9rem;
+    flex: 2;
+    min-width: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 13px 14px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+.search-input:focus {
+    border-color: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
 }
 /* Prevent blue background on autofill/previous prompts */
 .search-input:-webkit-autofill,
@@ -338,6 +363,245 @@
         .load-more-btn:hover { background: #333; }
 
         /* ==============================================
+           6. FILTER OVERLAY + RESULTS (Mobile)
+           ============================================== */
+        #filterOverlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        #filterOverlay.active{ display: flex; }
+
+        .filter-card{
+            width: 100%;
+            max-width: 460px;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: rgba(18,18,18,0.98);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+            position: relative;
+            color: #fff;
+        }
+        .filter-card::-webkit-scrollbar{ width: 0; height: 0; }
+
+        .close-popup{
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.85);
+            font-size: 1.6rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+        }
+
+        .filter-section-title{
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: rgba(255,255,255,0.55);
+            margin: 10px 0 10px;
+        }
+
+        .top-controls{
+            margin-bottom: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .genre-grid{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .genre-btn{
+            font-size: 11px;
+            padding: 9px 0;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.92);
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+        }
+        .genre-btn:active{ transform: translateY(1px); }
+        .genre-btn.active{
+            background: rgba(255,255,255,0.16);
+            border-color: rgba(255,255,255,0.22);
+            color: #fff;
+        }
+
+        #filterCustomSection{
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 12px;
+        }
+        #filterCustomSection.expanded{
+            max-height: 1000px;
+            padding-bottom: 12px;
+        }
+
+        .slider-box{ margin-bottom: 10px; }
+        .slider-head{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            margin-bottom: 6px;
+            color: rgba(255,255,255,0.85);
+        }
+        .slider-head b{ color: #fff; font-weight: 900; }
+
+        .any-check{
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            color: rgba(255,255,255,0.55);
+        }
+        input[type="range"]{ width: 100%; height: 5px; accent-color: #fff; cursor: pointer; }
+        input[type="range"]:disabled{ opacity: 0.18; }
+
+        select, .pg-num{
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        #filterYearExpandSection{
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+        }
+        #filterYearExpandSection.expanded{
+            max-height: 420px;
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .year-grid{
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .year-btn{
+            font-size: 10px;
+            padding: 8px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.92);
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .year-btn.explore-decade{
+            grid-column: span 4;
+            background: rgba(255,255,255,0.10);
+            border: 1px dashed rgba(255,255,255,0.35);
+        }
+
+        .action-controls{
+            display: flex;
+            gap: 10px;
+            margin: 10px 0 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            align-items: flex-end;
+        }
+        .btn-fetch{
+            width: 100%;
+            height: 40px;
+            background: #ffffff;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            cursor: pointer;
+        }
+
+        /* Results cards (full-screen grid view) */
+        .result-card{
+            background: #121212;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+        }
+        .result-card img{
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            background: #222;
+            display: block;
+        }
+        .result-title{
+            padding: 8px 8px 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.88);
+            line-height: 1.2;
+            height: 2.6em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+
+        
+        /* Filter results: match grid style (like actor/search grids) */
+        .media-card{
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .media-card .card{ width: 100%; }
+        .media-title{
+            display: none !important;
+            padding: 0 2px 2px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.86);
+            line-height: 1.2;
+            height: 2.6em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Landscape sizing tweaks (posters + spacing) */
+        @media (orientation: landscape) and (max-height: 520px){
+            .card{ width: 120px; }
+            .grid-layout{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+        }
+/* ==============================================
            6. MOBILE BOTTOM NAV
            ============================================== */
         .bottom-nav {
@@ -360,89 +624,259 @@
 }
         .bottom-nav .nav-item.active { color: white; }
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
-    </style>
+    /* ==============================================
+   7. DESKTOP FRIENDLY LAYOUT (Responsive Enhancements)
+   ============================================== */
+.page-container {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+}
 
-<style>
-/* === Landscape Sidebar Navigation === */
-@media (orientation: landscape) and (min-width: 768px) {
-  body {
-    padding-bottom: 0;
-    padding-left: 72px;
-  }
 
-  .bottom-nav {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    top: 0;
-    width: 72px;
-    height: 100vh;
-    flex-direction: column;
-    justify-content: center;
-    gap: 24px;
-    background: linear-gradient(
-      to right,
-      rgba(0,0,0,0.85),
-      rgba(0,0,0,0.55),
-      rgba(0,0,0,0)
-    );
-    backdrop-filter: blur(6px);
-  }
-
-  .bottom-nav a span {
+/* Desktop sidebar (hidden on mobile) */
+.desktop-sidebar {
     display: none;
-  }
-
-  .bottom-nav a {
-    justify-content: center;
-  }
 }
+
+.desktop-sidebar .side-item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.72);
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+.desktop-sidebar .side-item i { font-size: 1.1rem; }
+.desktop-sidebar .side-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); }
+.desktop-sidebar .side-item:active { transform: translateY(1px); }
+.desktop-sidebar .side-item:focus { background: transparent; color: rgba(255,255,255,0.92); }
+
+.desktop-sidebar .side-item.active { color: #fff; background: rgba(255,255,255,0.08); }
+
+/* Desktop header nav (hidden on mobile) */
+.desktop-nav {
+    display: none;
+    align-items: center;
+    gap: 10px;
+}
+.desktop-nav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+.desktop-nav .nav-link:hover {
+    transform: translateY(-1px);
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.14);
+}
+.desktop-nav .nav-link.active {
+    background: rgba(255,255,255,0.16);
+    border-color: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
+/* Make horizontal rows feel nicer on desktop */
+.row-container { scroll-snap-type: x proximity; }
+.card { scroll-snap-align: start; }
+.card::after{
+    display: none;
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
+            rgba(0,0,0,0) 100%
+        );
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    pointer-events:none;
+}
+/* Wider screens */
+@media (min-width: 900px) {
+    body { padding-bottom: 0; padding-left: var(--sidebar-width); } /* bottom nav hidden on desktop */
+    .bottom-nav { display: none; }
+    .desktop-sidebar {
+        display: flex;
+        position: fixed;
+        top: 0;
+        padding-top: var(--header-height);
+        left: 0;
+        bottom: 0;
+        width: var(--sidebar-width);
+        align-items: center;
+        justify-content: center; /* center the buttons vertically */
+        flex-direction: column;
+        gap: 18px;
+        /* Smooth black fade (matches attached reference vibe) */
+        background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
+            rgba(0,0,0,0) 100%
+        );
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-right: none;
+        z-index: 90;
+    }
+    .desktop-sidebar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -56px;
+        width: 56px;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+    }
+
+
+    /* Desktop header: same smooth black->transparent fade as mobile */
+    .header {
+        height: 72px;
+        padding: 0 28px;
+        /* Multi-stop fade (dark -> transparent) */
+        background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.96) 0%,
+        rgba(0, 0, 0, 0.92) 25%,
+        rgba(0, 0, 0, 0.65) 55%,
+        rgba(0, 0, 0, 0.30) 75%,
+        rgba(0, 0, 0, 0.08) 90%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    border-bottom: none;
+        transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    backdrop-filter 0.4s ease,
+                    border-bottom-color 0.4s ease;
+    }
+    .header { left: 0; width: 100%; }
+
+    .header.scrolled {
+        background: rgba(8, 8, 8, 0.95);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: none;
+    }
+
+    .header-content {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding-left: var(--sidebar-width);
+    }
+
+        /* Centered logo; sidebar handles navigation */
+    .logo-container { justify-self: center; }
+    .logo { height: 24px; }
+    .back-button-wrapper { justify-self: start; }
+    .desktop-nav { display: none; }
+    .header-right-placeholder { justify-self: end; width: auto; }
+
+    /* Views get centered with comfortable spacing */
+    #view-home .home-content-wrapper,
+    #view-search,
+    #view-collections,
+    #view-actor-details,
+    #view-filter-results {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    /* Give the hero a more premium look on desktop */
+    .hero { height: 70vh; max-height: 650px; margin-bottom: -80px; }
+    .hero-content { padding: 0 28px 60px; }
+    .hero-logo { width: 360px; max-width: 360px; margin-bottom: 22px; }
+
+    /* Bigger cards / better spacing for mouse users */
+    .section-title { padding: 0 28px; font-size: 1.2rem; margin-top: 36px; }
+    .row-container { padding: 0 28px 26px; gap: 14px; }
+    .card { width: 150px; border-radius: 12px; }
+    .card:hover { transform: scale(1.03); }
+
+    /* Grid sizes for desktop */
+    .grid-layout {
+        padding: 0 28px 36px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 14px;
+    }
+
+    /* Search area centered and wider */
+    .search-area { padding: 0 28px; }
+    .search-controls { max-width: 760px; margin: 0 auto; }
+    .search-input { font-size: 0.95rem; padding: 12px 14px; }
+    .lang-select { max-width: 110px; }
+    .btn-search-trigger { padding: 12px 16px; }
+
+    /* Featured slider feels less cramped */
+    .featured-header { padding: 0 28px; margin-top: 24px; }
+    .featured-slider { padding: 0 28px 34px; gap: 18px; }
+    .featured-card { max-width: 320px; }
+}
+
+/* Ultra-wide: keep things from stretching too much */
+@media (min-width: 1400px) {
+    .section-title { padding: 0 0; }
+    .row-container { padding: 0 0 26px; }
+    .grid-layout { padding: 0 0 36px; }
+    .featured-header { padding: 0 0; }
+    .featured-slider { padding: 0 0 34px; }
+    .search-area { padding: 0 0; }
+}
+    
+/* Landscape: keep back button above sidebar controls */
+@media (orientation: landscape) {
+    #back-button{
+        position: fixed !important;
+        top: 14px;
+        left: 14px;
+        z-index: 5000;
+    }
+}
+
+/* ===== Language section arrow (Home) ===== */
+.section-title.section-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:6px;
+}
+.section-arrow{ pointer-events:auto; 
+  border:none;
+  background:transparent;
+  color:rgba(255,255,255,0.75);
+  font-size:1.25rem;
+  line-height:1;
+  padding:6px 8px; margin-left:6px;
+  cursor:pointer;
+}
+.section-arrow:hover{ color:#fff; }
+.section-arrow span{ display:inline-block; transform: translateY(-1px); }
+
+/* ===== Mobile home side padding ===== */
+@media (max-width: 700px){
+  #view-home .row-container{ padding-left: 24px; padding-right: 24px; }
+  #view-home .section-title{ padding-left: 24px; padding-right: 24px; }
+}
+
 </style>
-
-
-<style>
-/* === Improved Landscape Sidebar === */
-@media (orientation: landscape) and (min-width: 900px) {
-  body {
-    padding-left: 76px;
-  }
-
-  .bottom-nav {
-    justify-content: center;
-    gap: 14px;
-  }
-
-  .bottom-nav .nav-item {
-    font-size: 0;
-  }
-
-  .bottom-nav .nav-item i {
-    font-size: 1.3rem;
-    margin: 0;
-  }
-
-  .bottom-nav::before {
-    content: "";
-    width: 28px;
-    height: 28px;
-    margin-bottom: 18px;
-    background: url('https://thirai.me/static/thiraiwhite.png') center/contain no-repeat;
-    opacity: 0.9;
-  }
-}
-
-/* Desktop movie grid scaling */
-@media (min-width: 1024px) {
-  .grid-layout {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  }
-
-  .row-container .card {
-    width: 150px;
-  }
-}
-</style>
-
 </head>
 <body>
 
@@ -455,10 +889,27 @@
         <div class="logo-container">
             <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
         </div>
-
-        <div class="header-right-placeholder"></div>
+<div class="header-right-placeholder"></div>
     </div>
 </header>
+
+<!-- Desktop Sidebar -->
+<aside class="desktop-sidebar" aria-label="Primary">
+  <button class="side-item" id="desk-home" onclick="switchTab('home')" aria-label="Home" title="Home">
+    <i class="fas fa-home"></i>
+  </button>
+  <button class="side-item" id="desk-search" onclick="switchTab('search')" aria-label="Search" title="Search">
+    <i class="fas fa-search"></i>
+  </button>
+  <button class="side-item" id="desk-collections" onclick="switchTab('collections')" aria-label="Collections" title="Collections">
+    <i class="fas fa-layer-group"></i>
+  </button>
+
+  <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
+    <i class="fas fa-sliders"></i>
+  </button>
+</aside>
+
 
     <div id="view-home">
         <div class="hero">
@@ -475,18 +926,36 @@
             <div class="section-title visually-hidden" id="cw-title">Continue</div>
             <div class="row-container visually-hidden" id="continue-watching-row"></div>
 
-            <div class="section-title">Tamil</div>
+            <div class="section-title section-title-row"><span>Tamil</span><button class="section-arrow" data-lang="tamil" data-category="recent" aria-label="Tamil recent"><span>›</span></button></div>
             <div class="row-container" id="row-tamil"></div>
 
-            <div class="section-title">Malayalam</div>
+            <div class="section-title section-title-row"><span>Malayalam</span><button class="section-arrow" data-lang="malayalam" data-category="recent" aria-label="Malayalam recent"><span>›</span></button></div>
             <div class="row-container" id="row-malayalam"></div>
           
-            <div class="section-title">Hindi</div>
+            <div class="section-title section-title-row"><span>Hindi</span><button class="section-arrow" data-lang="hindi" data-category="recent" aria-label="Hindi recent"><span>›</span></button></div>
             <div class="row-container" id="row-hindi"></div>
 
-            <div class="section-title">Telugu</div>
+            <div class="section-title section-title-row"><span>Telugu</span><button class="section-arrow" data-lang="telugu" data-category="recent" aria-label="Telugu recent"><span>›</span></button></div>
             <div class="row-container" id="row-telugu"></div>
-            </div>
+
+            <div class="section-title section-title-row"><span>Punjabi</span><button class="section-arrow" data-lang="punjabi" data-category="recent" aria-label="Punjabi recent"><span>›</span></button></div>
+            <div class="row-container" id="row-punjabi"></div>
+
+            <div class="section-title section-title-row"><span>Marathi</span><button class="section-arrow" data-lang="marathi" data-category="recent" aria-label="Marathi recent"><span>›</span></button></div>
+            <div class="row-container" id="row-marathi"></div>
+
+            <div class="section-title section-title-row"><span>Kannada</span><button class="section-arrow" data-lang="kannada" data-category="recent" aria-label="Kannada recent"><span>›</span></button></div>
+            <div class="row-container" id="row-kannada"></div>
+
+            <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
+            <div class="row-container" id="row-bengali"></div>
+
+            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
+            <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
+
+            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB TV Shows</div>
+            <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
+
         </div>
     </div>
 
@@ -531,14 +1000,15 @@
                     <option value="kannada">Kannada</option>
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
-                </select>
+                                    <option value="tmdb">TMDB</option>
+</select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
         </div>
         <div class="grid-layout" id="search-results"></div>
-        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="doSearch(searchState.page + 1, false)">Load More</button>
+        <button class="load-more-btn visually-hidden" id="load-more-search" onclick="loadMoreSearch()">Load More</button>
     </div>
 
     <div id="view-actor-details" class="visually-hidden view-padded">
@@ -547,12 +1017,24 @@
         <button class="load-more-btn visually-hidden" id="load-more-actor" onclick="loadNextActorPage()">Load More</button>
     </div>
 
+
+    <div id="view-filter-results" class="visually-hidden view-padded">
+        <div class="section-title" id="filter-results-title" style="margin-top: 0;">Results</div>
+        <div class="grid-layout" id="filter-results-grid"></div>
+        <button class="load-more-btn visually-hidden" id="load-more-filter" onclick="loadMoreFilterResults()">Load More</button>
+        <div id="filter-loading" class="visually-hidden" style="text-align:center; color:#777; padding: 10px 0;">Loading...</div>
+    </div>
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('home')" id="btm-home">
             <i class="fas fa-home"></i> <span>Home</span>
         </div>
         <div class="nav-item" onclick="switchTab('collections')" id="btm-collections">
             <i class="fas fa-layer-group"></i> <span>Collections</span>
+        </div>
+
+        <div class="nav-item" onclick="toggleFilterPopup()" id="btm-filter">
+            <i class="fas fa-sliders"></i> <span>Filter</span>
         </div>
 <div class="nav-item" onclick="switchTab('search')" id="btm-search">
     <i class="fas fa-search"></i> <span>Search</span>
@@ -565,6 +1047,72 @@
 
     </div>
 
+    <!-- Filter Overlay -->
+    <div id="filterOverlay" onclick="closeFilterOnOutsideClick(event)">
+        <div class="filter-card" role="dialog" aria-modal="true" aria-label="Filter movies">
+            <button class="close-popup" onclick="toggleFilterPopup()">&times;</button>
+
+            <div class="top-controls">
+                <span class="filter-section-title">Language</span>
+                <select id="filter-ln">
+                    <option value="tamil" selected>Tamil</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="telugu">Telugu</option>
+                    <option value="malayalam">Malayalam</option>
+                    <option value="kannada">Kannada</option>
+                    <option value="bengali">Bengali</option>
+                    <option value="marathi">Marathi</option>
+                    <option value="punjabi">Punjabi</option>
+                </select>
+            </div>
+
+            <span class="filter-section-title">Quick Genres</span>
+            <div class="genre-grid">
+                <button class="genre-btn" data-attr="action" onclick="toggleFilterGenre(this)">Action</button>
+                <button class="genre-btn" data-attr="comedy" onclick="toggleFilterGenre(this)">Comedy</button>
+                <button class="genre-btn" data-attr="romance" onclick="toggleFilterGenre(this)">Romance</button>
+                <button class="genre-btn" data-attr="storyline" onclick="toggleFilterGenre(this)">Storyline</button>
+                <button class="genre-btn" data-attr="performance" onclick="toggleFilterGenre(this)">Performance</button>
+                <button class="genre-btn" style="opacity: 0.85" onclick="toggleFilterCustom()">
+                    <i class="fas fa-sliders"></i> Custom
+                </button>
+            </div>
+
+            <div id="filterCustomSection">
+                <span class="filter-section-title">Genre Tuning</span>
+                <div id="filter-slider-container"></div>
+
+                <div class="slider-box" style="margin-top: 10px;">
+                    <div class="slider-head">
+                        <span style="font-weight: 800; font-size: 10px; text-transform: uppercase;">Review Count</span>
+                    </div>
+                    <input type="number" id="filter-ratecount" class="pg-num" value="75" min="0">
+                </div>
+            </div>
+
+            <div class="action-controls">
+                <button class="btn-fetch" onclick="runFilterGo()">Go</button>
+            </div>
+
+            <span class="filter-section-title">Release Date</span>
+            <div class="genre-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <button class="genre-btn decade-selector" onclick="showFilterYears(2020, this)">2020s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(2010, this)">2010s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(2000, this)">2000s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(1990, this)">1990s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(1980, this)">1980s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(1970, this)">1970s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(1960, this)">1960s</button>
+                <button class="genre-btn decade-selector" onclick="showFilterYears(1950, this)">1950s</button>
+            </div>
+
+            <div id="filterYearExpandSection">
+                <div id="filterYearGridContent" class="year-grid"></div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         // ===============================================
         // DATA EMBEDDED FROM UPLOADED JSON FILES
@@ -572,6 +1120,349 @@
         const API_KEY = '926e94b0f70b5bed8417b679652366ab'; // TMDB API Key for movie posters/backdrops
         const TMDB_BASE = 'https://api.themoviedb.org/3';
         const API_BASE = 'https://api.thirai.me';
+
+        // ===============================================
+        // FILTER (Year / Decade / Genre) - in-app overlay + full-screen results
+        // ===============================================
+        const FILTER_PRIMARY_API_URL = API_BASE;
+        const FILTER_FALLBACK_API_URL = 'https://backendthirai-test.onrender.com/'; // same fallback as year/decade/genre pages
+        let FILTER_API_BASE_URL = FILTER_PRIMARY_API_URL;
+
+        const FILTER_CATEGORIES = ['action', 'comedy', 'romance', 'storyline', 'performance'];
+
+        function toggleFilterPopup() {
+            const overlay = document.getElementById('filterOverlay');
+            if (!overlay) return;
+            overlay.classList.toggle('active');
+            filterPopupOpen = overlay.classList.contains('active');
+            setFilterActive(filterPopupOpen);
+            if (filterPopupOpen) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeFilterOnOutsideClick(event) {
+            const overlay = document.getElementById('filterOverlay');
+            if (event.target === overlay) toggleFilterPopup();
+        }
+
+        function initMobileFilter() {
+            const sliderContainer = document.getElementById('filter-slider-container');
+            if (!sliderContainer) return;
+
+            sliderContainer.innerHTML = '';
+            FILTER_CATEGORIES.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'slider-box';
+                div.innerHTML = `
+                    <div class="slider-head">
+                        <span style="text-transform: capitalize;">${cat}: <b id="filter-v-${cat}">ANY</b></span>
+                        <label class="any-check">
+                            <input type="checkbox" id="filter-c-${cat}" checked onchange="handleFilterAny('${cat}')"> ANY
+                        </label>
+                    </div>
+                    <input type="range" id="filter-s-${cat}" min="1" max="4" value="4" disabled oninput="updateFilterLabel('${cat}')">
+                `;
+                sliderContainer.appendChild(div);
+                updateFilterLabel(cat);
+            });
+        }
+
+        function toggleFilterCustom() {
+            const customBox = document.getElementById('filterCustomSection');
+            const yearBox = document.getElementById('filterYearExpandSection');
+            if (yearBox) yearBox.classList.remove('expanded');
+            if (customBox) customBox.classList.toggle('expanded');
+        }
+
+        function showFilterYears(decade, btn) {
+            const yearBox = document.getElementById('filterYearExpandSection');
+            const yearContent = document.getElementById('filterYearGridContent');
+            const customBox = document.getElementById('filterCustomSection');
+            const lang = document.getElementById('filter-ln').value;
+
+            document.querySelectorAll('.decade-selector').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (customBox) customBox.classList.remove('expanded');
+
+            if (yearBox.classList.contains('expanded') && yearBox.dataset.activeDecade == decade) {
+                yearBox.classList.remove('expanded');
+                if (btn) btn.classList.remove('active');
+                return;
+            }
+
+            yearContent.innerHTML = '';
+            yearBox.dataset.activeDecade = decade;
+
+            const currentYear = new Date().getFullYear();
+            for (let i = 0; i <= 9; i++) {
+                const year = decade + i;
+                if (year > currentYear) break;
+
+                const ybtn = document.createElement('button');
+                ybtn.className = 'year-btn';
+                ybtn.innerText = year;
+                ybtn.onclick = () => {
+                    toggleFilterPopup();
+                    openYearResults(lang, year);
+                };
+                yearContent.appendChild(ybtn);
+            }
+
+            const exploreBtn = document.createElement('button');
+            exploreBtn.className = 'year-btn explore-decade';
+            exploreBtn.innerText = `Explore the ${decade}s`;
+            exploreBtn.onclick = () => {
+                toggleFilterPopup();
+                openDecadeResults(lang, decade);
+            };
+            yearContent.appendChild(exploreBtn);
+
+            yearBox.classList.add('expanded');
+        }
+
+        function toggleFilterGenre(btn) {
+            const attr = btn.getAttribute('data-attr');
+            btn.classList.toggle('active');
+
+            const checkbox = document.getElementById('filter-c-' + attr);
+            const slider = document.getElementById('filter-s-' + attr);
+
+            if (btn.classList.contains('active')) {
+                checkbox.checked = false;
+                slider.disabled = false;
+                slider.value = 4;
+            } else {
+                checkbox.checked = true;
+                slider.disabled = true;
+            }
+            updateFilterLabel(attr);
+        }
+
+        function handleFilterAny(id) {
+            const s = document.getElementById('filter-s-' + id);
+            const check = document.getElementById('filter-c-' + id);
+            s.disabled = check.checked;
+
+            const btn = document.querySelector(`.genre-btn[data-attr="${id}"]`);
+            if (btn) {
+                if (check.checked) btn.classList.remove('active');
+                else if (s.value == 4) btn.classList.add('active');
+            }
+            updateFilterLabel(id);
+        }
+
+        function updateFilterLabel(id) {
+            const label = document.getElementById('filter-v-' + id);
+            if (!label) return;
+            const isAny = document.getElementById('filter-c-' + id).checked;
+            label.innerText = isAny ? 'ANY' : document.getElementById('filter-s-' + id).value;
+        }
+
+        function runFilterGo() {
+            const lang = document.getElementById('filter-ln').value;
+            const ratecount = document.getElementById('filter-ratecount').value;
+
+            const getVal = (cat) => {
+                const isAny = document.getElementById(`filter-c-${cat}`).checked;
+                if (isAny) return 0;
+                return document.getElementById(`filter-s-${cat}`).value;
+            };
+
+            const params = {
+                lang,
+                action: getVal('action'),
+                comedy: getVal('comedy'),
+                romance: getVal('romance'),
+                storyline: getVal('storyline'),
+                performance: getVal('performance'),
+                ratecount: ratecount
+            };
+
+            toggleFilterPopup();
+            openGenreResults(params);
+        }
+
+        // ===============================================
+        // FILTER RESULTS VIEW (Full screen, back enabled)
+        // ===============================================
+        let filterState = { mode: '', params: {}, page: 1, hasMore: false, isLoading: false };
+
+        function normalizeBase(base) {
+            return (base || '').replace(/\/$/, '');
+        }
+
+        function setFilterLoading(isLoading) {
+            const loadingEl = document.getElementById('filter-loading');
+            if (!loadingEl) return;
+            if (isLoading) loadingEl.classList.remove('visually-hidden');
+            else loadingEl.classList.add('visually-hidden');
+        }
+
+        function renderFilterMovies(movies, append = true) {
+            const grid = document.getElementById('filter-results-grid');
+            if (!grid) return;
+
+            if (!append) grid.innerHTML = '';
+
+            if (!movies || movies.length === 0) {
+                if (!append) {
+                    grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">No movies found.</p>';
+                }
+                return;
+            }
+
+            const baseClean = normalizeBase(FILTER_API_BASE_URL);
+
+            movies.forEach(movie => {
+                if (!movie) return;
+
+                const imgUrl = movie.img_url
+                    ? (movie.img_url.startsWith('http') ? movie.img_url : baseClean + movie.img_url)
+                    : '';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-card';
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${imgUrl}" loading="lazy" alt="${movie.title || ''}">`;
+
+                const title = document.createElement('div');
+                title.className = 'media-title';
+                title.textContent = movie.title || '';
+
+                wrapper.appendChild(card);
+                wrapper.appendChild(title);
+
+                wrapper.onclick = () => {
+                    if (movie.page_url) window.location.href = getRedirectUrl(movie.page_url);
+                };
+
+                grid.appendChild(wrapper);
+            });
+        }
+
+        function openYearResults(lang, year) {
+            filterState = { mode: 'year', params: { lang, year }, page: 1, hasMore: false, isLoading: false };
+            document.getElementById('filter-results-title').textContent = `${lang.charAt(0).toUpperCase() + lang.slice(1)} • ${year}`;
+            document.getElementById('filter-results-grid').innerHTML = '';
+            document.getElementById('load-more-filter').classList.add('visually-hidden');
+            FILTER_API_BASE_URL = FILTER_PRIMARY_API_URL;
+            switchTab('filter-results');
+            fetchAndRenderFilter(1, false);
+        }
+
+        function openDecadeResults(lang, decade) {
+            filterState = { mode: 'decade', params: { lang, decade }, page: 1, hasMore: false, isLoading: false };
+            document.getElementById('filter-results-title').textContent = `${lang.charAt(0).toUpperCase() + lang.slice(1)} • ${decade}s`;
+            document.getElementById('filter-results-grid').innerHTML = '';
+            document.getElementById('load-more-filter').classList.add('visually-hidden');
+            FILTER_API_BASE_URL = FILTER_PRIMARY_API_URL;
+            switchTab('filter-results');
+            fetchAndRenderFilter(1, false);
+        }
+
+        function openGenreResults(params) {
+            filterState = { mode: 'genre', params: params, page: 1, hasMore: false, isLoading: false };
+            document.getElementById('filter-results-title').textContent = `${params.lang.charAt(0).toUpperCase() + params.lang.slice(1)} • Genre`;
+            document.getElementById('filter-results-grid').innerHTML = '';
+            document.getElementById('load-more-filter').classList.add('visually-hidden');
+            FILTER_API_BASE_URL = FILTER_PRIMARY_API_URL;
+            switchTab('filter-results');
+            fetchAndRenderFilter(1, false);
+        }
+
+        function buildFilterEndpoint(base, mode, params, page) {
+            const b = normalizeBase(base);
+
+            if (mode === 'year') {
+                return `${b}/year/${params.lang}/${params.year}?page=${page}`;
+            }
+            if (mode === 'decade') {
+                return `${b}/decade/${params.lang}/${params.decade}?page=${page}`;
+            }
+            // genre
+            return `${b}/genre/${params.lang}?action=${params.action}&comedy=${params.comedy}&romance=${params.romance}&storyline=${params.storyline}&performance=${params.performance}&ratecount=${params.ratecount}&page=${page}`;
+        }
+
+        async function fetchAndRenderFilter(startPage, append = true) {
+            if (filterState.isLoading) return;
+            filterState.isLoading = true;
+
+            const loadMoreBtn = document.getElementById('load-more-filter');
+            if (loadMoreBtn) loadMoreBtn.classList.add('visually-hidden');
+            setFilterLoading(true);
+
+            try {
+                let allMovies = [];
+                let hasMore = true;
+                const pagesToFetch = 2;
+
+                for (let i = 0; i < pagesToFetch && hasMore; i++) {
+                    const pageToFetch = startPage + i;
+
+                    let endpoint = buildFilterEndpoint(FILTER_API_BASE_URL, filterState.mode, filterState.params, pageToFetch);
+                    let res;
+
+                    try {
+                        res = await fetch(endpoint);
+
+                        if (!res.ok && FILTER_API_BASE_URL === FILTER_PRIMARY_API_URL) {
+                            FILTER_API_BASE_URL = FILTER_FALLBACK_API_URL;
+                            endpoint = buildFilterEndpoint(FILTER_API_BASE_URL, filterState.mode, filterState.params, pageToFetch);
+                            res = await fetch(endpoint);
+                        }
+                    } catch (fetchErr) {
+                        if (FILTER_API_BASE_URL === FILTER_PRIMARY_API_URL) {
+                            FILTER_API_BASE_URL = FILTER_FALLBACK_API_URL;
+                            endpoint = buildFilterEndpoint(FILTER_API_BASE_URL, filterState.mode, filterState.params, pageToFetch);
+                            res = await fetch(endpoint);
+                        } else {
+                            throw fetchErr;
+                        }
+                    }
+
+                    if (!res.ok) throw new Error(`HTTP error ${res.status} on page ${pageToFetch}`);
+                    const data = await res.json();
+
+                    if (data && data.movies) allMovies.push(...data.movies);
+                    hasMore = !!(data && data.has_more);
+                }
+
+                renderFilterMovies(allMovies, append);
+
+                filterState.hasMore = hasMore;
+                if (hasMore) {
+                    filterState.page = startPage + pagesToFetch;
+                    if (loadMoreBtn) loadMoreBtn.classList.remove('visually-hidden');
+                } else {
+                    if (loadMoreBtn) loadMoreBtn.classList.add('visually-hidden');
+                }
+
+            } catch (e) {
+                console.error('Filter results load failed:', e);
+                if (!append) {
+                    const grid = document.getElementById('filter-results-grid');
+                    if (grid) grid.innerHTML = '<p style="color:#ff6b6b; width:100%; text-align:center; padding: 20px 0;">Failed to load movies.</p>';
+                }
+            } finally {
+                setFilterLoading(false);
+                filterState.isLoading = false;
+            }
+        }
+
+
+        function loadMoreFilterResults() {
+            if (!filterState.hasMore) return;
+            fetchAndRenderFilter(filterState.page, true);
+        }
+
+        document.addEventListener('DOMContentLoaded', initMobileFilter);
+
 
 const actorsData = {
   "castData": {
@@ -3141,7 +4032,39 @@ const teluguData = {
 };       
         // State management for pagination
         let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
-        let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
+        // Auto-search debounce (1s) + load 2 pages at a time
+        let _searchDebounce = null;
+
+        async function prefetchNextSearchPageIfAvailable() {
+            if (searchState.hasMore) {
+                await doSearch(searchState.page + 1, false);
+            }
+        }
+
+        function setupAutoSearch() {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+
+            input.addEventListener('input', () => {
+                clearTimeout(_searchDebounce);
+                _searchDebounce = setTimeout(async () => {
+                    // Start a new search and prefetch the next page for fuller results
+                    await doSearch(1, true);
+                    await prefetchNextSearchPageIfAvailable();
+                }, 1000);
+            });
+        }
+
+        async function loadMoreSearch() {
+            // Load 2 pages per click
+            const firstPage = searchState.page + 1;
+            await doSearch(firstPage, false);
+            if (searchState.hasMore) {
+                await doSearch(firstPage + 1, false);
+            }
+        }
+
+let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
 
         // ===============================================
         // UTILS
@@ -3164,13 +4087,120 @@ const teluguData = {
             return div;
         }
 
+        // ===============================================
+        // SIDEBAR ACTIVE STATE HELPERS
+        // ===============================================
+        let filterPopupOpen = false;
+        function setFilterActive(on){
+            const desk = document.getElementById('desk-filter');
+            const btm = document.getElementById('btm-filter');
+            if(desk) desk.classList.toggle('active', !!on);
+            if(btm) btm.classList.toggle('active', !!on);
+        }
+
+        // ===============================================
+        // LANGUAGE CATEGORY (Recent/Popular) FULL SCREEN
+        // Uses: (API_BASE)/language/(language)?category=recent|popular&page=(number)
+        // ===============================================
+        const langCategoryState = { lang: null, category: 'recent', page: 1, hasMore: false };
+
+        function openLanguageCategory(lang, category='recent'){
+            langCategoryState.lang = lang;
+            langCategoryState.category = category;
+            langCategoryState.page = 1;
+            langCategoryState.hasMore = false;
+
+            // toggle pills
+            document.getElementById('langcat-recent')?.classList.toggle('active', category==='recent');
+            document.getElementById('langcat-popular')?.classList.toggle('active', category==='popular');
+
+            const niceLang = (lang || '').charAt(0).toUpperCase() + (lang || '').slice(1);
+            const niceCat = category.charAt(0).toUpperCase() + category.slice(1);
+            const titleEl = document.getElementById('lang-category-title');
+            if(titleEl) titleEl.textContent = `${niceLang} • ${niceCat}`;
+
+            const grid = document.getElementById('lang-category-grid');
+            if(grid) grid.innerHTML = '';
+
+            switchTab('lang-category');
+            fetchAndRenderLanguageCategory(1, true);
+        }
+
+        function setLanguageCategory(category){
+            if(!langCategoryState.lang) return;
+            if(category !== 'recent' && category !== 'popular') return;
+            openLanguageCategory(langCategoryState.lang, category);
+        }
+
+        async function fetchAndRenderLanguageCategory(pageNumber, clear=false){
+            const grid = document.getElementById('lang-category-grid');
+            const loadMoreBtn = document.getElementById('load-more-lang-category');
+            if(!grid || !loadMoreBtn) return;
+
+            loadMoreBtn.disabled = true;
+
+            if(clear){
+                setLoading('lang-category-grid', true, false);
+            } else {
+                loadMoreBtn.textContent = 'Loading...';
+            }
+
+            try{
+                const url = `${API_BASE}/language/${langCategoryState.lang}?category=${langCategoryState.category}&page=${pageNumber}`;
+                const r = await fetch(url);
+                const d = await r.json();
+
+                if(clear) grid.innerHTML = '';
+
+                const movies = d.movies || d.results || [];
+                if(movies.length){
+                    movies.forEach(m => grid.appendChild(createCard(m)));
+                    langCategoryState.page = pageNumber;
+                    langCategoryState.hasMore = d.has_more || d.hasMore || false;
+                } else if(clear){
+                    grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">No results</p>';
+                    langCategoryState.hasMore = false;
+                }
+            }catch(err){
+                console.error(err);
+                if(clear) grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">Failed to load</p>';
+                langCategoryState.hasMore = false;
+            }finally{
+                setLoading('lang-category-grid', false, false);
+                loadMoreBtn.disabled = !langCategoryState.hasMore;
+                loadMoreBtn.classList.toggle('visually-hidden', !langCategoryState.hasMore);
+                loadMoreBtn.textContent = 'Load More';
+            }
+        }
+
+        function loadNextLanguageCategoryPage(){
+            if(langCategoryState.hasMore){
+                fetchAndRenderLanguageCategory(langCategoryState.page + 1, false);
+            }
+        }
+
         function setLoading(elementId, isLoading, append = false) {
             const el = document.getElementById(elementId);
+            if (!el) return;
+
             if (isLoading) {
-                if (!append) el.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Loading...</p>';
-            } else if (!append) {
-                 el.innerHTML = '';
+                if (!append) {
+                    el.dataset.loading = "1";
+                    el.innerHTML = '<p class="loading-text" style="color:#777; width:100%; text-align:center; padding: 20px 0;">Loading...</p>';
+                }
+                return;
             }
+
+            // When loading finishes, do NOT wipe real results.
+            // Only clear if the element is still showing the loading placeholder.
+            if (!append) {
+                if (el.dataset.loading === "1") {
+                    const onlyChild = el.children.length === 1 && el.children[0].classList.contains('loading-text');
+                    if (onlyChild) el.innerHTML = '';
+                    delete el.dataset.loading;
+                }
+            }
+        }
         }
 
         // ===============================================
@@ -3179,8 +4209,8 @@ const teluguData = {
         let historyStack = ['home'];
 
         function switchTab(tab) {
-            const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details');
-            const navItems = document.querySelectorAll('.nav-link, .nav-item');
+            const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details, #view-filter-results, #view-lang-category');
+            const navItems = document.querySelectorAll('.nav-link, .nav-item, .side-item');
             const backBtn = document.getElementById('back-button');
 
             // 1. Manage History
@@ -3198,10 +4228,21 @@ const teluguData = {
             navItems.forEach(e => e.classList.remove('active'));
             
             document.getElementById(`view-${tab}`).classList.remove('visually-hidden');
-            
-            if(document.getElementById(`btm-${tab}`)) document.getElementById(`btm-${tab}`).classList.add('active');
 
-            // Show back button for secondary views (anything that isn't a main bottom-nav tab)
+            // Keep the main tab highlighted even when opening secondary views (like actor-details / filter-results)
+            const mainTab = historyStack[0];
+
+            // Highlight Filter button when using filter feature
+            if (tab === 'filter-results') {
+                setFilterActive(true);
+            } else if (!filterPopupOpen) {
+                setFilterActive(false);
+            }
+            if(document.getElementById(`btm-${mainTab}`)) document.getElementById(`btm-${mainTab}`).classList.add('active');
+            if(document.getElementById(`desk-${mainTab}`)) document.getElementById(`desk-${mainTab}`).classList.add('active');
+            // Prevent sticky focus styling on desktop sidebar buttons
+            const deskBtn = document.getElementById(`desk-${mainTab}`);
+            if (deskBtn) { setTimeout(() => deskBtn.blur(), 0); }// Show back button for secondary views (anything that isn't a main bottom-nav tab)
             if (historyStack.length > 1) {
                 backBtn.classList.remove('visually-hidden');
             } else {
@@ -3217,29 +4258,13 @@ const teluguData = {
 
         function goBack() {
             if (historyStack.length > 1) {
-                historyStack.pop(); // Remove current view
+                historyStack.pop(); // remove current secondary view
                 const prevTab = historyStack[historyStack.length - 1];
-                historyStack.pop(); // Will be pushed back by switchTab if needed
                 switchTab(prevTab);
             } else if (historyStack.length === 1 && historyStack[0] !== 'home') {
-                 // Fallback: If on collections/search, go to home
                 switchTab('home');
             }
-
-            // 3. Init Collections on first load
-            if(tab === 'collections' && document.getElementById('grid-actors').children.length === 0) {
-                renderFeatured();
-                filterGrid('tamil', document.querySelector('.filter-tab[data-lang="tamil"]'));
-            }
-
-            // --- ADD THIS PART HERE ---
-            if (tab === 'search') {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            }
-        } // This is the end of switchTab
+        }
         
         // ===============================================
         // FEATURED SLIDESHOW LOGIC (Blurred Carousel)
@@ -3434,14 +4459,31 @@ if (actorCode === '3TKYioHCAF') {
         // ===============================================
         // SEARCH LOGIC (Dedicated Button)
         // ===============================================
+// TMDB SEARCH CARD (separate from TMDB home rows)
+// NOTE: we already have a createTmdbCard() used by the TMDB home rows below.
+// This one is dedicated to the Search tab to avoid name collisions.
+function createTmdbSearchCard(type, item) {
+    const div = document.createElement('div');
+    div.className = 'card';
+
+    const title = item.title || item.name || '';
+    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" loading="lazy" alt="${title}">`;
+
+    div.onclick = () => {
+        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
+        else window.location.href = `show.html?${item.id}`;
+    };
+    return div;
+}
+
         async function doSearch(pageNumber, isNewSearch) {
             const q = document.getElementById('search-input').value.trim();
             const lang = document.getElementById('lang-select').value;
             const grid = document.getElementById('search-results');
             const loadMoreBtn = document.getElementById('load-more-search');
 
-            if (q.length < 3) {
-                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 3 characters to search.</p>';
+            if (q.length < 1) {
+                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 1 character to search.</p>';
                 loadMoreBtn.classList.add('visually-hidden');
                 return;
             }
@@ -3462,7 +4504,56 @@ if (actorCode === '3TKYioHCAF') {
             }
 
             try {
-                const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
+                
+                if (searchState.lang === 'tmdb') {
+                    const movieUrl = `${TMDB_BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
+                    const tvUrl = `${TMDB_BASE}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
+
+                    const [mr, tr] = await Promise.all([fetch(movieUrl), fetch(tvUrl)]);
+                    const [md, td] = await Promise.all([mr.json(), tr.json()]);
+
+                    if (isNewSearch) grid.innerHTML = ''; // Clear "Loading..."
+
+                    const movieResults = (md.results || []).filter(x => x && x.poster_path);
+                    const tvResults = (td.results || []).filter(x => x && x.poster_path);
+
+                    // Section headers only on new search OR first page
+                    if (pageNumber === 1) {
+                        if (movieResults.length) {
+                            const h = document.createElement('div');
+                            h.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:8px 2px 0;';
+                            h.textContent = 'Movies';
+                            grid.appendChild(h);
+                        }
+                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
+
+                        if (tvResults.length) {
+                            const h2 = document.createElement('div');
+                            h2.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:12px 2px 0;';
+                            h2.textContent = 'TV Shows';
+                            grid.appendChild(h2);
+                        }
+                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
+                    } else {
+                        // Load more: append to the end without repeating headers
+                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
+                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
+                    }
+
+                    // Pagination
+                    const movieHasMore = (md.total_pages || 0) > pageNumber;
+                    const tvHasMore = (td.total_pages || 0) > pageNumber;
+                    searchState.page = pageNumber;
+                    searchState.hasMore = movieHasMore || tvHasMore;
+
+                    if (!movieResults.length && !tvResults.length && isNewSearch) {
+                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in TMDB.</p>`;
+                    }
+
+                    return; // Skip non-TMDB backend search
+                }
+
+const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
                 const r = await fetch(url);
                 const d = await r.json();
 
@@ -3566,6 +4657,7 @@ if (actorCode === '3TKYioHCAF') {
 async function init() {
     renderRows(false); // Initial render
     initBanner();
+    setupAutoSearch();
 
     // API Wakeup Call
     try {
@@ -3619,11 +4711,21 @@ if ('serviceWorker' in navigator) {
 (function () {
     const CACHE_KEY = 'thirai_continue_watching';
 
+
+    function updateContinueTitle() {
+        const title = document.getElementById('cw-title');
+        if (!title) return;
+        const isLandscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
+        title.textContent = isLandscape ? 'Continue' : 'Continue';
+    }
+
     function renderContinueWatching() {
         const row = document.getElementById('continue-watching-row');
         const title = document.getElementById('cw-title');
         if (!row || !title) return;
 
+
+        updateContinueTitle();
         let items = [];
         try {
             items = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
@@ -3672,6 +4774,10 @@ if ('serviceWorker' in navigator) {
     }
 
     document.addEventListener('DOMContentLoaded', renderContinueWatching);
+
+    document.addEventListener('DOMContentLoaded', updateContinueTitle);
+    window.addEventListener('resize', updateContinueTitle);
+    window.addEventListener('orientationchange', updateContinueTitle);
 })();
 </script>
 
@@ -3729,11 +4835,134 @@ async function loadHomeFromCache() {
   }
 }
 
+
+
+// ===============================================
+// TMDB HOME ROWS (Premium / isUnlocked)
+// - Hidden by default
+// - Shown only if localStorage.isUnlocked === true (also supports "true")
+// - Uses /movie/popular and /tv/popular
+// - Clicking cards goes to movie.html?{tmdbId} / show.html?{tmdbId}
+// ===============================================
+function isTmdbUnlocked() {
+  // localStorage values are usually strings; support both boolean and "true"
+  return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
+}
+
+// Hide TMDB from the search language selector unless unlocked
+function applyTmdbSearchVisibility() {
+  const sel = document.getElementById('lang-select');
+  if (!sel) return;
+
+  const unlocked = isTmdbUnlocked();
+  const tmdbOpt = sel.querySelector('option[value="tmdb"]');
+
+  if (!unlocked) {
+    if (tmdbOpt) tmdbOpt.remove();
+    // If somehow TMDB was selected via cached state/URL, fall back to first option
+    if (sel.value === 'tmdb') sel.selectedIndex = 0;
+  }
+}
+
+// Run now if DOM is ready, otherwise on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', applyTmdbSearchVisibility);
+} else {
+  applyTmdbSearchVisibility();
+}
+
+
+function showTmdbHomeRows(show) {
+  const movieTitle = document.getElementById('tmdb-movies-title');
+  const movieRow = document.getElementById('row-tmdb-movies');
+  const tvTitle = document.getElementById('tmdb-tv-title');
+  const tvRow = document.getElementById('row-tmdb-tv');
+
+  [movieTitle, movieRow, tvTitle, tvRow].forEach(el => {
+    if (!el) return;
+    if (show) el.classList.remove('visually-hidden');
+    else el.classList.add('visually-hidden');
+  });
+}
+
+function createTmdbCard(posterPath, altText, onClick) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${posterPath}" loading="lazy" alt="${altText || ''}">`;
+  div.onclick = onClick;
+  return div;
+}
+
+async function loadTmdbPopular(endpoint, rowId, type) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  row.innerHTML = '';
+  try {
+    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}`);
+    const d = await r.json();
+
+    const results = (d && d.results) ? d.results : [];
+    results.forEach(item => {
+      if (!item || !item.id || !item.poster_path) return; // hide items with no poster
+      const title = item.title || item.name || '';
+      const card = createTmdbCard(item.poster_path, title, () => {
+        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
+        else window.location.href = `show.html?${item.id}`;
+      });
+      row.appendChild(card);
+    });
+  } catch (e) {
+    console.error('Failed loading TMDB', endpoint, e);
+  }
+}
+
+async function loadTmdbHomeRows() {
+  if (!isTmdbUnlocked()) {
+    showTmdbHomeRows(false);
+    return;
+  }
+  showTmdbHomeRows(true);
+  await Promise.all([
+    loadTmdbPopular('/movie/popular', 'row-tmdb-movies', 'movie'),
+    loadTmdbPopular('/tv/popular', 'row-tmdb-tv', 'tv')
+  ]);
+}
 /* Run AFTER existing init */
 window.addEventListener("load", () => {
-  setTimeout(loadHomeFromCache, 500);
+  setTimeout(() => {
+    loadHomeFromCache();
+    loadTmdbHomeRows();
+  }, 500);
 });
+
+        // data-lang-category-handler
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.section-arrow');
+            if (!btn) return;
+            const lang = btn.getAttribute('data-lang');
+            const category = btn.getAttribute('data-category') || 'recent';
+            if (!lang) return;
+            e.preventDefault();
+            e.stopPropagation();
+            try { openLanguageCategory(lang, category); } catch(err) { console.error(err); }
+        }, true);
+    
 </script>
 
 </body>
 </html>
+    <div id="view-lang-category" class="visually-hidden view-padded">
+        <div class="section-title" id="lang-category-title" style="margin-top: 0;">Recent</div>
+
+        <div style="display:flex; gap:10px; padding: 0 var(--page-pad); margin-bottom: 12px;">
+            <button class="filter-tab" id="langcat-recent" onclick="setLanguageCategory('recent')">Recent</button>
+            <button class="filter-tab" id="langcat-popular" onclick="setLanguageCategory('popular')">Popular</button>
+        </div>
+
+        <div class="grid-layout" id="lang-category-grid"></div>
+        <button class="load-more-btn visually-hidden" id="load-more-lang-category" onclick="loadNextLanguageCategoryPage()">Load More</button>
+    </div>
+
+
+
