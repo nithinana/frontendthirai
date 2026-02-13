@@ -988,6 +988,36 @@
 }
 </style>
 
+
+<style>
+/* Fix Continue Watching title visibility and layering */
+#view-home .continue-title,
+#view-home .section-title.continue,
+#view-home .section-title[data-category="continue"],
+#view-home .section-title{
+  color: #ffffff !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* Ensure sections stack correctly */
+#view-home .continue-section{
+  position: relative !important;
+  z-index: 90 !important;
+}
+
+#view-home .row-container{
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.hero,
+.hero-container{
+  position: relative !important;
+  z-index: 1 !important;
+}
+</style>
+
 </head>
 <body>
 
