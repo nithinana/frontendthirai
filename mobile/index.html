@@ -858,13 +858,13 @@
   justify-content:flex-start;
   gap:6px;
 }
-.section-arrow{
+.section-arrow{ pointer-events:auto; 
   border:none;
   background:transparent;
   color:rgba(255,255,255,0.75);
   font-size:1.25rem;
   line-height:1;
-  padding:0; margin-left:6px;
+  padding:6px 8px; margin-left:6px;
   cursor:pointer;
 }
 .section-arrow:hover{ color:#fff; }
@@ -926,28 +926,28 @@
             <div class="section-title visually-hidden" id="cw-title">Continue</div>
             <div class="row-container visually-hidden" id="continue-watching-row"></div>
 
-            <div class="section-title section-title-row"><span>Tamil</span><button class="section-arrow" onclick="openLanguageCategory(\'tamil\', \'recent\')" aria-label="Tamil recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Tamil</span><button class="section-arrow" data-lang="tamil" data-category="recent" aria-label="Tamil recent"><span>›</span></button></div>
             <div class="row-container" id="row-tamil"></div>
 
-            <div class="section-title section-title-row"><span>Malayalam</span><button class="section-arrow" onclick="openLanguageCategory(\'malayalam\', \'recent\')" aria-label="Malayalam recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Malayalam</span><button class="section-arrow" data-lang="malayalam" data-category="recent" aria-label="Malayalam recent"><span>›</span></button></div>
             <div class="row-container" id="row-malayalam"></div>
           
-            <div class="section-title section-title-row"><span>Hindi</span><button class="section-arrow" onclick="openLanguageCategory(\'hindi\', \'recent\')" aria-label="Hindi recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Hindi</span><button class="section-arrow" data-lang="hindi" data-category="recent" aria-label="Hindi recent"><span>›</span></button></div>
             <div class="row-container" id="row-hindi"></div>
 
-            <div class="section-title section-title-row"><span>Telugu</span><button class="section-arrow" onclick="openLanguageCategory(\'telugu\', \'recent\')" aria-label="Telugu recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Telugu</span><button class="section-arrow" data-lang="telugu" data-category="recent" aria-label="Telugu recent"><span>›</span></button></div>
             <div class="row-container" id="row-telugu"></div>
 
-            <div class="section-title section-title-row"><span>Punjabi</span><button class="section-arrow" onclick="openLanguageCategory(\'punjabi\', \'recent\')" aria-label="Punjabi recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Punjabi</span><button class="section-arrow" data-lang="punjabi" data-category="recent" aria-label="Punjabi recent"><span>›</span></button></div>
             <div class="row-container" id="row-punjabi"></div>
 
-            <div class="section-title section-title-row"><span>Marathi</span><button class="section-arrow" onclick="openLanguageCategory(\'marathi\', \'recent\')" aria-label="Marathi recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Marathi</span><button class="section-arrow" data-lang="marathi" data-category="recent" aria-label="Marathi recent"><span>›</span></button></div>
             <div class="row-container" id="row-marathi"></div>
 
-            <div class="section-title section-title-row"><span>Kannada</span><button class="section-arrow" onclick="openLanguageCategory(\'kannada\', \'recent\')" aria-label="Kannada recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Kannada</span><button class="section-arrow" data-lang="kannada" data-category="recent" aria-label="Kannada recent"><span>›</span></button></div>
             <div class="row-container" id="row-kannada"></div>
 
-            <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" onclick="openLanguageCategory(\'bengali\', \'recent\')" aria-label="Bengali recent"><span>›</span></button></div>
+            <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
             <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
@@ -4920,6 +4920,19 @@ window.addEventListener("load", () => {
     loadTmdbHomeRows();
   }, 500);
 });
+
+        // data-lang-category-handler
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.section-arrow');
+            if (!btn) return;
+            const lang = btn.getAttribute('data-lang');
+            const category = btn.getAttribute('data-category') || 'recent';
+            if (!lang) return;
+            e.preventDefault();
+            e.stopPropagation();
+            try { openLanguageCategory(lang, category); } catch(err) { console.error(err); }
+        }, true);
+    
 </script>
 
 </body>
