@@ -575,7 +575,32 @@
 
 
 
-        /* ==============================================
+        
+        /* Filter results: match grid style (like actor/search grids) */
+        .media-card{
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .media-card .card{ width: 100%; }
+        .media-title{
+            padding: 0 2px 2px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.86);
+            line-height: 1.2;
+            height: 2.6em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Landscape sizing tweaks (posters + spacing) */
+        @media (orientation: landscape) and (max-height: 520px){
+            .card{ width: 120px; }
+            .grid-layout{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+        }
+/* ==============================================
            6. MOBILE BOTTOM NAV
            ============================================== */
         .bottom-nav {
@@ -1255,23 +1280,29 @@
             movies.forEach(movie => {
                 if (!movie) return;
 
-                const card = document.createElement('div');
-                card.className = 'result-card';
-
                 const imgUrl = movie.img_url
                     ? (movie.img_url.startsWith('http') ? movie.img_url : baseClean + movie.img_url)
                     : '';
 
-                card.innerHTML = `
-                    <img src="${imgUrl}" loading="lazy" alt="${movie.title || ''}">
-                    <div class="result-title">${movie.title || ''}</div>
-                `;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-card';
 
-                card.onclick = () => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${imgUrl}" loading="lazy" alt="${movie.title || ''}">`;
+
+                const title = document.createElement('div');
+                title.className = 'media-title';
+                title.textContent = movie.title || '';
+
+                wrapper.appendChild(card);
+                wrapper.appendChild(title);
+
+                wrapper.onclick = () => {
                     if (movie.page_url) window.location.href = getRedirectUrl(movie.page_url);
                 };
 
-                grid.appendChild(card);
+                grid.appendChild(wrapper);
             });
         }
 
@@ -4526,11 +4557,21 @@ if ('serviceWorker' in navigator) {
 (function () {
     const CACHE_KEY = 'thirai_continue_watching';
 
+
+    function updateContinueTitle() {
+        const title = document.getElementById('cw-title');
+        if (!title) return;
+        const isLandscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
+        title.textContent = isLandscape ? 'Continue' : 'Continue Watching';
+    }
+
     function renderContinueWatching() {
         const row = document.getElementById('continue-watching-row');
         const title = document.getElementById('cw-title');
         if (!row || !title) return;
 
+
+        updateContinueTitle();
         let items = [];
         try {
             items = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
@@ -4579,6 +4620,10 @@ if ('serviceWorker' in navigator) {
     }
 
     document.addEventListener('DOMContentLoaded', renderContinueWatching);
+
+    document.addEventListener('DOMContentLoaded', updateContinueTitle);
+    window.addEventListener('resize', updateContinueTitle);
+    window.addEventListener('orientationchange', updateContinueTitle);
 })();
 </script>
 
