@@ -850,6 +850,32 @@
         z-index: 5000;
     }
 }
+
+/* ===== Language section arrow (Home) ===== */
+.section-title.section-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.section-arrow{
+  border:none;
+  background:transparent;
+  color:rgba(255,255,255,0.75);
+  font-size:1.25rem;
+  line-height:1;
+  padding:4px 0 4px 10px;
+  cursor:pointer;
+}
+.section-arrow:hover{ color:#fff; }
+.section-arrow span{ display:inline-block; transform: translateY(-1px); }
+
+/* ===== Mobile home side padding ===== */
+@media (max-width: 700px){
+  #view-home .row-container{ padding-left: 24px; padding-right: 24px; }
+  #view-home .section-title{ padding-left: 24px; padding-right: 24px; }
+}
+
 </style>
 </head>
 <body>
@@ -897,31 +923,31 @@
 
         <div class="home-content-wrapper">
 
-            <div class="section-title visually-hidden" id="cw-title">Continue Watching</div>
+            <div class="section-title visually-hidden" id="cw-title">Continue</div>
             <div class="row-container visually-hidden" id="continue-watching-row"></div>
 
-            <div class="section-title">Tamil</div>
+            <div class="section-title section-title-row"><span>Tamil</span><button class="section-arrow" onclick="openLanguageCategory(\'tamil\', \'recent\')" aria-label="Tamil recent"><span>›</span></button></div>
             <div class="row-container" id="row-tamil"></div>
 
-            <div class="section-title">Malayalam</div>
+            <div class="section-title section-title-row"><span>Malayalam</span><button class="section-arrow" onclick="openLanguageCategory(\'malayalam\', \'recent\')" aria-label="Malayalam recent"><span>›</span></button></div>
             <div class="row-container" id="row-malayalam"></div>
           
-            <div class="section-title">Hindi</div>
+            <div class="section-title section-title-row"><span>Hindi</span><button class="section-arrow" onclick="openLanguageCategory(\'hindi\', \'recent\')" aria-label="Hindi recent"><span>›</span></button></div>
             <div class="row-container" id="row-hindi"></div>
 
-            <div class="section-title">Telugu</div>
+            <div class="section-title section-title-row"><span>Telugu</span><button class="section-arrow" onclick="openLanguageCategory(\'telugu\', \'recent\')" aria-label="Telugu recent"><span>›</span></button></div>
             <div class="row-container" id="row-telugu"></div>
 
-            <div class="section-title">Punjabi</div>
+            <div class="section-title section-title-row"><span>Punjabi</span><button class="section-arrow" onclick="openLanguageCategory(\'punjabi\', \'recent\')" aria-label="Punjabi recent"><span>›</span></button></div>
             <div class="row-container" id="row-punjabi"></div>
 
-            <div class="section-title">Marathi</div>
+            <div class="section-title section-title-row"><span>Marathi</span><button class="section-arrow" onclick="openLanguageCategory(\'marathi\', \'recent\')" aria-label="Marathi recent"><span>›</span></button></div>
             <div class="row-container" id="row-marathi"></div>
 
-            <div class="section-title">Kannada</div>
+            <div class="section-title section-title-row"><span>Kannada</span><button class="section-arrow" onclick="openLanguageCategory(\'kannada\', \'recent\')" aria-label="Kannada recent"><span>›</span></button></div>
             <div class="row-container" id="row-kannada"></div>
 
-            <div class="section-title">Bengali</div>
+            <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" onclick="openLanguageCategory(\'bengali\', \'recent\')" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
             <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
@@ -1108,7 +1134,9 @@
             const overlay = document.getElementById('filterOverlay');
             if (!overlay) return;
             overlay.classList.toggle('active');
-            if (overlay.classList.contains('active')) {
+            filterPopupOpen = overlay.classList.contains('active');
+            setFilterActive(filterPopupOpen);
+            if (filterPopupOpen) {
                 document.body.style.overflow = 'hidden';
             } else {
                 document.body.style.overflow = '';
@@ -4059,6 +4087,98 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
             return div;
         }
 
+        // ===============================================
+        // SIDEBAR ACTIVE STATE HELPERS
+        // ===============================================
+        let filterPopupOpen = false;
+        function setFilterActive(on){
+            const desk = document.getElementById('desk-filter');
+            const btm = document.getElementById('btm-filter');
+            if(desk) desk.classList.toggle('active', !!on);
+            if(btm) btm.classList.toggle('active', !!on);
+        }
+
+        // ===============================================
+        // LANGUAGE CATEGORY (Recent/Popular) FULL SCREEN
+        // Uses: (API_BASE)/language/(language)?category=recent|popular&page=(number)
+        // ===============================================
+        const langCategoryState = { lang: null, category: 'recent', page: 1, hasMore: false };
+
+        function openLanguageCategory(lang, category='recent'){
+            langCategoryState.lang = lang;
+            langCategoryState.category = category;
+            langCategoryState.page = 1;
+            langCategoryState.hasMore = false;
+
+            // toggle pills
+            document.getElementById('langcat-recent')?.classList.toggle('active', category==='recent');
+            document.getElementById('langcat-popular')?.classList.toggle('active', category==='popular');
+
+            const niceLang = (lang || '').charAt(0).toUpperCase() + (lang || '').slice(1);
+            const niceCat = category.charAt(0).toUpperCase() + category.slice(1);
+            const titleEl = document.getElementById('lang-category-title');
+            if(titleEl) titleEl.textContent = `${niceLang} • ${niceCat}`;
+
+            const grid = document.getElementById('lang-category-grid');
+            if(grid) grid.innerHTML = '';
+
+            switchTab('lang-category');
+            fetchAndRenderLanguageCategory(1, true);
+        }
+
+        function setLanguageCategory(category){
+            if(!langCategoryState.lang) return;
+            if(category !== 'recent' && category !== 'popular') return;
+            openLanguageCategory(langCategoryState.lang, category);
+        }
+
+        async function fetchAndRenderLanguageCategory(pageNumber, clear=false){
+            const grid = document.getElementById('lang-category-grid');
+            const loadMoreBtn = document.getElementById('load-more-lang-category');
+            if(!grid || !loadMoreBtn) return;
+
+            loadMoreBtn.disabled = true;
+
+            if(clear){
+                setLoading('lang-category-grid', true, false);
+            } else {
+                loadMoreBtn.textContent = 'Loading...';
+            }
+
+            try{
+                const url = `${API_BASE}/language/${langCategoryState.lang}?category=${langCategoryState.category}&page=${pageNumber}`;
+                const r = await fetch(url);
+                const d = await r.json();
+
+                if(clear) grid.innerHTML = '';
+
+                const movies = d.movies || d.results || [];
+                if(movies.length){
+                    movies.forEach(m => grid.appendChild(createCard(m)));
+                    langCategoryState.page = pageNumber;
+                    langCategoryState.hasMore = d.has_more || d.hasMore || false;
+                } else if(clear){
+                    grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">No results</p>';
+                    langCategoryState.hasMore = false;
+                }
+            }catch(err){
+                console.error(err);
+                if(clear) grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">Failed to load</p>';
+                langCategoryState.hasMore = false;
+            }finally{
+                setLoading('lang-category-grid', false, false);
+                loadMoreBtn.disabled = !langCategoryState.hasMore;
+                loadMoreBtn.classList.toggle('visually-hidden', !langCategoryState.hasMore);
+                loadMoreBtn.textContent = 'Load More';
+            }
+        }
+
+        function loadNextLanguageCategoryPage(){
+            if(langCategoryState.hasMore){
+                fetchAndRenderLanguageCategory(langCategoryState.page + 1, false);
+            }
+        }
+
         function setLoading(elementId, isLoading, append = false) {
             const el = document.getElementById(elementId);
             if (isLoading) {
@@ -4074,7 +4194,7 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
         let historyStack = ['home'];
 
         function switchTab(tab) {
-            const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details, #view-filter-results');
+            const views = document.querySelectorAll('#view-home, #view-collections, #view-search, #view-actor-details, #view-filter-results, #view-lang-category');
             const navItems = document.querySelectorAll('.nav-link, .nav-item, .side-item');
             const backBtn = document.getElementById('back-button');
 
@@ -4096,6 +4216,13 @@ let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore
 
             // Keep the main tab highlighted even when opening secondary views (like actor-details / filter-results)
             const mainTab = historyStack[0];
+
+            // Highlight Filter button when using filter feature
+            if (tab === 'filter-results') {
+                setFilterActive(true);
+            } else if (!filterPopupOpen) {
+                setFilterActive(false);
+            }
             if(document.getElementById(`btm-${mainTab}`)) document.getElementById(`btm-${mainTab}`).classList.add('active');
             if(document.getElementById(`desk-${mainTab}`)) document.getElementById(`desk-${mainTab}`).classList.add('active');
             // Prevent sticky focus styling on desktop sidebar buttons
@@ -4574,7 +4701,7 @@ if ('serviceWorker' in navigator) {
         const title = document.getElementById('cw-title');
         if (!title) return;
         const isLandscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
-        title.textContent = isLandscape ? 'Continue' : 'Continue Watching';
+        title.textContent = isLandscape ? 'Continue' : 'Continue';
     }
 
     function renderContinueWatching() {
@@ -4797,3 +4924,17 @@ window.addEventListener("load", () => {
 
 </body>
 </html>
+    <div id="view-lang-category" class="visually-hidden view-padded">
+        <div class="section-title" id="lang-category-title" style="margin-top: 0;">Recent</div>
+
+        <div style="display:flex; gap:10px; padding: 0 var(--page-pad); margin-bottom: 12px;">
+            <button class="filter-tab" id="langcat-recent" onclick="setLanguageCategory('recent')">Recent</button>
+            <button class="filter-tab" id="langcat-popular" onclick="setLanguageCategory('popular')">Popular</button>
+        </div>
+
+        <div class="grid-layout" id="lang-category-grid"></div>
+        <button class="load-more-btn visually-hidden" id="load-more-lang-category" onclick="loadNextLanguageCategoryPage()">Load More</button>
+    </div>
+
+
+
