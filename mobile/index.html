@@ -923,11 +923,28 @@
 .section-arrow:hover{ color:#fff; }
 .section-arrow span{ display:inline-block; transform: translateY(-1px); }
 
-/* ===== Mobile home side padding ===== */
-@media (max-width: 700px){
-  /* Slightly larger left/right inset on home rows (matches your screenshot style) */
-  #view-home .row-container{ padding-left: 30px; padding-right: 30px; }
-  #view-home .section-title{ padding-left: 30px; padding-right: 30px; }
+/* ===== Mobile home padding + tighter vertical spacing (Home) ===== */
+@media (max-width: 900px){
+  /* Use one variable so titles + rows ALWAYS start at the same line */
+  :root{ --page-pad: 26px; }
+
+  /* Keep posters away from the edges */
+  #view-home .row-container{
+    padding-left: var(--page-pad);
+    padding-right: var(--page-pad);
+    padding-bottom: 10px; /* tighter than before */
+  }
+
+  /* Make the title line up exactly with the posters */
+  #view-home .section-title{
+    padding-left: var(--page-pad);
+    padding-right: var(--page-pad);
+    margin-top: 14px;    /* less vertical spacing between categories */
+    margin-bottom: 8px;
+  }
+
+  /* Reduce extra gap above the first rows under the hero */
+  #view-home .home-content-wrapper{ padding-top: 2px; }
 }
 
 </style>
