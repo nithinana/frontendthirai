@@ -5899,6 +5899,64 @@ document.addEventListener("DOMContentLoaded", renderContinueWatching);
 })();
 </script>
 
+
+<!-- Backup Hero Banner Script (ONLY used if TMDB fails) -->
+<script>
+const HERO_FALLBACK = [
+  {
+    title: "Mersal",
+    logo: "https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png",
+    background: "https://image.tmdb.org/t/p/original/rx9kyO6YJLpXfFrU934C6i4yYMj.jpg",
+    link: "/watch.html?film=3QoX"
+  },
+  {
+    title: "Papanasam",
+    logo: "https://image.tmdb.org/t/p/w500/49Z8fKeYm0DMpdYM8VkP875KiBi.png",
+    background: "https://image.tmdb.org/t/p/original/e6WQoHeD1lomknxc0a65Ae1sfVw.jpg",
+    link: "/mobile/watch?film=2691"
+  }
+];
+
+function setHeroBanner(item) {
+  const bg = document.getElementById("hero-bg");
+  const logoContainer = document.getElementById("hero-logo-container");
+  const link = document.getElementById("hero-link");
+
+  if (!bg || !logoContainer || !link) return;
+
+  bg.style.backgroundImage = `url('${item.background}')`;
+  logoContainer.innerHTML = `<img src="${item.logo}" class="hero-logo" alt="${item.title}">`;
+  link.href = item.link;
+  link.classList.remove("visually-hidden");
+}
+
+// Wrap original loadHero safely
+const originalLoadHero = window.loadHero;
+
+window.loadHero = async function() {
+  try {
+    if (typeof originalLoadHero === "function") {
+      await originalLoadHero();
+    } else {
+      throw new Error("Original hero loader missing");
+    }
+  } catch (e) {
+    console.warn("TMDB hero failed, using backup hero", e);
+    const fallback = HERO_FALLBACK[Math.floor(Math.random() * HERO_FALLBACK.length)];
+    setHeroBanner(fallback);
+  }
+};
+
+// Safety fallback if nothing loads after 3 seconds
+setTimeout(() => {
+  const bg = document.getElementById("hero-bg");
+  if (!bg || !bg.style.backgroundImage) {
+    const fallback = HERO_FALLBACK[Math.floor(Math.random() * HERO_FALLBACK.length)];
+    setHeroBanner(fallback);
+  }
+}, 3000);
+</script>
+
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
