@@ -1517,6 +1517,13 @@
 }
 </style>
 
+
+<style id="prevent-flash-fix">
+#view-home .home-content-wrapper{
+  visibility:hidden !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -5784,6 +5791,23 @@ function renderContinueWatching() {
 
 // Auto-run when page loads
 document.addEventListener("DOMContentLoaded", renderContinueWatching);
+</script>
+
+
+<script id="prevent-flash-fix-script">
+document.addEventListener("DOMContentLoaded", function(){
+  const wrapper = document.querySelector('#view-home .home-content-wrapper');
+  if(!wrapper) return;
+
+  const observer = new MutationObserver(function(){
+    if(wrapper.children.length > 0){
+      wrapper.style.visibility = "visible";
+      observer.disconnect();
+    }
+  });
+
+  observer.observe(wrapper, {childList:true, subtree:true});
+});
 </script>
 
 </body>
