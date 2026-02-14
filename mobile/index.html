@@ -206,14 +206,43 @@
         }
         .toggle-btn.active { color: #fff; }
         .toggle-bg {
-            position: absolute; top: 3px; left: 3px; width: calc(50% - 3px); height: calc(100% - 6px);
+            position: absolute; top: 3px; left: 3px; width: 50%; height: calc(100% - 6px);
             background: #444; border-radius: 18px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1;
         }
 
+        .featured-slider {
+            display: flex; 
+            overflow-x: scroll; /* Use scroll */
+            scroll-snap-type: x mandatory; 
+            padding: 0 0 30px; 
+            gap: 15px; 
+            scrollbar-width: none;
+            /* Faded sides effect: only works on some browsers, JS helps ensure visual effect */
+            mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+        .featured-slider::-webkit-scrollbar { display: none; }
         
+        .featured-card {
+            flex: 0 0 70%; /* Size of the card, approx 70% of screen width */
+            margin-left: 15%; /* Initial offset to center the first one */
+            max-width: 300px;
+            aspect-ratio: 2/3;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            scroll-snap-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: scale(0.85); /* Blurred/faded side scale */
+            opacity: 0.5; /* Faded opacity for sides */
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+            cursor: pointer;
+        }
+        /* Override for the first/last elements to align the content properly at the ends */
+        .featured-card:first-child { margin-left: 15%; } 
+        .featured-card:last-child { margin-right: 15%; } 
         
-
-.featured-card img { width: 100%; height: 100%; object-fit: cover; }
+        .featured-card img { width: 100%; height: 100%; object-fit: cover; }
         .featured-overlay {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
@@ -228,122 +257,14 @@
         }
 
 
-        
-
-
-        /* ===== Featured carousel: centered highlight + side peeks + desktop arrows ===== */
-        .featured-carousel-wrap{
-            position: relative;
-            width: 100%;
-            max-width: 980px;
-            margin: 0 auto;
-            overflow: hidden; /* crop sides for the "peek" look */
-        }
-        /* Edge fades (works even if mask-image isn't supported) */
-        .featured-carousel-wrap::before,
-        .featured-carousel-wrap::after{
-            content:"";
-            position:absolute;
-            top:0; bottom:0;
-            width: 110px;
-            pointer-events:none;
-            z-index: 3;
-        }
-        .featured-carousel-wrap::before{
-            left:0;
-            background: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));
-        }
-        .featured-carousel-wrap::after{
-            right:0;
-            background: linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0));
-        }
-
-        .featured-slider{
-            --featured-card-w: clamp(160px, 52vw, 340px);
-            --featured-gap: 18px;
-
-            display:flex;
-            gap: var(--featured-gap);
-            overflow-x: scroll;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: auto;
-            scrollbar-width:none;
-
-            /* center the snapped card */
-            padding: 0 calc((100% - var(--featured-card-w)) / 2) 16px;
-            scroll-padding-left: calc((100% - var(--featured-card-w)) / 2);
-            scroll-padding-right: calc((100% - var(--featured-card-w)) / 2);
-
-            /* subtle fade on browsers that support masks */
-            mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
-        }
-        .featured-slider::-webkit-scrollbar{ display:none; }
-
-        .featured-card{
-            flex: 0 0 var(--featured-card-w);
-            max-width: none;
-            margin: 0 !important;
-            scroll-snap-align: center;
-            transform: scale(0.88);
-            opacity: 0.55;
-        }
-        .featured-card.active-slide{
-            transform: scale(1.0);
-            opacity: 1.0;
-        }
-
-        /* Desktop arrows */
-        .featured-nav{
-            position:absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 4;
-            width: 44px;
-            height: 44px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.18);
-            background: rgba(20,20,20,0.72);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: #fff;
-            display: none; /* enabled on desktop */
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.15s ease, background 0.15s ease;
-        }
-        .featured-nav svg{ width: 22px; height: 22px; }
-        .featured-nav:active{ transform: translateY(-50%) scale(0.96); }
-        .featured-prev{ left: 10px; }
-        .featured-next{ right: 10px; }
-
-        @media (min-width: 900px){
-            .featured-nav{ display:flex; }
-            .featured-carousel-wrap::before,
-            .featured-carousel-wrap::after{ width: 140px; }
-            .featured-slider{
-                --featured-card-w: 440px; /* one centered, sides peek */
-                --featured-gap: 22px;
-                scroll-snap-type: x mandatory;
-            }
-            /* Make side cards feel more "background" on wide screens */
-            .featured-card{ transform: scale(0.90); opacity: 0.55; }
-            .featured-card.active-slide{ transform: scale(1.02); opacity: 1.0; }
-        }
-
-        @media (orientation: landscape) and (max-height: 520px){
-            .featured-slider{ --featured-card-w: 360px; }
-        }
-
-/* ==============================================
+        /* ==============================================
            5. STANDARD ROWS & GRIDS
            ============================================== */
         .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
         
         .row-container {
             display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
-            scroll-behavior: auto; scrollbar-width: none;
+            scroll-behavior: smooth; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
 
@@ -354,6 +275,30 @@
             transition: transform 0.16s ease;
         }
         .card img { width: 100%; height: 100%; object-fit: cover; background: #222; }
+
+/* Continue Watching: small remove (X) button */
+#continue-watching-row .card { position: relative; }
+#continue-watching-row .remove-watch-item{
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 0;
+    background: rgba(0,0,0,0.70);
+    color: #fff;
+    font-size: 16px;
+    line-height: 22px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    z-index: 5;
+}
+#continue-watching-row .remove-watch-item:active{ transform: scale(0.96); }
+#continue-watching-row .remove-watch-item:hover{ background: rgba(0,0,0,0.85); }
+
 
         
         .card:hover { transform: scale(1.03); }
@@ -1116,374 +1061,6 @@
 }
 </style>
 
-
-<style id="featured-carousel-overrides">
-.featured-carousel,
-.featured-track {
-  overflow-x: auto !important;
-  animation: none !important;
-  scroll-behavior: auto !important;
-}
-
-.featured-track {
-  display: flex !important;
-  gap: 24px !important;
-}
-
-.featured-card {
-  flex: 0 0 340px !important;
-  scroll-snap-align: center !important;
-}
-
-.featured-card img {
-  border-radius: 18px !important;
-  display: block;
-}
-
-.featured-carousel {
-  scroll-snap-type: x mandatory !important;
-}
-
-.featured-carousel::-webkit-scrollbar {
-  display: none;
-}
-
-/* fade edges */
-.featured-carousel::before,
-.featured-carousel::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 80px;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.featured-carousel::before {
-  left: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.6), transparent);
-}
-
-.featured-carousel::after {
-  right: 0;
-  background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
-}
-</style>
-
-
-<style id="featured-sizing-responsive">
-/* Keep the Featured slider comfortably sized on mobile */
-@media (max-width: 600px){
-  .featured-slider{
-    --featured-card-w: clamp(140px, 62vw, 240px);
-    --featured-gap: 12px;
-    padding: 0 calc((100% - var(--featured-card-w)) / 2) 10px;
-    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-  }
-  .featured-card{ transform: scale(0.90); }
-  .featured-name{ font-size: 0.95rem; }
-  .featured-carousel-wrap{ margin-bottom: 6px; }
-  .featured-nav{ width: 36px; height: 36px; }
-}
-
-/* Desktop: avoid being cut off; give room for arrows and edge fades */
-@media (min-width: 900px){
-  .featured-carousel-wrap{
-    max-width: 1100px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 54px;  /* space for left arrow */
-    padding-right: 54px; /* space for right arrow */
-    box-sizing: border-box;
-  }
-  .featured-slider{
-    --featured-card-w: clamp(240px, 26vw, 360px);
-    padding: 0 calc((100% - var(--featured-card-w)) / 2) 14px;
-  }
-}
-</style>
-
-
-<style id="featured-fluid-responsive">
-/* Fluid responsive scaling based on viewport width */
-.featured-carousel-wrap{
-  width: 100%;
-  max-width: min(92vw, 1200px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-}
-
-/* Card width scales smoothly with screen size */
-.featured-slider{
-  --featured-card-w: clamp(140px, 28vw, 380px);
-  --featured-gap: clamp(10px, 2.2vw, 26px);
-  padding-left: calc((100% - var(--featured-card-w)) / 2);
-  padding-right: calc((100% - var(--featured-card-w)) / 2);
-  padding-bottom: clamp(8px, 1.5vw, 18px);
-}
-
-/* Scale the cards proportionally */
-.featured-card{
-  flex: 0 0 var(--featured-card-w);
-}
-
-/* Image scales perfectly inside card */
-.featured-card img{
-  width: 100%;
-  height: auto;
-  border-radius: clamp(10px, 1.2vw, 18px);
-}
-
-/* Scale text with viewport */
-.featured-name{
-  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
-}
-
-/* Scale arrows proportionally */
-.featured-nav{
-  width: clamp(32px, 3.5vw, 46px);
-  height: clamp(32px, 3.5vw, 46px);
-}
-
-/* Ensure no cutoff on very large displays */
-@media (min-width: 1400px){
-  .featured-carousel-wrap{
-    max-width: 1300px;
-  }
-}
-
-/* Ensure proper fit on very small displays */
-@media (max-width: 420px){
-  .featured-slider{
-    --featured-card-w: clamp(130px, 60vw, 200px);
-  }
-}
-</style>
-
-
-<style id="featured-mobile-height-fix">
-/* Prevent Featured card from becoming overly tall on mobile */
-@media (max-width: 600px){
-  .featured-card{
-    /* keep the whole card from taking over the screen */
-    max-height: 56vh;
-  }
-  .featured-card img{
-    /* constrain image height and crop gracefully */
-    height: clamp(220px, 50vh, 420px);
-    width: 100%;
-    object-fit: cover;
-    object-position: center top;
-  }
-  .featured-overlay{
-    /* keep name readable but not huge */
-    padding: 10px 12px;
-  }
-  .featured-name{
-    font-size: clamp(0.9rem, 4.2vw, 1.05rem);
-  }
-  /* reduce the extra bottom padding in the slider so it doesn't feel cut off */
-  .featured-slider{
-    padding-bottom: 8px !important;
-  }
-}
-</style>
-
-
-<style id="featured-mobile-peek-fix">
-@media (max-width: 600px){
-  /* Let the carousel span edge-to-edge on mobile */
-  .featured-carousel-wrap{
-    max-width: 100vw !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  /* Make the centered card larger, and guarantee a side-peek */
-  .featured-slider{
-    --featured-card-w: min(78vw, 320px) !important;
-    --featured-gap: 14px !important;
-    padding-left: calc((100% - var(--featured-card-w)) / 2) !important;
-    padding-right: calc((100% - var(--featured-card-w)) / 2) !important;
-  }
-
-  /* Slightly stronger side fade so the peek feels intentional */
-  .featured-slider{
-    mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%) !important;
-  }
-}
-</style>
-
-
-<style id="featured-no-crop-posters">
-@media (max-width: 600px){
-  /* Keep poster fully visible (no crop) */
-  .featured-card{
-    aspect-ratio: 2 / 3;
-    max-height: none !important;
-  }
-  .featured-card img{
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    object-position: center center !important;
-    background: #000; /* letterbox sides if needed */
-  }
-}
-</style>
-
-
-<style id="featured-mobile-proper-sizing">
-@media (max-width: 600px){
-  /* Make the Featured area feel like a section, not a full-screen hero */
-  .featured-carousel-wrap{
-    max-width: 100vw !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  /* Card width scales with screen; leaves room for side peeks */
-  .featured-slider{
-    --featured-card-w: clamp(210px, 70vw, 290px) !important;
-    --featured-gap: 14px !important;
-    padding-left: calc((100% - var(--featured-card-w)) / 2) !important;
-    padding-right: calc((100% - var(--featured-card-w)) / 2) !important;
-    padding-bottom: 10px !important;
-    mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%) !important;
-  }
-
-  .featured-card{
-    flex: 0 0 var(--featured-card-w) !important;
-    /* cap vertical size so it doesn't collide with the bottom nav */
-    max-height: 46vh !important;
-    transform: scale(0.92) !important;
-  }
-
-  /* Keep posters fully visible but not giant: fixed-ish height + contain */
-  .featured-card img{
-    width: 100% !important;
-    height: clamp(220px, 42vh, 320px) !important;
-    aspect-ratio: 2 / 3;
-    object-fit: contain !important;
-    background: #000;
-    border-radius: 18px !important;
-  }
-
-  .featured-overlay{
-    /* Keep label smaller and not blocking the poster */
-    padding: 8px 10px !important;
-  }
-  .featured-name{
-    font-size: 0.95rem !important;
-    line-height: 1.1;
-  }
-}
-</style>
-
-
-<style id="featured-mobile-tune-v2">
-@media (max-width: 600px){
-  /* Slightly larger card for mobile while keeping side peeks */
-  .featured-slider{
-    --featured-card-w: clamp(230px, 76vw, 320px) !important;
-  }
-
-  /* Let height be driven by width (2:3 poster) so it fills naturally */
-  .featured-card img{
-    height: min(calc(var(--featured-card-w) * 1.5), 52vh) !important;
-    object-fit: contain !important;
-    background: transparent !important;
-  }
-
-  /* Remove extra "boxy" feeling */
-  .featured-card{
-    max-height: none !important;
-    transform: scale(0.94) !important;
-  }
-
-  /* Nudge spacing so section feels tighter */
-  .featured-slider{
-    padding-bottom: 6px !important;
-  }
-}
-</style>
-
-
-<style id="featured-cleanup">
-/* ===== Featured poster styling cleanup ===== */
-.featured-card {
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.featured-card img {
-  border-radius: 20px;
-  display: block;
-}
-
-/* Remove actor name text */
-.featured-name {
-  display: none !important;
-}
-
-/* Remove bottom overlay */
-.featured-overlay {
-  display: none !important;
-}
-</style>
-
-
-<style id="toggle-switch-fix">
-/* ===== Toggle switch polish (Actors / Actresses) ===== */
-.toggle-switch{
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: stretch;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
-  overflow: hidden;
-}
-
-.toggle-btn{
-  width: 100%;
-  text-align: center;
-  padding: 8px 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.55);
-  border-radius: 999px;
-  user-select: none;
-}
-
-.toggle-btn.active{
-  color: rgba(255,255,255,0.95);
-}
-
-.toggle-bg{
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  height: calc(100% - 6px);
-  width: calc(50% - 0px);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.16);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
-  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
-  z-index: 1;
-}
-
-/* ensure labels sit above the sliding pill */
-.toggle-btn{ position: relative; z-index: 2; }
-</style>
-
 </head>
 <body>
 
@@ -1577,17 +1154,8 @@
             </div>
         </div>
 
-        <div class="featured-carousel-wrap" id="featured-carousel-wrap">
-            <button class="featured-nav featured-prev" type="button" aria-label="Previous featured" onclick="featuredPrev()">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-
-            <div class="featured-slider" id="featured-slider"></div>
-
-            <button class="featured-nav featured-next" type="button" aria-label="Next featured" onclick="featuredNext()">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-        </div>
+        <div class="featured-slider" id="featured-slider">
+            </div>
 
         <div class="section-title">Browse by Language</div>
         <div class="filter-tabs" id="lang-filter-tabs">
@@ -4883,159 +4451,52 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
         // FEATURED SLIDESHOW LOGIC (Blurred Carousel)
         // ===============================================
         let currentFeaturedMode = 'actors';
-        // Infinite-loop state for Featured slider
-        let featuredLoop = { baseCount: 0, loopWidth: 0, isJumping: false, navAnimating: false };
 
+        function renderFeatured() {
+            const list = actorsData.castData.featured[currentFeaturedMode];
+            const slider = document.getElementById('featured-slider');
+            slider.innerHTML = '';
 
+            list.forEach(actor => {
+                const div = document.createElement('div');
+                div.className = 'featured-card';
+                div.innerHTML = `
+                    <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
+                    <div class="featured-overlay">
+                        <div class="featured-name">${actor.name}</div>
+                    </div>
+                `;
+                div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
+                slider.appendChild(div);
+            });
+
+            // Re-attach scroll listener to update active slide
+            slider.removeEventListener('scroll', handleFeaturedScroll);
+            slider.addEventListener('scroll', handleFeaturedScroll);
+            handleFeaturedScroll(); // Initial call to set active slide
+        }
         
-function renderFeatured() {
-    const list = actorsData.castData.featured[currentFeaturedMode] || [];
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return;
+        function handleFeaturedScroll() {
+            const slider = document.getElementById('featured-slider');
+            const cards = slider.querySelectorAll('.featured-card');
+            const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
 
-    slider.innerHTML = '';
-    featuredLoop.baseCount = list.length;
-    featuredLoop.loopWidth = 0;
-    featuredLoop.isJumping = false;
+            cards.forEach(card => {
+                const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+                const distance = Math.abs(scrollCenter - cardCenter);
 
-    // Build 3 copies so we can "wrap" seamlessly.
-    const loopList = list.length ? [...list, ...list, ...list] : [];
+                // Determine if the card is close enough to the center to be "active"
+                const tolerance = card.offsetWidth * 0.4; 
 
-    loopList.forEach(actor => {
-        const div = document.createElement('div');
-        div.className = 'featured-card';
-        div.innerHTML = `
-            <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
-            <div class="featured-overlay">
-                <div class="featured-name">${actor.name}</div>
-            </div>
-        `;
-        div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
-        slider.appendChild(div);
-    });
-
-    // Re-attach scroll listener to update active slide + loop behavior
-    slider.removeEventListener('scroll', handleFeaturedScroll);
-    slider.addEventListener('scroll', handleFeaturedScroll, { passive: true });
-
-    // Jump to the middle copy so scrolling "both ways" loops.
-    requestAnimationFrame(() => {
-        const cards = slider.querySelectorAll('.featured-card');
-        if (!cards.length || featuredLoop.baseCount === 0) return;
-
-        const middleFirst = featuredLoop.baseCount; // first card of the middle copy
-        const c = cards[middleFirst];
-
-        // Center that card
-        const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
-        
-        // Prevent any "auto glide" on load: force instant positioning
-        const prevBehavior = slider.style.scrollBehavior;
-        slider.style.scrollBehavior = 'auto';
-        slider.scrollLeft = target;
-        // Restore (CSS is auto, but keep this safe)
-        requestAnimationFrame(() => { slider.style.scrollBehavior = prevBehavior || ''; });
-
-
-        // Measure the width of one full copy (distance between copy 0 start and copy 1 start)
-        const loopWidth = cards[featuredLoop.baseCount].offsetLeft - cards[0].offsetLeft;
-        featuredLoop.loopWidth = Math.max(1, loopWidth);
-
-        handleFeaturedScroll(); // Initial call to set active slide
-    });
-}
-
-
-function handleFeaturedScroll() {
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return;
-
-    // --- Infinite loop wrap ---
-    if (featuredLoop.baseCount > 0 && featuredLoop.loopWidth > 0 && !featuredLoop.isJumping && !featuredLoop.navAnimating) {
-        const left = slider.scrollLeft;
-
-        // If we drift too far into the first copy, jump forward one copy.
-        if (left < featuredLoop.loopWidth * 0.5) {
-            featuredLoop.isJumping = true;
-            slider.scrollLeft = left + featuredLoop.loopWidth;
-            requestAnimationFrame(() => { featuredLoop.isJumping = false; });
+                if (distance < tolerance) {
+                    card.classList.add('active-slide');
+                } else {
+                    card.classList.remove('active-slide');
+                }
+            });
         }
-        // If we drift too far into the last copy, jump backward one copy.
-        else if (left > featuredLoop.loopWidth * 1.5) {
-            featuredLoop.isJumping = true;
-            slider.scrollLeft = left - featuredLoop.loopWidth;
-            requestAnimationFrame(() => { featuredLoop.isJumping = false; });
-        }
-    }
 
-    // --- Active slide scaling ---
-    const cards = slider.querySelectorAll('.featured-card');
-    const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
-
-    cards.forEach(card => {
-        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-        const distance = Math.abs(scrollCenter - cardCenter);
-
-        // Determine if the card is close enough to the center to be "active"
-        const tolerance = card.offsetWidth * 0.4;
-
-        if (distance < tolerance) card.classList.add('active-slide');
-        else card.classList.remove('active-slide');
-    });
-}
-
-
-
-// ===============================================
-// FEATURED CAROUSEL NAV (desktop arrows)
-// ===============================================
-function featuredScrollToIndex(targetIndex){
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return;
-    const cards = slider.querySelectorAll('.featured-card');
-    if (!cards.length) return;
-
-    const i = Math.max(0, Math.min(cards.length - 1, targetIndex));
-    const c = cards[i];
-    const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
-
-    // Animate on arrow navigation (desktop) without triggering loop-jumps mid-animation
-    featuredLoop.navAnimating = true;
-    clearTimeout(featuredLoop._navTimer);
-    slider.scrollTo({ left: target, behavior: 'smooth' });
-    featuredLoop._navTimer = setTimeout(() => { featuredLoop.navAnimating = false; }, 520);
-}
-
-function featuredGetClosestIndex(){
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return 0;
-    const cards = slider.querySelectorAll('.featured-card');
-    if (!cards.length) return 0;
-
-    const center = slider.scrollLeft + (slider.clientWidth / 2);
-    let bestIdx = 0;
-    let bestDist = Infinity;
-
-    cards.forEach((card, idx) => {
-        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-        const dist = Math.abs(center - cardCenter);
-        if (dist < bestDist){
-            bestDist = dist;
-            bestIdx = idx;
-        }
-    });
-    return bestIdx;
-}
-
-function featuredNext(){
-    const idx = featuredGetClosestIndex();
-    featuredScrollToIndex(idx + 1);
-}
-function featuredPrev(){
-    const idx = featuredGetClosestIndex();
-    featuredScrollToIndex(idx - 1);
-}
-function toggleFeatured() {
+        function toggleFeatured() {
             currentFeaturedMode = currentFeaturedMode === 'actors' ? 'actresses' : 'actors';
             const bg = document.getElementById('feat-toggle-bg');
             const btn1 = document.getElementById('btn-actors');
@@ -5467,7 +4928,7 @@ if ('serviceWorker' in navigator) {
 
             card.innerHTML = `
                 <img src="${item.img}" alt="${item.title || ''}">
-                <div class="remove-watch-item">&times;</div>
+                <button type="button" class="remove-watch-item" aria-label="Remove from Continue Watching">×</button>
             `;
 
             card.onclick = () => {
