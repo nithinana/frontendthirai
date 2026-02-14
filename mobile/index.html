@@ -1519,8 +1519,9 @@
 
 
 <style id="prevent-flash-fix">
+/* Hide embedded home rows until cache JSON load completes */
 #view-home .home-content-wrapper{
-  visibility:hidden !important;
+  visibility:hidden;
 }
 </style>
 
@@ -2814,61 +2815,6 @@ const tamilData = {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2605-4f75.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2605/?lang=tamil",
       "title": "Kaaki Sattai"
-    },
-	      {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7xwg-ca19.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7xwg/?lang=tamil",
-      "title": "Tourist Family"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4zIG-8ecc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4zIG/?lang=tamil",
-      "title": "Dragon"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7bdd-0aaf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7bdd/?lang=tamil",
-      "title": "Madha Gaja Raja"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/fGGE-eae7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/fGGE/?lang=tamil",
-      "title": "Kudumbasthan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3d52-3c00.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3d52/?lang=tamil",
-      "title": "Coolie"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4bRV-6e9b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4bRV/?lang=tamil",
-      "title": "Madharaasi"
-    }
-	      {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2Edj-3bc2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2Edj/?lang=tamil",
-      "title": "Parasakthi"
-    },
-			      {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7xwg-ca19.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7xwg/?lang=tamil",
-      "title": "Tourist Family"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1kTx-7208.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1kTx/?lang=tamil",
-      "title": "Amaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4zIG-8ecc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4zIG/?lang=tamil",
-      "title": "Dragon"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5goY-2e08.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5goY/?lang=tamil",
-      "title": "Vettaiyan"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2595-b314.jpg",
@@ -4212,6 +4158,11 @@ const malayalamData = {
       "page_url": "https://einthusan.tv/movie/watch/2998/?lang=malayalam",
       "title": "James & Alice"
 	},
+	      {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2901-8bbc.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2901/?lang=malayalam",
+      "title": "Adi Kapyare Kootamani"
+    },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2152-763d.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2152/?lang=malayalam",
@@ -5845,19 +5796,27 @@ document.addEventListener("DOMContentLoaded", renderContinueWatching);
 
 
 <script id="prevent-flash-fix-script">
-document.addEventListener("DOMContentLoaded", function(){
+(() => {
   const wrapper = document.querySelector('#view-home .home-content-wrapper');
-  if(!wrapper) return;
+  if (!wrapper) return;
 
-  const observer = new MutationObserver(function(){
-    if(wrapper.children.length > 0){
-      wrapper.style.visibility = "visible";
-      observer.disconnect();
-    }
-  });
-
-  observer.observe(wrapper, {childList:true, subtree:true});
-});
+  // If loadHomeFromCache exists, wrap it so we reveal rows only after it finishes (success or failure).
+  const orig = window.loadHomeFromCache;
+  if (typeof orig === 'function') {
+    window.loadHomeFromCache = async function(...args) {
+      try {
+        return await orig.apply(this, args);
+      } finally {
+        wrapper.style.visibility = 'visible';
+      }
+    };
+  } else {
+    // Fallback: never keep the page blank if the function isn't present for some reason.
+    window.addEventListener('DOMContentLoaded', () => {
+      wrapper.style.visibility = 'visible';
+    });
+  }
+})();
 </script>
 
 </body>
