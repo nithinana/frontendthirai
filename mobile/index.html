@@ -1540,16 +1540,18 @@
     transition: opacity 0.5s ease;
 }
 #loadingOverlay img {
-    width: 200px;
-    animation: pulse-logo 1.5s infinite ease-in-out;
+    width: min(220px, 60vw);
+    height: auto;
+    display: block;
+    animation: fade-logo 1.6s ease-in-out infinite;
 }
 #slowNetworkMessage {
     margin-top: 20px;
     opacity: 0.7;
     font-size: 0.9rem;
 }
-@keyframes pulse-logo {
-    0%,100% { opacity: 0.5; }
+@keyframes fade-logo {
+    0%, 100% { opacity: 0.25; }
     50% { opacity: 1; }
 }
 </style>
@@ -1558,7 +1560,7 @@
 <body>
 
 <div id="loadingOverlay">
-    <img src="./static/thiraiblack.png" alt="Loading...">
+    <img src="https://thirai.me/static/thiraiwhite.png" alt="Loading...">
     <div id="slowNetworkMessage" style="display:none;">
         <i class="fa fa-info-circle"></i>
         <span>Our server appears to be slow right now, please be patient.</span>
