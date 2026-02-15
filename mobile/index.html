@@ -5957,6 +5957,91 @@ setTimeout(() => {
 }, 3000);
 </script>
 
+
+<style id="cw-and-layout-fixes">
+/* FIX: prevent hero from pulling content under header */
+.hero{
+  margin-bottom: 0 !important;
+}
+
+/* FIX: ensure home sections sit below header */
+#view-home .home-content-wrapper{
+  padding-top: 18px !important;
+  margin-top: 0 !important;
+}
+</style>
+
+<script id="continue-watching-unified-fix">
+(() => {
+  const CACHE_KEY = 'thirai_continue_watching';
+
+  function readItems() {
+    let items = [];
+    try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch {}
+
+    let changed = false;
+    items = items.map(it => {
+      if (it && !it.url && it.link) { it.url = it.link; changed = true; }
+      return it;
+    });
+
+    if (changed) localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+
+    return items.filter(it => it && it.img && (it.url || it.link));
+  }
+
+  function writeItems(items) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(items || []));
+  }
+
+  function renderContinueWatching() {
+    const row = document.getElementById('continue-watching-row');
+    const title = document.getElementById('cw-title');
+    if (!row || !title) return;
+
+    const items = readItems();
+
+    row.innerHTML = '';
+    if (!items.length) {
+      row.classList.add('visually-hidden');
+      title.classList.add('visually-hidden');
+      return;
+    }
+
+    row.classList.remove('visually-hidden');
+    title.classList.remove('visually-hidden');
+
+    items.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <img src="${item.img}" alt="${item.title || ''}">
+        <button class="remove-watch-item" type="button">&times;</button>
+      `;
+
+      card.onclick = () => {
+        const href = item.url || item.link;
+        if (!href) return;
+        window.location.href = href;
+      };
+
+      card.querySelector('.remove-watch-item').onclick = (e) => {
+        e.stopPropagation();
+        const next = readItems();
+        next.splice(index, 1);
+        writeItems(next);
+        renderContinueWatching();
+      };
+
+      row.appendChild(card);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', renderContinueWatching);
+})();
+</script>
+
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
