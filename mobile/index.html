@@ -791,6 +791,18 @@
 
 .desktop-sidebar .side-item.active { color: #fff; background: rgba(255,255,255,0.08); }
 
+/* Sidebar layout helpers */
+.desktop-sidebar .side-spacer{ flex: 1; }
+.desktop-sidebar .side-item#desk-install{
+  margin-bottom: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.desktop-sidebar .side-item#desk-install:hover{
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.16);
+}
+
 /* Desktop header nav (hidden on mobile) */
 .desktop-nav {
     display: none;
@@ -842,6 +854,44 @@
     transition: opacity 0.18s ease;
     pointer-events:none;
 }
+/* Landscape devices (tablets/phones): use sidebar instead of bottom-nav for a cleaner layout */
+@media (orientation: landscape) and (min-width: 720px) and (max-width: 899px){
+    body { padding-bottom: 0; padding-left: var(--sidebar-width); }
+    .bottom-nav { display: none; }
+    .desktop-sidebar {
+        display: flex;
+        position: fixed;
+        top: 0;
+        padding-top: var(--header-height);
+        left: 0;
+        bottom: 0;
+        width: var(--sidebar-width);
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        background: linear-gradient(90deg,
+            rgba(0,0,0,0.92) 0%,
+            rgba(0,0,0,0.70) 42%,
+            rgba(0,0,0,0.34) 76%,
+            rgba(0,0,0,0) 100%
+        );
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: 90;
+    }
+    .desktop-sidebar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -56px;
+        width: 56px;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+    }
+}
+
 /* Wider screens */
 @media (min-width: 900px) {
     body { padding-bottom: 0; padding-left: var(--sidebar-width); } /* bottom nav hidden on desktop */
@@ -921,6 +971,10 @@
     .back-button-wrapper { justify-self: start; }
     .desktop-nav { display: none; }
     .header-right-placeholder { justify-self: end; width: auto; }
+    /* Center sidebar items (remove spacer that pushes content upward) */
+    .desktop-sidebar .side-spacer{ display: none; }
+    .desktop-sidebar .side-item#desk-install{ margin-bottom: 0; }
+
 
     /* Views get centered with comfortable spacing */
     #view-home .home-content-wrapper,
@@ -1595,6 +1649,11 @@
 
   <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
     <i class="fas fa-sliders"></i>
+  </button>
+
+  <div class="side-spacer" aria-hidden="true"></div>
+  <button class="side-item visually-hidden" id="desk-install" aria-label="Install app" title="Install">
+    <i class="fas fa-download"></i>
   </button>
 </aside>
 
@@ -5479,22 +5538,31 @@ async function init() {
 <script>
 let deferredPrompt;
 const installBtn = document.getElementById('btm-install');
+const installSideBtn = document.getElementById('desk-install');
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  installBtn.classList.remove('visually-hidden');
 
-  installBtn.onclick = async () => {
-    installBtn.classList.add('visually-hidden');
+  // Show install entry points (bottom-nav + sidebar if present)
+  [installBtn, installSideBtn].forEach(btn => btn && btn.classList.remove('visually-hidden'));
+
+  const handleInstallClick = async () => {
+    [installBtn, installSideBtn].forEach(btn => btn && btn.classList.add('visually-hidden'));
+    if (!deferredPrompt) return;
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
   };
+
+  if (installBtn) installBtn.onclick = handleInstallClick;
+  if (installSideBtn) installSideBtn.onclick = handleInstallClick;
 });
 
 window.addEventListener('appinstalled', () => {
-  installBtn.classList.add('visually-hidden');
+  [installBtn, installSideBtn].forEach(btn => btn && btn.classList.add('visually-hidden'));
+});
+
 });
 
 if ('serviceWorker' in navigator) {
