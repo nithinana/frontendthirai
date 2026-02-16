@@ -912,7 +912,9 @@
             if(socket) socket.disconnect();
         });
 
-        partyToggleBtn.onclick = () => { 
+        partyToggleBtn.onclick = () => {
+            document.getElementById('partyHeader').innerText = 'Watch Party';
+            resetModal();
             partyModal.style.display = 'block';
             modalBackdrop.style.display = 'block';
         };
@@ -935,6 +937,7 @@
         }
 
         function resetModal() {
+            document.getElementById('partyHeader').innerText = 'Watch Party';
             selectionScreen.style.display = 'block';
             hostSetup.style.display = 'none';
             joinSetup.style.display = 'none';
@@ -1663,5 +1666,62 @@ window.addEventListener('load', () => {
         document.addEventListener('DOMContentLoaded', showControls);
     </script>
 
+
+<!-- FIX: Prevent duplicate joins + send reliable leave events -->
+<script>
+(function(){
+  // Join only once per tab per room id
+  function autoJoinOnce(roomId) {
+    const key = 'autojoined_' + roomId;
+    if (sessionStorage.getItem(key)) return false;
+    sessionStorage.setItem(key, '1');
+    return true;
+  }
+
+  function leaveRoomCleanly() {
+    try {
+      if (window.socket && window.currentRoomId) {
+        socket.emit('leave-room', { roomId: currentRoomId });
+      }
+      if (window.socket) socket.disconnect();
+    } catch(e) {}
+  }
+
+  // More reliable than only beforeunload (esp. mobile)
+  window.addEventListener('pagehide', leaveRoomCleanly);
+  window.addEventListener('beforeunload', leaveRoomCleanly);
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'hidden') leaveRoomCleanly();
+  });
+
+  // Guard auto-join triggered by ?join= or ?code= so it can’t fire twice
+  window.addEventListener('load', function(){
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code') || params.get('join');
+      const name = params.get('name');
+      if (!code) return;
+
+      const roomId = code.toUpperCase();
+      if (!autoJoinOnce(roomId)) return;
+
+      const joinCodeInput = document.getElementById('joinCode');
+      const joinNameInput = document.getElementById('joinName');
+      const partyToggleBtn = document.getElementById('partyToggleBtn');
+      const chooseJoin = document.getElementById('chooseJoin');
+      const startJoinBtn = document.getElementById('startJoinBtn');
+
+      if (joinCodeInput) joinCodeInput.value = roomId;
+      if (name && joinNameInput) joinNameInput.value = decodeURIComponent(name);
+
+      // If your UI requires opening the party panel and choosing join:
+      if (partyToggleBtn) partyToggleBtn.click();
+      if (chooseJoin) chooseJoin.click();
+
+      if (startJoinBtn) setTimeout(function(){ startJoinBtn.click(); }, 300);
+    } catch(e) {}
+  });
+})();
+</script>
 </body>
 </html>
