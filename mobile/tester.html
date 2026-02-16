@@ -6657,34 +6657,50 @@ setTimeout(() => {
     return arrow ? arrow.closest('.section-title-row') : null;
   }
 
-  function applyHomeCategoryOrder(){
-    const wrap = getHomeWrapper();
-    if(!wrap) return;
+  
+function getRowBlock(rowEl){
+  if(!rowEl) return null;
+  const p = rowEl.parentElement;
+  // Home row arrows feature wraps rows inside .row-wrap (desktop arrow container)
+  if(p && p.classList && p.classList.contains('row-wrap')) return p;
+  return rowEl;
+}
 
-    // Keep Continue Watching at the top (if present)
-    const cwTitle = document.getElementById('cw-title');
-    const cwRow = document.getElementById('continue-watching-row');
+function applyHomeCategoryOrder(){
+  const wrap = getHomeWrapper();
+  if(!wrap) return;
 
-    const keep = [];
-    if(cwTitle) keep.push(cwTitle);
-    if(cwRow) keep.push(cwRow);
+  // Keep Continue Watching at the top (if present)
+  const cwTitle = document.getElementById('cw-title');
+  const cwRow = document.getElementById('continue-watching-row');
+  const cwBlock = getRowBlock(cwRow);
 
-    // Re-append kept nodes first
-    keep.forEach(n => { if(n && n.parentNode === wrap) wrap.appendChild(n); });
+  // Rebuild the order using a fragment so titles + rows stay paired,
+  // even when rows are wrapped by the arrow UI.
+  const frag = document.createDocumentFragment();
 
-    const order = getSavedOrder();
-    order.forEach(key => {
-      const def = CATEGORY_DEFS.find(d => d.key === key);
-      if(!def) return;
-      const titleEl = findTitleEl(def);
-      const rowEl = document.getElementById(def.rowId);
-      if(titleEl && titleEl.parentNode === wrap) wrap.appendChild(titleEl);
-      if(rowEl && rowEl.parentNode === wrap) wrap.appendChild(rowEl);
-    });
-  }
+  if(cwTitle && cwTitle.parentNode === wrap) frag.appendChild(cwTitle);
+  if(cwBlock && cwBlock.parentNode === wrap) frag.appendChild(cwBlock);
 
-  // --------------------------------
-  // Sort UI
+  const order = getSavedOrder();
+  order.forEach(key => {
+    const def = CATEGORY_DEFS.find(d => d.key === key);
+    if(!def) return;
+
+    const titleEl = findTitleEl(def);
+    const rowEl = document.getElementById(def.rowId);
+    const blockEl = getRowBlock(rowEl);
+
+    if(titleEl && titleEl.parentNode === wrap) frag.appendChild(titleEl);
+    if(blockEl && blockEl.parentNode === wrap) frag.appendChild(blockEl);
+  });
+
+  wrap.appendChild(frag);
+}
+
+// --------------------------------
+// Sort UI
+
   // --------------------------------
   function buildSortList(){
     const list = document.getElementById('categorySortList');
