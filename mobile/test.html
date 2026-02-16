@@ -1852,6 +1852,15 @@
 #settingsOverlay.active .settings-card{ transform: translateY(0) scale(1); opacity: 1; }
 </style>
 
+
+<style id="mobile-portrait-nav-fix">
+@media (max-width: 700px) and (orientation: portrait){
+  .bottom-nav .nav-item span{ display:none !important; }
+  .bottom-nav .nav-item i{ margin-bottom:0 !important; }
+  .bottom-nav .nav-item{ font-size:0 !important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -6954,6 +6963,54 @@ window.resetHomeOrder = function(){
     }
   });
 
+})();
+</script>
+
+
+<script id="ensureRow-sort-fix">
+// FIX: ensureRow creates proper title structure so sorting works
+(function(){
+  function fixedEnsureRow(id, title, langKey){
+    let row = document.getElementById(id);
+    let titleEl = row ? row.previousElementSibling : null;
+
+    if(!row){
+      const h = document.createElement("div");
+      h.className = "section-title section-title-row";
+      h.innerHTML = `
+        <span>${title}</span>
+        <button class="section-arrow" data-lang="${langKey}" data-category="recent" aria-label="${title} recent">
+          <span>›</span>
+        </button>
+      `;
+
+      row = document.createElement("div");
+      row.className = "row-container";
+      row.id = id;
+
+      const wrap = document.querySelector("#view-home .home-content-wrapper") || document.body;
+      wrap.appendChild(h);
+      wrap.appendChild(row);
+    } else {
+      if(titleEl && !titleEl.classList.contains("section-title-row")){
+        const h = document.createElement("div");
+        h.className = "section-title section-title-row";
+        h.innerHTML = `
+          <span>${title}</span>
+          <button class="section-arrow" data-lang="${langKey}" data-category="recent" aria-label="${title} recent">
+            <span>›</span>
+          </button>
+        `;
+        titleEl.replaceWith(h);
+      }
+    }
+
+    row.innerHTML = "";
+    return row;
+  }
+
+  // override global ensureRow if exists
+  window.ensureRow = fixedEnsureRow;
 })();
 </script>
 
