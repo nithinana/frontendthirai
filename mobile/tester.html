@@ -756,6 +756,9 @@
 }
         .bottom-nav .nav-item.active { color: white; }
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+        .bottom-nav .nav-item span { display: none !important; }
+        .bottom-nav .nav-item i { margin-bottom: 0 !important; }
+
     /* ==============================================
    7. DESKTOP FRIENDLY LAYOUT (Responsive Enhancements)
    ============================================== */
@@ -1695,169 +1698,178 @@
 
 
 <style id="settings-overlay-style">
+/* ==============================================
+   SETTINGS OVERLAY (Clean + Blurred)
+   ============================================== */
 #settingsOverlay{
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  z-index: 3000;
-  display: flex;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 2500;
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 18px;
-
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 240ms ease, visibility 0s linear 240ms;
-  will-change: opacity;
 }
-#settingsOverlay.active{
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition: opacity 240ms ease, visibility 0s;
-}
+#settingsOverlay.active{ display:flex; }
 
 .settings-card{
-  transform: translateY(14px) scale(0.98);
-  opacity: 0;
-  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease;
-  will-change: transform, opacity;
-
   width: 100%;
   max-width: 520px;
-  max-height: 85vh;
-  overflow-y: auto;
+  max-height: 86vh;
+  overflow: auto;
   background: rgba(18,18,18,0.98);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 22px;
   padding: 18px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-  position: relative;
-  color: #fff;
+  box-shadow: 0 14px 48px rgba(0,0,0,0.60);
+  transform: translateY(10px) scale(0.98);
+  opacity: 0;
+  transition: transform 220ms cubic-bezier(0.25, 1, 0.5, 1), opacity 220ms ease;
 }
-.settings-card::-webkit-scrollbar{ width:0; height:0; }
+#settingsOverlay.active .settings-card{
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.settings-head{ padding-right: 34px; }
+.settings-title{
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  margin-bottom: 12px;
+}
 
-.settings-head{ display:flex; align-items:center; justify-content: space-between; padding-right: 36px; }
-.settings-title{ font-size: 1.1rem; font-weight: 900; letter-spacing: 0.2px; }
-
-.settings-btn{
+.settings-item{
   width: 100%;
-  margin-top: 12px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.94);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-top: 10px;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+.settings-item:active{ transform: scale(0.99); }
+.settings-item i{ opacity: 0.75; transition: transform 180ms ease; }
+.settings-item.expanded i{ transform: rotate(180deg); opacity: 0.95; }
+
+.settings-expand{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 260ms ease;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.settings-expand.expanded{
+  max-height: 1200px;
+  padding-bottom: 14px;
+}
+
+.settings-hint{
+  margin: 12px 2px 10px;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+.settings-error{
+  margin-top: 10px;
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Sort list */
+.sort-list{
+  list-style:none;
+  margin: 0;
+  padding: 0;
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sort-item{
   display:flex;
   align-items:center;
   justify-content: space-between;
   gap: 12px;
   padding: 12px 12px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.92);
-  cursor: pointer;
-  font-weight: 800;
-}
-.settings-btn span{ flex:1; text-align:left; }
-.settings-btn i{ opacity: 0.92; }
-.settings-chevron{ transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); opacity: 0.6; }
-.settings-btn[aria-expanded="true"] .settings-chevron{ transform: rotate(180deg); opacity: 0.9; }
-
- .settings-section{
-  margin-top: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  border-radius: 16px;
-
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  padding: 0 12px;
-  transition: max-height 360ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease, padding 220ms ease;
-}
-.settings-section.expanded{
-  max-height: 900px;
-  opacity: 1;
-  padding: 12px;
-}
-
-.settings-hint{
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.72);
-  margin-bottom: 10px;
-}
-
-.sort-list{ display:flex; flex-direction: column; gap: 8px; }
-.sort-item{
-  transition: transform 120ms ease, background 180ms ease, border-color 180ms ease;
-
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.25);
+  background: rgba(255,255,255,0.04);
   cursor: grab;
-  user-select:none;
+  user-select: none;
 }
 .sort-item:active{ cursor: grabbing; }
-.sort-item.dragging{ opacity: 0.55; }
-.sort-handle{ opacity: 0.55; }
-.sort-name{ font-weight: 800; font-size: 0.92rem; }
+.sort-item .label{ font-weight: 800; color: rgba(255,255,255,0.92); }
+.sort-item .handle{ opacity: 0.55; }
+.sort-item.dragging{ opacity: 0.55; transform: scale(0.99); }
+.sort-item.over{ outline: 2px solid rgba(255,255,255,0.16); }
 
-.settings-actions{ display:flex; gap: 10px; margin-top: 12px; }
-.settings-action{
-  flex:1;
-  height: 40px;
-  border-radius: 12px;
-  border: none;
+.settings-actions{
+  display:flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.btn-primary, .btn-ghost, .btn-danger{
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0 14px;
+}
+.btn-primary{
   background: #ffffff;
   color: #000;
-  font-weight: 900;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  cursor:pointer;
+  border-color: rgba(255,255,255,0.20);
 }
-.settings-action.secondary{
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.14);
+.btn-ghost{
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.92);
+}
+.btn-danger{
+  background: rgba(229,9,20,0.15);
   color: #fff;
+  border-color: rgba(229,9,20,0.35);
 }
-.settings-action.full{ width:100%; flex: unset; }
-.settings-action:disabled{ opacity:0.45; cursor:not-allowed; }
+.wide{ width: 100%; }
 
-.pin-row{ display:flex; justify-content:center; gap: 10px; margin: 8px 0 12px; }
-.pin-input{
+/* PIN */
+.pin-row{
+  display:flex;
+  justify-content:center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.pin{
   width: 44px;
-  height: 52px;
-  text-align: center;
+  height: 54px;
+  text-align:center;
   font-size: 1.6rem;
   font-weight: 900;
   color: #fff;
   background: rgba(255,255,255,0.06);
-  border: 2px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px;
-  outline:none;
 }
-.pin-input:focus{ border-color: rgba(255,255,255,0.26); }
+.pin:focus{
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.08);
+}
 
-.settings-error{ margin-top: 10px; color: #ff5b5b; font-weight: 700; font-size: 0.9rem; }
-.settings-success{ font-weight: 900; margin-bottom: 8px; }
-.tmdb-info p{ margin: 8px 0; color: rgba(255,255,255,0.82); line-height: 1.35; }
-
-
-#settingsOverlay.active .settings-card{ transform: translateY(0) scale(1); opacity: 1; }
-</style>
-
-
-<style id="mobile-portrait-nav-fix">
-@media (max-width: 700px) and (orientation: portrait){
-  .bottom-nav .nav-item span{ display:none !important; }
-  .bottom-nav .nav-item i{ margin-bottom:0 !important; }
-  .bottom-nav .nav-item{ font-size:0 !important; }
+/* Small screens */
+@media (max-width: 420px){
+  .settings-card{ padding: 16px; border-radius: 20px; }
+  .pin{ width: 40px; height: 52px; }
 }
 </style>
 
@@ -1902,8 +1914,8 @@
     <i class="fas fa-sliders"></i>
   </button>
 
-  <button class="side-item" id="desk-settings" onclick="openSettings()" aria-label="Settings" title="Settings">
-    <i class="fas fa-cog"></i>
+  <button class="side-item" id="desk-settings" onclick="toggleSettingsPopup()" aria-label="Settings" title="Settings">
+    <i class="fas fa-gear"></i>
   </button>
 </aside>
 
@@ -2046,8 +2058,9 @@
     <i class="fas fa-search"></i> <span>Search</span>
 </div>
 
-<div class="nav-item" onclick="openSettings()" id="btm-settings">
-    <i class="fas fa-cog"></i> <span>Settings</span>
+
+<div class="nav-item" onclick="toggleSettingsPopup()" id="btm-settings">
+    <i class="fas fa-gear"></i> <span>Settings</span>
 </div>
 
 <div class="nav-item visually-hidden" id="btm-install">
@@ -2127,43 +2140,51 @@
     <!-- Settings Overlay -->
     <div id="settingsOverlay" onclick="closeSettingsOnOutsideClick(event)">
         <div class="settings-card" role="dialog" aria-modal="true" aria-label="Settings">
-            <button class="close-popup" onclick="toggleSettings(false)">&times;</button>
+            <button class="close-popup" onclick="toggleSettingsPopup()">&times;</button>
 
             <div class="settings-head">
                 <div class="settings-title">Settings</div>
             </div>
-</div>
 
-            <button class="settings-btn" onclick="toggleTmdbSection()">
-                <i class="fas fa-film"></i>
-                <span>TMDB</span>
-                <i class="fas fa-chevron-down settings-chevron" id="tmdbChevron"></i>
+            <button class="settings-item" type="button" onclick="toggleSettingsSection('sort')">
+                <span>Sort Categories</span>
+                <i class="fas fa-chevron-down" id="settings-chevron-sort" aria-hidden="true"></i>
             </button>
+            <div class="settings-expand" id="settings-section-sort">
+                <div class="settings-hint">Drag to reorder the Home categories.</div>
+                <ul class="sort-list" id="categorySortList" aria-label="Sortable category list"></ul>
+                <div class="settings-actions">
+                    <button class="btn-ghost" type="button" onclick="resetCategoryOrder()">Reset</button>
+                    <button class="btn-primary" type="button" onclick="saveCategoryOrder()">Save</button>
+                </div>
+            </div>
 
-            <div class="settings-section" id="tmdbSection">
-                <div id="tmdbLocked">
-                    <div class="settings-hint">Enter your access code to enable TMDB.</div>
+            <button class="settings-item" type="button" onclick="toggleSettingsSection('tmdb')">
+                <span>TMDB Access</span>
+                <i class="fas fa-chevron-down" id="settings-chevron-tmdb" aria-hidden="true"></i>
+            </button>
+            <div class="settings-expand" id="settings-section-tmdb">
+                <div id="tmdbAccessLocked">
+                    <div class="settings-hint">Enter the 4-digit access code.</div>
                     <div class="pin-row" id="tmdbPinRow">
-                        <input type="text" class="pin-input" id="tmdbPin1" maxlength="1" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="pin-input" id="tmdbPin2" maxlength="1" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="pin-input" id="tmdbPin3" maxlength="1" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="pin-input" id="tmdbPin4" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 1">
+                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2">
+                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3">
+                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4">
                     </div>
-                    <button class="settings-action full" id="tmdbUnlockBtn" onclick="attemptTmdbUnlock()" disabled>Unlock TMDB</button>
+                    <button class="btn-primary wide" type="button" id="tmdbUnlockBtn" onclick="attemptTmdbUnlock()" disabled>Unlock TMDB</button>
                     <div class="settings-error" id="tmdbError" style="display:none;"></div>
                 </div>
 
-                <div id="tmdbUnlocked" class="visually-hidden">
-                    <div class="settings-success">TMDB is enabled.</div>
-                    <div class="tmdb-info">
-                        <p>Access to third party servers the extend from just South Asian content.</p>
-                        <p>TMDB Movies and TV Shows row added to home page.</p>
-                        <p>TMDB added as a language in the dropdown to search movies.</p>
-                        <p><b>Note:</b> Servers through TMDB are not hosted by Thirai, but are rather just redirects to third-party sites with content. Advertisements are beyond my control when streaming.</p>
+                <div id="tmdbAccessUnlocked" class="visually-hidden">
+                    <div class="settings-hint">
+                        <i class="fas fa-check-circle"></i>
+                        TMDB is enabled on this device.
                     </div>
-                    <button class="settings-action secondary full" onclick="disableTmdb()">Disable TMDB</button>
+                    <button class="btn-danger wide" type="button" onclick="disableTmdbAccess()">Disable & Remove</button>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -5947,11 +5968,6 @@ const HOME_LANGS = [
   { id: "row-bengali", lang: "bengali", title: "Bengali" }
 ];
 
-function getOrderedHomeLangs(){
-  return HOME_LANGS.slice();
-}
-
-
 function ensureRow(id, title) {
   let row = document.getElementById(id);
   if (!row) {
@@ -5963,15 +5979,15 @@ function ensureRow(id, title) {
     row.className = "row-container";
     row.id = id;
 
-    document.querySelector("#view-home .home-content-wrapper").appendChild(h);
-    document.querySelector("#view-home .home-content-wrapper").appendChild(row);
+    document.querySelector("#view-home").appendChild(h);
+    document.querySelector("#view-home").appendChild(row);
   }
   row.innerHTML = "";
   return row;
 }
 
 async function loadHomeFromCache() {
-  for (const cfg of getOrderedHomeLangs()) {
+  for (const cfg of HOME_LANGS) {
     const row = ensureRow(cfg.id, cfg.title);
     try {
       const r = await fetch(`/cache/${cfg.lang}popular.json`);
@@ -5988,6 +6004,9 @@ async function loadHomeFromCache() {
       console.error("Failed loading", cfg.lang, e);
     }
   }
+}
+
+
 
 // ===============================================
 // TMDB HOME ROWS (Premium / isUnlocked)
@@ -6513,180 +6532,412 @@ setTimeout(() => {
 </script>
 
 
-<script id="settings-modal-script">
+<script id="settings-popup-js">
+/* ================================
+   SETTINGS POPUP
+   - Sort Categories (Home)
+   - TMDB Access (PIN 1451)
+================================ */
 (function(){
-  const SETTINGS_OVERLAY = document.getElementById('settingsOverlay');
+  const LS_HOME_ORDER = 'thirai_homeCategoryOrder';
+  const PIN = '1451';
 
-  // ===== Settings open/close =====
-  window.toggleSettings = function(show){
-    if(!SETTINGS_OVERLAY) return;
-    const on = (show === undefined) ? !SETTINGS_OVERLAY.classList.contains('active') : !!show;
-    SETTINGS_OVERLAY.classList.toggle('active', on);
-    if(on){
-      try{ refreshSettingsUi(); }catch(e){}
-    }else{
-      // collapse sections on close
-      document.getElementById('sortSection')?.classList.remove('expanded');
-      document.getElementById('tmdbSection')?.classList.remove('expanded');
-      document.getElementById('sortChevron')?.closest('.settings-btn')?.setAttribute('aria-expanded','false');
-      document.getElementById('tmdbChevron')?.closest('.settings-btn')?.setAttribute('aria-expanded','false');
-    }
+  function qs(sel, root=document){ return root.querySelector(sel); }
+  function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+
+  function lockBodyScroll(lock){
+    document.body.style.overflow = lock ? 'hidden' : '';
   }
-  window.openSettings = function(){ window.toggleSettings(true); }
+
+  // --------------------------------
+  // Overlay open/close
+  // --------------------------------
+  window.toggleSettingsPopup = function(){
+    const ov = document.getElementById('settingsOverlay');
+    if(!ov) return;
+    const isOpen = ov.classList.contains('active');
+    if(isOpen){
+      ov.classList.remove('active');
+      lockBodyScroll(false);
+    } else {
+      ov.classList.add('active');
+      lockBodyScroll(true);
+      // default: keep sections collapsed
+      setTimeout(() => { try{ initSettingsUi(); }catch(e){} }, 0);
+    }
+  };
 
   window.closeSettingsOnOutsideClick = function(e){
-    const card = document.querySelector('#settingsOverlay .settings-card');
-    if(!card) return;
-    if(!card.contains(e.target)) window.toggleSettings(false);
+    if(e.target && e.target.id === 'settingsOverlay'){
+      toggleSettingsPopup();
+    }
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+      const ov = document.getElementById('settingsOverlay');
+      if(ov && ov.classList.contains('active')){
+        toggleSettingsPopup();
+      }
+    }
+  });
+
+  // --------------------------------
+  // Sections expand/collapse
+  // --------------------------------
+  window.toggleSettingsSection = function(which){
+    const sec = document.getElementById(`settings-section-${which}`);
+    const btn = qs(`button.settings-item[onclick*="'${which}'"]`);
+    const chev = document.getElementById(`settings-chevron-${which}`);
+    if(!sec) return;
+
+    const open = !sec.classList.contains('expanded');
+
+    // close other
+    ['sort','tmdb'].forEach(k => {
+      const s = document.getElementById(`settings-section-${k}`);
+      const b = qs(`button.settings-item[onclick*="'${k}'"]`);
+      if(s && k !== which){ s.classList.remove('expanded'); }
+      if(b && k !== which){ b.classList.remove('expanded'); }
+      const c = document.getElementById(`settings-chevron-${k}`);
+      if(c && k !== which){ /* rotation handled by .expanded on btn */ }
+    });
+
+    sec.classList.toggle('expanded', open);
+    if(btn) btn.classList.toggle('expanded', open);
+
+    // When opening, refresh content
+    if(open){
+      if(which === 'sort'){ buildSortList(); }
+      if(which === 'tmdb'){ syncTmdbAccessUi(); focusFirstPin(); }
+    }
+  };
+
+  // --------------------------------
+  // Home category ordering
+  // --------------------------------
+  const CATEGORY_DEFS = [
+    { key:'tamil',       title:'Tamil',       rowId:'row-tamil',       titleKind:'lang' },
+    { key:'malayalam',   title:'Malayalam',   rowId:'row-malayalam',   titleKind:'lang' },
+    { key:'hindi',       title:'Hindi',       rowId:'row-hindi',       titleKind:'lang' },
+    { key:'telugu',      title:'Telugu',      rowId:'row-telugu',      titleKind:'lang' },
+    { key:'punjabi',     title:'Punjabi',     rowId:'row-punjabi',     titleKind:'lang' },
+    { key:'marathi',     title:'Marathi',     rowId:'row-marathi',     titleKind:'lang' },
+    { key:'kannada',     title:'Kannada',     rowId:'row-kannada',     titleKind:'lang' },
+    { key:'bengali',     title:'Bengali',     rowId:'row-bengali',     titleKind:'lang' },
+    { key:'tmdb-movies', title:'TMDB Movies', rowId:'row-tmdb-movies', titleKind:'id', titleId:'tmdb-movies-title' },
+    { key:'tmdb-tv',     title:'TMDB TV Shows', rowId:'row-tmdb-tv',   titleKind:'id', titleId:'tmdb-tv-title' }
+  ];
+
+  function getSavedOrder(){
+    try{
+      const raw = localStorage.getItem(LS_HOME_ORDER);
+      const arr = raw ? JSON.parse(raw) : null;
+      if(Array.isArray(arr) && arr.length){
+        // keep only known keys, then append missing
+        const known = new Set(CATEGORY_DEFS.map(x => x.key));
+        const cleaned = arr.filter(k => known.has(k));
+        const missing = CATEGORY_DEFS.map(x => x.key).filter(k => !cleaned.includes(k));
+        return [...cleaned, ...missing];
+      }
+    }catch(e){}
+    return CATEGORY_DEFS.map(x => x.key);
   }
 
-  // ===== TMDB section (PIN) =====
-  const PIN = "1451"; // matches premium.html
+  function getHomeWrapper(){
+    return document.querySelector('#view-home .home-content-wrapper');
+  }
 
-  function inputs(){
-    return [
-      document.getElementById('tmdbPin1'),
-      document.getElementById('tmdbPin2'),
-      document.getElementById('tmdbPin3'),
-      document.getElementById('tmdbPin4'),
-    ].filter(Boolean);
+  function findTitleEl(def){
+    if(def.titleKind === 'id'){
+      return document.getElementById(def.titleId);
+    }
+    // language rows: title is the .section-title-row that contains section-arrow[data-lang]
+    const arrow = document.querySelector(`.section-title-row .section-arrow[data-lang="${def.key}"]`);
+    return arrow ? arrow.closest('.section-title-row') : null;
+  }
+
+  function applyHomeCategoryOrder(){
+    const wrap = getHomeWrapper();
+    if(!wrap) return;
+
+    // Keep Continue Watching at the top (if present)
+    const cwTitle = document.getElementById('cw-title');
+    const cwRow = document.getElementById('continue-watching-row');
+
+    const keep = [];
+    if(cwTitle) keep.push(cwTitle);
+    if(cwRow) keep.push(cwRow);
+
+    // Re-append kept nodes first
+    keep.forEach(n => { if(n && n.parentNode === wrap) wrap.appendChild(n); });
+
+    const order = getSavedOrder();
+    order.forEach(key => {
+      const def = CATEGORY_DEFS.find(d => d.key === key);
+      if(!def) return;
+      const titleEl = findTitleEl(def);
+      const rowEl = document.getElementById(def.rowId);
+      if(titleEl && titleEl.parentNode === wrap) wrap.appendChild(titleEl);
+      if(rowEl && rowEl.parentNode === wrap) wrap.appendChild(rowEl);
+    });
+  }
+
+  // --------------------------------
+  // Sort UI
+  // --------------------------------
+  function buildSortList(){
+    const list = document.getElementById('categorySortList');
+    if(!list) return;
+
+    const order = getSavedOrder();
+    const keyToDef = Object.fromEntries(CATEGORY_DEFS.map(d => [d.key, d]));
+    list.innerHTML = '';
+
+    order.forEach(k => {
+      const def = keyToDef[k];
+      if(!def) return;
+
+      const li = document.createElement('li');
+      li.className = 'sort-item';
+      li.draggable = true;
+      li.dataset.key = def.key;
+      li.innerHTML = `
+        <span class="label">${def.title}</span>
+        <span class="handle" aria-hidden="true"><i class="fas fa-grip-lines"></i></span>
+      `;
+      list.appendChild(li);
+    });
+
+    // Drag & drop
+    let dragging = null;
+
+    function onDragStart(e){
+      dragging = e.currentTarget;
+      dragging.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain', dragging.dataset.key); }catch(_){}
+    }
+
+    function onDragEnd(){
+      if(dragging) dragging.classList.remove('dragging');
+      qsa('.sort-item.over', list).forEach(x => x.classList.remove('over'));
+      dragging = null;
+    }
+
+    function onDragOver(e){
+      e.preventDefault();
+      const target = e.currentTarget;
+      if(!dragging || target === dragging) return;
+
+      const rect = target.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      list.insertBefore(dragging, before ? target : target.nextSibling);
+      target.classList.add('over');
+      setTimeout(() => target.classList.remove('over'), 80);
+    }
+
+    qsa('.sort-item', list).forEach(item => {
+      item.addEventListener('dragstart', onDragStart);
+      item.addEventListener('dragend', onDragEnd);
+      item.addEventListener('dragover', onDragOver);
+    });
+  }
+
+  window.saveCategoryOrder = function(){
+    const list = document.getElementById('categorySortList');
+    if(!list) return;
+    const order = qsa('.sort-item', list).map(li => li.dataset.key);
+    localStorage.setItem(LS_HOME_ORDER, JSON.stringify(order));
+    applyHomeCategoryOrder();
+  };
+
+  window.resetCategoryOrder = function(){
+    localStorage.removeItem(LS_HOME_ORDER);
+    buildSortList();
+    applyHomeCategoryOrder();
+  };
+
+  // Apply order on boot + after cache loads
+  document.addEventListener('DOMContentLoaded', () => {
+    try{ applyHomeCategoryOrder(); }catch(e){}
+  });
+  window.addEventListener('load', () => {
+    setTimeout(() => { try{ applyHomeCategoryOrder(); }catch(e){} }, 650);
+  });
+
+  // --------------------------------
+  // TMDB Access (same behavior idea as premium.html)
+  // --------------------------------
+  function isUnlocked(){
+    return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
+  }
+
+  function ensureTmdbSearchOption(){
+    const sel = document.getElementById('lang-select');
+    if(!sel) return;
+    const existing = sel.querySelector('option[value="tmdb"]');
+    if(isUnlocked()){
+      if(!existing){
+        const opt = document.createElement('option');
+        opt.value = 'tmdb';
+        opt.textContent = 'TMDB';
+        sel.appendChild(opt);
+      }
+    } else {
+      if(existing) existing.remove();
+      if(sel.value === 'tmdb') sel.selectedIndex = 0;
+    }
+  }
+
+  function syncTmdbAccessUi(){
+    const locked = document.getElementById('tmdbAccessLocked');
+    const unlocked = document.getElementById('tmdbAccessUnlocked');
+    if(!locked || !unlocked) return;
+
+    const on = isUnlocked();
+    locked.classList.toggle('visually-hidden', on);
+    unlocked.classList.toggle('visually-hidden', !on);
+
+    // Keep search selector aligned
+    try{
+      if(typeof window.applyTmdbSearchVisibility === 'function') window.applyTmdbSearchVisibility();
+      ensureTmdbSearchOption();
+    }catch(e){}
+  }
+
+  function clearPinUi(){
+    const pins = qsa('#tmdbPinRow .pin');
+    pins.forEach(p => p.value = '');
+    const err = document.getElementById('tmdbError');
+    if(err){ err.style.display = 'none'; err.textContent = ''; }
+    const btn = document.getElementById('tmdbUnlockBtn');
+    if(btn) btn.disabled = true;
+  }
+
+  function focusFirstPin(){
+    const pins = qsa('#tmdbPinRow .pin');
+    if(pins[0]) setTimeout(() => pins[0].focus(), 50);
+  }
+
+  function getPinValue(){
+    return qsa('#tmdbPinRow .pin').map(p => (p.value||'').trim()).join('');
   }
 
   function updateUnlockBtn(){
     const btn = document.getElementById('tmdbUnlockBtn');
     if(!btn) return;
-    const allFilled = inputs().every(i => i.value && /^\d$/.test(i.value));
-    btn.disabled = !allFilled;
-  }
-
-  function setupPinInputs(){
-    const ins = inputs();
-    if(!ins.length) return;
-
-    ins.forEach((input, idx) => {
-      input.addEventListener('input', () => {
-        input.value = (input.value || '').replace(/[^0-9]/g,'').slice(0,1);
-        if(input.value && idx < ins.length-1) ins[idx+1].focus();
-        updateUnlockBtn();
-      });
-      input.addEventListener('keydown', (e) => {
-        if(e.key === 'Backspace' && !input.value && idx > 0){
-          ins[idx-1].focus();
-        }
-      });
-      input.addEventListener('paste', (e) => {
-        e.preventDefault();
-        const code = (e.clipboardData || window.clipboardData).getData('text')
-          .trim().replace(/[^0-9]/g,'').slice(0,4);
-        for(let i=0;i<code.length;i++){
-          if(ins[i]) ins[i].value = code[i];
-        }
-        if(ins[Math.min(code.length,3)]) ins[Math.min(code.length,3)].focus();
-        updateUnlockBtn();
-      });
-    });
-
-    document.getElementById('tmdbUnlockBtn')?.addEventListener('click', () => {
-      window.attemptTmdbUnlock();
-    });
-
-    updateUnlockBtn();
-  }
-
-  function setTmdbUi(unlocked){
-    const locked = document.getElementById('tmdbLocked');
-    const ok = document.getElementById('tmdbUnlocked');
-    if(!locked || !ok) return;
-    if(unlocked){
-      locked.classList.add('visually-hidden');
-      ok.classList.remove('visually-hidden');
-    }else{
-      ok.classList.add('visually-hidden');
-      locked.classList.remove('visually-hidden');
-    }
-  }
-
-  window.toggleTmdbSection = function(){
-    const sec = document.getElementById('tmdbSection');
-    const btn = document.getElementById('tmdbChevron')?.closest('.settings-btn');
-    if(!sec || !btn) return;
-
-    const on = !sec.classList.contains('expanded');
-    sec.classList.toggle('expanded', on);
-    btn.setAttribute('aria-expanded', on ? 'true' : 'false');
-    if(on){
-      refreshSettingsUi();
-      setupPinInputs();
-      // focus first pin if locked
-      if(!isUnlocked()){ document.getElementById('tmdbPin1')?.focus(); }
-    }
-  }
-
-  function isUnlocked(){
-    return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true' ||
-            localStorage.getItem('isUnlocked') === 'true' || localStorage.getItem('premium_isUnlocked') === 'true');
+    const filled = qsa('#tmdbPinRow .pin').every(p => /^\d$/.test((p.value||'').trim()));
+    btn.disabled = !filled;
   }
 
   window.attemptTmdbUnlock = function(){
     const err = document.getElementById('tmdbError');
-    if(err){ err.style.display = 'none'; err.textContent = ''; }
+    if(err){ err.style.display='none'; err.textContent=''; }
 
-    const code = inputs().map(i => i.value || '').join('');
-    if(code.length !== 4){
-      if(err){ err.textContent = 'Enter all 4 digits.'; err.style.display = 'block'; }
-      return;
+    if(getPinValue() === PIN){
+      // store unlock flags (matches the app’s existing checks)
+      localStorage.setItem('isUnlocked', 'true');
+      localStorage.setItem('premium_isUnlocked', 'true');
+
+      syncTmdbAccessUi();
+      clearPinUi();
+
+      // show TMDB rows + fill them
+      try{
+        if(typeof window.loadTmdbHomeRows === 'function') window.loadTmdbHomeRows();
+      }catch(e){}
+    } else {
+      if(err){
+        err.textContent = 'Incorrect code.';
+        err.style.display = 'block';
+      }
+      clearPinUi();
+      focusFirstPin();
     }
+  };
 
-    if(code === PIN){
-      localStorage.setItem('isUnlocked','true');
-      localStorage.setItem('premium_isUnlocked','true');
-      localStorage.isUnlocked = 'true';
-
-      setTmdbUi(true);
-
-      // Enable TMDB search option + rows
-      try{ window.applyTmdbSearchVisibility?.(); }catch(_){}
-      try{ window.loadTmdbHomeRows?.(); }catch(_){}
-      try{ window.showTmdbHomeRows?.(true); }catch(_){}
-      // clear inputs
-      inputs().forEach(i => i.value='');
-      updateUnlockBtn();
-    }else{
-      if(err){ err.textContent = 'Incorrect code.'; err.style.display = 'block'; }
-      inputs().forEach(i => i.value='');
-      document.getElementById('tmdbPin1')?.focus();
-      updateUnlockBtn();
-    }
-  }
-
-  window.disableTmdb = function(){
+  window.disableTmdbAccess = function(){
     localStorage.removeItem('isUnlocked');
     localStorage.removeItem('premium_isUnlocked');
-    try{ delete localStorage.isUnlocked; }catch(_){ localStorage.isUnlocked = 'false'; }
+    syncTmdbAccessUi();
+    clearPinUi();
 
-    setTmdbUi(false);
+    // hide tmdb rows
+    try{
+      if(typeof window.loadTmdbHomeRows === 'function') window.loadTmdbHomeRows();
+      if(typeof window.applyTmdbSearchVisibility === 'function') window.applyTmdbSearchVisibility();
+      ensureTmdbSearchOption();
+    }catch(e){}
+  };
 
-    // Hide TMDB rows + remove TMDB option
-    try{ window.showTmdbHomeRows?.(false); }catch(_){}
-    try{ window.applyTmdbSearchVisibility?.(); }catch(_){}
+  // PIN inputs behavior
+  function initPinInputs(){
+    const pins = qsa('#tmdbPinRow .pin');
+    if(!pins.length) return;
 
-  function refreshSettingsUi(){
-    setTmdbUi(isUnlocked());
+    pins.forEach((inp, idx) => {
+      inp.addEventListener('input', () => {
+        inp.value = (inp.value || '').replace(/[^0-9]/g,'').slice(0,1);
+        if(inp.value && pins[idx+1]) pins[idx+1].focus();
+        updateUnlockBtn();
+      });
+      inp.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !inp.value && pins[idx-1]){
+          pins[idx-1].focus();
+        }
+      });
+      inp.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const txt = (e.clipboardData || window.clipboardData).getData('text');
+        const code = (txt || '').replace(/[^0-9]/g,'').slice(0,4);
+        for(let i=0;i<4;i++){
+          if(pins[i]) pins[i].value = code[i] || '';
+        }
+        updateUnlockBtn();
+        if(code.length === 4) pins[3].blur();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const ov = document.getElementById('settingsOverlay');
+      if(!ov || !ov.classList.contains('active')) return;
+      const tmdbOpen = document.getElementById('settings-section-tmdb')?.classList.contains('expanded');
+      if(!tmdbOpen) return;
+      if(e.key === 'Enter'){
+        const btn = document.getElementById('tmdbUnlockBtn');
+        if(btn && !btn.disabled) btn.click();
+      }
+    });
   }
 
+  // One-time init when overlay opens
+  let _initDone = false;
+  function initSettingsUi(){
+    // sync state
+    syncTmdbAccessUi();
+    ensureTmdbSearchOption();
 
-  // Close on ESC
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && SETTINGS_OVERLAY?.classList.contains('active')){
-      window.toggleSettings(false);
+    if(!_initDone){
+      initPinInputs();
+      _initDone = true;
     }
+  }
+
+  // expose for open handler
+  window.__initSettingsUi = initSettingsUi;
+
+  // Init at startup so state is consistent
+  document.addEventListener('DOMContentLoaded', () => {
+    try{
+      syncTmdbAccessUi();
+      ensureTmdbSearchOption();
+      applyHomeCategoryOrder();
+    }catch(e){}
   });
 
 })();
 </script>
-
-
-
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
