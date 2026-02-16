@@ -140,6 +140,7 @@
         }
         .detail-item label { display: block; color: #555; font-size: 0.65rem; text-transform: uppercase; font-weight: 800; margin-bottom: 2px; }
         .detail-item p { font-size: 0.9rem; margin: 0; color: #eee; }
+        .age-rating-icon { height: 26px; width: auto; vertical-align: middle; }
 
         /* --- SERVER SELECTION OVERLAY (Synced with Show.html) --- */
         #server-overlay {
@@ -270,6 +271,7 @@
             <div class="detail-item"><label>Original Title</label><p id="d-otitle">-</p></div>
             <div class="detail-item"><label>Language</label><p id="d-lang">-</p></div>
                         <div class="detail-item"><label>Rating</label><p><span class="rating-box" id="m-rating"></span></p></div>
+            <div class="detail-item"><label>Age Rating</label><p id="d-age-rating">-</p></div>
             <div class="detail-item"><label>Year</label><p id="m-year">-</p></div>
             <div class="detail-item"><label>Runtime</label><p id="m-runtime">-</p></div>
             <div class="detail-item"><label>Genres</label><p id="m-genres">-</p></div>
@@ -311,8 +313,19 @@
     async function loadMovie() {
         if (!ID) return;
         try {
-            const r = await fetch(`https://api.themoviedb.org/3/movie/${ID}?api_key=${KEY}&append_to_response=credits,images,videos,recommendations`);
+            const r = await fetch(`https://api.themoviedb.org/3/movie/${ID}?api_key=${KEY}&append_to_response=credits,images,videos,recommendations,release_dates`);
             movieData = await r.json();
+            // --- Age rating (UK / GB certification) ---
+            function getUkAgeRating(data) {
+                try {
+                    const gb = (data.release_dates && data.release_dates.results || []).find(r => r.iso_3166_1 === 'GB');
+                    if (!gb || !Array.isArray(gb.release_dates)) return '';
+                    // pick the first non-empty certification
+                    const cert = gb.release_dates.map(x => (x.certification || '').trim()).find(c => c);
+                    return cert || '';
+                } catch (e) { return ''; }
+            }
+
 
             document.title = `${movieData.title} - Thirai`;
             document.getElementById('movie-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movieData.backdrop_path})`;
@@ -367,6 +380,31 @@
             document.getElementById('d-lang').innerText = movieData.original_language.toUpperCase();
             document.getElementById('d-budget').innerText = movieData.budget ? `$${(movieData.budget / 1000000).toFixed(1)}M` : 'N/A';
             document.getElementById('d-revenue').innerText = movieData.revenue ? `$${(movieData.revenue / 1000000).toFixed(1)}M` : 'N/A';
+
+            // Render Age Rating icon/text
+            const ageEl = document.getElementById('d-age-rating');
+            const cert = getUkAgeRating(movieData);
+
+            const iconMap = {
+                'U': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/U.png',
+                'PG': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/PG.png',
+                '12': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/12.png',
+                '12A': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/12.png',
+                '15': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/15.png',
+                '18': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/18.png',
+                'TBC': 'https://www.cineworld.co.uk/xmedia/img/10108/rating/TBC.png'
+            };
+
+            const key = (cert || 'TBC').toUpperCase();
+            if (iconMap[key]) {
+                ageEl.innerHTML = `<img class="age-rating-icon" src="${iconMap[key]}" alt="${key}">`;
+            } else if (!cert) {
+                // No certification available: show TBC icon
+                ageEl.innerHTML = `<img class="age-rating-icon" src="${iconMap['TBC']}" alt="TBC">`;
+            } else {
+                // Some other certification: show as plain text
+                ageEl.textContent = cert;
+            }
 
             document.getElementById('movie-page').style.display = 'block';
             document.getElementById('loadingScreen').style.display = 'none';
