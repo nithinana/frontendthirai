@@ -1615,6 +1615,84 @@
 }
 </style>
 
+
+<style id="home-row-arrows-style">
+/* ===== Home language rows: clean left/right arrows ===== */
+#view-home .row-wrap{
+  position: relative;
+}
+
+#view-home .row-wrap .row-nav{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;           /* match fade width */
+  height: auto;                    /* full row height */
+  border-radius: 0;                /* no circle */
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: rgba(255,255,255,0.92);
+  display: none;                   /* enabled on desktop */
+  align-items: center;
+  justify-content: flex-start;         /* move arrow closer into fade */
+  padding-left:14px;
+  cursor: pointer;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+#view-home .row-wrap .row-nav svg{ width: 20px; height: 20px; }
+#view-home .row-wrap .row-nav:active{ transform: scale(0.98); }
+#view-home .row-wrap .row-prev{ left: 0; }
+#view-home .row-wrap .row-next{ right: 0; justify-content:flex-end; padding-right:14px; }
+
+/* only show when JS says it's needed */
+#view-home .row-wrap .row-nav.is-visible{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* side fades removed — arrows only, no gradient fade */
+
+/* Desktop only (avoid covering swipe on mobile) */
+@media (min-width: 900px){
+  #view-home .row-wrap .row-nav{ display: flex; }
+}
+</style>
+
+
+<style id="home-row-fade-conditional">
+/* Conditional fades — only show on sides where more content exists */
+#view-home .row-wrap::before,
+#view-home .row-wrap::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:84px;
+  pointer-events:none;
+  z-index:20;
+  opacity:0;
+  transition: opacity 140ms ease;
+}
+
+/* left fade (show when not at far left) */
+#view-home .row-wrap.can-scroll-left::before{
+  left:0;
+  opacity:1;
+  background: linear-gradient(to right, rgba(8,8,8,0.95), rgba(8,8,8,0));
+}
+
+/* right fade (show when not at far right) */
+#view-home .row-wrap.can-scroll-right::after{
+  right:0;
+  opacity:1;
+  background: linear-gradient(to left, rgba(8,8,8,0.95), rgba(8,8,8,0));
+}
+</style>
+
 </head>
 <body>
 
@@ -6093,6 +6171,122 @@ setTimeout(() => {
   }
 
   document.addEventListener('DOMContentLoaded', renderContinueWatching);
+})();
+</script>
+
+
+<script id="home-row-arrows-js">
+(function(){
+  function makeBtn(dir){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'row-nav ' + (dir === 'prev' ? 'row-prev' : 'row-next');
+    btn.setAttribute('aria-label', dir === 'prev' ? 'Scroll left' : 'Scroll right');
+    btn.innerHTML = dir === 'prev'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    return btn;
+  }
+
+  function needsOverflow(el){
+    return (el.scrollWidth - el.clientWidth) > 6;
+  }
+
+  function initOneRow(row){
+    if (!row || row.dataset.arrowsInit === '1') return;
+    row.dataset.arrowsInit = '1';
+
+    // wrap the row so arrows can overlay cleanly
+    const wrap = document.createElement('div');
+    wrap.className = 'row-wrap';
+    row.parentNode.insertBefore(wrap, row);
+    wrap.appendChild(row);
+
+    const prev = makeBtn('prev');
+    const next = makeBtn('next');
+    wrap.appendChild(prev);
+    wrap.appendChild(next);
+
+    function scrollByAmount(sign){
+      const amount = Math.max(240, Math.floor(row.clientWidth * 0.85));
+      row.scrollBy({ left: sign * amount, behavior: 'smooth' });
+    }
+
+    prev.addEventListener('click', () => scrollByAmount(-1));
+    next.addEventListener('click', () => scrollByAmount( 1));
+
+    let raf = 0;
+    function update(){
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const overflow = needsOverflow(row);
+        wrap.classList.toggle('has-overflow', overflow);
+
+        if (!overflow){
+          prev.classList.remove('is-visible');
+          next.classList.remove('is-visible');
+          return;
+        }
+
+        const max = row.scrollWidth - row.clientWidth;
+        const left = row.scrollLeft;
+
+        // show/hide based on position
+        if (left > 6){
+          prev.classList.add('is-visible');
+          wrap.classList.add('can-scroll-left');
+        } else {
+          prev.classList.remove('is-visible');
+          wrap.classList.remove('can-scroll-left');
+        }
+
+        if (left < max - 6){
+          next.classList.add('is-visible');
+          wrap.classList.add('can-scroll-right');
+        } else {
+          next.classList.remove('is-visible');
+          wrap.classList.remove('can-scroll-right');
+        }
+      });
+    }
+
+    row.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+
+    // initial + after images load
+    update();
+    setTimeout(update, 350);
+    setTimeout(update, 900);
+  }
+
+  function initHomeRowArrows(){
+    const home = document.getElementById('view-home');
+    if (!home) return;
+
+    // language/category rows on home (exclude continue-watching which can be hidden)
+    const rows = home.querySelectorAll('.home-content-wrapper .row-container');
+    rows.forEach(r => initOneRow(r));
+  }
+
+  // run after DOM ready
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initHomeRowArrows);
+  } else {
+    initHomeRowArrows();
+  }
+
+  // also re-run whenever tab switches (in case home rows re-render)
+  const _origSwitchTab = window.switchTab;
+  if (typeof _origSwitchTab === 'function'){
+    window.switchTab = function(){
+      const res = _origSwitchTab.apply(this, arguments);
+      // allow any render to finish
+      setTimeout(() => {
+        try{ initHomeRowArrows(); }catch(e){}
+      }, 50);
+      return res;
+    }
+  }
 })();
 </script>
 
