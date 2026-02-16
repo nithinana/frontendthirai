@@ -206,43 +206,14 @@
         }
         .toggle-btn.active { color: #fff; }
         .toggle-bg {
-            position: absolute; top: 3px; left: 3px; width: 50%; height: calc(100% - 6px);
+            position: absolute; top: 3px; left: 3px; width: calc(50% - 3px); height: calc(100% - 6px);
             background: #444; border-radius: 18px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1;
         }
 
-        .featured-slider {
-            display: flex; 
-            overflow-x: scroll; /* Use scroll */
-            scroll-snap-type: x mandatory; 
-            padding: 0 0 30px; 
-            gap: 15px; 
-            scrollbar-width: none;
-            /* Faded sides effect: only works on some browsers, JS helps ensure visual effect */
-            mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-        }
-        .featured-slider::-webkit-scrollbar { display: none; }
         
-        .featured-card {
-            flex: 0 0 70%; /* Size of the card, approx 70% of screen width */
-            margin-left: 15%; /* Initial offset to center the first one */
-            max-width: 300px;
-            aspect-ratio: 2/3;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            scroll-snap-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transform: scale(0.85); /* Blurred/faded side scale */
-            opacity: 0.5; /* Faded opacity for sides */
-            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
-            cursor: pointer;
-        }
-        /* Override for the first/last elements to align the content properly at the ends */
-        .featured-card:first-child { margin-left: 15%; } 
-        .featured-card:last-child { margin-right: 15%; } 
         
-        .featured-card img { width: 100%; height: 100%; object-fit: cover; }
+
+.featured-card img { width: 100%; height: 100%; object-fit: cover; }
         .featured-overlay {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
@@ -257,14 +228,122 @@
         }
 
 
-        /* ==============================================
+        
+
+
+        /* ===== Featured carousel: centered highlight + side peeks + desktop arrows ===== */
+        .featured-carousel-wrap{
+            position: relative;
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+            overflow: hidden; /* crop sides for the "peek" look */
+        }
+        /* Edge fades (works even if mask-image isn't supported) */
+        .featured-carousel-wrap::before,
+        .featured-carousel-wrap::after{
+            content:"";
+            position:absolute;
+            top:0; bottom:0;
+            width: 110px;
+            pointer-events:none;
+            z-index: 3;
+        }
+        .featured-carousel-wrap::before{
+            left:0;
+            background: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));
+        }
+        .featured-carousel-wrap::after{
+            right:0;
+            background: linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0));
+        }
+
+        .featured-slider{
+            --featured-card-w: clamp(160px, 52vw, 340px);
+            --featured-gap: 18px;
+
+            display:flex;
+            gap: var(--featured-gap);
+            overflow-x: scroll;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: auto;
+            scrollbar-width:none;
+
+            /* center the snapped card */
+            padding: 0 calc((100% - var(--featured-card-w)) / 2) 16px;
+            scroll-padding-left: calc((100% - var(--featured-card-w)) / 2);
+            scroll-padding-right: calc((100% - var(--featured-card-w)) / 2);
+
+            /* subtle fade on browsers that support masks */
+            mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
+        }
+        .featured-slider::-webkit-scrollbar{ display:none; }
+
+        .featured-card{
+            flex: 0 0 var(--featured-card-w);
+            max-width: none;
+            margin: 0 !important;
+            scroll-snap-align: center;
+            transform: scale(0.88);
+            opacity: 0.55;
+        }
+        .featured-card.active-slide{
+            transform: scale(1.0);
+            opacity: 1.0;
+        }
+
+        /* Desktop arrows */
+        .featured-nav{
+            position:absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 4;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(20,20,20,0.72);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            display: none; /* enabled on desktop */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .featured-nav svg{ width: 22px; height: 22px; }
+        .featured-nav:active{ transform: translateY(-50%) scale(0.96); }
+        .featured-prev{ left: 10px; }
+        .featured-next{ right: 10px; }
+
+        @media (min-width: 900px){
+            .featured-nav{ display:flex; }
+            .featured-carousel-wrap::before,
+            .featured-carousel-wrap::after{ width: 140px; }
+            .featured-slider{
+                --featured-card-w: 440px; /* one centered, sides peek */
+                --featured-gap: 22px;
+                scroll-snap-type: x mandatory;
+            }
+            /* Make side cards feel more "background" on wide screens */
+            .featured-card{ transform: scale(0.90); opacity: 0.55; }
+            .featured-card.active-slide{ transform: scale(1.02); opacity: 1.0; }
+        }
+
+        @media (orientation: landscape) and (max-height: 520px){
+            .featured-slider{ --featured-card-w: 360px; }
+        }
+
+/* ==============================================
            5. STANDARD ROWS & GRIDS
            ============================================== */
         .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
         
         .row-container {
             display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
-            scroll-behavior: smooth; scrollbar-width: none;
+            scroll-behavior: auto; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
 
@@ -275,30 +354,6 @@
             transition: transform 0.16s ease;
         }
         .card img { width: 100%; height: 100%; object-fit: cover; background: #222; }
-
-/* Continue Watching: small remove (X) button */
-#continue-watching-row .card { position: relative; }
-#continue-watching-row .remove-watch-item{
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    border: 0;
-    background: rgba(0,0,0,0.70);
-    color: #fff;
-    font-size: 16px;
-    line-height: 22px;
-    padding: 0;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    z-index: 5;
-}
-#continue-watching-row .remove-watch-item:active{ transform: scale(0.96); }
-#continue-watching-row .remove-watch-item:hover{ background: rgba(0,0,0,0.85); }
-
 
         
         .card:hover { transform: scale(1.03); }
@@ -872,7 +927,8 @@
     #view-search,
     #view-collections,
     #view-actor-details,
-    #view-filter-results {
+    #view-filter-results,
+    #view-lang-category {
         max-width: 1240px;
         margin: 0 auto;
     }
@@ -1061,8 +1117,752 @@
 }
 </style>
 
+
+<style id="featured-carousel-overrides">
+.featured-carousel,
+.featured-track {
+  overflow-x: auto !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+
+.featured-track {
+  display: flex !important;
+  gap: 24px !important;
+}
+
+.featured-card {
+  flex: 0 0 340px !important;
+  scroll-snap-align: center !important;
+}
+
+.featured-card img {
+  border-radius: 18px !important;
+  display: block;
+}
+
+.featured-carousel {
+  scroll-snap-type: x mandatory !important;
+}
+
+.featured-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* fade edges */
+.featured-carousel::before,
+.featured-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.featured-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.6), transparent);
+}
+
+.featured-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
+}
+</style>
+
+
+<style id="featured-sizing-responsive">
+/* Keep the Featured slider comfortably sized on mobile */
+@media (max-width: 600px){
+  .featured-slider{
+    --featured-card-w: clamp(140px, 62vw, 240px);
+    --featured-gap: 12px;
+    padding: 0 calc((100% - var(--featured-card-w)) / 2) 10px;
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  }
+  .featured-card{ transform: scale(0.90); }
+  .featured-name{ font-size: 0.95rem; }
+  .featured-carousel-wrap{ margin-bottom: 6px; }
+  .featured-nav{ width: 36px; height: 36px; }
+}
+
+/* Desktop: avoid being cut off; give room for arrows and edge fades */
+@media (min-width: 900px){
+  .featured-carousel-wrap{
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 54px;  /* space for left arrow */
+    padding-right: 54px; /* space for right arrow */
+    box-sizing: border-box;
+  }
+  .featured-slider{
+    --featured-card-w: clamp(240px, 26vw, 360px);
+    padding: 0 calc((100% - var(--featured-card-w)) / 2) 14px;
+  }
+}
+</style>
+
+
+<style id="featured-fluid-responsive">
+/* Fluid responsive scaling based on viewport width */
+.featured-carousel-wrap{
+  width: 100%;
+  max-width: min(92vw, 1200px);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* Card width scales smoothly with screen size */
+.featured-slider{
+  --featured-card-w: clamp(140px, 28vw, 380px);
+  --featured-gap: clamp(10px, 2.2vw, 26px);
+  padding-left: calc((100% - var(--featured-card-w)) / 2);
+  padding-right: calc((100% - var(--featured-card-w)) / 2);
+  padding-bottom: clamp(8px, 1.5vw, 18px);
+}
+
+/* Scale the cards proportionally */
+.featured-card{
+  flex: 0 0 var(--featured-card-w);
+}
+
+/* Image scales perfectly inside card */
+.featured-card img{
+  width: 100%;
+  height: auto;
+  border-radius: clamp(10px, 1.2vw, 18px);
+}
+
+/* Scale text with viewport */
+.featured-name{
+  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+}
+
+/* Scale arrows proportionally */
+.featured-nav{
+  width: clamp(32px, 3.5vw, 46px);
+  height: clamp(32px, 3.5vw, 46px);
+}
+
+/* Ensure no cutoff on very large displays */
+@media (min-width: 1400px){
+  .featured-carousel-wrap{
+    max-width: 1300px;
+  }
+}
+
+/* Ensure proper fit on very small displays */
+@media (max-width: 420px){
+  .featured-slider{
+    --featured-card-w: clamp(130px, 60vw, 200px);
+  }
+}
+</style>
+
+
+<style id="featured-mobile-height-fix">
+/* Prevent Featured card from becoming overly tall on mobile */
+@media (max-width: 600px){
+  .featured-card{
+    /* keep the whole card from taking over the screen */
+    max-height: 56vh;
+  }
+  .featured-card img{
+    /* constrain image height and crop gracefully */
+    height: clamp(220px, 50vh, 420px);
+    width: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  .featured-overlay{
+    /* keep name readable but not huge */
+    padding: 10px 12px;
+  }
+  .featured-name{
+    font-size: clamp(0.9rem, 4.2vw, 1.05rem);
+  }
+  /* reduce the extra bottom padding in the slider so it doesn't feel cut off */
+  .featured-slider{
+    padding-bottom: 8px !important;
+  }
+}
+</style>
+
+
+<style id="featured-mobile-peek-fix">
+@media (max-width: 600px){
+  /* Let the carousel span edge-to-edge on mobile */
+  .featured-carousel-wrap{
+    max-width: 100vw !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Make the centered card larger, and guarantee a side-peek */
+  .featured-slider{
+    --featured-card-w: min(78vw, 320px) !important;
+    --featured-gap: 14px !important;
+    padding-left: calc((100% - var(--featured-card-w)) / 2) !important;
+    padding-right: calc((100% - var(--featured-card-w)) / 2) !important;
+  }
+
+  /* Slightly stronger side fade so the peek feels intentional */
+  .featured-slider{
+    mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%) !important;
+  }
+}
+</style>
+
+
+<style id="featured-no-crop-posters">
+@media (max-width: 600px){
+  /* Keep poster fully visible (no crop) */
+  .featured-card{
+    aspect-ratio: 2 / 3;
+    max-height: none !important;
+  }
+  .featured-card img{
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    background: #000; /* letterbox sides if needed */
+  }
+}
+</style>
+
+
+<style id="featured-mobile-proper-sizing">
+@media (max-width: 600px){
+  /* Make the Featured area feel like a section, not a full-screen hero */
+  .featured-carousel-wrap{
+    max-width: 100vw !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Card width scales with screen; leaves room for side peeks */
+  .featured-slider{
+    --featured-card-w: clamp(210px, 70vw, 290px) !important;
+    --featured-gap: 14px !important;
+    padding-left: calc((100% - var(--featured-card-w)) / 2) !important;
+    padding-right: calc((100% - var(--featured-card-w)) / 2) !important;
+    padding-bottom: 10px !important;
+    mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%) !important;
+  }
+
+  .featured-card{
+    flex: 0 0 var(--featured-card-w) !important;
+    /* cap vertical size so it doesn't collide with the bottom nav */
+    max-height: 46vh !important;
+    transform: scale(0.92) !important;
+  }
+
+  /* Keep posters fully visible but not giant: fixed-ish height + contain */
+  .featured-card img{
+    width: 100% !important;
+    height: clamp(220px, 42vh, 320px) !important;
+    aspect-ratio: 2 / 3;
+    object-fit: contain !important;
+    background: #000;
+    border-radius: 18px !important;
+  }
+
+  .featured-overlay{
+    /* Keep label smaller and not blocking the poster */
+    padding: 8px 10px !important;
+  }
+  .featured-name{
+    font-size: 0.95rem !important;
+    line-height: 1.1;
+  }
+}
+</style>
+
+
+<style id="featured-mobile-tune-v2">
+@media (max-width: 600px){
+  /* Slightly larger card for mobile while keeping side peeks */
+  .featured-slider{
+    --featured-card-w: clamp(230px, 76vw, 320px) !important;
+  }
+
+  /* Let height be driven by width (2:3 poster) so it fills naturally */
+  .featured-card img{
+    height: min(calc(var(--featured-card-w) * 1.5), 52vh) !important;
+    object-fit: contain !important;
+    background: transparent !important;
+  }
+
+  /* Remove extra "boxy" feeling */
+  .featured-card{
+    max-height: none !important;
+    transform: scale(0.94) !important;
+  }
+
+  /* Nudge spacing so section feels tighter */
+  .featured-slider{
+    padding-bottom: 6px !important;
+  }
+}
+</style>
+
+
+<style id="featured-cleanup">
+/* ===== Featured poster styling cleanup ===== */
+.featured-card {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.featured-card img {
+  border-radius: 20px;
+  display: block;
+}
+
+/* Remove actor name text */
+.featured-name {
+  display: none !important;
+}
+
+/* Remove bottom overlay */
+.featured-overlay {
+  display: none !important;
+}
+</style>
+
+
+<style id="toggle-switch-fix">
+/* ===== Toggle switch polish (Actors / Actresses) ===== */
+.toggle-switch{
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  overflow: hidden;
+}
+
+.toggle-btn{
+  width: 100%;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  border-radius: 999px;
+  user-select: none;
+}
+
+.toggle-btn.active{
+  color: rgba(255,255,255,0.95);
+}
+
+.toggle-bg{
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  height: calc(100% - 6px);
+  width: calc(50% - 0px);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 1;
+}
+
+/* ensure labels sit above the sliding pill */
+.toggle-btn{ position: relative; z-index: 2; }
+</style>
+
+
+<style id="continue-watching-remove-style">
+#continue-watching-row .card{
+  position: relative;
+}
+#continue-watching-row .remove-watch-item{
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+#continue-watching-row .remove-watch-item:hover{
+  background: rgba(0,0,0,0.95);
+}
+#continue-watching-row .remove-watch-item:active{
+  transform: scale(0.92);
+}
+</style>
+
+
+<style id="prevent-flash-fix">
+/* Hide embedded home rows until cache JSON load completes */
+#view-home .home-content-wrapper{
+  visibility:hidden;
+}
+</style>
+
+
+<style id="global-loading-overlay-style">
+#loadingOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: #080808;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+#loadingOverlay img {
+    width: min(220px, 60vw);
+    height: auto;
+    display: block;
+    animation: fade-logo 1.6s ease-in-out infinite;
+}
+#slowNetworkMessage {
+    margin-top: 20px;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+@keyframes fade-logo {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+}
+</style>
+
+
+<style id="recent-movies-centering-fix">
+/* Recent movies view — add side margins and center grid */
+#view-filter-results .grid-layout,
+#view-actor-details .grid-layout {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    justify-content: center !important;
+}
+
+/* Desktop centering */
+@media (min-width: 700px){
+    #view-filter-results .grid-layout,
+    #view-actor-details .grid-layout {
+        max-width: 1100px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+</style>
+
+
+<style id="lang-category-centering-fix">
+/* Center the "Language • Recent/Popular" view like the other desktop views */
+@media (min-width: 900px){
+  #view-lang-category{
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Give the Recent/Popular pills the same side padding as other sections */
+#view-lang-category > div[style*="display:flex"]{
+  padding-left: var(--page-pad) !important;
+  padding-right: var(--page-pad) !important;
+}
+
+/* Center the posters grid and avoid huge empty space on wide screens */
+#lang-category-grid{
+  justify-content: center;
+}
+
+@media (min-width: 900px){
+  #lang-category-grid{
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+
+    /* keep columns a fixed poster width so the whole set can center */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 150px)) !important;
+    justify-content: center !important;
+  }
+}
+</style>
+
+
+<style id="home-row-arrows-style">
+/* ===== Home language rows: clean left/right arrows ===== */
+#view-home .row-wrap{
+  position: relative;
+}
+
+#view-home .row-wrap .row-nav{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;           /* match fade width */
+  height: auto;                    /* full row height */
+  border-radius: 0;                /* no circle */
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: rgba(255,255,255,0.92);
+  display: none;                   /* enabled on desktop */
+  align-items: center;
+  justify-content: flex-start;         /* move arrow closer into fade */
+  padding-left:14px;
+  cursor: pointer;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+#view-home .row-wrap .row-nav svg{ width: 20px; height: 20px; }
+#view-home .row-wrap .row-nav:active{ transform: scale(0.98); }
+#view-home .row-wrap .row-prev{ left: 0; }
+#view-home .row-wrap .row-next{ right: 0; justify-content:flex-end; padding-right:14px; }
+
+/* only show when JS says it's needed */
+#view-home .row-wrap .row-nav.is-visible{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* side fades removed — arrows only, no gradient fade */
+
+/* Desktop only (avoid covering swipe on mobile) */
+@media (min-width: 900px){
+  #view-home .row-wrap .row-nav{ display: flex; }
+}
+</style>
+
+
+<style id="home-row-fade-conditional">
+/* Conditional fades — only show on sides where more content exists */
+#view-home .row-wrap::before,
+#view-home .row-wrap::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:84px;
+  pointer-events:none;
+  z-index:20;
+  opacity:0;
+  transition: opacity 140ms ease;
+}
+
+/* left fade (show when not at far left) */
+#view-home .row-wrap.can-scroll-left::before{
+  left:0;
+  opacity:1;
+  background: linear-gradient(to right, rgba(8,8,8,0.95), rgba(8,8,8,0));
+}
+
+/* right fade (show when not at far right) */
+#view-home .row-wrap.can-scroll-right::after{
+  right:0;
+  opacity:1;
+  background: linear-gradient(to left, rgba(8,8,8,0.95), rgba(8,8,8,0));
+}
+</style>
+
+
+<style id="settings-overlay-style">
+#settingsOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 240ms ease, visibility 0s linear 240ms;
+  will-change: opacity;
+}
+#settingsOverlay.active{
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 240ms ease, visibility 0s;
+}
+
+.settings-card{
+  transform: translateY(14px) scale(0.98);
+  opacity: 0;
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease;
+  will-change: transform, opacity;
+
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: rgba(18,18,18,0.98);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  position: relative;
+  color: #fff;
+}
+.settings-card::-webkit-scrollbar{ width:0; height:0; }
+
+.settings-head{ display:flex; align-items:center; justify-content: space-between; padding-right: 36px; }
+.settings-title{ font-size: 1.1rem; font-weight: 900; letter-spacing: 0.2px; }
+
+.settings-btn{
+  width: 100%;
+  margin-top: 12px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.92);
+  cursor: pointer;
+  font-weight: 800;
+}
+.settings-btn span{ flex:1; text-align:left; }
+.settings-btn i{ opacity: 0.92; }
+.settings-chevron{ transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); opacity: 0.6; }
+.settings-btn[aria-expanded="true"] .settings-chevron{ transform: rotate(180deg); opacity: 0.9; }
+
+ .settings-section{
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0 12px;
+  transition: max-height 360ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease, padding 220ms ease;
+}
+.settings-section.expanded{
+  max-height: 900px;
+  opacity: 1;
+  padding: 12px;
+}
+
+.settings-hint{
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.72);
+  margin-bottom: 10px;
+}
+
+.sort-list{ display:flex; flex-direction: column; gap: 8px; }
+.sort-item{
+  transition: transform 120ms ease, background 180ms ease, border-color 180ms ease;
+
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.25);
+  cursor: grab;
+  user-select:none;
+}
+.sort-item:active{ cursor: grabbing; }
+.sort-item.dragging{ opacity: 0.55; }
+.sort-handle{ opacity: 0.55; }
+.sort-name{ font-weight: 800; font-size: 0.92rem; }
+
+.settings-actions{ display:flex; gap: 10px; margin-top: 12px; }
+.settings-action{
+  flex:1;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: #ffffff;
+  color: #000;
+  font-weight: 900;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  cursor:pointer;
+}
+.settings-action.secondary{
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #fff;
+}
+.settings-action.full{ width:100%; flex: unset; }
+.settings-action:disabled{ opacity:0.45; cursor:not-allowed; }
+
+.pin-row{ display:flex; justify-content:center; gap: 10px; margin: 8px 0 12px; }
+.pin-input{
+  width: 44px;
+  height: 52px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  outline:none;
+}
+.pin-input:focus{ border-color: rgba(255,255,255,0.26); }
+
+.settings-error{ margin-top: 10px; color: #ff5b5b; font-weight: 700; font-size: 0.9rem; }
+.settings-success{ font-weight: 900; margin-bottom: 8px; }
+.tmdb-info p{ margin: 8px 0; color: rgba(255,255,255,0.82); line-height: 1.35; }
+
+
+#settingsOverlay.active .settings-card{ transform: translateY(0) scale(1); opacity: 1; }
+</style>
+
 </head>
 <body>
+
+<div id="loadingOverlay">
+    <img src="https://thirai.me/static/thiraiwhite.png" alt="Loading...">
+    <div id="slowNetworkMessage" style="display:none;">
+        <i class="fa fa-info-circle"></i>
+        <span>Our server appears to be slow right now, please be patient.</span>
+    </div>
+</div>
+
 
 <header class="header" id="main-header">
     <div class="header-content">
@@ -1091,6 +1891,10 @@
 
   <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
     <i class="fas fa-sliders"></i>
+  </button>
+
+  <button class="side-item" id="desk-settings" onclick="openSettings()" aria-label="Settings" title="Settings">
+    <i class="fas fa-cog"></i>
   </button>
 </aside>
 
@@ -1154,8 +1958,17 @@
             </div>
         </div>
 
-        <div class="featured-slider" id="featured-slider">
-            </div>
+        <div class="featured-carousel-wrap" id="featured-carousel-wrap">
+            <button class="featured-nav featured-prev" type="button" aria-label="Previous featured" onclick="featuredPrev()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <div class="featured-slider" id="featured-slider"></div>
+
+            <button class="featured-nav featured-next" type="button" aria-label="Next featured" onclick="featuredNext()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+        </div>
 
         <div class="section-title">Browse by Language</div>
         <div class="filter-tabs" id="lang-filter-tabs">
@@ -1222,6 +2035,10 @@
         </div>
 <div class="nav-item" onclick="switchTab('search')" id="btm-search">
     <i class="fas fa-search"></i> <span>Search</span>
+</div>
+
+<div class="nav-item" onclick="openSettings()" id="btm-settings">
+    <i class="fas fa-cog"></i> <span>Settings</span>
 </div>
 
 <div class="nav-item visually-hidden" id="btm-install">
@@ -1297,7 +2114,65 @@
     </div>
 
 
-    <script>
+    
+    <!-- Settings Overlay -->
+    <div id="settingsOverlay" onclick="closeSettingsOnOutsideClick(event)">
+        <div class="settings-card" role="dialog" aria-modal="true" aria-label="Settings">
+            <button class="close-popup" onclick="toggleSettings(false)">&times;</button>
+
+            <div class="settings-head">
+                <div class="settings-title">Settings</div>
+            </div>
+
+            <button class="settings-btn" onclick="toggleSortSection()">
+                <i class="fas fa-sort"></i>
+                <span>Sort Home Categories</span>
+                <i class="fas fa-chevron-down settings-chevron" id="sortChevron"></i>
+            </button>
+
+            <div class="settings-section" id="sortSection">
+                <div class="settings-hint">Drag to reorder the rows on the Home page.</div>
+                <div id="sortList" class="sort-list" aria-label="Home categories order"></div>
+                <div class="settings-actions">
+                    <button class="settings-action secondary" onclick="resetHomeOrder()">Reset</button>
+                    <button class="settings-action" onclick="saveHomeOrder()">Save</button>
+                </div>
+            </div>
+
+            <button class="settings-btn" onclick="toggleTmdbSection()">
+                <i class="fas fa-film"></i>
+                <span>TMDB</span>
+                <i class="fas fa-chevron-down settings-chevron" id="tmdbChevron"></i>
+            </button>
+
+            <div class="settings-section" id="tmdbSection">
+                <div id="tmdbLocked">
+                    <div class="settings-hint">Enter your access code to enable TMDB.</div>
+                    <div class="pin-row" id="tmdbPinRow">
+                        <input type="text" class="pin-input" id="tmdbPin1" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="pin-input" id="tmdbPin2" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="pin-input" id="tmdbPin3" maxlength="1" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="pin-input" id="tmdbPin4" maxlength="1" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <button class="settings-action full" id="tmdbUnlockBtn" onclick="attemptTmdbUnlock()" disabled>Unlock TMDB</button>
+                    <div class="settings-error" id="tmdbError" style="display:none;"></div>
+                </div>
+
+                <div id="tmdbUnlocked" class="visually-hidden">
+                    <div class="settings-success">TMDB is enabled.</div>
+                    <div class="tmdb-info">
+                        <p>Access to third party servers the extend from just South Asian content.</p>
+                        <p>TMDB Movies and TV Shows row added to home page.</p>
+                        <p>TMDB added as a language in the dropdown to search movies.</p>
+                        <p><b>Note:</b> Servers through TMDB are not hosted by Thirai, but are rather just redirects to third-party sites with content. Advertisements are beyond my control when streaming.</p>
+                    </div>
+                    <button class="settings-action secondary full" onclick="disableTmdb()">Disable TMDB</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
         // ===============================================
         // DATA EMBEDDED FROM UPLOADED JSON FILES
         // ===============================================
@@ -3685,11 +4560,6 @@ const malayalamData = {
       "page_url": "https://einthusan.tv/movie/watch/2998/?lang=malayalam",
       "title": "James & Alice"
 	},
-	      {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2901-8bbc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2901/?lang=malayalam",
-      "title": "Adi Kapyare Kootamani"
-    },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2152-763d.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2152/?lang=malayalam",
@@ -4451,52 +5321,159 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
         // FEATURED SLIDESHOW LOGIC (Blurred Carousel)
         // ===============================================
         let currentFeaturedMode = 'actors';
+        // Infinite-loop state for Featured slider
+        let featuredLoop = { baseCount: 0, loopWidth: 0, isJumping: false, navAnimating: false };
 
-        function renderFeatured() {
-            const list = actorsData.castData.featured[currentFeaturedMode];
-            const slider = document.getElementById('featured-slider');
-            slider.innerHTML = '';
 
-            list.forEach(actor => {
-                const div = document.createElement('div');
-                div.className = 'featured-card';
-                div.innerHTML = `
-                    <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
-                    <div class="featured-overlay">
-                        <div class="featured-name">${actor.name}</div>
-                    </div>
-                `;
-                div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
-                slider.appendChild(div);
-            });
-
-            // Re-attach scroll listener to update active slide
-            slider.removeEventListener('scroll', handleFeaturedScroll);
-            slider.addEventListener('scroll', handleFeaturedScroll);
-            handleFeaturedScroll(); // Initial call to set active slide
-        }
         
-        function handleFeaturedScroll() {
-            const slider = document.getElementById('featured-slider');
-            const cards = slider.querySelectorAll('.featured-card');
-            const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
+function renderFeatured() {
+    const list = actorsData.castData.featured[currentFeaturedMode] || [];
+    const slider = document.getElementById('featured-slider');
+    if (!slider) return;
 
-            cards.forEach(card => {
-                const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-                const distance = Math.abs(scrollCenter - cardCenter);
+    slider.innerHTML = '';
+    featuredLoop.baseCount = list.length;
+    featuredLoop.loopWidth = 0;
+    featuredLoop.isJumping = false;
 
-                // Determine if the card is close enough to the center to be "active"
-                const tolerance = card.offsetWidth * 0.4; 
+    // Build 3 copies so we can "wrap" seamlessly.
+    const loopList = list.length ? [...list, ...list, ...list] : [];
 
-                if (distance < tolerance) {
-                    card.classList.add('active-slide');
-                } else {
-                    card.classList.remove('active-slide');
-                }
-            });
+    loopList.forEach(actor => {
+        const div = document.createElement('div');
+        div.className = 'featured-card';
+        div.innerHTML = `
+            <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
+            <div class="featured-overlay">
+                <div class="featured-name">${actor.name}</div>
+            </div>
+        `;
+        div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
+        slider.appendChild(div);
+    });
+
+    // Re-attach scroll listener to update active slide + loop behavior
+    slider.removeEventListener('scroll', handleFeaturedScroll);
+    slider.addEventListener('scroll', handleFeaturedScroll, { passive: true });
+
+    // Jump to the middle copy so scrolling "both ways" loops.
+    requestAnimationFrame(() => {
+        const cards = slider.querySelectorAll('.featured-card');
+        if (!cards.length || featuredLoop.baseCount === 0) return;
+
+        const middleFirst = featuredLoop.baseCount; // first card of the middle copy
+        const c = cards[middleFirst];
+
+        // Center that card
+        const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
+        
+        // Prevent any "auto glide" on load: force instant positioning
+        const prevBehavior = slider.style.scrollBehavior;
+        slider.style.scrollBehavior = 'auto';
+        slider.scrollLeft = target;
+        // Restore (CSS is auto, but keep this safe)
+        requestAnimationFrame(() => { slider.style.scrollBehavior = prevBehavior || ''; });
+
+
+        // Measure the width of one full copy (distance between copy 0 start and copy 1 start)
+        const loopWidth = cards[featuredLoop.baseCount].offsetLeft - cards[0].offsetLeft;
+        featuredLoop.loopWidth = Math.max(1, loopWidth);
+
+        handleFeaturedScroll(); // Initial call to set active slide
+    });
+}
+
+
+function handleFeaturedScroll() {
+    const slider = document.getElementById('featured-slider');
+    if (!slider) return;
+
+    // --- Infinite loop wrap ---
+    if (featuredLoop.baseCount > 0 && featuredLoop.loopWidth > 0 && !featuredLoop.isJumping && !featuredLoop.navAnimating) {
+        const left = slider.scrollLeft;
+
+        // If we drift too far into the first copy, jump forward one copy.
+        if (left < featuredLoop.loopWidth * 0.5) {
+            featuredLoop.isJumping = true;
+            slider.scrollLeft = left + featuredLoop.loopWidth;
+            requestAnimationFrame(() => { featuredLoop.isJumping = false; });
         }
+        // If we drift too far into the last copy, jump backward one copy.
+        else if (left > featuredLoop.loopWidth * 1.5) {
+            featuredLoop.isJumping = true;
+            slider.scrollLeft = left - featuredLoop.loopWidth;
+            requestAnimationFrame(() => { featuredLoop.isJumping = false; });
+        }
+    }
 
-        function toggleFeatured() {
+    // --- Active slide scaling ---
+    const cards = slider.querySelectorAll('.featured-card');
+    const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
+
+    cards.forEach(card => {
+        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+        const distance = Math.abs(scrollCenter - cardCenter);
+
+        // Determine if the card is close enough to the center to be "active"
+        const tolerance = card.offsetWidth * 0.4;
+
+        if (distance < tolerance) card.classList.add('active-slide');
+        else card.classList.remove('active-slide');
+    });
+}
+
+
+
+// ===============================================
+// FEATURED CAROUSEL NAV (desktop arrows)
+// ===============================================
+function featuredScrollToIndex(targetIndex){
+    const slider = document.getElementById('featured-slider');
+    if (!slider) return;
+    const cards = slider.querySelectorAll('.featured-card');
+    if (!cards.length) return;
+
+    const i = Math.max(0, Math.min(cards.length - 1, targetIndex));
+    const c = cards[i];
+    const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
+
+    // Animate on arrow navigation (desktop) without triggering loop-jumps mid-animation
+    featuredLoop.navAnimating = true;
+    clearTimeout(featuredLoop._navTimer);
+    slider.scrollTo({ left: target, behavior: 'smooth' });
+    featuredLoop._navTimer = setTimeout(() => { featuredLoop.navAnimating = false; }, 520);
+}
+
+function featuredGetClosestIndex(){
+    const slider = document.getElementById('featured-slider');
+    if (!slider) return 0;
+    const cards = slider.querySelectorAll('.featured-card');
+    if (!cards.length) return 0;
+
+    const center = slider.scrollLeft + (slider.clientWidth / 2);
+    let bestIdx = 0;
+    let bestDist = Infinity;
+
+    cards.forEach((card, idx) => {
+        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+        const dist = Math.abs(center - cardCenter);
+        if (dist < bestDist){
+            bestDist = dist;
+            bestIdx = idx;
+        }
+    });
+    return bestIdx;
+}
+
+function featuredNext(){
+    const idx = featuredGetClosestIndex();
+    featuredScrollToIndex(idx + 1);
+}
+function featuredPrev(){
+    const idx = featuredGetClosestIndex();
+    featuredScrollToIndex(idx - 1);
+}
+function toggleFeatured() {
             currentFeaturedMode = currentFeaturedMode === 'actors' ? 'actresses' : 'actors';
             const bg = document.getElementById('feat-toggle-bg');
             const btn1 = document.getElementById('btn-actors');
@@ -4928,7 +5905,7 @@ if ('serviceWorker' in navigator) {
 
             card.innerHTML = `
                 <img src="${item.img}" alt="${item.title || ''}">
-                <button type="button" class="remove-watch-item" aria-label="Remove from Continue Watching">×</button>
+                <div class="remove-watch-item">&times;</div>
             `;
 
             card.onclick = () => {
@@ -4975,6 +5952,24 @@ const HOME_LANGS = [
   { id: "row-bengali", lang: "bengali", title: "Bengali" }
 ];
 
+function getOrderedHomeLangs(){
+  const def = HOME_LANGS.slice();
+  let saved = null;
+  try{
+    saved = JSON.parse(localStorage.getItem('thirai_home_order') || 'null');
+  }catch(_){}
+  if(!Array.isArray(saved) || !saved.length) return def;
+
+  // saved may include tmdb keys; filter to langs that exist in HOME_LANGS
+  const exists = new Map(def.map(x => [x.lang, x]));
+  const ordered = [];
+  saved.forEach(k => { if(exists.has(k)) ordered.push(exists.get(k)); });
+  // append any missing langs
+  def.forEach(x => { if(!ordered.includes(x)) ordered.push(x); });
+  return ordered;
+}
+
+
 function ensureRow(id, title) {
   let row = document.getElementById(id);
   if (!row) {
@@ -4986,15 +5981,15 @@ function ensureRow(id, title) {
     row.className = "row-container";
     row.id = id;
 
-    document.querySelector("#view-home").appendChild(h);
-    document.querySelector("#view-home").appendChild(row);
+    document.querySelector("#view-home .home-content-wrapper").appendChild(h);
+    document.querySelector("#view-home .home-content-wrapper").appendChild(row);
   }
   row.innerHTML = "";
   return row;
 }
 
 async function loadHomeFromCache() {
-  for (const cfg of HOME_LANGS) {
+  for (const cfg of getOrderedHomeLangs()) {
     const row = ensureRow(cfg.id, cfg.title);
     try {
       const r = await fetch(`/cache/${cfg.lang}popular.json`);
@@ -5108,13 +6103,25 @@ async function loadTmdbHomeRows() {
 }
 /* Run AFTER existing init */
 window.addEventListener("load", () => {
-  setTimeout(() => {
-    loadHomeFromCache();
-    loadTmdbHomeRows();
+  setTimeout(async () => {
+    try {
+      const tasks = [];
+      if (typeof loadHomeFromCache === "function") tasks.push(loadHomeFromCache());
+      if (typeof loadTmdbHomeRows === "function") tasks.push(loadTmdbHomeRows());
+      if (tasks.length) {
+        await Promise.allSettled(tasks);
+      }
+    } finally {
+      if (typeof window.hideLoadingOverlay === "function") {
+        window.hideLoadingOverlay();
+      } else {
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) overlay.style.display = "none";
+      }
+    }
   }, 500);
 });
-
-        // data-lang-category-handler
+// data-lang-category-handler
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.section-arrow');
             if (!btn) return;
@@ -5162,6 +6169,792 @@ history.pushState = function(...args) {
 
 /* On page load */
 window.addEventListener("load", scrollToTopInstant);
+</script>
+
+
+<script id="continue-watching-remove-script">
+function renderContinueWatching() {
+  const row = document.getElementById('continue-watching-row');
+  const title = document.getElementById('cw-title');
+
+  if (!row || !title) return;
+
+  let data = JSON.parse(localStorage.getItem('thirai_continue_watching') || '[]');
+
+  if (!data.length) {
+    row.classList.add('visually-hidden');
+    title.classList.add('visually-hidden');
+    row.innerHTML = '';
+    return;
+  }
+
+  row.classList.remove('visually-hidden');
+  title.classList.remove('visually-hidden');
+
+  row.innerHTML = '';
+
+  data.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    card.innerHTML = `
+      <img src="${item.img}" alt="${item.title || ''}">
+      <button class="remove-watch-item">&times;</button>
+    `;
+
+    card.querySelector('img').onclick = () => {
+      window.location.href = item.link;
+    };
+
+    card.querySelector('.remove-watch-item').onclick = (e) => {
+      e.stopPropagation();
+      data.splice(index, 1);
+      localStorage.setItem('thirai_continue_watching', JSON.stringify(data));
+      renderContinueWatching();
+    };
+
+    row.appendChild(card);
+  });
+}
+
+// Auto-run when page loads
+document.addEventListener("DOMContentLoaded", renderContinueWatching);
+</script>
+
+
+<script id="prevent-flash-fix-script">
+(() => {
+  const wrapper = document.querySelector('#view-home .home-content-wrapper');
+  if (!wrapper) return;
+
+  // If loadHomeFromCache exists, wrap it so we reveal rows only after it finishes (success or failure).
+  const orig = window.loadHomeFromCache;
+  if (typeof orig === 'function') {
+    window.loadHomeFromCache = async function(...args) {
+      try {
+        return await orig.apply(this, args);
+      } finally {
+        wrapper.style.visibility = 'visible';
+      }
+    };
+  } else {
+    // Fallback: never keep the page blank if the function isn't present for some reason.
+    window.addEventListener('DOMContentLoaded', () => {
+      wrapper.style.visibility = 'visible';
+    });
+  }
+})();
+</script>
+
+
+
+<script id="global-loading-overlay-script">
+(function(){
+  function hideLoadingOverlay(){
+    const overlay = document.getElementById("loadingOverlay");
+    if (!overlay) return;
+    overlay.style.opacity = "0";
+    setTimeout(() => { overlay.style.display = "none"; }, 500);
+  }
+
+  // Slow network hint (only meaningful while overlay is visible)
+  setTimeout(() => {
+    const overlay = document.getElementById("loadingOverlay");
+    const slowMsg = document.getElementById("slowNetworkMessage");
+    if (overlay && slowMsg && overlay.style.display !== "none") {
+      slowMsg.style.display = "flex";
+    }
+  }, 4000);
+
+  // Expose for other scripts if needed
+  window.hideLoadingOverlay = hideLoadingOverlay;
+
+  // IMPORTANT: We do NOT hide on window load.
+  // The overlay is hidden after the Home rows finish loading.
+})();
+</script>
+
+
+<!-- Backup Hero Banner Script (ONLY used if TMDB fails) -->
+<script>
+const HERO_FALLBACK = [
+  {
+    title: "Mersal",
+    logo: "https://image.tmdb.org/t/p/original/udsF8gnPdklZGj74wDBgPSTklkg.png",
+    background: "https://image.tmdb.org/t/p/original/rx9kyO6YJLpXfFrU934C6i4yYMj.jpg",
+    link: "/watch.html?film=3QoX"
+  },
+  {
+    title: "Papanasam",
+    logo: "https://image.tmdb.org/t/p/w500/49Z8fKeYm0DMpdYM8VkP875KiBi.png",
+    background: "https://image.tmdb.org/t/p/original/e6WQoHeD1lomknxc0a65Ae1sfVw.jpg",
+    link: "/mobile/watch?film=2691"
+  }
+];
+
+function setHeroBanner(item) {
+  const bg = document.getElementById("hero-bg");
+  const logoContainer = document.getElementById("hero-logo-container");
+  const link = document.getElementById("hero-link");
+
+  if (!bg || !logoContainer || !link) return;
+
+  bg.style.backgroundImage = `url('${item.background}')`;
+  logoContainer.innerHTML = `<img src="${item.logo}" class="hero-logo" alt="${item.title}">`;
+  link.href = item.link;
+  link.classList.remove("visually-hidden");
+}
+
+// Wrap original loadHero safely
+const originalLoadHero = window.loadHero;
+
+window.loadHero = async function() {
+  try {
+    if (typeof originalLoadHero === "function") {
+      await originalLoadHero();
+    } else {
+      throw new Error("Original hero loader missing");
+    }
+  } catch (e) {
+    console.warn("TMDB hero failed, using backup hero", e);
+    const fallback = HERO_FALLBACK[Math.floor(Math.random() * HERO_FALLBACK.length)];
+    setHeroBanner(fallback);
+  }
+};
+
+// Safety fallback if nothing loads after 3 seconds
+setTimeout(() => {
+  const bg = document.getElementById("hero-bg");
+  if (!bg || !bg.style.backgroundImage) {
+    const fallback = HERO_FALLBACK[Math.floor(Math.random() * HERO_FALLBACK.length)];
+    setHeroBanner(fallback);
+  }
+}, 3000);
+</script>
+
+
+<style id="cw-and-layout-fixes">
+/* FIX: prevent hero from pulling content under header */
+.hero{
+  margin-bottom: 0 !important;
+}
+
+/* FIX: ensure home sections sit below header */
+#view-home .home-content-wrapper{
+  padding-top: 18px !important;
+  margin-top: 0 !important;
+}
+</style>
+
+<script id="continue-watching-unified-fix">
+(() => {
+  const CACHE_KEY = 'thirai_continue_watching';
+
+  function readItems() {
+    let items = [];
+    try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch {}
+
+    let changed = false;
+    items = items.map(it => {
+      if (it && !it.url && it.link) { it.url = it.link; changed = true; }
+      return it;
+    });
+
+    if (changed) localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+
+    return items.filter(it => it && it.img && (it.url || it.link));
+  }
+
+  function writeItems(items) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(items || []));
+  }
+
+  function renderContinueWatching() {
+    const row = document.getElementById('continue-watching-row');
+    const title = document.getElementById('cw-title');
+    if (!row || !title) return;
+
+    const items = readItems();
+
+    row.innerHTML = '';
+    if (!items.length) {
+      row.classList.add('visually-hidden');
+      title.classList.add('visually-hidden');
+      return;
+    }
+
+    row.classList.remove('visually-hidden');
+    title.classList.remove('visually-hidden');
+
+    items.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <img src="${item.img}" alt="${item.title || ''}">
+        <button class="remove-watch-item" type="button">&times;</button>
+      `;
+
+      card.onclick = () => {
+        const href = item.url || item.link;
+        if (!href) return;
+        window.location.href = href;
+      };
+
+      card.querySelector('.remove-watch-item').onclick = (e) => {
+        e.stopPropagation();
+        const next = readItems();
+        next.splice(index, 1);
+        writeItems(next);
+        renderContinueWatching();
+      };
+
+      row.appendChild(card);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', renderContinueWatching);
+})();
+</script>
+
+
+<script id="home-row-arrows-js">
+(function(){
+  function makeBtn(dir){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'row-nav ' + (dir === 'prev' ? 'row-prev' : 'row-next');
+    btn.setAttribute('aria-label', dir === 'prev' ? 'Scroll left' : 'Scroll right');
+    btn.innerHTML = dir === 'prev'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    return btn;
+  }
+
+  function needsOverflow(el){
+    return (el.scrollWidth - el.clientWidth) > 6;
+  }
+
+  function initOneRow(row){
+    if (!row || row.dataset.arrowsInit === '1') return;
+    row.dataset.arrowsInit = '1';
+
+    // wrap the row so arrows can overlay cleanly
+    const wrap = document.createElement('div');
+    wrap.className = 'row-wrap';
+    row.parentNode.insertBefore(wrap, row);
+    wrap.appendChild(row);
+
+    const prev = makeBtn('prev');
+    const next = makeBtn('next');
+    wrap.appendChild(prev);
+    wrap.appendChild(next);
+
+    function scrollByAmount(sign){
+      const amount = Math.max(240, Math.floor(row.clientWidth * 0.85));
+      row.scrollBy({ left: sign * amount, behavior: 'smooth' });
+    }
+
+    prev.addEventListener('click', () => scrollByAmount(-1));
+    next.addEventListener('click', () => scrollByAmount( 1));
+
+    let raf = 0;
+    function update(){
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const overflow = needsOverflow(row);
+        wrap.classList.toggle('has-overflow', overflow);
+
+        if (!overflow){
+          prev.classList.remove('is-visible');
+          next.classList.remove('is-visible');
+          return;
+        }
+
+        const max = row.scrollWidth - row.clientWidth;
+        const left = row.scrollLeft;
+
+        // show/hide based on position
+        if (left > 6){
+          prev.classList.add('is-visible');
+          wrap.classList.add('can-scroll-left');
+        } else {
+          prev.classList.remove('is-visible');
+          wrap.classList.remove('can-scroll-left');
+        }
+
+        if (left < max - 6){
+          next.classList.add('is-visible');
+          wrap.classList.add('can-scroll-right');
+        } else {
+          next.classList.remove('is-visible');
+          wrap.classList.remove('can-scroll-right');
+        }
+      });
+    }
+
+    row.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+
+    // initial + after images load
+    update();
+    setTimeout(update, 350);
+    setTimeout(update, 900);
+  }
+
+  function initHomeRowArrows(){
+    const home = document.getElementById('view-home');
+    if (!home) return;
+
+    // language/category rows on home (exclude continue-watching which can be hidden)
+    const rows = home.querySelectorAll('.home-content-wrapper .row-container');
+    rows.forEach(r => initOneRow(r));
+  }
+
+  // run after DOM ready
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initHomeRowArrows);
+  } else {
+    initHomeRowArrows();
+  }
+
+  // also re-run whenever tab switches (in case home rows re-render)
+  const _origSwitchTab = window.switchTab;
+  if (typeof _origSwitchTab === 'function'){
+    window.switchTab = function(){
+      const res = _origSwitchTab.apply(this, arguments);
+      // allow any render to finish
+      setTimeout(() => {
+        try{ initHomeRowArrows(); }catch(e){}
+      }, 50);
+      return res;
+    }
+  }
+})();
+</script>
+
+
+<script id="settings-modal-script">
+(function(){
+  const SETTINGS_OVERLAY = document.getElementById('settingsOverlay');
+
+  // ===== Settings open/close =====
+  window.toggleSettings = function(show){
+    if(!SETTINGS_OVERLAY) return;
+    const on = (show === undefined) ? !SETTINGS_OVERLAY.classList.contains('active') : !!show;
+    SETTINGS_OVERLAY.classList.toggle('active', on);
+    if(on){
+      try{ refreshSettingsUi(); }catch(e){}
+    }else{
+      // collapse sections on close
+      document.getElementById('sortSection')?.classList.remove('expanded');
+      document.getElementById('tmdbSection')?.classList.remove('expanded');
+      document.getElementById('sortChevron')?.closest('.settings-btn')?.setAttribute('aria-expanded','false');
+      document.getElementById('tmdbChevron')?.closest('.settings-btn')?.setAttribute('aria-expanded','false');
+    }
+  }
+  window.openSettings = function(){ window.toggleSettings(true); }
+
+  window.closeSettingsOnOutsideClick = function(e){
+    const card = document.querySelector('#settingsOverlay .settings-card');
+    if(!card) return;
+    if(!card.contains(e.target)) window.toggleSettings(false);
+  }
+
+  // ===== Sort section =====
+  function getDefaultOrder(){
+    // HOME_LANGS includes only the South Asian languages
+    return (window.HOME_LANGS || []).map(x => x.lang);
+  }
+
+  function getSavedOrder(){
+    try{
+      const v = JSON.parse(localStorage.getItem('thirai_home_order') || 'null');
+      if(Array.isArray(v) && v.length) return v;
+    }catch(_){}
+    return null;
+  }
+
+  function setSavedOrder(arr){
+    localStorage.setItem('thirai_home_order', JSON.stringify(arr));
+  }
+
+  function getCurrentDomOrder(){
+    // Look at the actual DOM order in home-content-wrapper
+    const wrap = document.querySelector('#view-home .home-content-wrapper');
+    if(!wrap) return getSavedOrder() || getDefaultOrder();
+
+    const langs = [];
+    wrap.querySelectorAll('.section-title-row .section-arrow').forEach(btn => {
+      const lang = btn.getAttribute('data-lang');
+      if(lang) langs.push(lang);
+    });
+
+    // If DOM is missing (rare), fall back
+    if(!langs.length) return getSavedOrder() || getDefaultOrder();
+    return langs;
+  }
+
+  function buildSortList(){
+    const list = document.getElementById('sortList');
+    if(!list) return;
+
+    list.innerHTML = '';
+    const order = getCurrentDomOrder();
+
+    const unlocked = (typeof window.isTmdbUnlocked === 'function') ? window.isTmdbUnlocked() : (localStorage.isUnlocked === 'true');
+    // Include TMDB rows in list when unlocked (optional, at end)
+    const sortItems = [...order];
+    if(unlocked){
+      sortItems.push('tmdb-movies');
+      sortItems.push('tmdb-tv');
+    }
+
+    const labelFor = (key) => {
+      if(key === 'tmdb-movies') return 'TMDB Movies';
+      if(key === 'tmdb-tv') return 'TMDB TV Shows';
+      const map = {
+        tamil:'Tamil', malayalam:'Malayalam', hindi:'Hindi', telugu:'Telugu',
+        punjabi:'Punjabi', marathi:'Marathi', kannada:'Kannada', bengali:'Bengali'
+      };
+      return map[key] || key;
+    };
+
+    sortItems.forEach(key => {
+      const item = document.createElement('div');
+      item.className = 'sort-item';
+      item.draggable = true;
+      item.dataset.key = key;
+      item.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-grip-vertical sort-handle"></i>
+          <div class="sort-name">${labelFor(key)}</div>
+        </div>
+        <i class="fas fa-ellipsis-v" style="opacity:0.25;"></i>
+      `;
+      list.appendChild(item);
+    });
+
+    enableDrag(list);
+  }
+
+  function enableDrag(list){
+    let dragEl = null;
+
+    function onDragStart(e){
+      dragEl = e.currentTarget;
+      dragEl.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain', dragEl.dataset.key || ''); }catch(_){}
+    }
+    function onDragEnd(){
+      if(dragEl) dragEl.classList.remove('dragging');
+      dragEl = null;
+    }
+    function onDragOver(e){
+      e.preventDefault();
+      const after = getDragAfterElement(list, e.clientY);
+      const dragging = list.querySelector('.dragging');
+      if(!dragging) return;
+      if(after == null) list.appendChild(dragging);
+      else list.insertBefore(dragging, after);
+    }
+
+    list.querySelectorAll('.sort-item').forEach(it => {
+      it.addEventListener('dragstart', onDragStart);
+      it.addEventListener('dragend', onDragEnd);
+    });
+    list.addEventListener('dragover', onDragOver);
+  }
+
+  function getDragAfterElement(container, y){
+    const els = [...container.querySelectorAll('.sort-item:not(.dragging)')];
+    return els.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height/2;
+      if(offset < 0 && offset > closest.offset){
+        return { offset, element: child };
+      }
+      return closest;
+    }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+  }
+
+  function applyHomeOrder(orderKeys){
+    const wrap = document.querySelector('#view-home .home-content-wrapper');
+    if(!wrap) return;
+
+    const defLangs = (window.HOME_LANGS || []).map(x => x.lang);
+
+    // Dedupe while preserving order, and ensure all langs exist
+    const seen = new Set();
+    const cleaned = [];
+    (orderKeys || []).forEach(k => {
+      if(!k || seen.has(k)) return;
+      seen.add(k);
+      cleaned.push(k);
+    });
+    defLangs.forEach(l => { if(!seen.has(l)) cleaned.push(l); });
+
+    // Build a lookup of existing language nodes from DOM (title + row)
+    const langNodes = new Map();
+    defLangs.forEach(lang => {
+      const titleBtn = wrap.querySelector(`.section-title-row .section-arrow[data-lang="${lang}"]`);
+      const title = titleBtn ? titleBtn.closest('.section-title-row') : null;
+      const row = document.getElementById(`row-${lang}`);
+      const rowWrap = row ? (row.closest('.row-wrap') || row) : null;
+      if(title && rowWrap) langNodes.set(lang, { key: lang, title, rowWrap });
+    });
+
+    // TMDB nodes if present
+    const tmdbNodes = new Map();
+    [
+      { key:'tmdb-movies', titleId:'tmdb-movies-title', rowId:'row-tmdb-movies' },
+      { key:'tmdb-tv',     titleId:'tmdb-tv-title',     rowId:'row-tmdb-tv' }
+    ].forEach(p => {
+      const title = document.getElementById(p.titleId);
+      const row = document.getElementById(p.rowId);
+      if(title && row){
+        tmdbNodes.set(p.key, { key: p.key, title, rowWrap: (row.closest('.row-wrap') || row) });
+      }
+    });
+
+    // Remove all movable sections first (languages + any TMDB rows) so re-append is clean
+    [...langNodes.values(), ...tmdbNodes.values()].forEach(n => {
+      try{ n.title.remove(); }catch(_){}
+      try{ n.rowWrap.remove(); }catch(_){}
+    });
+
+    // Re-add in requested order (append any unknown/missing keys gracefully)
+    cleaned.forEach(k => {
+      const n = langNodes.get(k) || tmdbNodes.get(k);
+      if(!n) return;
+      wrap.appendChild(n.title);
+      wrap.appendChild(n.rowWrap);
+    });
+
+    // If saved order contained TMDB keys but rows weren't present at the time,
+    // they'll be appended automatically when TMDB rows are later created by existing logic.
+
+    // Re-init row arrows overlay if present
+    try{ window.initHomeRowArrows?.(); }catch(_){}
+  }
+
+window.toggleSortSection = function(){
+    const sec = document.getElementById('sortSection');
+    const btn = document.getElementById('sortChevron')?.closest('.settings-btn');
+    if(!sec || !btn) return;
+
+    const on = !sec.classList.contains('expanded');
+    sec.classList.toggle('expanded', on);
+    btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    if(on) buildSortList();
+  }
+
+  window.saveHomeOrder = function(){
+    const list = document.getElementById('sortList');
+    if(!list) return;
+
+    const rawKeys = [...list.querySelectorAll('.sort-item')].map(x => x.dataset.key).filter(Boolean);
+
+    // Dedupe + ensure all default langs exist
+    const defLangs = (window.HOME_LANGS || []).map(x => x.lang);
+    const seen = new Set();
+    const keys = [];
+    rawKeys.forEach(k => { if(!seen.has(k)){ seen.add(k); keys.push(k); } });
+    defLangs.forEach(l => { if(!seen.has(l)){ seen.add(l); keys.push(l); } });
+
+    // Only keep TMDB keys if TMDB is currently unlocked (otherwise they just confuse ordering)
+    const unlocked = (typeof window.isTmdbUnlocked === 'function') ? window.isTmdbUnlocked() : (localStorage.isUnlocked === 'true');
+    const finalKeys = unlocked ? keys : keys.filter(k => !String(k).startsWith('tmdb-'));
+
+    setSavedOrder(finalKeys);
+    applyHomeOrder(finalKeys);
+
+    window.toggleSettings(false);
+  }
+
+window.resetHomeOrder = function(){
+    localStorage.removeItem('thirai_home_order');
+    const def = getDefaultOrder();
+    applyHomeOrder(def);
+    buildSortList();
+  }
+
+  // ===== TMDB section (PIN) =====
+  const PIN = "1451"; // matches premium.html
+
+  function inputs(){
+    return [
+      document.getElementById('tmdbPin1'),
+      document.getElementById('tmdbPin2'),
+      document.getElementById('tmdbPin3'),
+      document.getElementById('tmdbPin4'),
+    ].filter(Boolean);
+  }
+
+  function updateUnlockBtn(){
+    const btn = document.getElementById('tmdbUnlockBtn');
+    if(!btn) return;
+    const allFilled = inputs().every(i => i.value && /^\d$/.test(i.value));
+    btn.disabled = !allFilled;
+  }
+
+  function setupPinInputs(){
+    const ins = inputs();
+    if(!ins.length) return;
+
+    ins.forEach((input, idx) => {
+      input.addEventListener('input', () => {
+        input.value = (input.value || '').replace(/[^0-9]/g,'').slice(0,1);
+        if(input.value && idx < ins.length-1) ins[idx+1].focus();
+        updateUnlockBtn();
+      });
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !input.value && idx > 0){
+          ins[idx-1].focus();
+        }
+      });
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const code = (e.clipboardData || window.clipboardData).getData('text')
+          .trim().replace(/[^0-9]/g,'').slice(0,4);
+        for(let i=0;i<code.length;i++){
+          if(ins[i]) ins[i].value = code[i];
+        }
+        if(ins[Math.min(code.length,3)]) ins[Math.min(code.length,3)].focus();
+        updateUnlockBtn();
+      });
+    });
+
+    document.getElementById('tmdbUnlockBtn')?.addEventListener('click', () => {
+      window.attemptTmdbUnlock();
+    });
+
+    updateUnlockBtn();
+  }
+
+  function setTmdbUi(unlocked){
+    const locked = document.getElementById('tmdbLocked');
+    const ok = document.getElementById('tmdbUnlocked');
+    if(!locked || !ok) return;
+    if(unlocked){
+      locked.classList.add('visually-hidden');
+      ok.classList.remove('visually-hidden');
+    }else{
+      ok.classList.add('visually-hidden');
+      locked.classList.remove('visually-hidden');
+    }
+  }
+
+  window.toggleTmdbSection = function(){
+    const sec = document.getElementById('tmdbSection');
+    const btn = document.getElementById('tmdbChevron')?.closest('.settings-btn');
+    if(!sec || !btn) return;
+
+    const on = !sec.classList.contains('expanded');
+    sec.classList.toggle('expanded', on);
+    btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    if(on){
+      refreshSettingsUi();
+      setupPinInputs();
+      // focus first pin if locked
+      if(!isUnlocked()){ document.getElementById('tmdbPin1')?.focus(); }
+    }
+  }
+
+  function isUnlocked(){
+    return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true' ||
+            localStorage.getItem('isUnlocked') === 'true' || localStorage.getItem('premium_isUnlocked') === 'true');
+  }
+
+  window.attemptTmdbUnlock = function(){
+    const err = document.getElementById('tmdbError');
+    if(err){ err.style.display = 'none'; err.textContent = ''; }
+
+    const code = inputs().map(i => i.value || '').join('');
+    if(code.length !== 4){
+      if(err){ err.textContent = 'Enter all 4 digits.'; err.style.display = 'block'; }
+      return;
+    }
+
+    if(code === PIN){
+      localStorage.setItem('isUnlocked','true');
+      localStorage.setItem('premium_isUnlocked','true');
+      localStorage.isUnlocked = 'true';
+
+      setTmdbUi(true);
+
+      // Enable TMDB search option + rows
+      try{ window.applyTmdbSearchVisibility?.(); }catch(_){}
+      try{ window.loadTmdbHomeRows?.(); }catch(_){}
+      try{ window.showTmdbHomeRows?.(true); }catch(_){}
+
+      // If user saved order includes tmdb keys, apply
+      const saved = getSavedOrder();
+      if(saved) applyHomeOrder(saved);
+
+      // clear inputs
+      inputs().forEach(i => i.value='');
+      updateUnlockBtn();
+    }else{
+      if(err){ err.textContent = 'Incorrect code.'; err.style.display = 'block'; }
+      inputs().forEach(i => i.value='');
+      document.getElementById('tmdbPin1')?.focus();
+      updateUnlockBtn();
+    }
+  }
+
+  window.disableTmdb = function(){
+    localStorage.removeItem('isUnlocked');
+    localStorage.removeItem('premium_isUnlocked');
+    try{ delete localStorage.isUnlocked; }catch(_){ localStorage.isUnlocked = 'false'; }
+
+    setTmdbUi(false);
+
+    // Hide TMDB rows + remove TMDB option
+    try{ window.showTmdbHomeRows?.(false); }catch(_){}
+    try{ window.applyTmdbSearchVisibility?.(); }catch(_){}
+
+    // Remove tmdb keys from saved order
+    const saved = getSavedOrder();
+    if(saved){
+      const cleaned = saved.filter(k => k !== 'tmdb-movies' && k !== 'tmdb-tv');
+      setSavedOrder(cleaned);
+      applyHomeOrder(cleaned);
+      buildSortList();
+    }
+  }
+
+  function refreshSettingsUi(){
+    setTmdbUi(isUnlocked());
+  }
+
+  // ===== Apply saved home order on load =====
+  function applySavedHomeOrderEarly(){
+    const saved = getSavedOrder();
+    if(saved) applyHomeOrder(saved);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => {
+      applySavedHomeOrderEarly();
+      refreshSettingsUi();
+      setupPinInputs();
+    });
+  }else{
+    applySavedHomeOrderEarly();
+    refreshSettingsUi();
+    setupPinInputs();
+  }
+
+  // Close on ESC
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && SETTINGS_OVERLAY?.classList.contains('active')){
+      window.toggleSettings(false);
+    }
+  });
+
+})();
 </script>
 
 </body>
