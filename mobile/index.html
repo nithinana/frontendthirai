@@ -927,7 +927,8 @@
     #view-search,
     #view-collections,
     #view-actor-details,
-    #view-filter-results {
+    #view-filter-results,
+    #view-lang-category {
         max-width: 1240px;
         margin: 0 auto;
     }
@@ -1553,6 +1554,64 @@
 @keyframes fade-logo {
     0%, 100% { opacity: 0.25; }
     50% { opacity: 1; }
+}
+</style>
+
+
+<style id="recent-movies-centering-fix">
+/* Recent movies view — add side margins and center grid */
+#view-filter-results .grid-layout,
+#view-actor-details .grid-layout {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    justify-content: center !important;
+}
+
+/* Desktop centering */
+@media (min-width: 700px){
+    #view-filter-results .grid-layout,
+    #view-actor-details .grid-layout {
+        max-width: 1100px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+</style>
+
+
+<style id="lang-category-centering-fix">
+/* Center the "Language • Recent/Popular" view like the other desktop views */
+@media (min-width: 900px){
+  #view-lang-category{
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Give the Recent/Popular pills the same side padding as other sections */
+#view-lang-category > div[style*="display:flex"]{
+  padding-left: var(--page-pad) !important;
+  padding-right: var(--page-pad) !important;
+}
+
+/* Center the posters grid and avoid huge empty space on wide screens */
+#lang-category-grid{
+  justify-content: center;
+}
+
+@media (min-width: 900px){
+  #lang-category-grid{
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+
+    /* keep columns a fixed poster width so the whole set can center */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 150px)) !important;
+    justify-content: center !important;
+  }
 }
 </style>
 
