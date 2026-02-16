@@ -912,9 +912,7 @@
             if(socket) socket.disconnect();
         });
 
-        partyToggleBtn.onclick = () => {
-            document.getElementById('partyHeader').innerText = 'Watch Party';
-            resetModal();
+        partyToggleBtn.onclick = () => { 
             partyModal.style.display = 'block';
             modalBackdrop.style.display = 'block';
         };
@@ -937,7 +935,6 @@
         }
 
         function resetModal() {
-            document.getElementById('partyHeader').innerText = 'Watch Party';
             selectionScreen.style.display = 'block';
             hostSetup.style.display = 'none';
             joinSetup.style.display = 'none';
