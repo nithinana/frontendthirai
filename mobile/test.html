@@ -6015,6 +6015,14 @@ async function loadHomeFromCache() {
       console.error("Failed loading", cfg.lang, e);
     }
   }
+
+// Re-apply saved Home category order after rows are created/populated
+try {
+  const saved = JSON.parse(localStorage.getItem('thirai_home_order') || 'null');
+  if (Array.isArray(saved) && saved.length && typeof applyHomeOrder === 'function') {
+    applyHomeOrder(saved);
+  }
+} catch (e) {}
 }
 
 
