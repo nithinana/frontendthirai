@@ -473,6 +473,15 @@
         .party-field input:focus {
             border-color: rgba(13,110,253,0.9);
         }
+        .party-mode {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .party-mode .party-btn {
+            flex: 1;
+            justify-content: center;
+        }
         .party-actions {
             display: flex;
             gap: 10px;
@@ -587,7 +596,12 @@
                 Create a party to sync playback, or join with a code.
             </div>
 
-            <div class="party-row">
+            <div class="party-mode">
+                <button class="party-btn primary" id="partyModeHostBtn">Host</button>
+                <button class="party-btn primary" id="partyModeJoinBtn">Join</button>
+            </div>
+
+            <div class="party-row" id="partyJoinFields" style="display:none;">
                 <div class="party-field">
                     <label for="partyCodeInput">Party code</label>
                     <input id="partyCodeInput" placeholder="e.g. 5KUBL8" autocomplete="off" />
@@ -598,11 +612,22 @@
                 </div>
             </div>
 
+            <div class="party-row" id="partyHostFields" style="display:none;">
+                <div class="party-field" style="flex:1;">
+                    <label for="partyHostNameOnly">Your name</label>
+                    <input id="partyHostNameOnly" placeholder="e.g. Emma" autocomplete="name" />
+                </div>
+                <div class="party-field" style="flex:1;">
+                    <label for="partyHostCode">Party code</label>
+                    <input id="partyHostCode" placeholder="(generated after create)" readonly />
+                </div>
+            </div>
+
             <div class="party-actions">
                 <button class="party-btn secondary" id="partyCloseBtn">Close</button>
-                <button class="party-btn secondary" id="partyCopyBtn">Copy link</button>
-                <button class="party-btn primary" id="partyJoinBtn">Join</button>
-                <button class="party-btn primary" id="partyCreateBtn">Create</button>
+                <button class="party-btn secondary" id="partyCopyBtn" style="display:none;">Copy link</button>
+                <button class="party-btn primary" id="partyJoinBtn" style="display:none;">Join</button>
+                <button class="party-btn primary" id="partyCreateBtn" style="display:none;">Create</button>
                 <button class="party-btn danger" id="partyEndBtn" style="display:none;">End party</button>
             </div>
 
@@ -1166,12 +1191,22 @@
             const watchPartyButton = document.getElementById('watchPartyButton');
             const backdrop = document.getElementById('partyModalBackdrop');
             const closeBtn = document.getElementById('partyCloseBtn');
+
+            const modeHostBtn = document.getElementById('partyModeHostBtn');
+            const modeJoinBtn = document.getElementById('partyModeJoinBtn');
+            const joinFields = document.getElementById('partyJoinFields');
+            const hostFields = document.getElementById('partyHostFields');
+
             const joinBtn = document.getElementById('partyJoinBtn');
             const createBtn = document.getElementById('partyCreateBtn');
             const copyBtn = document.getElementById('partyCopyBtn');
             const endBtn = document.getElementById('partyEndBtn');
+
             const codeInput = document.getElementById('partyCodeInput');
             const nameInput = document.getElementById('partyNameInput');
+            const hostNameInput = document.getElementById('partyHostNameOnly');
+            const hostCodeInput = document.getElementById('partyHostCode');
+
             const hint = document.getElementById('partyHint');
             const usersBox = document.getElementById('partyUsers');
 
@@ -1183,6 +1218,7 @@
             let isHost = false;
             let lastEmitMs = 0;
             let suppressRemote = false;
+            let mode = null; // 'host' | 'join'
 
             function showStatus(text) {
                 statusText.textContent = text;
@@ -1214,6 +1250,36 @@
                 return out;
             }
 
+            function setMode(nextMode) {
+                mode = nextMode;
+
+                // Reset UI pieces
+                if (joinFields) joinFields.style.display = (mode === 'join') ? 'flex' : 'none';
+                if (hostFields) hostFields.style.display = (mode === 'host') ? 'flex' : 'none';
+
+                if (joinBtn) joinBtn.style.display = (mode === 'join') ? 'inline-flex' : 'none';
+                if (createBtn) createBtn.style.display = (mode === 'host') ? 'inline-flex' : 'none';
+
+                // Copy link only once you're in a party (roomId set) — we'll toggle later too
+                if (copyBtn) copyBtn.style.display = roomId ? 'inline-flex' : 'none';
+
+                // End button only if host currently in a party
+                if (endBtn) endBtn.style.display = (roomId && isHost) ? 'inline-flex' : 'none';
+
+                // Focus sensible field
+                if (mode === 'join') {
+                    if (codeInput && !codeInput.value) codeInput.focus();
+                    else if (nameInput && !nameInput.value) nameInput.focus();
+                } else if (mode === 'host') {
+                    if (hostNameInput) hostNameInput.focus();
+                }
+            }
+
+            function refreshActionButtons() {
+                if (copyBtn) copyBtn.style.display = roomId ? 'inline-flex' : 'none';
+                if (endBtn) endBtn.style.display = (roomId && isHost) ? 'inline-flex' : 'none';
+            }
+
             function ensureSocket() {
                 if (socket) return socket;
                 if (typeof io === 'undefined') {
@@ -1232,18 +1298,22 @@
 
                 socket.on('room-created', (rid) => {
                     roomId = rid;
-                    codeInput.value = rid;
+                    if (codeInput) if (codeInput) codeInput.value = rid;
+                if (hostCodeInput) hostCodeInput.value = rid;
+                    if (hostCodeInput) hostCodeInput.value = rid;
                     hint.textContent = `Party created. Share this code: ${rid}`;
-                    endBtn.style.display = 'inline-block';
                     showStatus(`Party: ${rid} (host)`);
                     usersBox.style.display = 'block';
+                    refreshActionButtons();
                 });
 
                 socket.on('joined-room', (payload) => {
                     hint.textContent = `Joined party: ${roomId}`;
-                    endBtn.style.display = isHost ? 'inline-block' : 'none';
                     showStatus(`Party: ${roomId}${isHost ? ' (host)' : ''}`);
                     usersBox.style.display = 'block';
+                    if (codeInput) codeInput.value = roomId || '';
+                    if (hostCodeInput) hostCodeInput.value = roomId || '';
+                    refreshActionButtons();
 
                     // If host provided a direct movie URL, load it for joiners
                     try {
@@ -1271,7 +1341,9 @@
 
                     const state = data.state;
                     if (state === 'play') {
-                        moviePlayer.play().catch(() => {});
+                        moviePlayer.play().catch((err) => {
+                        hint.textContent = 'Autoplay blocked. Press play once to enable syncing.';
+                    });
                     } else if (state === 'pause') {
                         moviePlayer.pause();
                     } else if (state === 'seek') {
@@ -1297,37 +1369,51 @@
             function cleanupPartyState() {
                 roomId = null;
                 isHost = false;
-                endBtn.style.display = 'none';
+
+                if (endBtn) endBtn.style.display = 'none';
+                if (copyBtn) copyBtn.style.display = 'none';
+
                 usersBox.style.display = 'none';
                 usersBox.innerHTML = '';
-                hint.textContent = 'Create a party to sync playback, or join with a code.';
+                hint.textContent = 'Choose Host or Join to start syncing playback.';
                 hideStatus();
+
+                // Reset mode UI
+                setMode(null);
+                if (joinFields) joinFields.style.display = 'none';
+                if (hostFields) hostFields.style.display = 'none';
 
                 // Don't force-disconnect socket; user may re-join quickly
             }
 
-            function requireName() {
-                const n = (nameInput.value || '').trim();
+            function requireName(forHost = false) {
+                const input = forHost ? hostNameInput : nameInput;
+                const n = (input && input.value ? input.value : '').trim();
                 if (!n) {
-                    nameInput.focus();
-                    alert('Please enter your name to join the party.');
+                    if (input) input.focus();
+                    alert('Please enter your name.');
                     return null;
                 }
                 return n;
             }
 
-            function emitSync(state) {
-                if (!socket || !roomId || !isHost) return;
+            function emitSync(state, force = false) {
+                if (!socket || !roomId || !isHost || !moviePlayer) return;
+
                 const now = Date.now();
-                // throttle to avoid spam on certain events
-                if (now - lastEmitMs < 200) return;
+
+                // Never throttle explicit play/pause/seek; only throttle periodic drift sync
+                if (!force) {
+                    if (now - lastEmitMs < 1200) return;
+                }
                 lastEmitMs = now;
 
                 socket.emit('sync-video', {
                     roomId,
                     state,
-                    time: moviePlayer ? moviePlayer.currentTime : 0
+                    time: moviePlayer.currentTime || 0
                 });
+            });
             }
 
             // Host -> broadcast playback events
@@ -1336,17 +1422,17 @@
 
                 moviePlayer.addEventListener('play', () => {
                     if (suppressRemote) return;
-                    if (isHost) emitSync('play');
+                    if (isHost) emitSync('play', true);
                 });
 
                 moviePlayer.addEventListener('pause', () => {
                     if (suppressRemote) return;
-                    if (isHost) emitSync('pause');
+                    if (isHost) emitSync('pause', true);
                 });
 
                 moviePlayer.addEventListener('seeked', () => {
                     if (suppressRemote) return;
-                    if (isHost) emitSync('seek');
+                    if (isHost) emitSync('seek', true);
                 });
 
                 // Optional: periodically sync while playing (keeps late-joiners closer)
@@ -1354,10 +1440,7 @@
                     if (suppressRemote) return;
                     if (!isHost) return;
                     if (moviePlayer.paused) return;
-                    const now = Date.now();
-                    if (now - lastEmitMs > 1000) {
-                        emitSync('play');
-                    }
+                    emitSync('play', false);
                 });
             }
 
@@ -1365,7 +1448,7 @@
                 const s = ensureSocket();
                 if (!s) return;
 
-                const hostName = (nameInput.value || '').trim() || 'Host';
+                const hostName = (hostNameInput && hostNameInput.value ? hostNameInput.value : '').trim() || 'Host';
                 const rid = makeCode(6);
                 const urlToSync = (moviePlayer && (moviePlayer.currentSrc || moviePlayer.src)) || '';
 
@@ -1378,7 +1461,9 @@
                     movieUrl: urlToSync
                 });
 
-                codeInput.value = rid;
+                if (codeInput) if (codeInput) codeInput.value = rid;
+                if (hostCodeInput) hostCodeInput.value = rid;
+                    if (hostCodeInput) hostCodeInput.value = rid;
                 endBtn.style.display = 'inline-block';
                 usersBox.style.display = 'block';
             }
@@ -1428,7 +1513,7 @@
                 const url = new URL(window.location.href);
                 url.searchParams.set('join', code);
 
-                const n = (nameInput.value || '').trim();
+                const n = ((isHost ? (hostNameInput && hostNameInput.value) : (nameInput && nameInput.value)) || '').trim();
                 if (n) url.searchParams.set('name', n);
                 else url.searchParams.delete('name');
 
@@ -1449,15 +1534,37 @@
             if (watchPartyButton) {
                 watchPartyButton.addEventListener('click', () => {
                     openModal();
-                    // If code exists but name empty, nudge focus
-                    if (codeInput.value && !nameInput.value) nameInput.focus();
+
+                    // If already in a party, keep current mode view
+                    if (roomId) {
+                        setMode(isHost ? 'host' : 'join');
+                        refreshActionButtons();
+                        return;
+                    }
+
+                    // Fresh open: show Host/Join chooser
+                    hint.textContent = 'Host a party or join an existing one.';
+                    setMode(null);
                 });
+
+            if (modeHostBtn) {
+                modeHostBtn.addEventListener('click', () => {
+                    hint.textContent = 'Host mode: enter your name, then create a party.';
+                    setMode('host');
+                });
+            }
+            if (modeJoinBtn) {
+                modeJoinBtn.addEventListener('click', () => {
+                    hint.textContent = 'Join mode: enter the code and your name, then join.';
+                    setMode('join');
+                });
+            }
             }
             closeBtn.addEventListener('click', closeModal);
             backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
             joinBtn.addEventListener('click', joinParty);
             createBtn.addEventListener('click', () => {
-                const userName = requireName(); // require name for host too (nicer)
+                const userName = requireName(true); // require host name
                 if (!userName) return;
                 createParty();
             });
@@ -1476,13 +1583,15 @@
 
                 if (!join) return;
 
-                codeInput.value = normalizeCode(join);
+                if (codeInput) codeInput.value = normalizeCode(join);
+                setMode('join');
 
                 if (name) {
                     nameInput.value = name;
                     // Auto-join when both are present
                     joinParty();
                     closeModal();
+                    refreshActionButtons();
                     return;
                 }
 
@@ -1494,6 +1603,7 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 hookVideoSync();
+                setMode(null);
                 autoJoinFromUrl();
                 // Show pill only once you're in a party
             });
