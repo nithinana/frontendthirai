@@ -1188,30 +1188,20 @@
         (function () {
             const SOCKET_SERVER_URL = 'http://localhost:3000'; // backend hosted on localhost
 
-            const watchPartyButton = document.getElementById('watchPartyButton');
-            const backdrop = document.getElementById('partyModalBackdrop');
-            const closeBtn = document.getElementById('partyCloseBtn');
+            // NOTE: We query DOM elements after DOMContentLoaded so listeners always bind.
+            let watchPartyButton, backdrop, closeBtn;
+            let modeHostBtn, modeJoinBtn;
+            let joinFields;
+            let hostFields;
 
-            const modeHostBtn = document.getElementById('partyModeHostBtn');
-            const modeJoinBtn = document.getElementById('partyModeJoinBtn');
-            const joinFields = document.getElementById('partyJoinFields');
-            const hostFields = document.getElementById('partyHostFields');
+            let joinBtn, createBtn, copyBtn, endBtn;
 
-            const joinBtn = document.getElementById('partyJoinBtn');
-            const createBtn = document.getElementById('partyCreateBtn');
-            const copyBtn = document.getElementById('partyCopyBtn');
-            const endBtn = document.getElementById('partyEndBtn');
+            let codeInput, nameInput, hostNameInput, hostCodeInput;
+            let hint;
+            let usersBox;
 
-            const codeInput = document.getElementById('partyCodeInput');
-            const nameInput = document.getElementById('partyNameInput');
-            const hostNameInput = document.getElementById('partyHostNameOnly');
-            const hostCodeInput = document.getElementById('partyHostCode');
-
-            const hint = document.getElementById('partyHint');
-            const usersBox = document.getElementById('partyUsers');
-
-            const statusPill = document.getElementById('partyStatusPill');
-            const statusText = document.getElementById('partyStatusText');
+            let statusPill;
+            let statusText;
 
             let socket = null;
             let roomId = null;
@@ -1230,11 +1220,13 @@
             }
 
             function openModal() {
+                if (!backdrop) return;
                 backdrop.classList.add('show');
                 backdrop.setAttribute('aria-hidden', 'false');
             }
 
             function closeModal() {
+                if (!backdrop) return;
                 backdrop.classList.remove('show');
                 backdrop.setAttribute('aria-hidden', 'true');
             }
@@ -1602,6 +1594,41 @@
             }
 
             document.addEventListener('DOMContentLoaded', () => {
+                // Bind modal elements now that the DOM is ready
+                watchPartyButton = document.getElementById('watchPartyButton');
+                backdrop = document.getElementById('partyModalBackdrop');
+                closeBtn = document.getElementById('partyCloseBtn');
+                modeHostBtn = document.getElementById('partyModeHostBtn');
+                modeJoinBtn = document.getElementById('partyModeJoinBtn');
+
+                joinBtn = document.getElementById('partyJoinBtn');
+                createBtn = document.getElementById('partyCreateBtn');
+                copyBtn = document.getElementById('partyCopyBtn');
+                endBtn = document.getElementById('partyEndBtn');
+
+                codeInput = document.getElementById('partyCodeInput');
+                nameInput = document.getElementById('partyNameInput');
+                hostNameInput = document.getElementById('partyHostNameOnly');
+                hostCodeInput = document.getElementById('partyHostCode');
+                hint = document.getElementById('partyHint');
+
+                usersBox = document.getElementById('partyUsers');
+                joinFields = document.getElementById('partyJoinFields');
+                hostFields = document.getElementById('partyHostFields');
+                statusPill = document.getElementById('partyStatusPill');
+                statusText = document.getElementById('partyStatusText');
+
+                // Wire UI events
+                if (watchPartyButton) watchPartyButton.addEventListener('click', () => openModal());
+                if (closeBtn) closeBtn.addEventListener('click', closeModal);
+                if (backdrop) backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+                if (modeHostBtn) modeHostBtn.addEventListener('click', () => setMode('host'));
+                if (modeJoinBtn) modeJoinBtn.addEventListener('click', () => setMode('join'));
+                if (createBtn) createBtn.addEventListener('click', createParty);
+                if (joinBtn) joinBtn.addEventListener('click', joinParty);
+                if (copyBtn) copyBtn.addEventListener('click', copyInviteLink);
+                if (endBtn) endBtn.addEventListener('click', endParty);
+
                 hookVideoSync();
                 setMode(null);
                 autoJoinFromUrl();
