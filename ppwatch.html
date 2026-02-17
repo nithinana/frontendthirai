@@ -2,43 +2,13 @@
 <html lang="en">
 <head>
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F">
-const pipButton = document.getElementById('pipButton');
-
-pipButton.addEventListener('click', async () => {
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            await moviePlayer.requestPictureInPicture();
-        }
-    } catch (e) {
-        console.warn("PiP not supported");
-    }
-});
-
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HKV7GQ766F"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'G-HKV7GQ766F');
-
-const pipButton = document.getElementById('pipButton');
-
-pipButton.addEventListener('click', async () => {
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            await moviePlayer.requestPictureInPicture();
-        }
-    } catch (e) {
-        console.warn("PiP not supported");
-    }
-});
-
 </script>
 
 <script>
@@ -63,21 +33,6 @@ pipButton.addEventListener('click', async () => {
       console.log("Tracking sent: " + movieCode);
     }
   })();
-
-const pipButton = document.getElementById('pipButton');
-
-pipButton.addEventListener('click', async () => {
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            await moviePlayer.requestPictureInPicture();
-        }
-    } catch (e) {
-        console.warn("PiP not supported");
-    }
-});
-
 </script>
  
 <script>
@@ -113,39 +68,9 @@ pipButton.addEventListener('click', async () => {
             console.error('Error rewriting URL:', error);
         }
     })();
-
-const pipButton = document.getElementById('pipButton');
-
-pipButton.addEventListener('click', async () => {
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            await moviePlayer.requestPictureInPicture();
-        }
-    } catch (e) {
-        console.warn("PiP not supported");
-    }
-});
-
 </script>
 
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1">
-const pipButton = document.getElementById('pipButton');
-
-pipButton.addEventListener('click', async () => {
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            await moviePlayer.requestPictureInPicture();
-        }
-    } catch (e) {
-        console.warn("PiP not supported");
-    }
-});
-
-</script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
     <meta name="screen-orientation" content="landscape">
     <link rel="manifest" href="/manifest.json">
@@ -496,13 +421,103 @@ pipButton.addEventListener('click', async () => {
         }
 
     
-@media (orientation: portrait) {
-  .movie-title-display {
-    display: none !important;
-  }
-}
+        /* --- WATCH PARTY UI --- */
+        .party-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .party-modal-backdrop.show { display: flex; }
+        .party-modal {
+            width: min(520px, 92vw);
+            background: rgba(20,20,20,0.98);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 18px;
+            color: #fff;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+        }
+        .party-modal h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .party-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .party-field {
+            flex: 1 1 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .party-field label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .party-field input {
+            height: 44px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.06);
+            color: white;
+            padding: 0 12px;
+            outline: none;
+            font-size: 1rem;
+        }
+        .party-field input:focus {
+            border-color: rgba(13,110,253,0.9);
+        }
+        .party-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .party-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .party-btn.primary { background: #0d6efd; color: white; }
+        .party-btn.secondary { background: rgba(255,255,255,0.12); color: white; }
+        .party-btn.danger { background: rgba(220,53,69,0.9); color: white; }
+        .party-hint { opacity: 0.85; font-size: 0.9rem; margin-top: 6px; }
+        .party-users {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.12);
+            max-height: 180px;
+            overflow: auto;
+        }
+        .party-users .u { padding: 6px 0; opacity: 0.95; }
+        .party-status {
+            display: none;
+            position: fixed;
+            left: 12px;
+            bottom: 12px;
+            z-index: 9998;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 999px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 0.95rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .party-status.show { display: flex; }
 
-</style>
+    </style>
 </head>
 <body>
     <div class="video-player-wrapper" id="videoPlayerWrapper">
@@ -520,15 +535,14 @@ pipButton.addEventListener('click', async () => {
                 </a>
                 <button id="magnificationButton" class="top-button">
                     <i class="bi bi-zoom-in"></i> </button>
-
-<button id="pipButton" class="top-button">
-  <i class="bi bi-pip"></i>
-</button>
-
                 <button id="castButton" class="top-button" style="display: none;">
                     <i class="bi bi-cast"></i>
                 </button>
-            </div>
+            
+                <button id="watchPartyButton" class="top-button" title="Watch Party">
+                    <i class="bi bi-people-fill"></i>
+                </button>
+</div>
 
             <div class="center-controls">
                 <button id="rewindButton" class="control-button">
@@ -565,6 +579,45 @@ pipButton.addEventListener('click', async () => {
         </div>
     </div>
 
+    <!-- WATCH PARTY MODAL -->
+    <div class="party-modal-backdrop" id="partyModalBackdrop" aria-hidden="true">
+        <div class="party-modal" role="dialog" aria-modal="true" aria-labelledby="partyTitle">
+            <h2 id="partyTitle"><i class="bi bi-people-fill"></i> Watch Party</h2>
+            <div class="party-hint" id="partyHint">
+                Create a party to sync playback, or join with a code.
+            </div>
+
+            <div class="party-row">
+                <div class="party-field">
+                    <label for="partyCodeInput">Party code</label>
+                    <input id="partyCodeInput" placeholder="e.g. 5KUBL8" autocomplete="off" />
+                </div>
+                <div class="party-field">
+                    <label for="partyNameInput">Your name</label>
+                    <input id="partyNameInput" placeholder="e.g. Emma" autocomplete="name" />
+                </div>
+            </div>
+
+            <div class="party-actions">
+                <button class="party-btn secondary" id="partyCloseBtn">Close</button>
+                <button class="party-btn secondary" id="partyCopyBtn">Copy link</button>
+                <button class="party-btn primary" id="partyJoinBtn">Join</button>
+                <button class="party-btn primary" id="partyCreateBtn">Create</button>
+                <button class="party-btn danger" id="partyEndBtn" style="display:none;">End party</button>
+            </div>
+
+            <div class="party-users" id="partyUsers" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="party-status" id="partyStatusPill">
+        <i class="bi bi-people-fill"></i>
+        <span id="partyStatusText">Not in a party</span>
+    </div>
+
+    <!-- Socket.IO client -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
     <script>
         const moviePlayer = document.getElementById('moviePlayer');
         const customControlsOverlay = document.getElementById('customControlsOverlay');
@@ -591,14 +644,6 @@ pipButton.addEventListener('click', async () => {
         const volumeSlider = document.getElementById('volumeSlider');
 
         let zoomLevel = 1;
-
-let timeMode = 0; // 0 = normal, 1 = remaining, 2 = watched
-
-timeDisplay.addEventListener('click', () => {
-    timeMode = (timeMode + 1) % 3;
-    updateProgressBar();
-});
-
         let lastVolume = 1;
         let isDraggingProgressBar = false;
         let controlsTimeout;
@@ -815,29 +860,12 @@ timeDisplay.addEventListener('click', () => {
             }
         });
 
-        
-function updateProgressBar() {
-    if (!isNaN(moviePlayer.duration) && moviePlayer.duration > 0) {
-        const progress = (moviePlayer.currentTime / moviePlayer.duration) * 100;
-        progressBar.style.width = `${progress}%`;
-        progressBarHandle.style.left = `${progress}%`;
-    }
-
-    const current = moviePlayer.currentTime;
-    const duration = moviePlayer.duration;
-    const remaining = duration - current;
-
-    if (timeMode === 0) {
-        timeDisplay.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
-    } 
-    else if (timeMode === 1) {
-        timeDisplay.textContent = `-${formatTime(remaining)}`;
-    } 
-    else {
-        timeDisplay.textContent = `-${formatTime(current)}`;
-    }
-}
-
+        function updateProgressBar() {
+            if (!isNaN(moviePlayer.duration) && moviePlayer.duration > 0) {
+                const progress = (moviePlayer.currentTime / moviePlayer.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressBarHandle.style.left = `${progress}%`;
+            }
             timeDisplay.textContent = `${formatTime(moviePlayer.currentTime)} / ${formatTime(moviePlayer.duration)}`;
         }
 
@@ -1128,21 +1156,350 @@ function updateProgressBar() {
                 forwardButton.disabled = false;
             }
         });
-    
-const pipButton = document.getElementById('pipButton');
+    </script>
 
-pipButton.addEventListener('click', async () => {
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            await moviePlayer.requestPictureInPicture();
-        }
-    } catch (e) {
-        console.warn("PiP not supported");
-    }
-});
+    <script>
+        // ---------------- WATCH PARTY (Socket.IO) ----------------
+        (function () {
+            const SOCKET_SERVER_URL = 'http://localhost:3000'; // backend hosted on localhost
 
-</script>
+            const watchPartyButton = document.getElementById('watchPartyButton');
+            const backdrop = document.getElementById('partyModalBackdrop');
+            const closeBtn = document.getElementById('partyCloseBtn');
+            const joinBtn = document.getElementById('partyJoinBtn');
+            const createBtn = document.getElementById('partyCreateBtn');
+            const copyBtn = document.getElementById('partyCopyBtn');
+            const endBtn = document.getElementById('partyEndBtn');
+            const codeInput = document.getElementById('partyCodeInput');
+            const nameInput = document.getElementById('partyNameInput');
+            const hint = document.getElementById('partyHint');
+            const usersBox = document.getElementById('partyUsers');
+
+            const statusPill = document.getElementById('partyStatusPill');
+            const statusText = document.getElementById('partyStatusText');
+
+            let socket = null;
+            let roomId = null;
+            let isHost = false;
+            let lastEmitMs = 0;
+            let suppressRemote = false;
+
+            function showStatus(text) {
+                statusText.textContent = text;
+                statusPill.classList.add('show');
+            }
+
+            function hideStatus() {
+                statusPill.classList.remove('show');
+            }
+
+            function openModal() {
+                backdrop.classList.add('show');
+                backdrop.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeModal() {
+                backdrop.classList.remove('show');
+                backdrop.setAttribute('aria-hidden', 'true');
+            }
+
+            function normalizeCode(v) {
+                return (v || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+            }
+
+            function makeCode(len = 6) {
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                let out = '';
+                for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+                return out;
+            }
+
+            function ensureSocket() {
+                if (socket) return socket;
+                if (typeof io === 'undefined') {
+                    alert('Socket.IO client failed to load.');
+                    return null;
+                }
+                socket = io(SOCKET_SERVER_URL, { transports: ['websocket', 'polling'] });
+
+                socket.on('connect', () => {
+                    // Connected
+                });
+
+                socket.on('error', (msg) => {
+                    alert(msg || 'Watch Party error');
+                });
+
+                socket.on('room-created', (rid) => {
+                    roomId = rid;
+                    codeInput.value = rid;
+                    hint.textContent = `Party created. Share this code: ${rid}`;
+                    endBtn.style.display = 'inline-block';
+                    showStatus(`Party: ${rid} (host)`);
+                    usersBox.style.display = 'block';
+                });
+
+                socket.on('joined-room', (payload) => {
+                    hint.textContent = `Joined party: ${roomId}`;
+                    endBtn.style.display = isHost ? 'inline-block' : 'none';
+                    showStatus(`Party: ${roomId}${isHost ? ' (host)' : ''}`);
+                    usersBox.style.display = 'block';
+
+                    // If host provided a direct movie URL, load it for joiners
+                    try {
+                        const movieUrl = payload && payload.movieUrl;
+                        if (movieUrl && moviePlayer && moviePlayer.src !== movieUrl) {
+                            moviePlayer.src = movieUrl;
+                            moviePlayer.load();
+                        }
+                    } catch (_) {}
+                });
+
+                socket.on('user-list', (users) => {
+                    if (!Array.isArray(users)) return;
+                    usersBox.innerHTML = users.map(u => `<div class="u">• ${escapeHtml(u.name || 'Guest')}</div>`).join('');
+                });
+
+                socket.on('video-update', (data) => {
+                    if (!moviePlayer) return;
+                    if (isHost) return; // host ignores remote updates
+                    if (!data) return;
+
+                    suppressRemote = true;
+                    const t = typeof data.time === 'number' ? data.time : parseFloat(data.time);
+                    if (!isNaN(t)) moviePlayer.currentTime = t;
+
+                    const state = data.state;
+                    if (state === 'play') {
+                        moviePlayer.play().catch(() => {});
+                    } else if (state === 'pause') {
+                        moviePlayer.pause();
+                    } else if (state === 'seek') {
+                        // time already set
+                    }
+                    setTimeout(() => { suppressRemote = false; }, 200);
+                });
+
+                socket.on('party-ended', () => {
+                    alert('This watch party has ended.');
+                    cleanupPartyState();
+                });
+
+                return socket;
+            }
+
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>"']/g, (m) => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                }[m]));
+            }
+
+            function cleanupPartyState() {
+                roomId = null;
+                isHost = false;
+                endBtn.style.display = 'none';
+                usersBox.style.display = 'none';
+                usersBox.innerHTML = '';
+                hint.textContent = 'Create a party to sync playback, or join with a code.';
+                hideStatus();
+
+                // Don't force-disconnect socket; user may re-join quickly
+            }
+
+            function requireName() {
+                const n = (nameInput.value || '').trim();
+                if (!n) {
+                    nameInput.focus();
+                    alert('Please enter your name to join the party.');
+                    return null;
+                }
+                return n;
+            }
+
+            function emitSync(state) {
+                if (!socket || !roomId || !isHost) return;
+                const now = Date.now();
+                // throttle to avoid spam on certain events
+                if (now - lastEmitMs < 200) return;
+                lastEmitMs = now;
+
+                socket.emit('sync-video', {
+                    roomId,
+                    state,
+                    time: moviePlayer ? moviePlayer.currentTime : 0
+                });
+            }
+
+            // Host -> broadcast playback events
+            function hookVideoSync() {
+                if (!moviePlayer) return;
+
+                moviePlayer.addEventListener('play', () => {
+                    if (suppressRemote) return;
+                    if (isHost) emitSync('play');
+                });
+
+                moviePlayer.addEventListener('pause', () => {
+                    if (suppressRemote) return;
+                    if (isHost) emitSync('pause');
+                });
+
+                moviePlayer.addEventListener('seeked', () => {
+                    if (suppressRemote) return;
+                    if (isHost) emitSync('seek');
+                });
+
+                // Optional: periodically sync while playing (keeps late-joiners closer)
+                moviePlayer.addEventListener('timeupdate', () => {
+                    if (suppressRemote) return;
+                    if (!isHost) return;
+                    if (moviePlayer.paused) return;
+                    const now = Date.now();
+                    if (now - lastEmitMs > 1000) {
+                        emitSync('play');
+                    }
+                });
+            }
+
+            function createParty() {
+                const s = ensureSocket();
+                if (!s) return;
+
+                const hostName = (nameInput.value || '').trim() || 'Host';
+                const rid = makeCode(6);
+                const urlToSync = (moviePlayer && (moviePlayer.currentSrc || moviePlayer.src)) || '';
+
+                roomId = rid;
+                isHost = true;
+
+                s.emit('create-room', {
+                    roomId: rid,
+                    hostName,
+                    movieUrl: urlToSync
+                });
+
+                codeInput.value = rid;
+                endBtn.style.display = 'inline-block';
+                usersBox.style.display = 'block';
+            }
+
+            function joinParty() {
+                const s = ensureSocket();
+                if (!s) return;
+
+                const code = normalizeCode(codeInput.value);
+                if (!code) {
+                    codeInput.focus();
+                    alert('Enter a party code.');
+                    return;
+                }
+
+                const userName = requireName();
+                if (!userName) return;
+
+                roomId = code;
+                isHost = false;
+
+                s.emit('join-room', { roomId: code, userName });
+                showStatus(`Joining: ${code}...`);
+            }
+
+            function leaveOrEndParty() {
+                if (!socket || !roomId) {
+                    cleanupPartyState();
+                    return;
+                }
+
+                if (isHost) {
+                    socket.emit('stop-party', roomId);
+                } else {
+                    socket.emit('leave-room', { roomId });
+                }
+                cleanupPartyState();
+                closeModal();
+            }
+
+            function copyLink() {
+                const code = normalizeCode(codeInput.value || roomId);
+                if (!code) {
+                    alert('No party code to copy yet.');
+                    return;
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.set('join', code);
+
+                const n = (nameInput.value || '').trim();
+                if (n) url.searchParams.set('name', n);
+                else url.searchParams.delete('name');
+
+                // keep URL tidy: don't leak any previous join/name combos into history
+                const text = url.toString();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        hint.textContent = 'Link copied to clipboard.';
+                    }).catch(() => {
+                        prompt('Copy this link:', text);
+                    });
+                } else {
+                    prompt('Copy this link:', text);
+                }
+            }
+
+            // UI wiring
+            if (watchPartyButton) {
+                watchPartyButton.addEventListener('click', () => {
+                    openModal();
+                    // If code exists but name empty, nudge focus
+                    if (codeInput.value && !nameInput.value) nameInput.focus();
+                });
+            }
+            closeBtn.addEventListener('click', closeModal);
+            backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+            joinBtn.addEventListener('click', joinParty);
+            createBtn.addEventListener('click', () => {
+                const userName = requireName(); // require name for host too (nicer)
+                if (!userName) return;
+                createParty();
+            });
+            copyBtn.addEventListener('click', copyLink);
+            endBtn.addEventListener('click', leaveOrEndParty);
+
+            codeInput.addEventListener('input', () => {
+                codeInput.value = normalizeCode(codeInput.value);
+            });
+
+            // Parse URL params: watch.html?join=CODE&name=E
+            function autoJoinFromUrl() {
+                const p = new URLSearchParams(window.location.search);
+                const join = p.get('join');
+                const name = p.get('name');
+
+                if (!join) return;
+
+                codeInput.value = normalizeCode(join);
+
+                if (name) {
+                    nameInput.value = name;
+                    // Auto-join when both are present
+                    joinParty();
+                    closeModal();
+                    return;
+                }
+
+                // No name parameter: open modal and require user to type name before joining
+                openModal();
+                nameInput.focus();
+                hint.textContent = `Code auto-filled (${normalizeCode(join)}). Enter your name to join.`;
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                hookVideoSync();
+                autoJoinFromUrl();
+                // Show pill only once you're in a party
+            });
+        })();
+        // ----------------------------------------------------------
+    </script>
+
 </body>
 </html>
