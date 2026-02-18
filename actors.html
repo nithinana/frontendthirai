@@ -164,6 +164,50 @@
             font-weight: 600;
         }
         
+
+/* --- Search Bar (TMDb Person Search) --- */
+#searchBarContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+#actorSearchInput {
+    width: min(520px, 100%);
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50rem;
+    padding: 8px 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+#actorSearchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+.search-clear-btn {
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+    color: var(--text-color);
+    border-radius: 50rem;
+    padding: 8px 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.search-clear-btn:hover {
+    background-color: var(--card-bg-color);
+}
+.search-hint {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    padding: 6px 0 0 0;
+}
+
         /* Main Content Area */
         .main-container {
             /* Margin set by JS to dynamically account for header + filter bar height */
@@ -282,6 +326,7 @@
                     <a class="nav-link active" id="featuredBtn" href="#">Main</a>
                     <a class="nav-link" id="actorsBtn" href="#">Actors</a>
                     <a class="nav-link" id="actressesBtn" href="#">Actresses</a>
+                    <a class="nav-link" id="searchActorsBtn" href="#"><i class="bi bi-search"></i><span class="d-none d-md-inline ms-1">Search</span></a>
                 </div>
             </div>
         </div>
@@ -432,6 +477,7 @@
             const castGrid = document.getElementById('castGrid');
             const actorsBtn = document.getElementById('actorsBtn');
             const actressesBtn = document.getElementById('actressesBtn');
+            const searchActorsBtn = document.getElementById('searchActorsBtn');
             const featuredBtn = document.getElementById('featuredBtn');
             const logoLink = document.getElementById('logoLink');
             const languageFilterDiv = document.getElementById('languageFilter'); 
@@ -587,6 +633,124 @@
             }
 
 
+
+// --- TMDb Person Search (Actors) ---
+
+let searchDebounceTimer = null;
+
+function createActorSearchBar() {
+    languageFilterDiv.innerHTML = '';
+
+    const container = document.createElement('div');
+    container.id = 'searchBarContainer';
+
+    const input = document.createElement('input');
+    input.type = 'search';
+    input.id = 'actorSearchInput';
+    input.placeholder = 'Search actors on TMDb…';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'search-clear-btn';
+    clearBtn.type = 'button';
+    clearBtn.title = 'Clear';
+    clearBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+
+    container.appendChild(input);
+    container.appendChild(clearBtn);
+    languageFilterDiv.appendChild(container);
+
+    const hint = document.createElement('div');
+    hint.className = 'search-hint';
+    hint.textContent = 'Type a name to search. Results will appear below.';
+    languageFilterDiv.appendChild(hint);
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        castGrid.innerHTML = '<div class="loading-message">Type a name to search for actors.</div>';
+        input.focus();
+    });
+
+    input.addEventListener('input', () => {
+        const q = input.value.trim();
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            if (!q) {
+                castGrid.innerHTML = '<div class="loading-message">Type a name to search for actors.</div>';
+                return;
+            }
+            searchActorsOnTMDb(q);
+        }, 350);
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const q = input.value.trim();
+            if (q) searchActorsOnTMDb(q);
+        }
+    });
+
+    adjustBodyPadding();
+    setTimeout(() => input.focus(), 0);
+}
+
+async function searchActorsOnTMDb(query) {
+    castGrid.innerHTML = '<div class="loading-message">Searching…</div>';
+
+    const url = `https://api.themoviedb.org/3/search/person?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&include_adult=false&page=1`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('TMDb search failed');
+        const data = await response.json();
+
+        // Keep only people primarily known for acting (TMDb uses "Acting")
+        const results = (data.results || []).filter(p => (p.known_for_department || '').toLowerCase() === 'acting');
+
+        if (results.length === 0) {
+            castGrid.innerHTML = '<div class="loading-message">No actors found. Try another name.</div>';
+            return;
+        }
+
+        castGrid.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        results.forEach(person => {
+            
+            // Hide people with no profile image
+            if (!person.profile_path) return;
+const card = document.createElement('a');
+            card.className = 'cast-card';
+            // Redirect to /cast.html with the TMDb person ID
+            card.href = `/cast.html?${person.id}`;
+
+            const img = document.createElement('img');
+            img.src = `${TMDB_IMAGE_BASE_URL}${person.profile_path}`;
+            img.alt = `Photo of ${person.name}`;
+            img.loading = 'lazy';
+            img.onerror = function () {
+                this.onerror = null;
+                this.src = './static/default_actor.png';
+            };
+
+            const name = document.createElement('div');
+            name.className = 'name';
+            name.textContent = person.name;
+
+            card.appendChild(img);
+            card.appendChild(name);
+
+            fragment.appendChild(card);
+        });
+
+        castGrid.appendChild(fragment);
+    } catch (error) {
+        castGrid.innerHTML = '<div class="loading-message">Could not reach TMDb. Please try again.</div>';
+    }
+}
+
             async function fetchProfileImageUrl(tmdbId) {
                 const url = `${TMDB_BASE_URL}${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=images`;
                 
@@ -684,6 +848,7 @@
                     featuredBtn.classList.add('active');
                     actorsBtn.classList.remove('active');
                     actressesBtn.classList.remove('active');
+                    searchActorsBtn.classList.remove('active');
                     createFeaturedFilter();
                     displayFeaturedCast(currentFeaturedType);
                 }
@@ -698,6 +863,8 @@
                     actorsBtn.classList.add('active');
                     actressesBtn.classList.remove('active');
                     featuredBtn.classList.remove('active');
+                    searchActorsBtn.classList.remove('active');
+                    searchActorsBtn.classList.remove('active');
                     createLanguageFilter(currentCastType); 
                     displayCast(currentCastType, activeLanguageFilter);
                 }
@@ -712,10 +879,30 @@
                     actressesBtn.classList.add('active');
                     actorsBtn.classList.remove('active');
                     featuredBtn.classList.remove('active');
+                    searchActorsBtn.classList.remove('active');
+                    searchActorsBtn.classList.remove('active');
                     createLanguageFilter(currentCastType); 
                     displayCast(currentCastType, activeLanguageFilter); 
                 }
             });
+
+
+searchActorsBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (currentViewMode !== 'search') {
+        currentViewMode = 'search';
+        // Nav active state
+        searchActorsBtn.classList.add('active');
+        featuredBtn.classList.remove('active');
+        actorsBtn.classList.remove('active');
+        actressesBtn.classList.remove('active');
+
+        // Reset and show search UI
+        activeLanguageFilter = 'all';
+        createActorSearchBar();
+        castGrid.innerHTML = '<div class="loading-message">Type a name to search for actors.</div>';
+    }
+});
 
             // --- Initialization ---
             
