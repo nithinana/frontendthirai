@@ -359,7 +359,7 @@
                 .filter(c => c.profile_path)
                 .slice(0, 15)
                 .map(c => `
-                    <div class="cast-item" role="button" tabindex="0" onclick="window.location.href='/cast.html?${c.id}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); window.location.href='/cast.html?${c.id}';}">
+                    <div class="cast-item" role="button" tabindex="0" onclick="window.location.href='/mobile/cast.html?${c.id}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); window.location.href='/cast.html?${c.id}';}">
                         <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="cast-img" alt="${c.name}">
                         <div class="cast-info">
                             <div class="cast-name">${c.name}</div>
