@@ -77,6 +77,7 @@
         .header-center-nav {
             display: flex;
             align-items: center;
+            gap: 4px;
         }
         
         .nav-link {
@@ -308,6 +309,88 @@
             }
         }
         
+    
+
+        /* --- Mobile-first improvements (added) --- */
+        :root{
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
+
+        body{
+            padding-bottom: var(--safe-bottom);
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
+        }
+
+        /* Better iOS notch handling + slightly tighter header on phones */
+        .app-header{
+            padding-top: calc(0.75rem + var(--safe-top));
+            padding-left: calc(1rem + var(--safe-left));
+            padding-right: calc(1rem + var(--safe-right));
+        }
+
+        /* Make the top nav usable on narrow screens (horizontal scroll) */
+        .header-center-nav{
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .header-center-nav::-webkit-scrollbar{ display:none; }
+
+        /* Slightly larger tap targets */
+        .nav-link, .language-filter-btn, .search-clear-btn{
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* More flexible grid sizing across phones/tablets */
+        #castGrid{
+            grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 28vw, 170px), 1fr));
+        }
+
+        /* Make filter bar respect safe areas */
+        #languageFilter{
+            padding-left: calc(16px + var(--safe-left));
+            padding-right: calc(16px + var(--safe-right));
+        }
+
+        /* Search bar: stack nicely on very small screens */
+        @media (max-width: 420px){
+            #searchBarContainer{
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            #actorSearchInput{
+                width: 100%;
+            }
+            .search-clear-btn{
+                width: 100%;
+            }
+            .search-hint{
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Ultra-small phones: a bit tighter spacing */
+        @media (max-width: 360px){
+            #castGrid{
+                gap: 12px;
+                grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            }
+            .main-container{
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+        }
+
     </style>
 </head>
 <body>
