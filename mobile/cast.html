@@ -365,7 +365,7 @@
       
       els.empty.style.display = 'none';
       els.grid.innerHTML = list.map(item => `
-        <a href="/${item.type === 'movie' ? 'movie' : 'show'}.html?${item.id}" class="media-card">
+        <a href="/mobile/${item.type === 'movie' ? 'movie' : 'show'}.html?${item.id}" class="media-card">
           <div class="poster-wrapper">
             <img src="${IMG_URL}${item.poster}" alt="${item.title}" loading="lazy">
             ${item.rating ? `<div class="rating-badge"><i class="bi bi-star-fill"></i> ${item.rating}</div>` : ''}
