@@ -72,7 +72,7 @@
         rgba(0, 0, 0, 0.08) 90%,
         rgba(0, 0, 0, 0) 100%
     );
-    z-index: 100;
+    z-index: 3000;
     border-bottom: none;
     box-shadow: none;
     transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -346,6 +346,17 @@
             scroll-behavior: auto; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
+        .search-featured { padding-bottom: 10px; }
+        .search-featured-block { margin-bottom: 14px; }
+        .search-featured-label {
+            padding: 0 var(--page-pad);
+            margin: 0 0 8px;
+            font-size: 0.95rem;
+            color: #bbb;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
 
         .card {
             flex: 0 0 auto; width: 100px; border-radius: var(--radius); overflow: hidden;
@@ -1080,7 +1091,7 @@
 #view-home .section-title{
   color: #ffffff !important;
   position: relative !important;
-  z-index: 100 !important;
+  z-index: 10 !important;
 }
 
 /* Ensure sections stack correctly */
@@ -1697,179 +1708,189 @@
 </style>
 
 
-<style id="settings-overlay-style">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<style id="watch-party-overlay-style">
 /* ==============================================
-   SETTINGS OVERLAY (Clean + Blurred)
+   WATCH PARTY POPUP (Modal Overlay)
    ============================================== */
-#settingsOverlay{
+#watchPartyOverlay{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 2500;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 18px;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 4000;
 }
-#settingsOverlay.active{ display:flex; }
+#watchPartyOverlay.active{ display:flex; }
 
-.settings-card{
+.watchparty-card{
   width: 100%;
-  max-width: 520px;
-  max-height: 86vh;
-  overflow: auto;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow: hidden;
   background: rgba(18,18,18,0.98);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 22px;
   padding: 18px;
-  box-shadow: 0 14px 48px rgba(0,0,0,0.60);
-  transform: translateY(10px) scale(0.98);
-  opacity: 0;
-  transition: transform 220ms cubic-bezier(0.25, 1, 0.5, 1), opacity 220ms ease;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  position: relative;
+  color: #fff;
 }
-#settingsOverlay.active .settings-card{
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-.settings-head{ padding-right: 34px; }
-.settings-title{
-  font-size: 1.05rem;
-  font-weight: 900;
-  letter-spacing: 0.2px;
-  margin-bottom: 12px;
-}
-
-.settings-item{
-  width: 100%;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.94);
+.watchparty-card *{ box-sizing: border-box; }
+.watchparty-close{
+  position:absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 1.7rem;
   cursor: pointer;
-  font-weight: 800;
-  font-size: 0.95rem;
-  margin-top: 10px;
-  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+  line-height: 1;
+  padding: 2px 6px;
 }
-.settings-item:active{ transform: scale(0.99); }
-.settings-item i{ opacity: 0.75; transition: transform 180ms ease; }
-.settings-item.expanded i{ transform: rotate(180deg); opacity: 0.95; }
-
-.settings-expand{
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 260ms ease;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-.settings-expand.expanded{
-  max-height: 1200px;
-  padding-bottom: 14px;
-}
-
-.settings-hint{
-  margin: 12px 2px 10px;
-  color: rgba(255,255,255,0.65);
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-.settings-error{
-  margin-top: 10px;
-  color: #ff6b6b;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-/* Sort list */
-.sort-list{
-  list-style:none;
-  margin: 0;
-  padding: 0;
-  display:flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sort-item{
+.watchparty-head{
   display:flex;
   align-items:center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
-  cursor: grab;
-  user-select: none;
+  gap:10px;
+  padding-right: 34px;
+  margin-bottom: 14px;
 }
-.sort-item:active{ cursor: grabbing; }
-.sort-item .label{ font-weight: 800; color: rgba(255,255,255,0.92); }
-.sort-item .handle{ opacity: 0.55; }
-.sort-item.dragging{ opacity: 0.55; transform: scale(0.99); }
-.sort-item.over{ outline: 2px solid rgba(255,255,255,0.16); }
-
-.settings-actions{
-  display:flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-.btn-primary, .btn-ghost, .btn-danger{
+.watchparty-head i{
+  width: 42px;
   height: 42px;
   border-radius: 14px;
+  display:grid;
+  place-items:center;
+  background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.10);
+}
+.watchparty-title{
+  font-size: 1.15rem;
   font-weight: 900;
-  cursor: pointer;
-  padding: 0 14px;
+  line-height: 1.1;
 }
-.btn-primary{
-  background: #ffffff;
-  color: #000;
-  border-color: rgba(255,255,255,0.20);
+.watchparty-sub{
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.60);
+  margin-top: 4px;
 }
-.btn-ghost{
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.92);
-}
-.btn-danger{
-  background: rgba(229,9,20,0.15);
-  color: #fff;
-  border-color: rgba(229,9,20,0.35);
-}
-.wide{ width: 100%; }
 
-/* PIN */
-.pin-row{
+.wp-code-inputs{
   display:flex;
   justify-content:center;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin: 14px 0 14px;
 }
-.pin{
-  width: 44px;
-  height: 54px;
+.wp-code{
+  width: 40px;
+  height: 50px;
   text-align:center;
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #fff;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px;
+  outline: none;
 }
-.pin:focus{
+.wp-code:focus{
   border-color: rgba(255,255,255,0.22);
   background: rgba(255,255,255,0.08);
 }
+.wp-primary{
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #000;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+}
+.wp-primary:disabled{ opacity: 0.5; cursor:not-allowed; }
 
-/* Small screens */
-@media (max-width: 420px){
-  .settings-card{ padding: 16px; border-radius: 20px; }
-  .pin{ width: 40px; height: 52px; }
+.wp-loading{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  padding: 22px 0 6px;
+  color: rgba(255,255,255,0.80);
+}
+.wp-loading i{
+  font-size: 1.4rem;
+  animation: wp-spin 1s linear infinite;
+}
+@keyframes wp-spin{ 100%{ transform: rotate(360deg);} }
+
+.wp-error{
+  display:none;
+  margin-top: 10px;
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  text-align:center;
+}
+.wp-lobby{
+  display:none;
+}
+.wp-movie{
+  display:flex;
+  gap: 12px;
+  align-items:center;
+  margin-top: 10px;
+}
+.wp-poster{
+  width: 74px;
+  height: 110px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.wp-mtitle{ font-weight: 900; font-size: 1.0rem; }
+.wp-mstatus{ color: rgba(255,255,255,0.65); font-size: 0.82rem; margin-top: 4px; }
+
+.wp-users{
+  margin-top: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 10px;
+  max-height: 120px;
+  overflow:auto;
+}
+.wp-user{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 2px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.90);
+}
+.wp-user i{ color: rgba(255,255,255,0.70); }
+.wp-name{
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  outline: none;
+}
+.wp-note{
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  text-align:center;
+  line-height: 1.4;
 }
 </style>
 
@@ -1910,12 +1931,12 @@
     <i class="fas fa-layer-group"></i>
   </button>
 
-  <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
-    <i class="fas fa-sliders"></i>
+    <button class="side-item" id="desk-watchparty" onclick="openWatchPartyPopup()" aria-label="Watch Party" title="Watch Party">
+    <i class="fas fa-user-friends"></i>
   </button>
 
-  <button class="side-item" id="desk-settings" onclick="toggleSettingsPopup()" aria-label="Settings" title="Settings">
-    <i class="fas fa-gear"></i>
+<button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
+    <i class="fas fa-sliders"></i>
   </button>
 </aside>
 
@@ -2025,7 +2046,22 @@
                 </button>
             </div>
         </div>
-        <div class="grid-layout" id="search-results"></div>
+        
+        <div id="search-featured" class="search-featured visually-hidden" aria-label="Featured">
+            <div class="section-title">Featured</div>
+
+            <div class="search-featured-block">
+                <div class="search-featured-label" id="search-featured-current-label"></div>
+                <div class="row-container" id="search-featured-current"></div>
+            </div>
+
+            <div class="search-featured-block">
+                <div class="search-featured-label" id="search-featured-prev-label"></div>
+                <div class="row-container" id="search-featured-prev"></div>
+            </div>
+        </div>
+
+<div class="grid-layout" id="search-results"></div>
         <button class="load-more-btn visually-hidden" id="load-more-search" onclick="loadMoreSearch()" aria-label="Load more"><i class="fas fa-arrow-rotate-right" aria-hidden="true"></i></button>
     </div>
 
@@ -2051,16 +2087,15 @@
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
 
-        <div class="nav-item" onclick="toggleFilterPopup()" id="btm-filter">
+                <div class="nav-item" onclick="openWatchPartyPopup()" id="btm-watchparty">
+            <i class="fas fa-user-friends"></i> <span>Watch Party</span>
+        </div>
+
+<div class="nav-item" onclick="toggleFilterPopup()" id="btm-filter">
             <i class="fas fa-sliders"></i> <span>Filter</span>
         </div>
 <div class="nav-item" onclick="switchTab('search')" id="btm-search">
     <i class="fas fa-search"></i> <span>Search</span>
-</div>
-
-
-<div class="nav-item" onclick="toggleSettingsPopup()" id="btm-settings">
-    <i class="fas fa-gear"></i> <span>Settings</span>
 </div>
 
 <div class="nav-item visually-hidden" id="btm-install">
@@ -2070,7 +2105,62 @@
 
     </div>
 
-    <!-- Filter Overlay -->
+    
+    <!-- Watch Party Overlay -->
+    <div id="watchPartyOverlay" onclick="closeWatchPartyOnOutsideClick(event)">
+      <div class="watchparty-card" role="dialog" aria-modal="true" aria-label="Watch Party">
+        <button class="watchparty-close" aria-label="Close" onclick="closeWatchPartyPopup()">&times;</button>
+
+        <div class="watchparty-head">
+          <i class="fas fa-user-friends" aria-hidden="true"></i>
+          <div>
+            <div class="watchparty-title">Watch Party</div>
+            <div class="watchparty-sub">Enter a 6‑digit code to join.</div>
+          </div>
+        </div>
+
+        <!-- Code View -->
+        <div id="wpCodeView">
+          <div class="wp-code-inputs" aria-label="Party code">
+            <input type="text" class="wp-code" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="wp-code" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="wp-code" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="wp-code" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="wp-code" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+            <input type="text" class="wp-code" maxlength="1" pattern="[A-Z0-9]" inputmode="text" autocomplete="off">
+          </div>
+
+          <button class="wp-primary" id="wpCheckBtn" disabled>Search</button>
+          <div class="wp-note">Note: Feature not publicly available yet. DM for more info.</div>
+          <div class="wp-error" id="wpError">Invalid or expired room code.</div>
+        </div>
+
+        <!-- Loading -->
+        <div class="wp-loading" id="wpLoading">
+          <i class="fas fa-sync-alt" aria-hidden="true"></i>
+          <span>Checking room…</span>
+        </div>
+
+        <!-- Lobby -->
+        <div class="wp-lobby" id="wpLobby">
+          <div class="wp-movie">
+            <img src="" class="wp-poster" id="wpPoster" alt="">
+            <div>
+              <div class="wp-mtitle" id="wpTitle">Movie Session</div>
+              <div class="wp-mstatus" id="wpStatus"></div>
+            </div>
+          </div>
+
+          <div class="wp-users" id="wpUserList"></div>
+
+          <input type="text" id="wpNickname" class="wp-name" placeholder="Name" autocomplete="off">
+          <button class="wp-primary" id="wpJoinBtn" disabled style="margin-top:12px;">Join</button>
+        </div>
+      </div>
+    </div>
+
+
+<!-- Filter Overlay -->
     <div id="filterOverlay" onclick="closeFilterOnOutsideClick(event)">
         <div class="filter-card" role="dialog" aria-modal="true" aria-label="Filter movies">
             <button class="close-popup" onclick="toggleFilterPopup()">&times;</button>
@@ -2136,59 +2226,7 @@
     </div>
 
 
-    
-    <!-- Settings Overlay -->
-    <div id="settingsOverlay" onclick="closeSettingsOnOutsideClick(event)">
-        <div class="settings-card" role="dialog" aria-modal="true" aria-label="Settings">
-            <button class="close-popup" onclick="toggleSettingsPopup()">&times;</button>
-
-            <div class="settings-head">
-                <div class="settings-title">Settings</div>
-            </div>
-
-            <button class="settings-item" type="button" onclick="toggleSettingsSection('sort')">
-                <span>Sort Categories</span>
-                <i class="fas fa-chevron-down" id="settings-chevron-sort" aria-hidden="true"></i>
-            </button>
-            <div class="settings-expand" id="settings-section-sort">
-                <div class="settings-hint">Drag to reorder the Home categories.</div>
-                <ul class="sort-list" id="categorySortList" aria-label="Sortable category list"></ul>
-                <div class="settings-actions">
-                    <button class="btn-ghost" type="button" onclick="resetCategoryOrder()">Reset</button>
-                    <button class="btn-primary" type="button" onclick="saveCategoryOrder()">Save</button>
-                </div>
-            </div>
-
-            <button class="settings-item" type="button" onclick="toggleSettingsSection('tmdb')">
-                <span>TMDB Access</span>
-                <i class="fas fa-chevron-down" id="settings-chevron-tmdb" aria-hidden="true"></i>
-            </button>
-            <div class="settings-expand" id="settings-section-tmdb">
-                <div id="tmdbAccessLocked">
-                    <div class="settings-hint">Enter the 4-digit access code.</div>
-                    <div class="pin-row" id="tmdbPinRow">
-                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 1">
-                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2">
-                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3">
-                        <input class="pin" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4">
-                    </div>
-                    <button class="btn-primary wide" type="button" id="tmdbUnlockBtn" onclick="attemptTmdbUnlock()" disabled>Unlock TMDB</button>
-                    <div class="settings-error" id="tmdbError" style="display:none;"></div>
-                </div>
-
-                <div id="tmdbAccessUnlocked" class="visually-hidden">
-                    <div class="settings-hint">
-                        <i class="fas fa-check-circle"></i>
-                        TMDB is enabled on this device.
-                    </div>
-                    <button class="btn-danger wide" type="button" onclick="disableTmdbAccess()">Disable & Remove</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-<script>
+    <script>
         // ===============================================
         // DATA EMBEDDED FROM UPLOADED JSON FILES
         // ===============================================
@@ -2729,6 +2767,11 @@ const actorsData = {
           "actor_code": "ijsq87BV3Y",
           "language": "tamil"
         },
+		{ "name": "Vikranth", 
+		 "tmdb_id": "585382", 
+		 "actor_code": "66ELwNVOVM", 
+		"language": "tamil" },
+        { "name": "Ashok Selvan", "tmdb_id": "1187398", "actor_code": "73Gxhzkkjf", "language": "tamil" },
         {
           "name": "Karthi Sivakumar",
           "tmdb_id": "123066",
@@ -4607,11 +4650,6 @@ const malayalamData = {
       "title": "King Liar"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1uX5-6b5d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1uX5/?lang=malayalam",
-      "title": "Guruvayoorambala Nadayil"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2853-fdf2.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2853/?lang=malayalam",
       "title": "Amar Akbar Anthony"
@@ -4874,11 +4912,6 @@ const hindiData = {
       "title": "Goliyon Ki Raasleela Ram Leela"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9032-007c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9032/?lang=hindi",
-      "title": "Sultan"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2887-0159.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2887/?lang=hindi",
       "title": "Bajirao Mastani"
@@ -5031,19 +5064,9 @@ const teluguData = {
       "title": "Nenu Sailaja"
     },
     {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3033-db79.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3033/?lang=telugu",
-      "title": "Race Gurram"
-    },
-    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9041-581e.jpg",
       "page_url": "https://einthusan.tv/movie/watch/9041/?lang=telugu",
       "title": "Kalyana Vaibhogame"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1862-2bc3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1862/?lang=telugu",
-      "title": "Seethamma Vakitlo Sirimalle Chettu"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9036-9bbe.jpg",
@@ -5102,6 +5125,127 @@ const teluguData = {
 };       
         // State management for pagination
         let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
+
+        // ===============================================
+        // SEARCH EMPTY STATE: FEATURED (Year / Tamil)
+        // Shows posters when search box is empty.
+        // ===============================================
+        const searchFeaturedState = { loaded: false, loading: false, data: { current: [], prev: [] } };
+
+        function setSearchFeaturedVisible(on) {
+            const featured = document.getElementById('search-featured');
+            const grid = document.getElementById('search-results');
+            if (featured) featured.classList.toggle('visually-hidden', !on);
+            if (grid) grid.classList.toggle('visually-hidden', !!on);
+        }
+
+        function renderSearchFeaturedPlaceholders() {
+            const cur = document.getElementById('search-featured-current');
+            const prev = document.getElementById('search-featured-prev');
+            if (cur) cur.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">Loading…</p>';
+            if (prev) prev.innerHTML = '';
+        }
+
+        async function fetchYearFeaturedPage(year) {
+            const params = { lang: 'tamil', year: year };
+            let base = FILTER_PRIMARY_API_URL || API_BASE;
+            let endpoint = buildFilterEndpoint(base, 'year', params, 1);
+            let res;
+
+            try {
+                res = await fetch(endpoint);
+                if (!res.ok && base === (FILTER_PRIMARY_API_URL || API_BASE)) {
+                    base = FILTER_FALLBACK_API_URL || base;
+                    endpoint = buildFilterEndpoint(base, 'year', params, 1);
+                    res = await fetch(endpoint);
+                }
+            } catch (err) {
+                if (base === (FILTER_PRIMARY_API_URL || API_BASE) && FILTER_FALLBACK_API_URL) {
+                    base = FILTER_FALLBACK_API_URL;
+                    endpoint = buildFilterEndpoint(base, 'year', params, 1);
+                    res = await fetch(endpoint);
+                } else {
+                    throw err;
+                }
+            }
+
+            if (!res || !res.ok) throw new Error('Failed to load featured year ' + year);
+            const data = await res.json();
+            return (data && data.movies) ? data.movies : [];
+        }
+
+        function renderSearchFeaturedRows(currentYear, prevYear, curMovies, prevMovies) {
+            const curLabel = document.getElementById('search-featured-current-label');
+            const prevLabel = document.getElementById('search-featured-prev-label');
+            const cur = document.getElementById('search-featured-current');
+            const prev = document.getElementById('search-featured-prev');
+
+            if (curLabel) curLabel.textContent = `/year/tamil/${currentYear}?page=1`;
+            if (prevLabel) prevLabel.textContent = `/year/tamil/${prevYear}?page=1`;
+
+            if (cur) {
+                cur.innerHTML = '';
+                (curMovies || []).forEach(item => {
+                    if (item && item.img_url && item.page_url) cur.appendChild(createCard(item));
+                });
+            }
+            if (prev) {
+                prev.innerHTML = '';
+                (prevMovies || []).forEach(item => {
+                    if (item && item.img_url && item.page_url) prev.appendChild(createCard(item));
+                });
+            }
+
+            // Fallback messaging if API returns nothing
+            if (cur && cur.children.length === 0) {
+                cur.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">No posters found.</p>';
+            }
+            if (prev && prev.children.length === 0) {
+                prev.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">No posters found.</p>';
+            }
+        }
+
+        async function ensureSearchFeaturedLoaded() {
+            if (searchFeaturedState.loaded || searchFeaturedState.loading) return;
+            searchFeaturedState.loading = true;
+
+            renderSearchFeaturedPlaceholders();
+
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const prevYear = currentYear - 1;
+
+            try {
+                const [curMovies, prevMovies] = await Promise.all([
+                    fetchYearFeaturedPage(currentYear),
+                    fetchYearFeaturedPage(prevYear)
+                ]);
+
+                searchFeaturedState.data.current = curMovies || [];
+                searchFeaturedState.data.prev = prevMovies || [];
+                searchFeaturedState.loaded = true;
+
+                renderSearchFeaturedRows(currentYear, prevYear, searchFeaturedState.data.current, searchFeaturedState.data.prev);
+            } catch (e) {
+                const cur = document.getElementById('search-featured-current');
+                const prev = document.getElementById('search-featured-prev');
+                if (cur) cur.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">Couldn\'t load featured posters.</p>';
+                if (prev) prev.innerHTML = '';
+                console.error(e);
+            } finally {
+                searchFeaturedState.loading = false;
+            }
+        }
+
+        async function showSearchFeatured() {
+            setSearchFeaturedVisible(true);
+            await ensureSearchFeaturedLoaded();
+        }
+
+        function hideSearchFeatured() {
+            setSearchFeaturedVisible(false);
+        }
+
         // Auto-search debounce (1s) + load 2 pages at a time
         let _searchDebounce = null;
 
@@ -5123,7 +5267,20 @@ const teluguData = {
                     await prefetchNextSearchPageIfAvailable();
                 }, 1000);
             });
-        }
+        
+        // When the Search view is opened via nav, show Featured if the box is empty.
+        document.addEventListener('click', function(e) {
+            const isSearchNav = e.target.closest('.search-btn, [data-view="view-search"], [data-view="search"], [data-view="#view-search"]');
+            if (!isSearchNav) return;
+            setTimeout(() => {
+                const si = document.getElementById('search-input');
+                if (si && !si.value.trim()) {
+                    showSearchFeatured();
+                }
+            }, 0);
+        }, { passive: true });
+
+}
 
         async function loadMoreSearch() {
             // Load 2 pages per click
@@ -5656,10 +5813,14 @@ function createTmdbSearchCard(type, item) {
             const loadMoreBtn = document.getElementById('load-more-search');
 
             if (q.length < 1) {
-                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 1 character to search.</p>';
+                // Empty search: show Featured posters (no load more)
                 loadMoreBtn.classList.add('visually-hidden');
+                await showSearchFeatured();
                 return;
+            } else {
+                hideSearchFeatured();
             }
+
 
             if (isNewSearch) {
                 // Start new search
@@ -5829,6 +5990,12 @@ async function init() {
     renderRows(false); // Initial render
     initBanner();
     setupAutoSearch();
+    // If search is empty, preload Featured posters (shown when Search tab is opened)
+    try {
+        const si = document.getElementById('search-input');
+        if (si && !si.value.trim()) { await ensureSearchFeaturedLoaded(); }
+    } catch (e) { console.error(e); }
+
 
     // API Wakeup Call
     try {
@@ -6532,428 +6699,272 @@ setTimeout(() => {
 </script>
 
 
-<script id="settings-popup-js">
-/* ================================
-   SETTINGS POPUP
-   - Sort Categories (Home)
-   - TMDB Access (PIN 1451)
-================================ */
-(function(){
-  const LS_HOME_ORDER = 'thirai_homeCategoryOrder';
-  const PIN = '1451';
+<script id="watch-party-popup-script">
+/* ===============================================
+   WATCH PARTY POPUP (Join in-place)
+   - Mirrors join.html behavior but as a modal
+=============================================== */
+let wpSocket = null;
+let wpCurrentRoomId = "";
 
-  function qs(sel, root=document){ return root.querySelector(sel); }
-  function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
+function openWatchPartyPopup(){
+  const overlay = document.getElementById('watchPartyOverlay');
+  if(!overlay) return;
 
-  function lockBodyScroll(lock){
-    document.body.style.overflow = lock ? 'hidden' : '';
+  // Close filter popup if open (avoid stacked modals)
+  try{ if(typeof filterPopupOpen !== 'undefined' && filterPopupOpen) toggleFilterPopup(); }catch(e){}
+
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  resetWatchPartyUI(true);
+
+  // connect socket lazily
+  try{
+    if(!wpSocket){
+      wpSocket = io("https://watchpartybackend-b5a2.onrender.com", { transports: ["websocket", "polling"] });
+      wireWatchPartySocket();
+    }
+  }catch(err){
+    console.warn("Watch Party socket init failed", err);
   }
 
-  // --------------------------------
-  // Overlay open/close
-  // --------------------------------
-  window.toggleSettingsPopup = function(){
-    const ov = document.getElementById('settingsOverlay');
-    if(!ov) return;
-    const isOpen = ov.classList.contains('active');
-    if(isOpen){
-      ov.classList.remove('active');
-      lockBodyScroll(false);
-    } else {
-      ov.classList.add('active');
-      lockBodyScroll(true);
-      // default: keep sections collapsed
-      setTimeout(() => { try{ initSettingsUi(); }catch(e){} }, 0);
-    }
-  };
-
-  window.closeSettingsOnOutsideClick = function(e){
-    if(e.target && e.target.id === 'settingsOverlay'){
-      toggleSettingsPopup();
-    }
-  };
-
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape'){
-      const ov = document.getElementById('settingsOverlay');
-      if(ov && ov.classList.contains('active')){
-        toggleSettingsPopup();
-      }
-    }
-  });
-
-  // --------------------------------
-  // Sections expand/collapse
-  // --------------------------------
-  window.toggleSettingsSection = function(which){
-    const sec = document.getElementById(`settings-section-${which}`);
-    const btn = qs(`button.settings-item[onclick*="'${which}'"]`);
-    const chev = document.getElementById(`settings-chevron-${which}`);
-    if(!sec) return;
-
-    const open = !sec.classList.contains('expanded');
-
-    // close other
-    ['sort','tmdb'].forEach(k => {
-      const s = document.getElementById(`settings-section-${k}`);
-      const b = qs(`button.settings-item[onclick*="'${k}'"]`);
-      if(s && k !== which){ s.classList.remove('expanded'); }
-      if(b && k !== which){ b.classList.remove('expanded'); }
-      const c = document.getElementById(`settings-chevron-${k}`);
-      if(c && k !== which){ /* rotation handled by .expanded on btn */ }
-    });
-
-    sec.classList.toggle('expanded', open);
-    if(btn) btn.classList.toggle('expanded', open);
-
-    // When opening, refresh content
-    if(open){
-      if(which === 'sort'){ buildSortList(); }
-      if(which === 'tmdb'){ syncTmdbAccessUi(); focusFirstPin(); }
-    }
-  };
-
-  // --------------------------------
-  // Home category ordering
-  // --------------------------------
-  const CATEGORY_DEFS = [
-    { key:'tamil',       title:'Tamil',       rowId:'row-tamil',       titleKind:'lang' },
-    { key:'malayalam',   title:'Malayalam',   rowId:'row-malayalam',   titleKind:'lang' },
-    { key:'hindi',       title:'Hindi',       rowId:'row-hindi',       titleKind:'lang' },
-    { key:'telugu',      title:'Telugu',      rowId:'row-telugu',      titleKind:'lang' },
-    { key:'punjabi',     title:'Punjabi',     rowId:'row-punjabi',     titleKind:'lang' },
-    { key:'marathi',     title:'Marathi',     rowId:'row-marathi',     titleKind:'lang' },
-    { key:'kannada',     title:'Kannada',     rowId:'row-kannada',     titleKind:'lang' },
-    { key:'bengali',     title:'Bengali',     rowId:'row-bengali',     titleKind:'lang' },
-    { key:'tmdb-movies', title:'TMDB Movies', rowId:'row-tmdb-movies', titleKind:'id', titleId:'tmdb-movies-title' },
-    { key:'tmdb-tv',     title:'TMDB TV Shows', rowId:'row-tmdb-tv',   titleKind:'id', titleId:'tmdb-tv-title' }
-  ];
-
-  function getSavedOrder(){
-    try{
-      const raw = localStorage.getItem(LS_HOME_ORDER);
-      const arr = raw ? JSON.parse(raw) : null;
-      if(Array.isArray(arr) && arr.length){
-        // keep only known keys, then append missing
-        const known = new Set(CATEGORY_DEFS.map(x => x.key));
-        const cleaned = arr.filter(k => known.has(k));
-        const missing = CATEGORY_DEFS.map(x => x.key).filter(k => !cleaned.includes(k));
-        return [...cleaned, ...missing];
-      }
-    }catch(e){}
-    return CATEGORY_DEFS.map(x => x.key);
-  }
-
-  function getHomeWrapper(){
-    return document.querySelector('#view-home .home-content-wrapper');
-  }
-
-  function findTitleEl(def){
-    if(def.titleKind === 'id'){
-      return document.getElementById(def.titleId);
-    }
-    // language rows: title is the .section-title-row that contains section-arrow[data-lang]
-    const arrow = document.querySelector(`.section-title-row .section-arrow[data-lang="${def.key}"]`);
-    return arrow ? arrow.closest('.section-title-row') : null;
-  }
-
-  
-function getRowBlock(rowEl){
-  if(!rowEl) return null;
-  const p = rowEl.parentElement;
-  // Home row arrows feature wraps rows inside .row-wrap (desktop arrow container)
-  if(p && p.classList && p.classList.contains('row-wrap')) return p;
-  return rowEl;
+  // focus first input
+  const first = overlay.querySelector('.wp-code');
+  if(first) first.focus();
 }
 
-function applyHomeCategoryOrder(){
-  const wrap = getHomeWrapper();
-  if(!wrap) return;
+function closeWatchPartyPopup(){
+  const overlay = document.getElementById('watchPartyOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
 
-  // Keep Continue Watching at the top (if present)
-  const cwTitle = document.getElementById('cw-title');
-  const cwRow = document.getElementById('continue-watching-row');
-  const cwBlock = getRowBlock(cwRow);
-
-  // Rebuild the order using a fragment so titles + rows stay paired,
-  // even when rows are wrapped by the arrow UI.
-  const frag = document.createDocumentFragment();
-
-  if(cwTitle && cwTitle.parentNode === wrap) frag.appendChild(cwTitle);
-  if(cwBlock && cwBlock.parentNode === wrap) frag.appendChild(cwBlock);
-
-  const order = getSavedOrder();
-  order.forEach(key => {
-    const def = CATEGORY_DEFS.find(d => d.key === key);
-    if(!def) return;
-
-    const titleEl = findTitleEl(def);
-    const rowEl = document.getElementById(def.rowId);
-    const blockEl = getRowBlock(rowEl);
-
-    if(titleEl && titleEl.parentNode === wrap) frag.appendChild(titleEl);
-    if(blockEl && blockEl.parentNode === wrap) frag.appendChild(blockEl);
-  });
-
-  wrap.appendChild(frag);
+  // disconnect to avoid leaking listeners (match join.html behavior)
+  try{
+    if(wpSocket){
+      wpSocket.disconnect();
+      wpSocket = null;
+    }
+  }catch(e){}
+  wpCurrentRoomId = "";
 }
 
-// --------------------------------
-// Sort UI
+function closeWatchPartyOnOutsideClick(e){
+  const card = document.querySelector('#watchPartyOverlay .watchparty-card');
+  if(card && !card.contains(e.target)){
+    closeWatchPartyPopup();
+  }
+}
 
-  // --------------------------------
-  function buildSortList(){
-    const list = document.getElementById('categorySortList');
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    const overlay = document.getElementById('watchPartyOverlay');
+    if(overlay && overlay.classList.contains('active')) closeWatchPartyPopup();
+  }
+});
+
+function resetWatchPartyUI(clearInputs){
+  const codeView = document.getElementById('wpCodeView');
+  const lobby = document.getElementById('wpLobby');
+  const loading = document.getElementById('wpLoading');
+  const err = document.getElementById('wpError');
+  const checkBtn = document.getElementById('wpCheckBtn');
+  const joinBtn = document.getElementById('wpJoinBtn');
+  const nickname = document.getElementById('wpNickname');
+  const inputs = document.querySelectorAll('#watchPartyOverlay .wp-code');
+
+  if(codeView) codeView.style.display = 'block';
+  if(lobby) lobby.style.display = 'none';
+  if(loading) loading.style.display = 'none';
+  if(err) err.style.display = 'none';
+  if(checkBtn) checkBtn.disabled = true;
+  if(joinBtn) joinBtn.disabled = true;
+  if(nickname) nickname.value = '';
+
+  if(clearInputs){
+    inputs.forEach(i => i.value = '');
+  }
+}
+
+function formatWpTime(s){
+  if(!s && s !== 0) return "";
+  const m = Math.floor(s / 60);
+  const rs = Math.floor(s % 60);
+  return `Host is at ${m.toString().padStart(2,'0')}:${rs.toString().padStart(2,'0')}`;
+}
+
+function wireWatchPartySocket(){
+  if(!wpSocket) return;
+
+  wpSocket.on('user-list', (users) => {
+    const list = document.getElementById('wpUserList');
     if(!list) return;
+    const realUsers = (users || []).filter(u => u && u.name !== "Preview_User");
+    if(realUsers.length === 0){
+      list.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.55); font-size:0.82rem; padding:8px 0;">Waiting for others…</div>';
+    }else{
+      list.innerHTML = realUsers.map(u => `
+        <div class="wp-user">
+          <i class="fas fa-user-circle" aria-hidden="true"></i>
+          <span>${escapeHtml(u.name)} ${u.isHost ? '<b style="color:#ffd86b; font-size:0.72rem; margin-left:4px;">HOST</b>' : ''}</span>
+        </div>
+      `).join('');
+    }
+  });
+}
 
-    const order = getSavedOrder();
-    const keyToDef = Object.fromEntries(CATEGORY_DEFS.map(d => [d.key, d]));
-    list.innerHTML = '';
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
-    order.forEach(k => {
-      const def = keyToDef[k];
-      if(!def) return;
+// Input behavior (auto-advance, paste, enable buttons)
+(function initWatchPartyInputs(){
+  const overlay = document.getElementById('watchPartyOverlay');
+  if(!overlay) return;
+  const inputs = overlay.querySelectorAll('.wp-code');
+  const checkBtn = document.getElementById('wpCheckBtn');
+  const err = document.getElementById('wpError');
 
-      const li = document.createElement('li');
-      li.className = 'sort-item';
-      li.draggable = true;
-      li.dataset.key = def.key;
-      li.innerHTML = `
-        <span class="label">${def.title}</span>
-        <span class="handle" aria-hidden="true"><i class="fas fa-grip-lines"></i></span>
-      `;
-      list.appendChild(li);
+  inputs.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      if(err) err.style.display = 'none';
+      input.value = (input.value || '').toUpperCase().slice(0,1);
+      if(input.value && idx < inputs.length - 1) inputs[idx+1].focus();
+      if(checkBtn) checkBtn.disabled = Array.from(inputs).some(i => !i.value);
     });
 
-    // Drag & drop
-    let dragging = null;
+    input.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !input.value && idx > 0) inputs[idx-1].focus();
+    });
 
-    function onDragStart(e){
-      dragging = e.currentTarget;
-      dragging.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      try{ e.dataTransfer.setData('text/plain', dragging.dataset.key); }catch(_){}
-    }
-
-    function onDragEnd(){
-      if(dragging) dragging.classList.remove('dragging');
-      qsa('.sort-item.over', list).forEach(x => x.classList.remove('over'));
-      dragging = null;
-    }
-
-    function onDragOver(e){
+    input.addEventListener('paste', (e) => {
       e.preventDefault();
-      const target = e.currentTarget;
-      if(!dragging || target === dragging) return;
+      const data = (e.clipboardData.getData('text') || '').toUpperCase().trim();
+      const chars = data.split('');
+      chars.forEach((ch, i) => {
+        if(inputs[idx+i]) inputs[idx+i].value = ch;
+      });
+      const nextIndex = Math.min(idx + chars.length, inputs.length - 1);
+      if(inputs[nextIndex]) inputs[nextIndex].focus();
+      if(checkBtn) checkBtn.disabled = Array.from(inputs).some(i => !i.value);
+    });
+  });
 
-      const rect = target.getBoundingClientRect();
-      const before = (e.clientY - rect.top) < rect.height / 2;
-      list.insertBefore(dragging, before ? target : target.nextSibling);
-      target.classList.add('over');
-      setTimeout(() => target.classList.remove('over'), 80);
-    }
-
-    qsa('.sort-item', list).forEach(item => {
-      item.addEventListener('dragstart', onDragStart);
-      item.addEventListener('dragend', onDragEnd);
-      item.addEventListener('dragover', onDragOver);
+  if(checkBtn){
+    checkBtn.addEventListener('click', () => {
+      const code = Array.from(inputs).map(i => i.value).join('');
+      handleWpCodeSearch(code);
     });
   }
 
-  window.saveCategoryOrder = function(){
-    const list = document.getElementById('categorySortList');
-    if(!list) return;
-    const order = qsa('.sort-item', list).map(li => li.dataset.key);
-    localStorage.setItem(LS_HOME_ORDER, JSON.stringify(order));
-    applyHomeCategoryOrder();
-  };
-
-  window.resetCategoryOrder = function(){
-    localStorage.removeItem(LS_HOME_ORDER);
-    buildSortList();
-    applyHomeCategoryOrder();
-  };
-
-  // Apply order on boot + after cache loads
-  document.addEventListener('DOMContentLoaded', () => {
-    try{ applyHomeCategoryOrder(); }catch(e){}
-  });
-  window.addEventListener('load', () => {
-    setTimeout(() => { try{ applyHomeCategoryOrder(); }catch(e){} }, 650);
-  });
-
-  // --------------------------------
-  // TMDB Access (same behavior idea as premium.html)
-  // --------------------------------
-  function isUnlocked(){
-    return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
-  }
-
-  function ensureTmdbSearchOption(){
-    const sel = document.getElementById('lang-select');
-    if(!sel) return;
-    const existing = sel.querySelector('option[value="tmdb"]');
-    if(isUnlocked()){
-      if(!existing){
-        const opt = document.createElement('option');
-        opt.value = 'tmdb';
-        opt.textContent = 'TMDB';
-        sel.appendChild(opt);
-      }
-    } else {
-      if(existing) existing.remove();
-      if(sel.value === 'tmdb') sel.selectedIndex = 0;
-    }
-  }
-
-  function syncTmdbAccessUi(){
-    const locked = document.getElementById('tmdbAccessLocked');
-    const unlocked = document.getElementById('tmdbAccessUnlocked');
-    if(!locked || !unlocked) return;
-
-    const on = isUnlocked();
-    locked.classList.toggle('visually-hidden', on);
-    unlocked.classList.toggle('visually-hidden', !on);
-
-    // Keep search selector aligned
-    try{
-      if(typeof window.applyTmdbSearchVisibility === 'function') window.applyTmdbSearchVisibility();
-      ensureTmdbSearchOption();
-    }catch(e){}
-  }
-
-  function clearPinUi(){
-    const pins = qsa('#tmdbPinRow .pin');
-    pins.forEach(p => p.value = '');
-    const err = document.getElementById('tmdbError');
-    if(err){ err.style.display = 'none'; err.textContent = ''; }
-    const btn = document.getElementById('tmdbUnlockBtn');
-    if(btn) btn.disabled = true;
-  }
-
-  function focusFirstPin(){
-    const pins = qsa('#tmdbPinRow .pin');
-    if(pins[0]) setTimeout(() => pins[0].focus(), 50);
-  }
-
-  function getPinValue(){
-    return qsa('#tmdbPinRow .pin').map(p => (p.value||'').trim()).join('');
-  }
-
-  function updateUnlockBtn(){
-    const btn = document.getElementById('tmdbUnlockBtn');
-    if(!btn) return;
-    const filled = qsa('#tmdbPinRow .pin').every(p => /^\d$/.test((p.value||'').trim()));
-    btn.disabled = !filled;
-  }
-
-  window.attemptTmdbUnlock = function(){
-    const err = document.getElementById('tmdbError');
-    if(err){ err.style.display='none'; err.textContent=''; }
-
-    if(getPinValue() === PIN){
-      // store unlock flags (matches the app’s existing checks)
-      localStorage.setItem('isUnlocked', 'true');
-      localStorage.setItem('premium_isUnlocked', 'true');
-
-      syncTmdbAccessUi();
-      clearPinUi();
-
-      // show TMDB rows + fill them
-      try{
-        if(typeof window.loadTmdbHomeRows === 'function') window.loadTmdbHomeRows();
-      }catch(e){}
-    } else {
-      if(err){
-        err.textContent = 'Incorrect code.';
-        err.style.display = 'block';
-      }
-      clearPinUi();
-      focusFirstPin();
-    }
-  };
-
-  window.disableTmdbAccess = function(){
-    localStorage.removeItem('isUnlocked');
-    localStorage.removeItem('premium_isUnlocked');
-    syncTmdbAccessUi();
-    clearPinUi();
-
-    // hide tmdb rows
-    try{
-      if(typeof window.loadTmdbHomeRows === 'function') window.loadTmdbHomeRows();
-      if(typeof window.applyTmdbSearchVisibility === 'function') window.applyTmdbSearchVisibility();
-      ensureTmdbSearchOption();
-    }catch(e){}
-  };
-
-  // PIN inputs behavior
-  function initPinInputs(){
-    const pins = qsa('#tmdbPinRow .pin');
-    if(!pins.length) return;
-
-    pins.forEach((inp, idx) => {
-      inp.addEventListener('input', () => {
-        inp.value = (inp.value || '').replace(/[^0-9]/g,'').slice(0,1);
-        if(inp.value && pins[idx+1]) pins[idx+1].focus();
-        updateUnlockBtn();
-      });
-      inp.addEventListener('keydown', (e) => {
-        if(e.key === 'Backspace' && !inp.value && pins[idx-1]){
-          pins[idx-1].focus();
-        }
-      });
-      inp.addEventListener('paste', (e) => {
-        e.preventDefault();
-        const txt = (e.clipboardData || window.clipboardData).getData('text');
-        const code = (txt || '').replace(/[^0-9]/g,'').slice(0,4);
-        for(let i=0;i<4;i++){
-          if(pins[i]) pins[i].value = code[i] || '';
-        }
-        updateUnlockBtn();
-        if(code.length === 4) pins[3].blur();
-      });
+  const nickname = document.getElementById('wpNickname');
+  const joinBtn = document.getElementById('wpJoinBtn');
+  if(nickname && joinBtn){
+    nickname.addEventListener('input', () => {
+      joinBtn.disabled = nickname.value.trim().length < 1;
     });
-
-    document.addEventListener('keydown', (e) => {
-      const ov = document.getElementById('settingsOverlay');
-      if(!ov || !ov.classList.contains('active')) return;
-      const tmdbOpen = document.getElementById('settings-section-tmdb')?.classList.contains('expanded');
-      if(!tmdbOpen) return;
-      if(e.key === 'Enter'){
-        const btn = document.getElementById('tmdbUnlockBtn');
-        if(btn && !btn.disabled) btn.click();
-      }
+    joinBtn.addEventListener('click', () => {
+      const name = encodeURIComponent(nickname.value.trim());
+      // ensure socket closes before redirect
+      try{ if(wpSocket){ wpSocket.disconnect(); wpSocket = null; } }catch(e){}
+      window.location.href = `gurcher.html?join=${encodeURIComponent(wpCurrentRoomId)}&name=${name}`;
     });
   }
-
-  // One-time init when overlay opens
-  let _initDone = false;
-  function initSettingsUi(){
-    // sync state
-    syncTmdbAccessUi();
-    ensureTmdbSearchOption();
-
-    if(!_initDone){
-      initPinInputs();
-      _initDone = true;
-    }
-  }
-
-  // expose for open handler
-  window.__initSettingsUi = initSettingsUi;
-
-  // Init at startup so state is consistent
-  document.addEventListener('DOMContentLoaded', () => {
-    try{
-      syncTmdbAccessUi();
-      ensureTmdbSearchOption();
-      applyHomeCategoryOrder();
-    }catch(e){}
-  });
-
 })();
+
+function handleWpCodeSearch(roomId){
+  const codeView = document.getElementById('wpCodeView');
+  const lobby = document.getElementById('wpLobby');
+  const loading = document.getElementById('wpLoading');
+  const err = document.getElementById('wpError');
+  const inputs = document.querySelectorAll('#watchPartyOverlay .wp-code');
+
+  wpCurrentRoomId = (roomId || '').toUpperCase();
+
+  if(err) err.style.display = 'none';
+  if(codeView) codeView.style.display = 'none';
+  if(lobby) lobby.style.display = 'none';
+  if(loading){ loading.style.display = 'flex'; }
+
+  // Ensure socket exists
+  if(!wpSocket){
+    try{
+      wpSocket = io("https://watchpartybackend-b5a2.onrender.com", { transports: ["websocket", "polling"] });
+      wireWatchPartySocket();
+    }catch(e){
+      showWpError();
+      return;
+    }
+  }
+
+  // safety timeout (like join.html)
+  const timeout = setTimeout(() => {
+    if(lobby && lobby.style.display !== 'block'){
+      showWpError();
+    }
+  }, 6500);
+
+  try{
+    wpSocket.emit('join-room', { roomId: wpCurrentRoomId, userName: "Preview_User" });
+
+    wpSocket.once('joined-room', async (data) => {
+      clearTimeout(timeout);
+      if(data && data.movieUrl){
+        await processWpRoomData(data);
+      }else{
+        showWpError();
+      }
+    });
+  }catch(e){
+    clearTimeout(timeout);
+    showWpError();
+  }
+
+  function showWpError(){
+    if(loading) loading.style.display = 'none';
+    if(codeView) codeView.style.display = 'block';
+    if(err) err.style.display = 'block';
+    inputs.forEach(i => i.value = '');
+    if(inputs[0]) inputs[0].focus();
+  }
+}
+
+async function processWpRoomData(data){
+  const posterEl = document.getElementById('wpPoster');
+  const titleEl = document.getElementById('wpTitle');
+  const statusEl = document.getElementById('wpStatus');
+  const loading = document.getElementById('wpLoading');
+  const lobby = document.getElementById('wpLobby');
+
+  // Find film code from URL patterns used by backend
+  const url = data.movieUrl || '';
+  const filmMatch = url.match(/film=([^&]+)/) || url.match(/watch\/(\d+)/);
+  const filmCode = filmMatch ? filmMatch[1] : null;
+
+  if(statusEl) statusEl.textContent = formatWpTime(data.time);
+
+  if(filmCode){
+    try{
+      const res = await fetch(`https://api.thirai.me/watch?url=https://einthusan.tv/movie/watch/${filmCode}/?lang=tamil`);
+      const meta = await res.json();
+
+      if(posterEl) posterEl.src = meta.img_url || '';
+      if(posterEl) posterEl.alt = meta.title || 'Movie poster';
+      if(titleEl) titleEl.textContent = meta.title || 'Movie Session';
+    }catch(e){
+      if(titleEl) titleEl.textContent = 'Movie Session';
+    }
+  }else{
+    if(titleEl) titleEl.textContent = 'Movie Session';
+  }
+
+  if(loading) loading.style.display = 'none';
+  if(lobby) lobby.style.display = 'block';
+  const nick = document.getElementById('wpNickname');
+  if(nick) nick.focus();
+}
 </script>
+
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
