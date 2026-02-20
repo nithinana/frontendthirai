@@ -6796,48 +6796,164 @@ async function processWpRoomData(data){
 </script>
 
 
+
 <!-- =======================
      Thirai Account System (Supabase)
-     - Google Login
-     - Continue Watching stored per account
-     - TMDB access tied to account flag (profiles.tmdb_unlocked)
+     - Email/Password auth only (Google removed)
+     - Profile name (profiles.display_name) shown in header, not email
+     - Click name to open account menu: TMDB toggle + Sign out
+     - TMDB enabled flag stored in profiles.tmdb_unlocked (account-based)
      NOTE: Replace SUPABASE_URL + SUPABASE_ANON_KEY with your project values.
+     DB REQUIREMENT: public.profiles table with columns:
+       user_id uuid (pk), display_name text, tmdb_unlocked boolean default false
      ======================= -->
 <style>
-  #authDock{position:fixed;top:12px;right:12px;z-index:99999;display:flex;gap:8px;align-items:center}
-  #authDock button{background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;font:500 13px/1.1 Inter,system-ui,sans-serif;cursor:pointer}
-  #authDock button.primary{border-color:rgba(229,9,20,.55)}
-  #authDock .pill{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);font:500 13px/1 Inter,system-ui,sans-serif}
+  /* Account chip + menu (top-right) */
+  #acctDock{position:fixed;top:12px;right:12px;z-index:99999;display:flex;gap:10px;align-items:center}
+  #acctChip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 10px;border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    font:700 13px/1 Inter,system-ui,sans-serif;color:#fff;
+    cursor:pointer; user-select:none;
+  }
+  #acctChip .muted{color:rgba(255,255,255,.68);font-weight:700}
+  #acctChip i{opacity:.9}
+  #acctChip .crown{display:none}
+  #acctMenu{
+    position:fixed;top:52px;right:12px;z-index:99999;
+    width:min(320px,calc(100vw - 24px));
+    background:#0f0f0f;border:1px solid rgba(255,255,255,.12);
+    border-radius:16px;box-shadow:0 20px 80px rgba(0,0,0,.55);
+    display:none;overflow:hidden;
+  }
+  #acctMenu .hdr{
+    padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;flex-direction:column;gap:4px;
+  }
+  #acctMenu .hdr .nm{font:900 15px/1.2 Inter,system-ui,sans-serif;color:#fff}
+  #acctMenu .hdr .em{font:600 12px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.55);word-break:break-all}
+  #acctMenu .row{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #acctMenu .row + .row{border-top:1px solid rgba(255,255,255,.06)}
+  #acctMenu .row .label{display:flex;flex-direction:column;gap:3px}
+  #acctMenu .row .label b{font:900 12px/1.1 Inter,system-ui,sans-serif;color:#fff}
+  #acctMenu .row .label span{font:600 11px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.55)}
+  #acctMenu .btn{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    color:#fff;border-radius:12px;
+    padding:10px 12px;font:800 12px/1 Inter,system-ui,sans-serif;
+    cursor:pointer; width:100%;
+  }
+  #acctMenu .btn:active{transform:translateY(1px)}
+  #acctMenu .btn.danger{border-color:rgba(229,9,20,.55)}
+  /* Toggle */
+  .sw{position:relative;width:46px;height:26px;flex:0 0 auto}
+  .sw input{opacity:0;width:0;height:0}
+  .slider{
+    position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.14);
+    transition:.2s;border-radius:999px;border:1px solid rgba(255,255,255,.18)
+  }
+  .slider:before{
+    content:"";position:absolute;height:20px;width:20px;left:3px;top:50%;
+    transform:translateY(-50%);background:#fff;border-radius:50%;
+    transition:.2s;
+  }
+  .sw input:checked + .slider{background:rgba(229,9,20,.55);border-color:rgba(229,9,20,.65)}
+  .sw input:checked + .slider:before{transform:translate(20px,-50%)}
+  /* Auth modal */
   #authModalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:99998;display:none}
-  #authModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 28px));background:#0f0f0f;border:1px solid rgba(255,255,255,.12);border-radius:16px;z-index:99999;display:none;box-shadow:0 20px 80px rgba(0,0,0,.55)}
-  #authModal header{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px 14px}
-  #authModal header .title{font:800 16px/1.1 Inter,system-ui,sans-serif}
+  #authModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 28px));
+    background:#0f0f0f;border:1px solid rgba(255,255,255,.12);border-radius:16px;z-index:99999;display:none;
+    box-shadow:0 20px 80px rgba(0,0,0,.55)}
+  #authModal header{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px}
+  #authModal header .title{font:900 16px/1.1 Inter,system-ui,sans-serif}
   #authModal header button{background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;padding:6px}
-  #authModal .body{padding:0 14px 14px 14px}
-  #authModal label{display:block;color:rgba(255,255,255,.72);font:600 12px/1 Inter,system-ui,sans-serif;margin:10px 0 6px}
-  #authModal input{width:100%;background:#141414;color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px 12px;font:500 14px/1.2 Inter,system-ui,sans-serif}
+  #authModal .body{padding:0 14px 14px}
+  #authModal label{display:block;color:rgba(255,255,255,.72);font:800 12px/1 Inter,system-ui,sans-serif;margin:10px 0 6px}
+  #authModal input{
+    width:100%;background:#141414;color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:12px;
+    padding:10px 12px;font:600 14px/1.2 Inter,system-ui,sans-serif
+  }
   #authModal .row{display:flex;gap:10px;margin-top:12px}
-  #authModal .row button{flex:1;background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;font:700 13px/1 Inter,system-ui,sans-serif;cursor:pointer}
+  #authModal .row button{
+    flex:1;background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:12px;
+    padding:10px 12px;font:900 13px/1 Inter,system-ui,sans-serif;cursor:pointer
+  }
   #authModal .row button.primary{border-color:rgba(229,9,20,.55)}
-  #authModal .divider{display:flex;align-items:center;gap:10px;margin:14px 0}
-  #authModal .divider:before,#authModal .divider:after{content:"";flex:1;height:1px;background:rgba(255,255,255,.10)}
-  #authModal .divider span{color:rgba(255,255,255,.55);font:700 12px/1 Inter,system-ui,sans-serif}
-  #authModal .status{margin-top:10px;color:rgba(255,255,255,.7);font:500 12px/1.25 Inter,system-ui,sans-serif}
+  #authModal .status{margin-top:10px;color:rgba(255,255,255,.7);font:600 12px/1.25 Inter,system-ui,sans-serif}
+
+  /* TMDB enable modal (PIN) */
+  #tmdbBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99998;display:none}
+  #tmdbModal{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(520px,calc(100vw - 28px));
+    background:#0f0f0f;border:1px solid rgba(255,255,255,.12);border-radius:18px;
+    z-index:99999;display:none;box-shadow:0 20px 80px rgba(0,0,0,.55);overflow:hidden
+  }
+  #tmdbModal .pad{padding:18px}
+  #tmdbModal .head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  #tmdbModal .pillIcon{
+    width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10)
+  }
+  #tmdbModal h3{margin:0;font:900 16px/1.1 Inter,system-ui,sans-serif}
+  #tmdbModal p{margin:6px 0 0;color:rgba(255,255,255,.65);font:600 12px/1.35 Inter,system-ui,sans-serif}
+  #tmdbModal .pins{display:flex;justify-content:center;gap:8px;margin:14px 0}
+  #tmdbModal .pin{
+    width:44px;height:56px;text-align:center;font:900 22px/1 Inter,system-ui,sans-serif;color:#fff;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px
+  }
+  #tmdbModal .btnPrimary{
+    width:100%;height:46px;border:none;border-radius:14px;background:#fff;color:#000;
+    font:900 13px/1 Inter,system-ui,sans-serif;cursor:pointer
+  }
+  #tmdbModal .err{display:none;margin-top:10px;color:#ff6b6b;font:700 12px/1.25 Inter,system-ui,sans-serif;text-align:center}
 </style>
 
-<div id="authDock">
-  <span id="authPill" class="pill">Not signed in</span>
-  <button id="authOpenBtn" class="primary">Sign in</button>
-  <button id="authLogoutBtn" style="display:none;">Logout</button>
+<!-- Dock -->
+<div id="acctDock">
+  <div id="acctChip" title="Account">
+    <span id="acctName" class="muted">Sign in</span>
+    <i id="acctCrown" class="fa-solid fa-crown crown" title="TMDB enabled"></i>
+    <i class="fa-solid fa-chevron-down" style="font-size:11px;opacity:.75"></i>
+  </div>
 </div>
 
+<!-- Account menu -->
+<div id="acctMenu" role="menu" aria-label="Account menu">
+  <div class="hdr">
+    <div class="nm" id="menuName">—</div>
+    <div class="em" id="menuEmail">—</div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      <b>TMDB Access</b>
+      <span>Enable TMDB Movies/TV in Thirai</span>
+    </div>
+    <label class="sw" aria-label="TMDB toggle">
+      <input id="tmdbToggle" type="checkbox" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <button class="btn danger" id="signOutBtn">Sign out</button>
+  </div>
+</div>
+
+<!-- Auth modal -->
 <div id="authModalBackdrop"></div>
-<div id="authModal" role="dialog" aria-modal="true" aria-label="Account">
+<div id="authModal" role="dialog" aria-modal="true" aria-label="Sign in">
   <header>
-    <div class="title">Account</div>
+    <div class="title">Sign in</div>
     <button id="authCloseBtn" aria-label="Close">✕</button>
   </header>
   <div class="body">
+    <label>Name</label>
+    <input id="authName" type="text" autocomplete="name" placeholder="Your name" />
     <label>Email</label>
     <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" />
     <label>Password</label>
@@ -6846,34 +6962,47 @@ async function processWpRoomData(data){
       <button id="authLoginBtn" class="primary">Login</button>
       <button id="authSignupBtn">Sign up</button>
     </div>
+    <div id="authStatus" class="status"></div>
+  </div>
+</div>
 
-    <div class="divider"><span>OR</span></div>
-
-    <div class="row">
-      <button id="authGoogleBtn" class="primary">
-        <span style="display:inline-flex;gap:8px;align-items:center;justify-content:center;">
-          <i class="fa-brands fa-google"></i> Continue with Google
-        </span>
-      </button>
+<!-- TMDB enable modal -->
+<div id="tmdbBackdrop"></div>
+<div id="tmdbModal" role="dialog" aria-modal="true" aria-label="Enable TMDB">
+  <div class="pad">
+    <div class="head">
+      <div class="pillIcon"><i class="fa-solid fa-lock"></i></div>
+      <div>
+        <h3>Enter the access code</h3>
+        <p>Enable TMDB features for your account.</p>
+      </div>
     </div>
 
-    <div id="authStatus" class="status"></div>
+    <div class="pins" aria-label="Access code">
+      <input class="pin" id="pin1" maxlength="1" inputmode="numeric" autocomplete="off" />
+      <input class="pin" id="pin2" maxlength="1" inputmode="numeric" autocomplete="off" />
+      <input class="pin" id="pin3" maxlength="1" inputmode="numeric" autocomplete="off" />
+      <input class="pin" id="pin4" maxlength="1" inputmode="numeric" autocomplete="off" />
+    </div>
+
+    <button class="btnPrimary" id="tmdbUnlockBtn" disabled>Enable TMDB</button>
+    <div class="err" id="tmdbErr"></div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/** =======================
- *  CONFIG (REQUIRED)
- *  ======================= */
 const SUPABASE_URL = "https://jgzsjgrlgzzfrvjsuctt.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_oMvwF5VI_Upl8GOrnnusdA_y07YJ8Oe";
 
-/** =======================
- *  Supabase client
- *  ======================= */
+const TMDB_CORRECT_PIN = "1451";
+const TMDB_MAX_ATTEMPTS = 5;
+const TMDB_LOCKOUT_MS = 15 * 60 * 1000;
+const LS_TMDB_ATTEMPTS = "tmdb_attemptCount";
+const LS_TMDB_LOCKOUT = "tmdb_lockoutTimestamp";
+
 let supabaseClient = null;
-function getSupabase(){
+function sb(){
   if(supabaseClient) return supabaseClient;
   if(!SUPABASE_URL || SUPABASE_URL.startsWith("PASTE_") || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith("PASTE_")){
     console.warn("[Accounts] Supabase not configured yet. Add SUPABASE_URL + SUPABASE_ANON_KEY.");
@@ -6882,83 +7011,53 @@ function getSupabase(){
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   return supabaseClient;
 }
-
 async function sbUser(){
-  const sb = getSupabase(); if(!sb) return null;
-  const { data } = await sb.auth.getUser();
+  const c = sb(); if(!c) return null;
+  const { data } = await c.auth.getUser();
   return data?.user || null;
 }
+function el(id){ return document.getElementById(id); }
+function show(id, on){ const e=el(id); if(e) e.style.display = on ? "block" : "none"; }
+function setText(id, t){ const e=el(id); if(e) e.textContent = t; }
+function setStatus(msg){ setText("authStatus", msg || ""); }
 
-function setStatus(msg){
-  const el = document.getElementById("authStatus");
-  if(el) el.textContent = msg || "";
+async function ensureProfile(user, nameIfAny){
+  const c = sb(); if(!c || !user) return;
+  const base = { user_id: user.id };
+  if(nameIfAny && String(nameIfAny).trim()) base.display_name = String(nameIfAny).trim();
+  await c.from("profiles").upsert(base);
 }
-
-function openAuthModal(){
-  document.getElementById("authModalBackdrop").style.display = "block";
-  document.getElementById("authModal").style.display = "block";
-  setStatus("");
-  setTimeout(()=>document.getElementById("authEmail")?.focus(), 0);
-}
-function closeAuthModal(){
-  document.getElementById("authModalBackdrop").style.display = "none";
-  document.getElementById("authModal").style.display = "none";
-}
-
-async function ensureProfile(user){
-  const sb = getSupabase(); if(!sb || !user) return;
-  // create row if missing (safe upsert)
-  await sb.from("profiles").upsert({ user_id: user.id });
-}
-
 async function getProfile(){
-  const sb = getSupabase(); if(!sb) return null;
+  const c = sb(); if(!c) return null;
   const user = await sbUser(); if(!user) return null;
-  const { data } = await sb.from("profiles").select("tmdb_unlocked, display_name").eq("user_id", user.id).single();
+  const { data } = await c.from("profiles").select("display_name, tmdb_unlocked").eq("user_id", user.id).single();
   return data || null;
 }
+async function setTmdbUnlocked(on){
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
+  await c.from("profiles").update({ tmdb_unlocked: !!on }).eq("user_id", user.id);
+  try { localStorage.isUnlocked = on ? "true" : "false"; } catch {}
+}
 
-/** =======================
- *  Continue Watching (DB)
- *  - Replaces localStorage as source of truth when signed in
- *  ======================= */
 const CW_CACHE_KEY = "thirai_continue_watching";
-
-// Read legacy local list
-function readLocalCW(){
-  try { return JSON.parse(localStorage.getItem(CW_CACHE_KEY) || "[]") || []; } catch { return []; }
-}
-function writeLocalCW(items){
-  try { localStorage.setItem(CW_CACHE_KEY, JSON.stringify(items || [])); } catch {}
-}
+function readLocalCW(){ try { return JSON.parse(localStorage.getItem(CW_CACHE_KEY) || "[]") || []; } catch { return []; } }
 
 async function fetchCW(){
-  const sb = getSupabase(); if(!sb) return readLocalCW();
+  const c = sb(); if(!c) return readLocalCW();
   const user = await sbUser();
   if(!user) return readLocalCW();
-
-  const { data, error } = await sb
+  const { data, error } = await c
     .from("continue_watching")
     .select("url,img,title,progress_seconds,duration_seconds,updated_at")
     .order("updated_at", { ascending: false })
     .limit(30);
-
   if(error){ console.error(error); return []; }
-  return (data || []).map(r => ({
-    url: r.url,
-    img: r.img,
-    title: r.title || "",
-    // keep your existing fields if you want progress UI later
-    progress_seconds: r.progress_seconds,
-    duration_seconds: r.duration_seconds
-  }));
+  return (data || []).map(r => ({ url:r.url, img:r.img, title:r.title||"", progress_seconds:r.progress_seconds, duration_seconds:r.duration_seconds }));
 }
-
 async function upsertCW(item){
-  const sb = getSupabase(); if(!sb) return;
-  const user = await sbUser();
-  if(!user) return;
-
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
   const payload = {
     user_id: user.id,
     url: item.url || item.link,
@@ -6968,211 +7067,299 @@ async function upsertCW(item){
     duration_seconds: item.duration_seconds ?? null
   };
   if(!payload.url || !payload.img) return;
-
-  const { error } = await sb.from("continue_watching").upsert(payload, { onConflict: "user_id,url" });
+  const { error } = await c.from("continue_watching").upsert(payload, { onConflict: "user_id,url" });
   if(error) console.error(error);
 }
-
 async function removeCW(url){
-  const sb = getSupabase(); if(!sb) return;
-  const user = await sbUser();
-  if(!user) return;
-  const { error } = await sb.from("continue_watching").delete().eq("user_id", user.id).eq("url", url);
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
+  const { error } = await c.from("continue_watching").delete().eq("user_id", user.id).eq("url", url);
   if(error) console.error(error);
 }
-
-// One-time migration: localStorage -> account DB
 async function migrateLocalCWToAccount(){
-  const sb = getSupabase(); if(!sb) return;
-  const user = await sbUser();
-  if(!user) return;
-
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
   const items = readLocalCW();
   if(!items.length) return;
-
-  for(const it of items){
-    await upsertCW(it);
-  }
-  // clear local after migration (comment this out if you want to keep it as offline cache)
+  for(const it of items) await upsertCW(it);
   localStorage.removeItem(CW_CACHE_KEY);
 }
-
-/** =======================
- *  Patch existing Continue Watching renderer
- *  Your file currently reads localStorage directly.
- *  We override renderContinueWatching() to use DB when logged in.
- *  ======================= */
 async function renderContinueWatchingFromAccount(){
   try{
     const container = document.getElementById("continue-watching-list") || document.getElementById("continueWatchingList");
     if(!container) return;
-
     const items = await fetchCW();
     if(!items.length){
       container.innerHTML = '<div style="color:rgba(255,255,255,.55);padding:0 var(--page-pad);">Nothing here yet.</div>';
       return;
     }
-
-    // Keep your visual style similar to existing cards
-    container.innerHTML = items.map((item, idx) => `
+    container.innerHTML = items.map(item => `
       <a href="${item.url}" class="continue-card" style="display:block;min-width:160px;max-width:160px;">
         <div style="position:relative;">
-          <img src="${item.img}" alt="${(item.title||"").replace(/"/g,"&quot;")}" style="width:160px;height:90px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.10);" />
+          <img src="${item.img}" alt="${(item.title||"").replace(/"/g,"&quot;")}"
+               style="width:160px;height:90px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.10);" />
           <button data-cw-remove="${encodeURIComponent(item.url)}"
             title="Remove" aria-label="Remove"
             style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 8px;cursor:pointer;">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div style="margin-top:8px;font:700 12px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        <div style="margin-top:8px;font:800 12px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           ${item.title || "Continue watching"}
         </div>
       </a>
     `).join("");
-
-    // remove handlers
     container.querySelectorAll("[data-cw-remove]").forEach(btn=>{
       btn.addEventListener("click", async (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         const url = decodeURIComponent(btn.getAttribute("data-cw-remove"));
         await removeCW(url);
         await renderContinueWatchingFromAccount();
       });
     });
-
-  }catch(e){
-    console.error(e);
-  }
+  }catch(e){ console.error(e); }
 }
-
-// If the app already calls renderContinueWatching(), make sure our version wins.
 window.renderContinueWatching = renderContinueWatchingFromAccount;
 
-/** =======================
- *  TMDB access tied to account
- *  - Source of truth: profiles.tmdb_unlocked
- *  - We mirror the value to localStorage.isUnlocked for compatibility
- *    with your existing code (so you don’t have to rewrite all checks).
- *  ======================= */
-async function syncTmdbUnlockFlagToCompatibilityStorage(){
-  const profile = await getProfile();
-  const unlocked = !!profile?.tmdb_unlocked;
-  try { localStorage.isUnlocked = unlocked ? "true" : "false"; } catch {}
-  return unlocked;
+function openAuth(){ show("authModalBackdrop", true); show("authModal", true); setStatus(""); setTimeout(()=>el("authName")?.focus(),0); }
+function closeAuth(){ show("authModalBackdrop", false); show("authModal", false); }
+function openMenu(){ el("acctMenu").style.display = "block"; }
+function closeMenu(){ el("acctMenu").style.display = "none"; }
+function isMenuOpen(){ return el("acctMenu").style.display === "block"; }
+
+function setCrownVisible(on){
+  const crown = el("acctCrown");
+  if(!crown) return;
+  crown.style.display = on ? "inline-block" : "none";
 }
 
-/** =======================
- *  Auth actions
- *  ======================= */
+async function refreshDock(){
+  const user = await sbUser();
+  if(!user){
+    setText("acctName", "Sign in");
+    setCrownVisible(false);
+    closeMenu();
+    return;
+  }
+  const prof = await getProfile();
+  const nm = (prof?.display_name || "").trim() || "Account";
+  setText("acctName", nm);
+  setText("menuName", nm);
+  setText("menuEmail", user.email || "");
+  const unlocked = !!prof?.tmdb_unlocked;
+  setCrownVisible(unlocked);
+  el("tmdbToggle").checked = unlocked;
+  try { localStorage.isUnlocked = unlocked ? "true" : "false"; } catch {}
+}
+
 async function loginEmail(){
-  const sb = getSupabase(); if(!sb) return setStatus("Supabase not configured yet.");
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
+  const c = sb(); if(!c) return setStatus("Supabase not configured yet.");
+  const email = el("authEmail").value.trim();
+  const password = el("authPassword").value;
   setStatus("Signing in…");
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  const { data, error } = await c.auth.signInWithPassword({ email, password });
   if(error) return setStatus(error.message);
   await ensureProfile(data.user);
   await migrateLocalCWToAccount();
-  await syncTmdbUnlockFlagToCompatibilityStorage();
+  await refreshDock();
   await renderContinueWatchingFromAccount();
-  closeAuthModal();
+  closeAuth();
 }
-
 async function signupEmail(){
-  const sb = getSupabase(); if(!sb) return setStatus("Supabase not configured yet.");
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
+  const c = sb(); if(!c) return setStatus("Supabase not configured yet.");
+  const name = el("authName").value.trim();
+  const email = el("authEmail").value.trim();
+  const password = el("authPassword").value;
   setStatus("Creating account…");
-  const { data, error } = await sb.auth.signUp({ email, password });
+  const { data, error } = await c.auth.signUp({ email, password });
   if(error) return setStatus(error.message);
-  if(data.user) await ensureProfile(data.user);
-  setStatus("Check your email to confirm your account, then sign in.");
+  if(data.user) await ensureProfile(data.user, name);
+  setStatus("Check your email to confirm your account, then log in.");
 }
-
-async function loginGoogle(){
-  const sb = getSupabase(); if(!sb) return setStatus("Supabase not configured yet.");
-  setStatus("Opening Google sign-in…");
-  const redirectTo = window.location.origin + window.location.pathname;
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo }
-  });
-  if(error) setStatus(error.message);
-}
-
-async function logout(){
-  const sb = getSupabase(); if(!sb) return;
-  await sb.auth.signOut();
+async function signOut(){
+  const c = sb(); if(!c) return;
+  await c.auth.signOut();
   try { localStorage.isUnlocked = "false"; } catch {}
-  await updateAuthDock();
-  // after logout, render from local cache if any
-  if(typeof window.renderContinueWatching === "function") window.renderContinueWatching();
+  await refreshDock();
+  await renderContinueWatchingFromAccount();
 }
 
-/** =======================
- *  Dock state
- *  ======================= */
-async function updateAuthDock(){
-  const pill = document.getElementById("authPill");
-  const openBtn = document.getElementById("authOpenBtn");
-  const outBtn = document.getElementById("authLogoutBtn");
+let lockoutTimer = null;
 
-  const user = await sbUser();
-  if(user){
-    if(pill) pill.textContent = user.email || "Signed in";
-    if(openBtn) openBtn.style.display = "none";
-    if(outBtn) outBtn.style.display = "inline-block";
-  }else{
-    if(pill) pill.textContent = "Not signed in";
-    if(openBtn) openBtn.style.display = "inline-block";
-    if(outBtn) outBtn.style.display = "none";
+function tmdbIsLockedOut(){
+  const ts = localStorage.getItem(LS_TMDB_LOCKOUT);
+  if(!ts) return false;
+  const now = Date.now();
+  const end = parseInt(ts,10) + TMDB_LOCKOUT_MS;
+  if(now < end) return true;
+  localStorage.removeItem(LS_TMDB_LOCKOUT);
+  localStorage.setItem(LS_TMDB_ATTEMPTS, "0");
+  return false;
+}
+function tmdbLockoutMessage(){
+  const ts = localStorage.getItem(LS_TMDB_LOCKOUT);
+  if(!ts) return "";
+  const now = Date.now();
+  const end = parseInt(ts,10) + TMDB_LOCKOUT_MS;
+  const rem = Math.max(0, end-now);
+  const total = Math.ceil(rem/1000);
+  const m = Math.floor(total/60);
+  const s = total%60;
+  return `Too many failed attempts. Try again in ${m}:${String(s).padStart(2,'0')}.`;
+}
+function tmdbPins(){ return [el("pin1"),el("pin2"),el("pin3"),el("pin4")]; }
+
+function tmdbOpenModal(){
+  show("tmdbBackdrop", true); show("tmdbModal", true);
+  el("tmdbErr").style.display="none";
+  tmdbPins().forEach(i=>i.value="");
+  el("tmdbUnlockBtn").disabled = true;
+  setTimeout(()=>el("pin1")?.focus(),50);
+  tmdbStartLockoutTick();
+}
+function tmdbCloseModal(){
+  show("tmdbBackdrop", false); show("tmdbModal", false);
+  tmdbStopLockoutTick();
+}
+function tmdbStopLockoutTick(){
+  if(lockoutTimer){ clearInterval(lockoutTimer); lockoutTimer=null; }
+}
+function tmdbStartLockoutTick(){
+  tmdbStopLockoutTick();
+  if(tmdbIsLockedOut()){
+    const err = el("tmdbErr");
+    err.textContent = tmdbLockoutMessage();
+    err.style.display="block";
+    el("tmdbUnlockBtn").disabled = true;
+    lockoutTimer = setInterval(()=>{
+      if(!tmdbIsLockedOut()){
+        tmdbStopLockoutTick();
+        err.style.display="none";
+        tmdbCheckPins();
+      }else{
+        err.textContent = tmdbLockoutMessage();
+      }
+    }, 1000);
   }
 }
+function tmdbCheckPins(){
+  const pins = tmdbPins();
+  const allFilled = pins.every(i => i.value && /^\d$/.test(i.value));
+  const locked = tmdbIsLockedOut();
+  el("tmdbUnlockBtn").disabled = !allFilled || locked;
+  if(allFilled && !locked) el("tmdbErr").style.display="none";
+}
+async function tmdbHandleSuccess(){
+  localStorage.setItem(LS_TMDB_ATTEMPTS, "0");
+  localStorage.removeItem(LS_TMDB_LOCKOUT);
+  await setTmdbUnlocked(true);
+  await refreshDock();
+  tmdbCloseModal();
+}
+function tmdbHandleFailure(){
+  let attempts = parseInt(localStorage.getItem(LS_TMDB_ATTEMPTS) || "0", 10);
+  attempts++;
+  localStorage.setItem(LS_TMDB_ATTEMPTS, String(attempts));
+  const err = el("tmdbErr");
+  if(attempts >= TMDB_MAX_ATTEMPTS){
+    localStorage.setItem(LS_TMDB_LOCKOUT, String(Date.now()));
+    err.textContent = `Maximum attempts reached (${TMDB_MAX_ATTEMPTS}). Access locked.`;
+    err.style.display = "block";
+    el("tmdbUnlockBtn").disabled = true;
+    tmdbStartLockoutTick();
+  }else{
+    err.textContent = `Incorrect code. ${TMDB_MAX_ATTEMPTS - attempts} attempts remaining.`;
+    err.style.display = "block";
+  }
+  tmdbPins().forEach(i=>i.value="");
+  el("pin1")?.focus();
+  el("tmdbUnlockBtn").disabled = true;
+}
+async function tmdbUnlockClick(){
+  if(tmdbIsLockedOut()) return;
+  const entered = tmdbPins().map(i=>i.value).join("");
+  if(entered === TMDB_CORRECT_PIN) await tmdbHandleSuccess();
+  else tmdbHandleFailure();
+}
 
-(function wireAuthUI(){
-  document.getElementById("authOpenBtn")?.addEventListener("click", openAuthModal);
-  document.getElementById("authCloseBtn")?.addEventListener("click", closeAuthModal);
-  document.getElementById("authModalBackdrop")?.addEventListener("click", closeAuthModal);
-  document.getElementById("authLoginBtn")?.addEventListener("click", loginEmail);
-  document.getElementById("authSignupBtn")?.addEventListener("click", signupEmail);
-  document.getElementById("authGoogleBtn")?.addEventListener("click", loginGoogle);
-  document.getElementById("authLogoutBtn")?.addEventListener("click", logout);
+(function wire(){
+  el("acctChip")?.addEventListener("click", async ()=>{
+    const user = await sbUser();
+    if(!user){ openAuth(); return; }
+    if(isMenuOpen()) closeMenu(); else openMenu();
+  });
+  document.addEventListener("click", (e)=>{
+    const chip = el("acctChip");
+    const menu = el("acctMenu");
+    if(!menu) return;
+    const inside = menu.contains(e.target) || chip.contains(e.target);
+    if(!inside) closeMenu();
+  });
 
-  // ESC to close
-  window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeAuthModal(); });
+  el("authCloseBtn")?.addEventListener("click", closeAuth);
+  el("authModalBackdrop")?.addEventListener("click", closeAuth);
+  el("authLoginBtn")?.addEventListener("click", loginEmail);
+  el("authSignupBtn")?.addEventListener("click", signupEmail);
+
+  el("signOutBtn")?.addEventListener("click", async ()=>{ await signOut(); closeMenu(); });
+
+  el("tmdbToggle")?.addEventListener("change", async (e)=>{
+    const user = await sbUser();
+    if(!user){ e.target.checked=false; openAuth(); return; }
+    if(e.target.checked){
+      e.target.checked=false;
+      tmdbOpenModal();
+    }else{
+      await setTmdbUnlocked(false);
+      await refreshDock();
+    }
+  });
+
+  el("tmdbBackdrop")?.addEventListener("click", tmdbCloseModal);
+
+  const pins = tmdbPins();
+  pins.forEach((input, idx)=>{
+    input.addEventListener("input", ()=>{
+      const v = (input.value || "").replace(/[^0-9]/g,"").charAt(0);
+      input.value = v;
+      if(v && idx < pins.length - 1) pins[idx+1].focus();
+      tmdbCheckPins();
+    });
+    input.addEventListener("keyup", (ev)=>{
+      if(ev.key === "Backspace" && !input.value && idx>0) pins[idx-1].focus();
+      tmdbCheckPins();
+    });
+    input.addEventListener("paste", (ev)=>{
+      ev.preventDefault();
+      const paste = (ev.clipboardData || window.clipboardData).getData("text").trim().replace(/[^0-9]/g,"").slice(0,4);
+      for(let i=0;i<paste.length;i++){ if(pins[i]) pins[i].value = paste[i]; }
+      (pins[Math.min(paste.length,3)] || pins[3]).focus();
+      tmdbCheckPins();
+    });
+  });
+  el("tmdbUnlockBtn")?.addEventListener("click", tmdbUnlockClick);
+
+  window.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape"){ closeAuth(); tmdbCloseModal(); closeMenu(); }
+    if(e.key==="Enter" && !el("tmdbUnlockBtn").disabled && el("tmdbModal").style.display==="block"){
+      e.preventDefault(); tmdbUnlockClick();
+    }
+  });
 })();
 
-/** =======================
- *  On load: restore session, sync flags, render CW
- *  ======================= */
-(async function initAccounts(){
-  const sb = getSupabase();
-  await updateAuthDock();
-
-  if(sb){
-    // Update UI on auth changes
-    sb.auth.onAuthStateChange(async (_event, session)=>{
-      await updateAuthDock();
+(async function init(){
+  const c = sb();
+  await refreshDock();
+  if(c){
+    c.auth.onAuthStateChange(async (_event, session)=>{
       if(session?.user){
         await ensureProfile(session.user);
         await migrateLocalCWToAccount();
-        await syncTmdbUnlockFlagToCompatibilityStorage();
-        await renderContinueWatchingFromAccount();
-      }else{
-        try { localStorage.isUnlocked = "false"; } catch {}
       }
+      await refreshDock();
+      await renderContinueWatchingFromAccount();
     });
-
-    // If already logged in, sync and render
-    const user = await sbUser();
-    if(user){
-      await ensureProfile(user);
-      await syncTmdbUnlockFlagToCompatibilityStorage();
-    }
   }
-
-  // Render CW (will pick DB if logged in, local if not)
   await renderContinueWatchingFromAccount();
 })();
 </script>
