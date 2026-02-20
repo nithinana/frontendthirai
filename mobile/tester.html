@@ -346,17 +346,6 @@
             scroll-behavior: auto; scrollbar-width: none;
         }
         .row-container::-webkit-scrollbar { display: none; }
-        .search-featured { padding-bottom: 10px; }
-        .search-featured-block { margin-bottom: 14px; }
-        .search-featured-label {
-            padding: 0 var(--page-pad);
-            margin: 0 0 8px;
-            font-size: 0.95rem;
-            color: #bbb;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-
 
         .card {
             flex: 0 0 auto; width: 100px; border-radius: var(--radius); overflow: hidden;
@@ -2046,22 +2035,7 @@
                 </button>
             </div>
         </div>
-        
-        <div id="search-featured" class="search-featured visually-hidden" aria-label="Featured">
-            <div class="section-title">Featured</div>
-
-            <div class="search-featured-block">
-                <div class="search-featured-label" id="search-featured-current-label"></div>
-                <div class="row-container" id="search-featured-current"></div>
-            </div>
-
-            <div class="search-featured-block">
-                <div class="search-featured-label" id="search-featured-prev-label"></div>
-                <div class="row-container" id="search-featured-prev"></div>
-            </div>
-        </div>
-
-<div class="grid-layout" id="search-results"></div>
+        <div class="grid-layout" id="search-results"></div>
         <button class="load-more-btn visually-hidden" id="load-more-search" onclick="loadMoreSearch()" aria-label="Load more"><i class="fas fa-arrow-rotate-right" aria-hidden="true"></i></button>
     </div>
 
@@ -5125,127 +5099,6 @@ const teluguData = {
 };       
         // State management for pagination
         let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
-
-        // ===============================================
-        // SEARCH EMPTY STATE: FEATURED (Year / Tamil)
-        // Shows posters when search box is empty.
-        // ===============================================
-        const searchFeaturedState = { loaded: false, loading: false, data: { current: [], prev: [] } };
-
-        function setSearchFeaturedVisible(on) {
-            const featured = document.getElementById('search-featured');
-            const grid = document.getElementById('search-results');
-            if (featured) featured.classList.toggle('visually-hidden', !on);
-            if (grid) grid.classList.toggle('visually-hidden', !!on);
-        }
-
-        function renderSearchFeaturedPlaceholders() {
-            const cur = document.getElementById('search-featured-current');
-            const prev = document.getElementById('search-featured-prev');
-            if (cur) cur.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">Loading…</p>';
-            if (prev) prev.innerHTML = '';
-        }
-
-        async function fetchYearFeaturedPage(year) {
-            const params = { lang: 'tamil', year: year };
-            let base = FILTER_PRIMARY_API_URL || API_BASE;
-            let endpoint = buildFilterEndpoint(base, 'year', params, 1);
-            let res;
-
-            try {
-                res = await fetch(endpoint);
-                if (!res.ok && base === (FILTER_PRIMARY_API_URL || API_BASE)) {
-                    base = FILTER_FALLBACK_API_URL || base;
-                    endpoint = buildFilterEndpoint(base, 'year', params, 1);
-                    res = await fetch(endpoint);
-                }
-            } catch (err) {
-                if (base === (FILTER_PRIMARY_API_URL || API_BASE) && FILTER_FALLBACK_API_URL) {
-                    base = FILTER_FALLBACK_API_URL;
-                    endpoint = buildFilterEndpoint(base, 'year', params, 1);
-                    res = await fetch(endpoint);
-                } else {
-                    throw err;
-                }
-            }
-
-            if (!res || !res.ok) throw new Error('Failed to load featured year ' + year);
-            const data = await res.json();
-            return (data && data.movies) ? data.movies : [];
-        }
-
-        function renderSearchFeaturedRows(currentYear, prevYear, curMovies, prevMovies) {
-            const curLabel = document.getElementById('search-featured-current-label');
-            const prevLabel = document.getElementById('search-featured-prev-label');
-            const cur = document.getElementById('search-featured-current');
-            const prev = document.getElementById('search-featured-prev');
-
-            if (curLabel) curLabel.textContent = `/year/tamil/${currentYear}?page=1`;
-            if (prevLabel) prevLabel.textContent = `/year/tamil/${prevYear}?page=1`;
-
-            if (cur) {
-                cur.innerHTML = '';
-                (curMovies || []).forEach(item => {
-                    if (item && item.img_url && item.page_url) cur.appendChild(createCard(item));
-                });
-            }
-            if (prev) {
-                prev.innerHTML = '';
-                (prevMovies || []).forEach(item => {
-                    if (item && item.img_url && item.page_url) prev.appendChild(createCard(item));
-                });
-            }
-
-            // Fallback messaging if API returns nothing
-            if (cur && cur.children.length === 0) {
-                cur.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">No posters found.</p>';
-            }
-            if (prev && prev.children.length === 0) {
-                prev.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">No posters found.</p>';
-            }
-        }
-
-        async function ensureSearchFeaturedLoaded() {
-            if (searchFeaturedState.loaded || searchFeaturedState.loading) return;
-            searchFeaturedState.loading = true;
-
-            renderSearchFeaturedPlaceholders();
-
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const prevYear = currentYear - 1;
-
-            try {
-                const [curMovies, prevMovies] = await Promise.all([
-                    fetchYearFeaturedPage(currentYear),
-                    fetchYearFeaturedPage(prevYear)
-                ]);
-
-                searchFeaturedState.data.current = curMovies || [];
-                searchFeaturedState.data.prev = prevMovies || [];
-                searchFeaturedState.loaded = true;
-
-                renderSearchFeaturedRows(currentYear, prevYear, searchFeaturedState.data.current, searchFeaturedState.data.prev);
-            } catch (e) {
-                const cur = document.getElementById('search-featured-current');
-                const prev = document.getElementById('search-featured-prev');
-                if (cur) cur.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 10px 0;">Couldn\'t load featured posters.</p>';
-                if (prev) prev.innerHTML = '';
-                console.error(e);
-            } finally {
-                searchFeaturedState.loading = false;
-            }
-        }
-
-        async function showSearchFeatured() {
-            setSearchFeaturedVisible(true);
-            await ensureSearchFeaturedLoaded();
-        }
-
-        function hideSearchFeatured() {
-            setSearchFeaturedVisible(false);
-        }
-
         // Auto-search debounce (1s) + load 2 pages at a time
         let _searchDebounce = null;
 
@@ -5267,20 +5120,7 @@ const teluguData = {
                     await prefetchNextSearchPageIfAvailable();
                 }, 1000);
             });
-        
-        // When the Search view is opened via nav, show Featured if the box is empty.
-        document.addEventListener('click', function(e) {
-            const isSearchNav = e.target.closest('.search-btn, [data-view="view-search"], [data-view="search"], [data-view="#view-search"]');
-            if (!isSearchNav) return;
-            setTimeout(() => {
-                const si = document.getElementById('search-input');
-                if (si && !si.value.trim()) {
-                    showSearchFeatured();
-                }
-            }, 0);
-        }, { passive: true });
-
-}
+        }
 
         async function loadMoreSearch() {
             // Load 2 pages per click
@@ -5813,14 +5653,10 @@ function createTmdbSearchCard(type, item) {
             const loadMoreBtn = document.getElementById('load-more-search');
 
             if (q.length < 1) {
-                // Empty search: show Featured posters (no load more)
+                grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding: 20px 0;">Enter at least 1 character to search.</p>';
                 loadMoreBtn.classList.add('visually-hidden');
-                await showSearchFeatured();
                 return;
-            } else {
-                hideSearchFeatured();
             }
-
 
             if (isNewSearch) {
                 // Start new search
@@ -5990,12 +5826,6 @@ async function init() {
     renderRows(false); // Initial render
     initBanner();
     setupAutoSearch();
-    // If search is empty, preload Featured posters (shown when Search tab is opened)
-    try {
-        const si = document.getElementById('search-input');
-        if (si && !si.value.trim()) { await ensureSearchFeaturedLoaded(); }
-    } catch (e) { console.error(e); }
-
 
     // API Wakeup Call
     try {
@@ -6963,6 +6793,388 @@ async function processWpRoomData(data){
   const nick = document.getElementById('wpNickname');
   if(nick) nick.focus();
 }
+</script>
+
+
+<!-- =======================
+     Thirai Account System (Supabase)
+     - Google Login
+     - Continue Watching stored per account
+     - TMDB access tied to account flag (profiles.tmdb_unlocked)
+     NOTE: Replace SUPABASE_URL + SUPABASE_ANON_KEY with your project values.
+     ======================= -->
+<style>
+  #authDock{position:fixed;top:12px;right:12px;z-index:99999;display:flex;gap:8px;align-items:center}
+  #authDock button{background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;font:500 13px/1.1 Inter,system-ui,sans-serif;cursor:pointer}
+  #authDock button.primary{border-color:rgba(229,9,20,.55)}
+  #authDock .pill{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);font:500 13px/1 Inter,system-ui,sans-serif}
+  #authModalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:99998;display:none}
+  #authModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 28px));background:#0f0f0f;border:1px solid rgba(255,255,255,.12);border-radius:16px;z-index:99999;display:none;box-shadow:0 20px 80px rgba(0,0,0,.55)}
+  #authModal header{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px 14px}
+  #authModal header .title{font:800 16px/1.1 Inter,system-ui,sans-serif}
+  #authModal header button{background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;padding:6px}
+  #authModal .body{padding:0 14px 14px 14px}
+  #authModal label{display:block;color:rgba(255,255,255,.72);font:600 12px/1 Inter,system-ui,sans-serif;margin:10px 0 6px}
+  #authModal input{width:100%;background:#141414;color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px 12px;font:500 14px/1.2 Inter,system-ui,sans-serif}
+  #authModal .row{display:flex;gap:10px;margin-top:12px}
+  #authModal .row button{flex:1;background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;font:700 13px/1 Inter,system-ui,sans-serif;cursor:pointer}
+  #authModal .row button.primary{border-color:rgba(229,9,20,.55)}
+  #authModal .divider{display:flex;align-items:center;gap:10px;margin:14px 0}
+  #authModal .divider:before,#authModal .divider:after{content:"";flex:1;height:1px;background:rgba(255,255,255,.10)}
+  #authModal .divider span{color:rgba(255,255,255,.55);font:700 12px/1 Inter,system-ui,sans-serif}
+  #authModal .status{margin-top:10px;color:rgba(255,255,255,.7);font:500 12px/1.25 Inter,system-ui,sans-serif}
+</style>
+
+<div id="authDock">
+  <span id="authPill" class="pill">Not signed in</span>
+  <button id="authOpenBtn" class="primary">Sign in</button>
+  <button id="authLogoutBtn" style="display:none;">Logout</button>
+</div>
+
+<div id="authModalBackdrop"></div>
+<div id="authModal" role="dialog" aria-modal="true" aria-label="Account">
+  <header>
+    <div class="title">Account</div>
+    <button id="authCloseBtn" aria-label="Close">✕</button>
+  </header>
+  <div class="body">
+    <label>Email</label>
+    <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+    <label>Password</label>
+    <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" />
+    <div class="row">
+      <button id="authLoginBtn" class="primary">Login</button>
+      <button id="authSignupBtn">Sign up</button>
+    </div>
+
+    <div class="divider"><span>OR</span></div>
+
+    <div class="row">
+      <button id="authGoogleBtn" class="primary">
+        <span style="display:inline-flex;gap:8px;align-items:center;justify-content:center;">
+          <i class="fa-brands fa-google"></i> Continue with Google
+        </span>
+      </button>
+    </div>
+
+    <div id="authStatus" class="status"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/** =======================
+ *  CONFIG (REQUIRED)
+ *  ======================= */
+const SUPABASE_URL = "https://jgzsjgrlgzzfrvjsuctt.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_oMvwF5VI_Upl8GOrnnusdA_y07YJ8Oe";
+
+/** =======================
+ *  Supabase client
+ *  ======================= */
+let supabaseClient = null;
+function getSupabase(){
+  if(supabaseClient) return supabaseClient;
+  if(!SUPABASE_URL || SUPABASE_URL.startsWith("PASTE_") || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith("PASTE_")){
+    console.warn("[Accounts] Supabase not configured yet. Add SUPABASE_URL + SUPABASE_ANON_KEY.");
+    return null;
+  }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return supabaseClient;
+}
+
+async function sbUser(){
+  const sb = getSupabase(); if(!sb) return null;
+  const { data } = await sb.auth.getUser();
+  return data?.user || null;
+}
+
+function setStatus(msg){
+  const el = document.getElementById("authStatus");
+  if(el) el.textContent = msg || "";
+}
+
+function openAuthModal(){
+  document.getElementById("authModalBackdrop").style.display = "block";
+  document.getElementById("authModal").style.display = "block";
+  setStatus("");
+  setTimeout(()=>document.getElementById("authEmail")?.focus(), 0);
+}
+function closeAuthModal(){
+  document.getElementById("authModalBackdrop").style.display = "none";
+  document.getElementById("authModal").style.display = "none";
+}
+
+async function ensureProfile(user){
+  const sb = getSupabase(); if(!sb || !user) return;
+  // create row if missing (safe upsert)
+  await sb.from("profiles").upsert({ user_id: user.id });
+}
+
+async function getProfile(){
+  const sb = getSupabase(); if(!sb) return null;
+  const user = await sbUser(); if(!user) return null;
+  const { data } = await sb.from("profiles").select("tmdb_unlocked, display_name").eq("user_id", user.id).single();
+  return data || null;
+}
+
+/** =======================
+ *  Continue Watching (DB)
+ *  - Replaces localStorage as source of truth when signed in
+ *  ======================= */
+const CW_CACHE_KEY = "thirai_continue_watching";
+
+// Read legacy local list
+function readLocalCW(){
+  try { return JSON.parse(localStorage.getItem(CW_CACHE_KEY) || "[]") || []; } catch { return []; }
+}
+function writeLocalCW(items){
+  try { localStorage.setItem(CW_CACHE_KEY, JSON.stringify(items || [])); } catch {}
+}
+
+async function fetchCW(){
+  const sb = getSupabase(); if(!sb) return readLocalCW();
+  const user = await sbUser();
+  if(!user) return readLocalCW();
+
+  const { data, error } = await sb
+    .from("continue_watching")
+    .select("url,img,title,progress_seconds,duration_seconds,updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(30);
+
+  if(error){ console.error(error); return []; }
+  return (data || []).map(r => ({
+    url: r.url,
+    img: r.img,
+    title: r.title || "",
+    // keep your existing fields if you want progress UI later
+    progress_seconds: r.progress_seconds,
+    duration_seconds: r.duration_seconds
+  }));
+}
+
+async function upsertCW(item){
+  const sb = getSupabase(); if(!sb) return;
+  const user = await sbUser();
+  if(!user) return;
+
+  const payload = {
+    user_id: user.id,
+    url: item.url || item.link,
+    img: item.img,
+    title: item.title || null,
+    progress_seconds: item.progress_seconds ?? null,
+    duration_seconds: item.duration_seconds ?? null
+  };
+  if(!payload.url || !payload.img) return;
+
+  const { error } = await sb.from("continue_watching").upsert(payload, { onConflict: "user_id,url" });
+  if(error) console.error(error);
+}
+
+async function removeCW(url){
+  const sb = getSupabase(); if(!sb) return;
+  const user = await sbUser();
+  if(!user) return;
+  const { error } = await sb.from("continue_watching").delete().eq("user_id", user.id).eq("url", url);
+  if(error) console.error(error);
+}
+
+// One-time migration: localStorage -> account DB
+async function migrateLocalCWToAccount(){
+  const sb = getSupabase(); if(!sb) return;
+  const user = await sbUser();
+  if(!user) return;
+
+  const items = readLocalCW();
+  if(!items.length) return;
+
+  for(const it of items){
+    await upsertCW(it);
+  }
+  // clear local after migration (comment this out if you want to keep it as offline cache)
+  localStorage.removeItem(CW_CACHE_KEY);
+}
+
+/** =======================
+ *  Patch existing Continue Watching renderer
+ *  Your file currently reads localStorage directly.
+ *  We override renderContinueWatching() to use DB when logged in.
+ *  ======================= */
+async function renderContinueWatchingFromAccount(){
+  try{
+    const container = document.getElementById("continue-watching-list") || document.getElementById("continueWatchingList");
+    if(!container) return;
+
+    const items = await fetchCW();
+    if(!items.length){
+      container.innerHTML = '<div style="color:rgba(255,255,255,.55);padding:0 var(--page-pad);">Nothing here yet.</div>';
+      return;
+    }
+
+    // Keep your visual style similar to existing cards
+    container.innerHTML = items.map((item, idx) => `
+      <a href="${item.url}" class="continue-card" style="display:block;min-width:160px;max-width:160px;">
+        <div style="position:relative;">
+          <img src="${item.img}" alt="${(item.title||"").replace(/"/g,"&quot;")}" style="width:160px;height:90px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.10);" />
+          <button data-cw-remove="${encodeURIComponent(item.url)}"
+            title="Remove" aria-label="Remove"
+            style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 8px;cursor:pointer;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div style="margin-top:8px;font:700 12px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${item.title || "Continue watching"}
+        </div>
+      </a>
+    `).join("");
+
+    // remove handlers
+    container.querySelectorAll("[data-cw-remove]").forEach(btn=>{
+      btn.addEventListener("click", async (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        const url = decodeURIComponent(btn.getAttribute("data-cw-remove"));
+        await removeCW(url);
+        await renderContinueWatchingFromAccount();
+      });
+    });
+
+  }catch(e){
+    console.error(e);
+  }
+}
+
+// If the app already calls renderContinueWatching(), make sure our version wins.
+window.renderContinueWatching = renderContinueWatchingFromAccount;
+
+/** =======================
+ *  TMDB access tied to account
+ *  - Source of truth: profiles.tmdb_unlocked
+ *  - We mirror the value to localStorage.isUnlocked for compatibility
+ *    with your existing code (so you don’t have to rewrite all checks).
+ *  ======================= */
+async function syncTmdbUnlockFlagToCompatibilityStorage(){
+  const profile = await getProfile();
+  const unlocked = !!profile?.tmdb_unlocked;
+  try { localStorage.isUnlocked = unlocked ? "true" : "false"; } catch {}
+  return unlocked;
+}
+
+/** =======================
+ *  Auth actions
+ *  ======================= */
+async function loginEmail(){
+  const sb = getSupabase(); if(!sb) return setStatus("Supabase not configured yet.");
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  setStatus("Signing in…");
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if(error) return setStatus(error.message);
+  await ensureProfile(data.user);
+  await migrateLocalCWToAccount();
+  await syncTmdbUnlockFlagToCompatibilityStorage();
+  await renderContinueWatchingFromAccount();
+  closeAuthModal();
+}
+
+async function signupEmail(){
+  const sb = getSupabase(); if(!sb) return setStatus("Supabase not configured yet.");
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  setStatus("Creating account…");
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if(error) return setStatus(error.message);
+  if(data.user) await ensureProfile(data.user);
+  setStatus("Check your email to confirm your account, then sign in.");
+}
+
+async function loginGoogle(){
+  const sb = getSupabase(); if(!sb) return setStatus("Supabase not configured yet.");
+  setStatus("Opening Google sign-in…");
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo }
+  });
+  if(error) setStatus(error.message);
+}
+
+async function logout(){
+  const sb = getSupabase(); if(!sb) return;
+  await sb.auth.signOut();
+  try { localStorage.isUnlocked = "false"; } catch {}
+  await updateAuthDock();
+  // after logout, render from local cache if any
+  if(typeof window.renderContinueWatching === "function") window.renderContinueWatching();
+}
+
+/** =======================
+ *  Dock state
+ *  ======================= */
+async function updateAuthDock(){
+  const pill = document.getElementById("authPill");
+  const openBtn = document.getElementById("authOpenBtn");
+  const outBtn = document.getElementById("authLogoutBtn");
+
+  const user = await sbUser();
+  if(user){
+    if(pill) pill.textContent = user.email || "Signed in";
+    if(openBtn) openBtn.style.display = "none";
+    if(outBtn) outBtn.style.display = "inline-block";
+  }else{
+    if(pill) pill.textContent = "Not signed in";
+    if(openBtn) openBtn.style.display = "inline-block";
+    if(outBtn) outBtn.style.display = "none";
+  }
+}
+
+(function wireAuthUI(){
+  document.getElementById("authOpenBtn")?.addEventListener("click", openAuthModal);
+  document.getElementById("authCloseBtn")?.addEventListener("click", closeAuthModal);
+  document.getElementById("authModalBackdrop")?.addEventListener("click", closeAuthModal);
+  document.getElementById("authLoginBtn")?.addEventListener("click", loginEmail);
+  document.getElementById("authSignupBtn")?.addEventListener("click", signupEmail);
+  document.getElementById("authGoogleBtn")?.addEventListener("click", loginGoogle);
+  document.getElementById("authLogoutBtn")?.addEventListener("click", logout);
+
+  // ESC to close
+  window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeAuthModal(); });
+})();
+
+/** =======================
+ *  On load: restore session, sync flags, render CW
+ *  ======================= */
+(async function initAccounts(){
+  const sb = getSupabase();
+  await updateAuthDock();
+
+  if(sb){
+    // Update UI on auth changes
+    sb.auth.onAuthStateChange(async (_event, session)=>{
+      await updateAuthDock();
+      if(session?.user){
+        await ensureProfile(session.user);
+        await migrateLocalCWToAccount();
+        await syncTmdbUnlockFlagToCompatibilityStorage();
+        await renderContinueWatchingFromAccount();
+      }else{
+        try { localStorage.isUnlocked = "false"; } catch {}
+      }
+    });
+
+    // If already logged in, sync and render
+    const user = await sbUser();
+    if(user){
+      await ensureProfile(user);
+      await syncTmdbUnlockFlagToCompatibilityStorage();
+    }
+  }
+
+  // Render CW (will pick DB if logged in, local if not)
+  await renderContinueWatchingFromAccount();
+})();
 </script>
 
 </body>
