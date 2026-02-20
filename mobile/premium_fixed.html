@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Restricted Access</title>
+
+  <!-- Match index.html typography + icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+
+  <style>
+    :root{
+      --bg-body:#080808;
+      --bg-card: rgba(18,18,18,0.98);
+      --stroke: rgba(255,255,255,0.10);
+      --stroke-soft: rgba(255,255,255,0.08);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.65);
+      --danger: #ff6b6b;
+      --radius: 22px;
+      --radius-sm: 14px;
+      --shadow: 0 12px 40px rgba(0,0,0,0.55);
+    }
+
+    *{ box-sizing:border-box; outline:none; -webkit-tap-highlight-color: transparent; }
+    html, body{ height:100%; width:100%; margin:0; padding:0; }
+    body{
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-body);
+      color: var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    /* Center card */
+    .panel{
+      width: min(520px, 92vw);
+      max-height: 88vh;
+      overflow:auto;
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .panel::-webkit-scrollbar{ width:0; height:0; }
+
+    .head{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding-right: 34px;
+      margin-bottom: 14px;
+    }
+    .icon-pill{
+      width:42px; height:42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--stroke);
+      flex: 0 0 auto;
+    }
+    .title{
+      font-size: 1.15rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin:0;
+    }
+    .sub{
+      margin:4px 0 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
+    /* Inputs (match index's wp-code vibe) */
+    .code-inputs{
+      display:flex;
+      justify-content:center;
+      gap: 8px;
+      margin: 14px 0 14px;
+    }
+    .code-input{
+      width: 42px;
+      height: 54px;
+      text-align:center;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #fff;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      outline:none;
+    }
+    .code-input:focus{
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+    }
+    /* Prevent blue autofill */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active{
+      -webkit-box-shadow: 0 0 0 1000px rgba(28,28,28,1) inset !important;
+      -webkit-text-fill-color: white !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .btn-primary{
+      width: 100%;
+      height: 46px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      color: #000;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+    }
+    .btn-primary:disabled{ opacity:0.55; cursor:not-allowed; }
+
+    .btn-secondary{
+      width:100%;
+      height: 46px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.92);
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      cursor:pointer;
+      margin-top: 10px;
+    }
+
+    .error{
+      display:none;
+      margin-top: 10px;
+      color: var(--danger);
+      font-size: 0.9rem;
+      text-align:center;
+      line-height: 1.25;
+    }
+
+    /* Screens */
+    .screen{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      background: var(--bg-body);
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .screen.hidden{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    /* Enabled content */
+    .benefits{
+      margin: 12px 0 0;
+      padding: 0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .benefit{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+    }
+    .benefit i{
+      margin-top:2px;
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.92);
+      flex: 0 0 auto;
+    }
+    .benefit .btxt{
+      font-size: 0.92rem;
+      line-height: 1.3;
+      color: rgba(255,255,255,0.88);
+    }
+    .benefit b{
+      color:#fff;
+      font-weight: 900;
+    }
+
+    .note{
+      margin-top: 14px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.80);
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+    .note b{ color:#fff; font-weight: 900; }
+
+    /* Success overlay (short) */
+    #success-overlay{
+      position:absolute;
+      inset:0;
+      background: var(--bg-body);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      z-index: 50;
+    }
+    .check-container{
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      background: rgba(34,197,94,0.85); /* green */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform: scale(0);
+      animation: grow 0.28s ease-out forwards;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+    }
+    .check-icon{
+      color:#fff;
+      font-size: 56px;
+      opacity:0;
+      animation: fadeIn 0.25s 0.22s forwards;
+    }
+    #success-overlay p{
+      margin: 18px 0 0;
+      color: rgba(255,255,255,0.92);
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    @keyframes grow{ from{transform:scale(0);} to{transform:scale(1);} }
+    @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  </style>
+</head>
+
+<body>
+  <!-- Unlock Screen -->
+  <div id="unlock-screen" class="screen">
+    <div class="panel" role="dialog" aria-modal="true">
+      <div class="head">
+        <div class="icon-pill"><i class="bi bi-lock-fill"></i></div>
+        <div>
+          <h1 class="title">Enter the access code</h1>
+          <p class="sub">Unlock premium features on this device.</p>
+        </div>
+      </div>
+
+      <div class="code-inputs" id="codeInputContainer" aria-label="Access code">
+        <input type="text" class="code-input" id="code1" maxlength="1" inputmode="numeric" autocomplete="off" />
+        <input type="text" class="code-input" id="code2" maxlength="1" inputmode="numeric" autocomplete="off" />
+        <input type="text" class="code-input" id="code3" maxlength="1" inputmode="numeric" autocomplete="off" />
+        <input type="text" class="code-input" id="code4" maxlength="1" inputmode="numeric" autocomplete="off" />
+      </div>
+
+      <button class="btn-primary" id="unlockButton" disabled>Unlock</button>
+      <div class="error" id="error-message"></div>
+    </div>
+  </div>
+
+  <!-- Enabled Screen -->
+  <div id="enabled-screen" class="screen hidden">
+    <div class="panel" role="region" aria-label="Premium enabled">
+      <div class="head">
+        <div class="icon-pill"><i class="bi bi-stars"></i></div>
+        <div>
+          <h1 class="title">Premium is enabled</h1>
+          <p class="sub">What you get:</p>
+        </div>
+      </div>
+
+      <ul class="benefits">
+        <li class="benefit">
+          <i class="bi bi-hdd-network-fill"></i>
+          <div class="btxt"><b>Access to third party servers</b> that extend from just South Asian content.</div>
+        </li>
+        <li class="benefit">
+          <i class="bi bi-collection-play-fill"></i>
+          <div class="btxt"><b>TMDB Movies and TV Shows</b> row added to home page.</div>
+        </li>
+        <li class="benefit">
+          <i class="bi bi-translate"></i>
+          <div class="btxt"><b>TMDB</b> added as a language in the dropdown to search movies.</div>
+        </li>
+      </ul>
+
+      <div class="note">
+        <b>Note:</b> Servers through <b>TMDB</b> are not hosted by <b>Thirai</b>, but are rather just redirects to third-party sites with content.
+        Advertisements are beyond my control when streaming.
+      </div>
+
+      <button class="btn-secondary" id="disableButton"><i class="bi bi-toggle-off" style="margin-right:8px;"></i>Disable Premium</button>
+    </div>
+  </div>
+
+  <!-- Success overlay -->
+  <div id="success-overlay">
+    <div class="check-container">
+      <i class="bi bi-check-lg check-icon"></i>
+    </div>
+    <p>Enabled</p>
+  </div>
+
+  <script>
+    (function(){
+      // --- CONFIGURATION (kept from original) ---
+      const CORRECT_PIN = "1451";
+      const MAX_ATTEMPTS = 5;
+      const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
+
+      // --- LOCAL STORAGE KEYS (match original premium.html) ---
+      const LS_UNLOCKED = 'isUnlocked';
+      const LS_ATTEMPTS = 'attemptCount';
+      const LS_LOCKOUT = 'lockoutTimestamp';
+
+      // --- DOM ---
+      const inputs = document.querySelectorAll('.code-input');
+      const unlockButton = document.getElementById('unlockButton');
+      const errorMessage = document.getElementById('error-message');
+
+      const unlockScreen = document.getElementById('unlock-screen');
+      const enabledScreen = document.getElementById('enabled-screen');
+      const successOverlay = document.getElementById('success-overlay');
+      const disableButton = document.getElementById('disableButton');
+
+      let lockoutInterval = null;
+
+      function showUnlock(){
+        enabledScreen.classList.add('hidden');
+        unlockScreen.classList.remove('hidden');
+        // reset inputs
+        inputs.forEach(i => i.value = '');
+        unlockButton.disabled = true;
+        errorMessage.style.display = 'none';
+        setTimeout(()=> inputs[0]?.focus(), 50);
+        checkLockoutStatus();
+      }
+
+      function showEnabled(){
+        unlockScreen.classList.add('hidden');
+        enabledScreen.classList.remove('hidden');
+      }
+
+      function isLockedOut(){
+        const lockoutTimestamp = localStorage.getItem(LS_LOCKOUT);
+        if (lockoutTimestamp) {
+          const now = Date.now();
+          const lockoutEnd = parseInt(lockoutTimestamp, 10) + LOCKOUT_DURATION_MS;
+          if (now < lockoutEnd) {
+            const remainingMs = lockoutEnd - now;
+            const totalSeconds = Math.ceil(remainingMs / 1000);
+            const remainingMinutes = Math.floor(totalSeconds / 60);
+            const remainingSeconds = totalSeconds % 60;
+
+            errorMessage.textContent = `Too many failed attempts. Try again in ${remainingMinutes}:${remainingSeconds.toString().padStart(2,'0')}.`;
+            errorMessage.style.display = 'block';
+            return true;
+          } else {
+            localStorage.removeItem(LS_LOCKOUT);
+            localStorage.setItem(LS_ATTEMPTS, '0');
+            if (lockoutInterval) { clearInterval(lockoutInterval); lockoutInterval = null; }
+            errorMessage.style.display = 'none';
+            return false;
+          }
+        }
+        return false;
+      }
+
+      function checkInputs(){
+        let allFilled = true;
+        inputs.forEach(input => {
+          if (input.value.length === 0 || !/^\d$/.test(input.value)) allFilled = false;
+        });
+        const locked = isLockedOut();
+        unlockButton.disabled = !allFilled || locked;
+        if (allFilled && !locked) errorMessage.style.display = 'none';
+      }
+
+      function checkLockoutStatus(){
+        if (isLockedOut()){
+          unlockButton.disabled = true;
+          if (!lockoutInterval) lockoutInterval = setInterval(checkLockoutStatus, 1000);
+        } else {
+          if (lockoutInterval){ clearInterval(lockoutInterval); lockoutInterval = null; }
+          checkInputs();
+        }
+      }
+
+      function handleSuccess(){
+        // store success state (same as original)
+        localStorage.setItem(LS_UNLOCKED, 'true');
+        localStorage.setItem('premium_isUnlocked', 'true'); // keep secondary key
+        localStorage.setItem(LS_ATTEMPTS, '0');
+        localStorage.removeItem(LS_LOCKOUT);
+
+        // quick success feedback then show enabled screen (NO redirect)
+        successOverlay.style.display = 'flex';
+        setTimeout(() => {
+          successOverlay.style.display = 'none';
+          showEnabled();
+        }, 900);
+      }
+
+      function handleFailure(){
+        let currentAttempts = parseInt(localStorage.getItem(LS_ATTEMPTS) || '0', 10);
+        currentAttempts++;
+        localStorage.setItem(LS_ATTEMPTS, String(currentAttempts));
+
+        if (currentAttempts >= MAX_ATTEMPTS){
+          localStorage.setItem(LS_LOCKOUT, String(Date.now()));
+          errorMessage.textContent = `Maximum attempts reached (${MAX_ATTEMPTS}). Access locked.`;
+          errorMessage.style.display = 'block';
+          checkLockoutStatus();
+        } else {
+          const remaining = MAX_ATTEMPTS - currentAttempts;
+          errorMessage.textContent = `Incorrect code. ${remaining} attempts remaining.`;
+          errorMessage.style.display = 'block';
+        }
+
+        inputs.forEach(i => i.value = '');
+        inputs[0]?.focus();
+        unlockButton.disabled = true;
+      }
+
+      // Inputs behavior (kept)
+      inputs.forEach((input, index) => {
+        input.addEventListener('keyup', (e) => {
+          if (e.key === 'Backspace' && input.value === '' && index > 0) inputs[index-1].focus();
+          checkInputs();
+        });
+
+        input.addEventListener('input', () => {
+          const value = input.value.replace(/[^0-9]/g, '').charAt(0);
+          input.value = value;
+
+          if (input.value.length === 1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+          } else if (index === inputs.length - 1 && input.value.length === 1) {
+            unlockButton.focus();
+          }
+          checkInputs();
+        });
+
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const pasteCode = (e.clipboardData || window.clipboardData).getData('text')
+            .trim().replace(/[^0-9]/g, '').slice(0, 4);
+
+          for (let i=0; i<pasteCode.length; i++){
+            if (inputs[i]) inputs[i].value = pasteCode[i];
+          }
+          const last = pasteCode.length > 0 ? pasteCode.length - 1 : 0;
+          if (inputs[last + 1]) inputs[last + 1].focus();
+          else inputs[last]?.blur();
+
+          checkInputs();
+        });
+      });
+
+      unlockButton.addEventListener('click', () => {
+        if (isLockedOut()) return;
+        const entered = Array.from(inputs).map(i => i.value).join('');
+        if (entered === CORRECT_PIN) handleSuccess();
+        else handleFailure();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !unlockButton.disabled && !unlockScreen.classList.contains('hidden')) {
+          e.preventDefault();
+          unlockButton.click();
+        }
+      });
+
+      disableButton.addEventListener('click', () => {
+        // disable only the premium unlock flags
+        localStorage.removeItem(LS_UNLOCKED);
+        localStorage.removeItem('premium_isUnlocked');
+        // keep attempts/lockout as-is? (safer to reset)
+        localStorage.setItem(LS_ATTEMPTS, '0');
+        localStorage.removeItem(LS_LOCKOUT);
+        showUnlock();
+      });
+
+      // Init
+      document.addEventListener('DOMContentLoaded', () => {
+        const isUnlocked = localStorage.getItem(LS_UNLOCKED) === 'true' || localStorage.getItem('premium_isUnlocked') === 'true';
+        if (isUnlocked) showEnabled();
+        else showUnlock();
+      });
+
+    })();
+  </script>
+</body>
+</html>
