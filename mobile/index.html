@@ -2054,6 +2054,9 @@
         
         <div class="grid-layout" id="grid-actors">
             </div>
+
+        <div class="section-title">Music Directors</div>
+        <div class="grid-layout" id="grid-composers"></div>
     </div>
 
     <div id="view-search" class="visually-hidden view-padded">
@@ -2247,6 +2250,69 @@
         const API_KEY = '926e94b0f70b5bed8417b679652366ab'; // TMDB API Key for movie posters/backdrops
         const TMDB_BASE = 'https://api.themoviedb.org/3';
         const API_BASE = 'https://api.thirai.me';
+
+        
+        // ===============================================
+        // MUSIC DIRECTORS (Composers) - Browse by Language
+        // ===============================================
+        const composersData = {
+          tamil: [
+            { name: "Yuvan Shankar Raja", code: "22UUYFMUwi" },
+            { name: "G. V. Prakash Kumar", code: "63W89Vu5jE" },
+            { name: "Santhosh Narayanan", code: "4MHvQzkyOh" },
+            { name: "D. Imman", code: "3JI2Af0eZ2" },
+            { name: "Sam C. S.", code: "2j3eX8r3I3" },
+            { name: "Anirudh Ravichander", code: "3LovLOeCrk" },
+            { name: "Hiphop Tamizha", code: "NMLsrb8tdE" },
+            { name: "Devi Sri Prasad", code: "2INxqiVkLp" },
+            { name: "Ilaiyaraaja", code: "2oU01UMMDb" },
+            { name: "S. Thaman", code: "6rJvo6oT0w" },
+            { name: "A. R. Rahman", code: "2qX0k3esTW" },
+            { name: "Sean Roldan", code: "5BBlxDKuXA" }
+          ]
+        };
+
+        const tmdbPersonCache = new Map();
+
+        async function getTmdbProfileUrlByName(name) {
+          if (tmdbPersonCache.has(name)) return tmdbPersonCache.get(name);
+          let img = 'https://via.placeholder.com/150';
+          try {
+            const q = encodeURIComponent(name);
+            const searchUrl = `${TMDB_BASE}/search/person?api_key=${API_KEY}&query=${q}`;
+            const r = await fetch(searchUrl);
+            const d = await r.json();
+            const top = d?.results?.[0];
+            if (top?.profile_path) {
+              img = `https://image.tmdb.org/t/p/w185${top.profile_path}`;
+            }
+          } catch (e) {}
+          tmdbPersonCache.set(name, img);
+          return img;
+        }
+
+        async function renderMusicDirectors(lang) {
+          const grid = document.getElementById('grid-composers');
+          if (!grid) return;
+
+          const list = composersData[lang] || [];
+          grid.innerHTML = '';
+
+          for (const c of list) {
+            const img = await getTmdbProfileUrlByName(c.name);
+            const div = document.createElement('div');
+            div.style.textAlign = 'center';
+            div.style.cursor = 'pointer';
+            div.innerHTML = `
+              <div style="width:100px; height:100px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:2px solid #333;">
+                <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy" alt="${c.name}">
+              </div>
+              <div style="font-size:0.85rem; color:#ccc;">${c.name}</div>
+            `;
+            div.onclick = () => openComposerDetails(c.code, lang, c.name);
+            grid.appendChild(div);
+          }
+        }
 
         // ===============================================
         // FILTER (Year / Decade / Genre) - in-app overlay + full-screen results
@@ -5171,7 +5237,7 @@ const teluguData = {
             }
         }
 
-let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
+let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
 
         // ===============================================
         // UTILS
@@ -5556,6 +5622,7 @@ function toggleFeatured() {
             
             // Set initial state
             actorState = { 
+                type: 'actor',
                 actorCode: actorCode, 
                 lang: lang, 
                 actorName: actorName, 
@@ -5570,8 +5637,28 @@ function toggleFeatured() {
             await fetchActorPage(1, true);
         }
 
+
+        async function openComposerDetails(composerCode, lang, composerName) {
+            switchTab('actor-details');
+
+            actorState = { 
+                type: 'composer',
+                actorCode: composerCode, 
+                lang: lang, 
+                actorName: composerName, 
+                page: 1, 
+                hasMore: false 
+            };
+            document.getElementById('actor-details-title').textContent = `${composerName}`;
+
+            // Clear previous results and load page 1
+            document.getElementById('actor-movies-grid').innerHTML = '';
+            document.getElementById('load-more-actor').classList.add('visually-hidden');
+            await fetchActorPage(1, true);
+        }
+
         async function fetchActorPage(pageNumber, clear = false) {
-            const { actorCode, lang } = actorState;
+            const { actorCode, lang, type } = actorState;
             const grid = document.getElementById('actor-movies-grid');
             const loadMoreBtn = document.getElementById('load-more-actor');
 
@@ -5585,18 +5672,19 @@ function toggleFeatured() {
 
             try {
                 let d;
-if (actorCode === '3TKYioHCAF') {
+if (type === 'actor' && actorCode === '3TKYioHCAF') {
     const r = await fetch('/mobile/vijay.json');
     d = await r.json();
     d.has_more = false; 
-} else if (actorCode === '5vCobOqDDx') {
+} else if (type === 'actor' && actorCode === '5vCobOqDDx') {
     const r = await fetch('/mobile/Dhanush.json');
     d = await r.json();
     d.has_more = false;
 }
                 // ✅ All other actors continue to use the normal API
                 else {
-                    const url = `${API_BASE}/actors/${lang}/${actorCode}?page=${pageNumber}`;
+                    const basePath = (type === 'composer') ? 'composers' : 'actors';
+                    const url = `${API_BASE}/${basePath}/${lang}/${actorCode}?page=${pageNumber}`;
                     const r = await fetch(url);
                     d = await r.json();
                 }
@@ -5668,6 +5756,9 @@ if (actorCode === '3TKYioHCAF') {
                 div.onclick = () => openActorDetails(actor.actor_code, actor.language, actor.name);
                 grid.appendChild(div);
             }
+
+            // Render Music Directors for this language
+            await renderMusicDirectors(lang);
         }
 
         // ===============================================
