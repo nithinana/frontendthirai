@@ -1,7 +1,7 @@
 {
   "name": "Thirai",
   "short_name": "Thirai",
-  "description": "A web application.",
+  "description": "South Asian Streaming",
   "start_url": "/mobile/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -49,4 +49,5 @@
     }
   ]
 }
+
 
