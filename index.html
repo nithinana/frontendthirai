@@ -5609,6 +5609,12 @@ function toggleFeatured() {
                 btn2.classList.remove('active');
             }
             renderFeatured();
+            // Also refresh the "Browse by Language" grid to match the toggle
+            try {
+                const activeTab = document.querySelector('#lang-filter-tabs .filter-tab.active');
+                const activeLang = activeTab ? activeTab.getAttribute('data-lang') : 'tamil';
+                if (activeTab) filterGrid(activeLang, activeTab);
+            } catch(e) { console.error(e); }
         }
 
 // ===============================================
@@ -5728,7 +5734,8 @@ if (type === 'actor' && actorCode === '3TKYioHCAF') {
             const grid = document.getElementById('grid-actors');
             setLoading('grid-actors', true, false);
 
-            const actors = actorsData.castData.tmdb.actors.filter(a => a.language === lang);
+            const peopleList = (actorsData.castData.tmdb && actorsData.castData.tmdb[currentFeaturedMode]) ? actorsData.castData.tmdb[currentFeaturedMode] : (actorsData.castData.tmdb.actors || []);
+            const actors = peopleList.filter(a => a.language === lang);
             
             grid.innerHTML = '';
             for(const actor of actors) {
