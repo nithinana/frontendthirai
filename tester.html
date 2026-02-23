@@ -440,9 +440,7 @@
         }
 
     </style>
-
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="video-player-wrapper" id="videoPlayerWrapper">
@@ -1109,8 +1107,7 @@
                 transports: ["websocket", "polling"],
                 reconnection: true,
                 reconnectionAttempts: 999,
-                reconnectionDelay: 500,
-                timeout: 15000
+                reconnectionDelay: 500
             });
 
             wpSocket.on('connect', () => {
