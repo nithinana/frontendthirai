@@ -504,23 +504,12 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             z-index: 2000;
-            display: flex; /* keep mounted so we can animate */
+            display: none;
             align-items: center;
             justify-content: center;
             padding: 18px;
-
-            /* smooth open/close */
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity 220ms ease, visibility 0s linear 220ms;
         }
-        #filterOverlay.active{
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-            transition: opacity 220ms ease, visibility 0s;
-        }
+        #filterOverlay.active{ display: flex; }
 
         .filter-card{
             width: 100%;
@@ -534,15 +523,6 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.55);
             position: relative;
             color: #fff;
-
-            /* card motion */
-            transform: translateY(18px) scale(0.98);
-            opacity: 0;
-            transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
-        }
-        #filterOverlay.active .filter-card{
-            transform: translateY(0) scale(1);
-            opacity: 1;
         }
         .filter-card::-webkit-scrollbar{ width: 0; height: 0; }
 
@@ -1726,7 +1706,7 @@
 #watchPartyOverlay{
   position: fixed;
   inset: 0;
-  display: flex; /* keep mounted so we can animate */
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 18px;
@@ -1734,19 +1714,8 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   z-index: 4000;
-
-  /* smooth open/close */
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 220ms ease, visibility 0s linear 220ms;
 }
-#watchPartyOverlay.active{
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition: opacity 220ms ease, visibility 0s;
-}
+#watchPartyOverlay.active{ display:flex; }
 
 .watchparty-card{
   width: 100%;
@@ -1760,15 +1729,6 @@
   box-shadow: 0 12px 40px rgba(0,0,0,0.55);
   position: relative;
   color: #fff;
-
-  /* card motion */
-  transform: translateY(18px) scale(0.98);
-  opacity: 0;
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
-}
-#watchPartyOverlay.active .watchparty-card{
-  transform: translateY(0) scale(1);
-  opacity: 1;
 }
 .watchparty-card *{ box-sizing: border-box; }
 .watchparty-close{
@@ -2054,9 +2014,6 @@
         
         <div class="grid-layout" id="grid-actors">
             </div>
-
-        <div class="section-title">Music Directors</div>
-        <div class="grid-layout" id="grid-composers"></div>
     </div>
 
     <div id="view-search" class="visually-hidden view-padded">
@@ -2250,69 +2207,6 @@
         const API_KEY = '926e94b0f70b5bed8417b679652366ab'; // TMDB API Key for movie posters/backdrops
         const TMDB_BASE = 'https://api.themoviedb.org/3';
         const API_BASE = 'https://api.thirai.me';
-
-        
-        // ===============================================
-        // MUSIC DIRECTORS (Composers) - Browse by Language
-        // ===============================================
-        const composersData = {
-          tamil: [
-            { name: "Anirudh Ravichander", code: "3LovLOeCrk" },
-		            { name: "A. R. Rahman", code: "2qX0k3esTW" },
-			  { name: "Yuvan Shankar Raja", code: "22UUYFMUwi" },
-            { name: "G. V. Prakash Kumar", code: "63W89Vu5jE" },
-            { name: "Santhosh Narayanan", code: "4MHvQzkyOh" },
-            { name: "D. Imman", code: "3JI2Af0eZ2" },
-            { name: "Sam C. S.", code: "2j3eX8r3I3" },
-            { name: "Hiphop Tamizha", code: "NMLsrb8tdE" },
-            { name: "Devi Sri Prasad", code: "2INxqiVkLp" },
-            { name: "Ilaiyaraaja", code: "2oU01UMMDb" },
-            { name: "S. Thaman", code: "6rJvo6oT0w" },
-            { name: "Sean Roldan", code: "5BBlxDKuXA" }
-          ]
-        };
-
-        const tmdbPersonCache = new Map();
-
-        async function getTmdbProfileUrlByName(name) {
-          if (tmdbPersonCache.has(name)) return tmdbPersonCache.get(name);
-          let img = 'https://via.placeholder.com/150';
-          try {
-            const q = encodeURIComponent(name);
-            const searchUrl = `${TMDB_BASE}/search/person?api_key=${API_KEY}&query=${q}`;
-            const r = await fetch(searchUrl);
-            const d = await r.json();
-            const top = d?.results?.[0];
-            if (top?.profile_path) {
-              img = `https://image.tmdb.org/t/p/w185${top.profile_path}`;
-            }
-          } catch (e) {}
-          tmdbPersonCache.set(name, img);
-          return img;
-        }
-
-        async function renderMusicDirectors(lang) {
-          const grid = document.getElementById('grid-composers');
-          if (!grid) return;
-
-          const list = composersData[lang] || [];
-          grid.innerHTML = '';
-
-          for (const c of list) {
-            const img = await getTmdbProfileUrlByName(c.name);
-            const div = document.createElement('div');
-            div.style.textAlign = 'center';
-            div.style.cursor = 'pointer';
-            div.innerHTML = `
-              <div style="width:100px; height:100px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:2px solid #333;">
-                <img src="${img}" style="width:100%; height:100%; object-fit:cover;" loading="lazy" alt="${c.name}">
-              </div>
-              <div style="font-size:0.85rem; color:#ccc;">${c.name}</div>
-            `;
-            div.onclick = () => openComposerDetails(c.code, lang, c.name);
-            grid.appendChild(div);
-          }
-        }
 
         // ===============================================
         // FILTER (Year / Decade / Genre) - in-app overlay + full-screen results
@@ -4423,6 +4317,11 @@ const tamilData = {
       "title": "Kutti Puli"
     },
     {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1317-5419.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/1317/?lang=tamil",
+      "title": "Pizza"
+    },
+    {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6jiA-f94b.jpg",
       "page_url": "https://einthusan.tv/movie/watch/6jiA/?lang=tamil",
       "title": "Love Today"
@@ -4718,6 +4617,11 @@ const malayalamData = {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2ZJw-df9e.jpg",
       "page_url": "https://einthusan.tv/movie/watch/2ZJw/?lang=malayalam",
       "title": "Rekhachithram"
+    },
+    {
+      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2982-2956.jpg",
+      "page_url": "https://einthusan.tv/movie/watch/2982/?lang=malayalam",
+      "title": "King Liar"
     },
     {
       "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2853-fdf2.jpg",
@@ -5227,7 +5131,7 @@ const teluguData = {
             }
         }
 
-let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
+let actorState = { actorCode: '', lang: 'tamil', actorName: '', page: 1, hasMore: false };
 
         // ===============================================
         // UTILS
@@ -5237,7 +5141,7 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
             // Returns: https://thirai.me/watch?film=2223
             const match = einthusanUrl.match(/\/watch\/([a-zA-Z0-9]+)\//);
             if(match && match[1]) {
-                return `https://thirai.me/watch?film=${match[1]}`;
+                return `https://thirai.me/mobile/watch?film=${match[1]}`;
             }
             return einthusanUrl;
         }
@@ -5255,10 +5159,6 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
         // ===============================================
         let filterPopupOpen = false;
         function setFilterActive(on){
-            // If Filter is active (popup open or filter-results), make it the ONLY highlighted nav item.
-            if(!!on){
-                document.querySelectorAll('.nav-link, .nav-item, .side-item').forEach(el => el.classList.remove('active'));
-            }
             const desk = document.getElementById('desk-filter');
             const btm = document.getElementById('btm-filter');
             if(desk) desk.classList.toggle('active', !!on);
@@ -5612,7 +5512,6 @@ function toggleFeatured() {
             
             // Set initial state
             actorState = { 
-                type: 'actor',
                 actorCode: actorCode, 
                 lang: lang, 
                 actorName: actorName, 
@@ -5627,28 +5526,8 @@ function toggleFeatured() {
             await fetchActorPage(1, true);
         }
 
-
-        async function openComposerDetails(composerCode, lang, composerName) {
-            switchTab('actor-details');
-
-            actorState = { 
-                type: 'composer',
-                actorCode: composerCode, 
-                lang: lang, 
-                actorName: composerName, 
-                page: 1, 
-                hasMore: false 
-            };
-            document.getElementById('actor-details-title').textContent = `${composerName}`;
-
-            // Clear previous results and load page 1
-            document.getElementById('actor-movies-grid').innerHTML = '';
-            document.getElementById('load-more-actor').classList.add('visually-hidden');
-            await fetchActorPage(1, true);
-        }
-
         async function fetchActorPage(pageNumber, clear = false) {
-            const { actorCode, lang, type } = actorState;
+            const { actorCode, lang } = actorState;
             const grid = document.getElementById('actor-movies-grid');
             const loadMoreBtn = document.getElementById('load-more-actor');
 
@@ -5662,19 +5541,18 @@ function toggleFeatured() {
 
             try {
                 let d;
-if (type === 'actor' && actorCode === '3TKYioHCAF') {
-    const r = await fetch('/vijay.json');
+if (actorCode === '3TKYioHCAF') {
+    const r = await fetch('/mobile/vijay.json');
     d = await r.json();
     d.has_more = false; 
-} else if (type === 'actor' && actorCode === '5vCobOqDDx') {
-    const r = await fetch('/Dhanush.json');
+} else if (actorCode === '5vCobOqDDx') {
+    const r = await fetch('/mobile/Dhanush.json');
     d = await r.json();
     d.has_more = false;
 }
                 // ✅ All other actors continue to use the normal API
                 else {
-                    const basePath = (type === 'composer') ? 'composers' : 'actors';
-                    const url = `${API_BASE}/${basePath}/${lang}/${actorCode}?page=${pageNumber}`;
+                    const url = `${API_BASE}/actors/${lang}/${actorCode}?page=${pageNumber}`;
                     const r = await fetch(url);
                     d = await r.json();
                 }
@@ -5746,9 +5624,6 @@ if (type === 'actor' && actorCode === '3TKYioHCAF') {
                 div.onclick = () => openActorDetails(actor.actor_code, actor.language, actor.name);
                 grid.appendChild(div);
             }
-
-            // Render Music Directors for this language
-            await renderMusicDirectors(lang);
         }
 
         // ===============================================
@@ -6408,7 +6283,7 @@ const HERO_FALLBACK = [
     title: "Papanasam",
     logo: "https://image.tmdb.org/t/p/w500/49Z8fKeYm0DMpdYM8VkP875KiBi.png",
     background: "https://image.tmdb.org/t/p/original/e6WQoHeD1lomknxc0a65Ae1sfVw.jpg",
-    link: "/watch?film=2691"
+    link: "/mobile/watch?film=2691"
   }
 ];
 
@@ -6918,6 +6793,623 @@ async function processWpRoomData(data){
   const nick = document.getElementById('wpNickname');
   if(nick) nick.focus();
 }
+</script>
+
+
+
+
+<!-- =======================
+     Thirai Account System (Supabase)
+     FIXES:
+     - Continue Watching syncs to account (mirrors any localStorage updates to DB when logged in)
+     - Display name is taken from profiles.display_name (no name field on login)
+     - Account chip shows name only when logged in; otherwise shows "Sign in"
+     - Click name opens menu; menu contains TMDB toggle + Edit name + Sign out
+     - TMDB enable uses premium_fixed-style PIN gate; state stored in profiles.tmdb_unlocked (account-based)
+     - Crown icon shows when TMDB enabled
+     - Sign out reliability improved (menu click propagation fixed)
+     NOTE: Replace SUPABASE_URL + SUPABASE_ANON_KEY with your project values.
+     DB REQUIREMENT:
+       public.profiles(user_id uuid pk, display_name text, tmdb_unlocked boolean default false)
+       public.continue_watching(user_id uuid, url text, img text, title text, progress_seconds int, duration_seconds int, updated_at timestamptz)
+     ======================= -->
+<style>
+  #acctDock{position:fixed;top:12px;right:12px;z-index:99999;display:flex;gap:10px;align-items:center}
+  #acctChip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 10px;border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    font:800 13px/1 Inter,system-ui,sans-serif;color:#fff;
+    cursor:pointer; user-select:none;
+  }
+  #acctChip .muted{color:rgba(255,255,255,.68)}
+  #acctChip .crown{display:none}
+  #acctMenu{
+    position:fixed;top:52px;right:12px;z-index:99999;
+    width:min(340px,calc(100vw - 24px));
+    background:#0f0f0f;border:1px solid rgba(255,255,255,.12);
+    border-radius:16px;box-shadow:0 20px 80px rgba(0,0,0,.55);
+    display:none;overflow:hidden;
+  }
+  #acctMenu .hdr{
+    padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;flex-direction:column;gap:4px;
+  }
+  #acctMenu .hdr .nm{font:900 15px/1.2 Inter,system-ui,sans-serif;color:#fff}
+  #acctMenu .hdr .em{font:600 12px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.55);word-break:break-all}
+  #acctMenu .row{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #acctMenu .row + .row{border-top:1px solid rgba(255,255,255,.06)}
+  #acctMenu .row .label{display:flex;flex-direction:column;gap:3px}
+  #acctMenu .row .label b{font:900 12px/1.1 Inter,system-ui,sans-serif;color:#fff}
+  #acctMenu .row .label span{font:600 11px/1.2 Inter,system-ui,sans-serif;color:rgba(255,255,255,.55)}
+  #acctMenu .btn{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    color:#fff;border-radius:12px;
+    padding:10px 12px;font:900 12px/1 Inter,system-ui,sans-serif;
+    cursor:pointer; width:100%;
+  }
+  #acctMenu .btn.danger{border-color:rgba(229,9,20,.55)}
+  #acctMenu .btn.white{background:#fff;color:#000;border-color:#fff}
+  .sw{position:relative;width:46px;height:26px;flex:0 0 auto}
+  .sw input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.14);transition:.2s;border-radius:999px;border:1px solid rgba(255,255,255,.18)}
+  .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:50%;transform:translateY(-50%);background:#fff;border-radius:50%;transition:.2s;}
+  .sw input:checked + .slider{background:rgba(229,9,20,.55);border-color:rgba(229,9,20,.65)}
+  .sw input:checked + .slider:before{transform:translate(20px,-50%)}
+
+  /* Auth modal */
+  #authModalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:99998;display:none}
+  #authModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 28px));
+    background:#0f0f0f;border:1px solid rgba(255,255,255,.12);border-radius:16px;z-index:99999;display:none;
+    box-shadow:0 20px 80px rgba(0,0,0,.55)}
+  #authModal header{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px}
+  #authModal header .title{font:900 16px/1.1 Inter,system-ui,sans-serif}
+  #authModal header button{background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;padding:6px}
+  #authModal .body{padding:0 14px 14px}
+  #authModal label{display:block;color:rgba(255,255,255,.72);font:800 12px/1 Inter,system-ui,sans-serif;margin:10px 0 6px}
+  #authModal input{
+    width:100%;background:#141414;color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:12px;
+    padding:10px 12px;font:700 14px/1.2 Inter,system-ui,sans-serif
+  }
+  #authModal .row{display:flex;gap:10px;margin-top:12px}
+  #authModal .row button{
+    flex:1;background:#121212;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:12px;
+    padding:10px 12px;font:900 13px/1 Inter,system-ui,sans-serif;cursor:pointer
+  }
+  #authModal .row button.primary{border-color:rgba(229,9,20,.55)}
+  #authModal .status{margin-top:10px;color:rgba(255,255,255,.7);font:600 12px/1.25 Inter,system-ui,sans-serif}
+
+  /* TMDB enable modal (PIN) */
+  #tmdbBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99998;display:none}
+  #tmdbModal{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(520px,calc(100vw - 28px));
+    background:#0f0f0f;border:1px solid rgba(255,255,255,.12);border-radius:18px;
+    z-index:99999;display:none;box-shadow:0 20px 80px rgba(0,0,0,.55);overflow:hidden
+  }
+  #tmdbModal .pad{padding:18px}
+  #tmdbModal .head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  #tmdbModal .pillIcon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10)}
+  #tmdbModal h3{margin:0;font:900 16px/1.1 Inter,system-ui,sans-serif}
+  #tmdbModal p{margin:6px 0 0;color:rgba(255,255,255,.65);font:600 12px/1.35 Inter,system-ui,sans-serif}
+  #tmdbModal .pins{display:flex;justify-content:center;gap:8px;margin:14px 0}
+  #tmdbModal .pin{width:44px;height:56px;text-align:center;font:900 22px/1 Inter,system-ui,sans-serif;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px}
+  #tmdbModal .btnPrimary{width:100%;height:46px;border:none;border-radius:14px;background:#fff;color:#000;font:900 13px/1 Inter,system-ui,sans-serif;cursor:pointer}
+  #tmdbModal .err{display:none;margin-top:10px;color:#ff6b6b;font:700 12px/1.25 Inter,system-ui,sans-serif;text-align:center}
+</style>
+
+<div id="acctDock">
+  <div id="acctChip" title="Account">
+    <span id="acctName" class="muted">Sign in</span>
+    <i id="acctCrown" class="fa-solid fa-crown crown" title="TMDB enabled"></i>
+    <i class="fa-solid fa-chevron-down" style="font-size:11px;opacity:.75"></i>
+  </div>
+</div>
+
+<div id="acctMenu" role="menu" aria-label="Account menu">
+  <div class="hdr">
+    <div class="nm" id="menuName">—</div>
+    <div class="em" id="menuEmail">—</div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      <b>TMDB Access</b>
+      <span>Enable TMDB Movies/TV in Thirai</span>
+    </div>
+    <label class="sw" aria-label="TMDB toggle">
+      <input id="tmdbToggle" type="checkbox" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <button class="btn white" id="editNameBtn">Edit display name</button>
+  </div>
+
+  <div class="row">
+    <button class="btn danger" id="signOutBtn">Sign out</button>
+  </div>
+</div>
+
+<div id="authModalBackdrop"></div>
+<div id="authModal" role="dialog" aria-modal="true" aria-label="Sign in">
+  <header>
+    <div class="title">Sign in</div>
+    <button id="authCloseBtn" aria-label="Close">✕</button>
+  </header>
+  <div class="body">
+    <label>Email</label>
+    <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+    <label>Password</label>
+    <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" />
+    <div class="row">
+      <button id="authLoginBtn" class="primary">Login</button>
+      <button id="authSignupBtn">Sign up</button>
+    </div>
+    <div id="authStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="tmdbBackdrop"></div>
+<div id="tmdbModal" role="dialog" aria-modal="true" aria-label="Enable TMDB">
+  <div class="pad">
+    <div class="head">
+      <div class="pillIcon"><i class="fa-solid fa-lock"></i></div>
+      <div>
+        <h3>Enter the access code</h3>
+        <p>Enable TMDB features for your account.</p>
+      </div>
+    </div>
+
+    <div class="pins" aria-label="Access code">
+      <input class="pin" id="pin1" maxlength="1" inputmode="numeric" autocomplete="off" />
+      <input class="pin" id="pin2" maxlength="1" inputmode="numeric" autocomplete="off" />
+      <input class="pin" id="pin3" maxlength="1" inputmode="numeric" autocomplete="off" />
+      <input class="pin" id="pin4" maxlength="1" inputmode="numeric" autocomplete="off" />
+    </div>
+
+    <button class="btnPrimary" id="tmdbUnlockBtn" disabled>Enable TMDB</button>
+    <div class="err" id="tmdbErr"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://jgzsjgrlgzzfrvjsuctt.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_oMvwF5VI_Upl8GOrnnusdA_y07YJ8Oe";
+
+/* premium_fixed-style gate */
+const TMDB_CORRECT_PIN = "1451";
+const TMDB_MAX_ATTEMPTS = 5;
+const TMDB_LOCKOUT_MS = 15 * 60 * 1000;
+const LS_TMDB_ATTEMPTS = "tmdb_attemptCount";
+const LS_TMDB_LOCKOUT = "tmdb_lockoutTimestamp";
+
+/* Continue Watching key */
+const CW_CACHE_KEY = "thirai_continue_watching";
+
+/* Supabase */
+let _sb = null;
+function sb(){
+  if(_sb) return _sb;
+  if(!SUPABASE_URL || SUPABASE_URL.startsWith("PASTE_") || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith("PASTE_")){
+    console.warn("[Accounts] Supabase not configured yet. Add SUPABASE_URL + SUPABASE_ANON_KEY.");
+    return null;
+  }
+  _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _sb;
+}
+async function sbUser(){
+  const c = sb(); if(!c) return null;
+  const { data } = await c.auth.getUser();
+  return data?.user || null;
+}
+function el(id){ return document.getElementById(id); }
+function show(id, on){ const e=el(id); if(e) e.style.display = on ? "block" : "none"; }
+function setText(id, t){ const e=el(id); if(e) e.textContent = t; }
+function setStatus(msg){ setText("authStatus", msg || ""); }
+
+/* Profiles */
+async function ensureProfile(user){
+  const c = sb(); if(!c || !user) return;
+  await c.from("profiles").upsert({ user_id: user.id });
+}
+async function getProfile(){
+  const c = sb(); if(!c) return null;
+  const user = await sbUser(); if(!user) return null;
+  const { data, error } = await c.from("profiles").select("display_name, tmdb_unlocked").eq("user_id", user.id).single();
+  if(error){ console.warn("[Profiles] ", error.message); return null; }
+  return data || null;
+}
+async function setDisplayName(name){
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
+  const nm = String(name||"").trim();
+  if(!nm) return;
+  const { error } = await c.from("profiles").update({ display_name: nm }).eq("user_id", user.id);
+  if(error) console.warn("[Profiles]", error.message);
+}
+async function setTmdbUnlocked(on){
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
+  const { error } = await c.from("profiles").update({ tmdb_unlocked: !!on }).eq("user_id", user.id);
+  if(error) console.warn("[TMDB flag]", error.message);
+  try { localStorage.isUnlocked = on ? "true" : "false"; } catch {}
+}
+
+/* Crown */
+function setCrownVisible(on){
+  const crown = el("acctCrown");
+  if(crown) crown.style.display = on ? "inline-block" : "none";
+}
+
+/* Auth modal + menu */
+function openAuth(){ show("authModalBackdrop", true); show("authModal", true); setStatus(""); setTimeout(()=>el("authEmail")?.focus(),0); }
+function closeAuth(){ show("authModalBackdrop", false); show("authModal", false); }
+function openMenu(){ el("acctMenu").style.display = "block"; }
+function closeMenu(){ el("acctMenu").style.display = "none"; }
+function isMenuOpen(){ return el("acctMenu").style.display === "block"; }
+
+/* Dock refresh */
+async function refreshDock(){
+  const user = await sbUser();
+  if(!user){
+    setText("acctName", "Sign in");
+    setText("menuName", "—");
+    setText("menuEmail", "—");
+    setCrownVisible(false);
+    closeMenu();
+    return;
+  }
+
+  const prof = await getProfile();
+  const nm = (prof?.display_name || "").trim() || "Account";
+  setText("acctName", nm);
+  setText("menuName", nm);
+  setText("menuEmail", user.email || "");
+  const unlocked = !!prof?.tmdb_unlocked;
+  el("tmdbToggle").checked = unlocked;
+  setCrownVisible(unlocked);
+  try { localStorage.isUnlocked = unlocked ? "true" : "false"; } catch {}
+}
+
+/* Continue Watching: local <-> account sync */
+function readLocalCW(){
+  try { return JSON.parse(localStorage.getItem(CW_CACHE_KEY) || "[]") || []; } catch { return []; }
+}
+
+let _cwSyncTimer = null;
+async function syncCWToAccount(items){
+  const c = sb(); if(!c) return;
+  const user = await sbUser(); if(!user) return;
+
+  // normalize
+  const norm = (items || []).map(it => ({
+    url: it.url || it.link,
+    img: it.img,
+    title: it.title || null,
+    progress_seconds: it.progress_seconds ?? null,
+    duration_seconds: it.duration_seconds ?? null
+  })).filter(it => it.url && it.img);
+
+  // upsert all
+  if(norm.length){
+    const payload = norm.map(it => ({ ...it, user_id: user.id }));
+    const { error } = await c.from("continue_watching").upsert(payload, { onConflict: "user_id,url" });
+    if(error) console.warn("[CW upsert]", error.message);
+  }
+
+  // delete removed (keep DB in sync with local list)
+  const urls = norm.map(x=>x.url);
+  const { data: existing, error: selErr } = await c.from("continue_watching").select("url").eq("user_id", user.id);
+  if(selErr){ console.warn("[CW select]", selErr.message); return; }
+  const toDelete = (existing || []).map(x=>x.url).filter(u => !urls.includes(u));
+  if(toDelete.length){
+    const { error: delErr } = await c.from("continue_watching").delete().eq("user_id", user.id).in("url", toDelete);
+    if(delErr) console.warn("[CW delete]", delErr.message);
+  }
+}
+
+function scheduleCWAccountSync(items){
+  clearTimeout(_cwSyncTimer);
+  _cwSyncTimer = setTimeout(()=>syncCWToAccount(items), 400);
+}
+
+/* Hook localStorage writes so ANY existing code that updates CW will sync to account */
+(function hookLocalStorage(){
+  const origSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(k, v){
+    try{
+      if(k === CW_CACHE_KEY){
+        const items = JSON.parse(String(v || "[]")) || [];
+        scheduleCWAccountSync(items);
+      }
+    }catch{}
+    return origSetItem(k, v);
+  };
+})();
+
+/* Render CW from account when logged-in, else fallback to whatever the site already renders */
+async function fetchCWFromAccount(){
+  const c = sb(); if(!c) return null;
+  const user = await sbUser(); if(!user) return null;
+  const { data, error } = await c
+    .from("continue_watching")
+    .select("url,img,title,progress_seconds,duration_seconds,updated_at")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(30);
+  if(error){ console.warn("[CW fetch]", error.message); return []; }
+  return (data || []).map(r => ({ url:r.url, img:r.img, title:r.title||"", progress_seconds:r.progress_seconds, duration_seconds:r.duration_seconds }));
+}
+
+async function renderCWFromAccountIfLoggedIn(){
+  const user = await sbUser();
+  if(!user) return; // let site do its normal thing if logged out
+
+  const row = document.getElementById("continue-watching-row");
+  const title = document.getElementById("cw-title");
+  if(!row || !title) return;
+
+  const items = await fetchCWFromAccount();
+  row.innerHTML = "";
+  if(!items || !items.length){
+    row.classList.add("visually-hidden");
+    title.classList.add("visually-hidden");
+    return;
+  }
+
+  row.classList.remove("visually-hidden");
+  title.classList.remove("visually-hidden");
+
+  items.forEach((item, index)=>{
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${item.img}" alt="${(item.title||"").replace(/"/g,"&quot;")}">
+      <button class="remove-watch-item" type="button">&times;</button>
+    `;
+    card.onclick = ()=>{ if(item.url) window.location.href = item.url; };
+    card.querySelector(".remove-watch-item").onclick = async (e)=>{
+      e.stopPropagation();
+      const c = sb(); if(!c) return;
+      const user = await sbUser(); if(!user) return;
+      await c.from("continue_watching").delete().eq("user_id", user.id).eq("url", item.url);
+      await renderCWFromAccountIfLoggedIn();
+    };
+    row.appendChild(card);
+  });
+}
+
+/* Auth actions */
+async function loginEmail(){
+  const c = sb(); if(!c) return setStatus("Supabase not configured yet.");
+  const email = el("authEmail").value.trim();
+  const password = el("authPassword").value;
+  setStatus("Signing in…");
+  const { data, error } = await c.auth.signInWithPassword({ email, password });
+  if(error) return setStatus(error.message);
+  await ensureProfile(data.user);
+  await refreshDock();
+  await renderCWFromAccountIfLoggedIn();
+  closeAuth();
+}
+async function signupEmail(){
+  const c = sb(); if(!c) return setStatus("Supabase not configured yet.");
+  const email = el("authEmail").value.trim();
+  const password = el("authPassword").value;
+  setStatus("Creating account…");
+  const { data, error } = await c.auth.signUp({ email, password });
+  if(error) return setStatus(error.message);
+  if(data.user) await ensureProfile(data.user);
+  setStatus("Check your email to confirm your account, then log in.");
+}
+async function signOut(){
+  const c = sb(); if(!c) return;
+  await c.auth.signOut();
+  try { localStorage.isUnlocked = "false"; } catch {}
+  await refreshDock();
+  closeMenu();
+}
+
+/* TMDB enable flow (PIN) */
+let lockoutTimer = null;
+function tmdbIsLockedOut(){
+  const ts = localStorage.getItem(LS_TMDB_LOCKOUT);
+  if(!ts) return false;
+  const now = Date.now();
+  const end = parseInt(ts,10) + TMDB_LOCKOUT_MS;
+  if(now < end) return true;
+  localStorage.removeItem(LS_TMDB_LOCKOUT);
+  localStorage.setItem(LS_TMDB_ATTEMPTS, "0");
+  return false;
+}
+function tmdbLockoutMessage(){
+  const ts = localStorage.getItem(LS_TMDB_LOCKOUT);
+  if(!ts) return "";
+  const now = Date.now();
+  const end = parseInt(ts,10) + TMDB_LOCKOUT_MS;
+  const rem = Math.max(0, end-now);
+  const total = Math.ceil(rem/1000);
+  const m = Math.floor(total/60);
+  const s = total%60;
+  return `Too many failed attempts. Try again in ${m}:${String(s).padStart(2,'0')}.`;
+}
+function tmdbPins(){ return [el("pin1"),el("pin2"),el("pin3"),el("pin4")]; }
+function tmdbOpenModal(){
+  show("tmdbBackdrop", true); show("tmdbModal", true);
+  el("tmdbErr").style.display="none";
+  tmdbPins().forEach(i=>i.value="");
+  el("tmdbUnlockBtn").disabled = true;
+  setTimeout(()=>el("pin1")?.focus(),50);
+  tmdbStartLockoutTick();
+}
+function tmdbCloseModal(){ show("tmdbBackdrop", false); show("tmdbModal", false); tmdbStopLockoutTick(); }
+function tmdbStopLockoutTick(){ if(lockoutTimer){ clearInterval(lockoutTimer); lockoutTimer=null; } }
+function tmdbStartLockoutTick(){
+  tmdbStopLockoutTick();
+  if(tmdbIsLockedOut()){
+    const err = el("tmdbErr");
+    err.textContent = tmdbLockoutMessage();
+    err.style.display="block";
+    el("tmdbUnlockBtn").disabled = true;
+    lockoutTimer = setInterval(()=>{
+      if(!tmdbIsLockedOut()){
+        tmdbStopLockoutTick();
+        err.style.display="none";
+        tmdbCheckPins();
+      }else{
+        err.textContent = tmdbLockoutMessage();
+      }
+    }, 1000);
+  }
+}
+function tmdbCheckPins(){
+  const pins = tmdbPins();
+  const allFilled = pins.every(i => i.value && /^\d$/.test(i.value));
+  const locked = tmdbIsLockedOut();
+  el("tmdbUnlockBtn").disabled = !allFilled || locked;
+  if(allFilled && !locked) el("tmdbErr").style.display="none";
+}
+async function tmdbHandleSuccess(){
+  localStorage.setItem(LS_TMDB_ATTEMPTS, "0");
+  localStorage.removeItem(LS_TMDB_LOCKOUT);
+  await setTmdbUnlocked(true);
+  await refreshDock();
+  // TMDB rows rely on localStorage.isUnlocked; refresh them if function exists
+  try { if(typeof window.applyTmdbSearchVisibility === "function") window.applyTmdbSearchVisibility(); } catch {}
+  tmdbCloseModal();
+}
+function tmdbHandleFailure(){
+  let attempts = parseInt(localStorage.getItem(LS_TMDB_ATTEMPTS) || "0", 10);
+  attempts++;
+  localStorage.setItem(LS_TMDB_ATTEMPTS, String(attempts));
+  const err = el("tmdbErr");
+  if(attempts >= TMDB_MAX_ATTEMPTS){
+    localStorage.setItem(LS_TMDB_LOCKOUT, String(Date.now()));
+    err.textContent = `Maximum attempts reached (${TMDB_MAX_ATTEMPTS}). Access locked.`;
+    err.style.display = "block";
+    el("tmdbUnlockBtn").disabled = true;
+    tmdbStartLockoutTick();
+  }else{
+    err.textContent = `Incorrect code. ${TMDB_MAX_ATTEMPTS - attempts} attempts remaining.`;
+    err.style.display = "block";
+  }
+  tmdbPins().forEach(i=>i.value="");
+  el("pin1")?.focus();
+  el("tmdbUnlockBtn").disabled = true;
+}
+async function tmdbUnlockClick(){
+  if(tmdbIsLockedOut()) return;
+  const entered = tmdbPins().map(i=>i.value).join("");
+  if(entered === TMDB_CORRECT_PIN) await tmdbHandleSuccess();
+  else tmdbHandleFailure();
+}
+
+/* Wiring */
+(function wire(){
+  // prevent "outside click" handler from eating menu clicks
+  el("acctMenu")?.addEventListener("click", (e)=>e.stopPropagation());
+  el("acctChip")?.addEventListener("click", async (e)=>{
+    e.stopPropagation();
+    const user = await sbUser();
+    if(!user){ openAuth(); return; }
+    if(isMenuOpen()) closeMenu(); else openMenu();
+  });
+
+  document.addEventListener("click", ()=>closeMenu());
+
+  el("authCloseBtn")?.addEventListener("click", closeAuth);
+  el("authModalBackdrop")?.addEventListener("click", closeAuth);
+  el("authLoginBtn")?.addEventListener("click", loginEmail);
+  el("authSignupBtn")?.addEventListener("click", signupEmail);
+
+  el("signOutBtn")?.addEventListener("click", signOut);
+
+  el("editNameBtn")?.addEventListener("click", async ()=>{
+    const user = await sbUser(); if(!user){ closeMenu(); openAuth(); return; }
+    const prof = await getProfile();
+    const current = (prof?.display_name || "").trim();
+    const nm = prompt("Display name", current || "");
+    if(nm && String(nm).trim()){
+      await setDisplayName(nm);
+      await refreshDock();
+    }
+  });
+
+  el("tmdbToggle")?.addEventListener("change", async (e)=>{
+    const user = await sbUser();
+    if(!user){ e.target.checked=false; closeMenu(); openAuth(); return; }
+    if(e.target.checked){
+      e.target.checked=false;
+      tmdbOpenModal();
+    }else{
+      await setTmdbUnlocked(false);
+      await refreshDock();
+      try { if(typeof window.applyTmdbSearchVisibility === "function") window.applyTmdbSearchVisibility(); } catch {}
+    }
+  });
+
+  el("tmdbBackdrop")?.addEventListener("click", tmdbCloseModal);
+
+  const pins = tmdbPins();
+  pins.forEach((input, idx)=>{
+    input.addEventListener("input", ()=>{
+      const v = (input.value || "").replace(/[^0-9]/g,"").charAt(0);
+      input.value = v;
+      if(v && idx < pins.length - 1) pins[idx+1].focus();
+      tmdbCheckPins();
+    });
+    input.addEventListener("keyup", (ev)=>{
+      if(ev.key === "Backspace" && !input.value && idx>0) pins[idx-1].focus();
+      tmdbCheckPins();
+    });
+    input.addEventListener("paste", (ev)=>{
+      ev.preventDefault();
+      const paste = (ev.clipboardData || window.clipboardData).getData("text").trim().replace(/[^0-9]/g,"").slice(0,4);
+      for(let i=0;i<paste.length;i++){ if(pins[i]) pins[i].value = paste[i]; }
+      (pins[Math.min(paste.length,3)] || pins[3]).focus();
+      tmdbCheckPins();
+    });
+  });
+  el("tmdbUnlockBtn")?.addEventListener("click", tmdbUnlockClick);
+
+  window.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape"){ closeAuth(); tmdbCloseModal(); closeMenu(); }
+    if(e.key==="Enter" && !el("tmdbUnlockBtn").disabled && el("tmdbModal").style.display==="block"){
+      e.preventDefault(); tmdbUnlockClick();
+    }
+  });
+})();
+
+/* Init */
+(async function init(){
+  const c = sb();
+  await refreshDock();
+
+  // render CW from account on load if logged in
+  document.addEventListener("DOMContentLoaded", ()=>renderCWFromAccountIfLoggedIn());
+
+  if(c){
+    c.auth.onAuthStateChange(async (_event, session)=>{
+      if(session?.user){
+        await ensureProfile(session.user);
+      }
+      await refreshDock();
+      await renderCWFromAccountIfLoggedIn();
+    });
+
+    // If already logged in, ensure profile + render
+    const user = await sbUser();
+    if(user){
+      await ensureProfile(user);
+      await renderCWFromAccountIfLoggedIn();
+    }
+  }
+})();
 </script>
 
 </body>
