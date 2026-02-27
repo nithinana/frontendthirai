@@ -722,6 +722,95 @@ if (!currentSeason && seasons && seasons.length) {
             outline: none;
         }
 
+
+        /* --- PIN UNLOCK OVERLAY (Show page) --- */
+        #unlock-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            background: rgba(0,0,0,0.78);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #unlock-overlay.active { display: flex; }
+
+        .unlock-card {
+            width: 100%;
+            max-width: 380px;
+            background: rgba(22,22,22,0.92);
+            border: 1px solid #333;
+            border-radius: 22px;
+            padding: 28px 22px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+            text-align: center;
+        }
+        .unlock-card h4 {
+            margin: 0 0 6px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+        .unlock-card p {
+            margin: 0;
+            color: rgba(255,255,255,0.65);
+            font-size: 0.92rem;
+        }
+        .pin-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0 16px;
+        }
+        .pin-digit {
+            width: 54px;
+            height: 64px;
+            border-radius: 14px;
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            font-size: 28px;
+            text-align: center;
+            outline: none;
+        }
+        .pin-digit:focus {
+            border-color: rgba(13,110,253,0.9);
+            box-shadow: 0 0 0 4px rgba(13,110,253,0.18);
+        }
+        .unlock-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .unlock-primary {
+            width: 100%;
+            padding: 14px 14px;
+            border-radius: 14px;
+            border: none;
+            background: #0d6efd;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .unlock-secondary {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.75);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        #pin-error-show {
+            margin-top: 10px;
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            min-height: 1.1em;
+        }
+
 </style>
 </head>
 <body>
@@ -784,6 +873,26 @@ if (!currentSeason && seasons && seasons.length) {
 </div><div aria-label="Show details" class="mobile-details-panel" id="mobile-details"></div>
 </div>
 </main>
+
+
+<div id="unlock-overlay" aria-hidden="true">
+    <div class="unlock-card" role="dialog" aria-modal="true" aria-label="Enter PIN to unlock">
+        <h4>Enter PIN</h4>
+        <p>Unlock to select a server.</p>
+        <div class="pin-inputs" id="pin-inputs-show">
+            <input class="pin-digit" type="text" inputmode="numeric" maxlength="1" aria-label="PIN digit 1">
+            <input class="pin-digit" type="text" inputmode="numeric" maxlength="1" aria-label="PIN digit 2">
+            <input class="pin-digit" type="text" inputmode="numeric" maxlength="1" aria-label="PIN digit 3">
+            <input class="pin-digit" type="text" inputmode="numeric" maxlength="1" aria-label="PIN digit 4">
+        </div>
+        <div class="unlock-actions">
+            <button class="unlock-primary" type="button" onclick="validateShowPin()">Unlock</button>
+            <button class="unlock-secondary" type="button" onclick="closeUnlockOverlay(true)">Go Back</button>
+        </div>
+        <div id="pin-error-show"></div>
+    </div>
+</div>
+
 
 <div id="server-overlay">
     <div class="server-modal" id="server-modal">
@@ -879,7 +988,103 @@ if (!currentSeason && seasons && seasons.length) {
                    localStorage.getItem('isUnlocked') === 'true';
         }
 
-        function buildCastLinks(castArr, limit) {
+        
+        // --- PIN GATE (Show page) ---
+        const PIN_SHOW = "1451";
+        let pendingServerOpen = null;
+
+        function openUnlockOverlay() {
+            const overlay = document.getElementById('unlock-overlay');
+            const err = document.getElementById('pin-error-show');
+            if (err) err.textContent = '';
+            if (!overlay) return;
+
+            overlay.classList.add('active');
+            document.body.classList.add('no-scroll');
+
+            const inputs = Array.from(document.querySelectorAll('#pin-inputs-show .pin-digit'));
+            inputs.forEach(i => i.value = '');
+            if (inputs[0]) inputs[0].focus();
+        }
+
+        function closeUnlockOverlay(clearPending = true) {
+            const overlay = document.getElementById('unlock-overlay');
+            if (!overlay) return;
+            overlay.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+            if (clearPending) pendingServerOpen = null;
+        }
+
+        function setupPinInputsShow() {
+            const inputs = Array.from(document.querySelectorAll('#pin-inputs-show .pin-digit'));
+            if (!inputs.length) return;
+
+            const onlyDigit = (v) => (v || '').replace(/\D/g, '').slice(0, 1);
+
+            inputs.forEach((input, idx) => {
+                input.addEventListener('input', () => {
+                    input.value = onlyDigit(input.value);
+                    if (input.value && inputs[idx + 1]) inputs[idx + 1].focus();
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !input.value && inputs[idx - 1]) {
+                        inputs[idx - 1].focus();
+                    }
+                    if (e.key === 'Enter') {
+                        validateShowPin();
+                    }
+                });
+
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    const digits = text.replace(/\D/g, '').slice(0, 4).split('');
+                    digits.forEach((d, i) => { if (inputs[i]) inputs[i].value = d; });
+                    const next = inputs[Math.min(digits.length, 3)];
+                    if (next) next.focus();
+                });
+            });
+
+            // Click outside to close
+            const overlay = document.getElementById('unlock-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', (ev) => {
+                    if (ev.target === overlay) closeUnlockOverlay();
+                });
+            }
+        }
+
+        function validateShowPin() {
+            const err = document.getElementById('pin-error-show');
+            const inputs = Array.from(document.querySelectorAll('#pin-inputs-show .pin-digit'));
+            const entered = inputs.map(i => (i.value || '').trim()).join('');
+
+            if (entered === PIN_SHOW) {
+                localStorage.setItem('isUnlocked', 'true');
+                localStorage.setItem('premium_isUnlocked', 'true'); // keep compatibility
+
+                // Update Watch Now icon immediately after unlock
+                updateWatchNowIcon();
+
+                // Keep a copy before closing (closeUnlockOverlay may clear pending depending on caller)
+                const pending = pendingServerOpen;
+                closeUnlockOverlay(false);
+
+                if (pending) {
+                    pendingServerOpen = null;
+                    const { showId, s, e, epName } = pending;
+                    openServerOverlay(showId, s, e, epName);
+                }
+            } else {
+                if (err) err.textContent = 'Incorrect PIN.';
+                inputs.forEach(i => i.value = '');
+                if (inputs[0]) inputs[0].focus();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', setupPinInputsShow);
+function buildCastLinks(castArr, limit) {
             if (!Array.isArray(castArr)) return '';
             return castArr.slice(0, limit).map(c => {
                 const id = (c && (c.id || c.id === 0)) ? String(c.id) : '';
@@ -895,6 +1100,21 @@ if (!currentSeason && seasons && seasons.length) {
         }
 
 
+
+        function updateWatchNowIcon() {
+            const btn = document.getElementById('watchNowBtn');
+            const iconSpan = document.getElementById('watchNowIcon');
+            if (!btn || !iconSpan) return;
+
+            if (isUnlocked()) {
+                iconSpan.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>';
+                btn.setAttribute('data-unlocked', 'true');
+            } else {
+                iconSpan.innerHTML = '<i class="bi bi-lock-fill me-2"></i>';
+                btn.setAttribute('data-unlocked', 'false');
+            }
+        }
+
         function renderActionButton(showId, firstSeasonNumber) {
             const isUserUnlocked = isUnlocked();
             const actionLabel = `Season 1, Episode 1`;
@@ -904,8 +1124,10 @@ if (!currentSeason && seasons && seasons.length) {
                 : '<i class="bi bi-lock-fill me-2"></i>';
 
             actionButtonContainer.innerHTML = `
-                <button onclick="openServerOverlay('${showId}', ${firstSeasonNumber}, 1, 'Episode 1')" class="btn action-button" aria-label="Watch now">
-                    ${icon}
+                <button id="watchNowBtn" data-unlocked="${isUserUnlocked ? 'true' : 'false'}"
+                        onclick="openServerOverlay('${showId}', ${firstSeasonNumber}, 1, 'Episode 1')"
+                        class="btn action-button" aria-label="Watch now">
+                    <span id="watchNowIcon">${icon}</span>
                     Watch Now
                 </button>
             `;
@@ -937,7 +1159,13 @@ if (!currentSeason && seasons && seasons.length) {
         }
 
         function openServerOverlay(showId, s, e, epName) {
-            const overlay = document.getElementById('server-overlay');
+            // If locked, ask for PIN first (before showing servers)
+            if (!isUnlocked()) {
+                pendingServerOpen = { showId, s, e, epName };
+                openUnlockOverlay();
+                return;
+            }
+const overlay = document.getElementById('server-overlay');
             const list = document.getElementById('server-options-list');
             const label = document.getElementById('target-episode-label');
             
@@ -1080,7 +1308,8 @@ if (!currentSeason && seasons && seasons.length) {
                 
                 if (allSeasons.length > 0) {
                     const firstSeasonNumber = allSeasons[0].season_number;
-                    renderActionButton(showId, firstSeasonNumber); 
+                    renderActionButton(showId, firstSeasonNumber);
+                    updateWatchNowIcon(); 
                     
                     // CACHE LOGIC: Check for last saved season for this specific show
                     const lastSeason = localStorage.getItem(`last_season_${showId}`);
