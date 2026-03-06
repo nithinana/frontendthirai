@@ -1033,6 +1033,49 @@
 .section-arrow:hover{ color:#fff; }
 .section-arrow span{ display:inline-block; transform: translateY(-1px); }
 
+/* ===== TMDB beta shortcut ===== */
+.tmdb-shortcut{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.tmdb-beta-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+  padding:0 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.78);
+  font-size:0.72rem;
+  font-weight:800;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.tmdb-search-shortcut{
+  pointer-events:auto;
+  width:32px;
+  height:32px;
+  border:none;
+  background:transparent;
+  color:rgba(255,255,255,0.75);
+  font-size:1.25rem;
+  line-height:1;
+  padding:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-radius:10px;
+  transition:color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+.tmdb-search-shortcut:hover{ color:#fff; background:rgba(255,255,255,0.06); }
+.tmdb-search-shortcut:active{ transform:scale(0.96); }
+.tmdb-search-shortcut i{ font-size:1em; }
+
 /* ===== Mobile home side padding ===== */
 @media (max-width: 700px){
   #view-home .row-container{ padding-left: 24px; padding-right: 24px; }
@@ -1932,152 +1975,6 @@
 
 
 
-
-<style id="home-about-footer-style">
-/* Home-only footer actions */
-.home-about-footer{
-  padding: 10px 18px 26px;
-}
-.home-about-footer-inner{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.home-footer-link,
-.home-footer-btn{
-  appearance:none;
-  border:none;
-  background:transparent;
-  color: rgba(255,255,255,0.72);
-  font: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
-  padding: 6px 4px;
-  cursor:pointer;
-  transition: color 140ms ease, opacity 140ms ease;
-}
-.home-footer-link:hover,
-.home-footer-btn:hover,
-.home-footer-link:focus-visible,
-.home-footer-btn:focus-visible{
-  color:#fff;
-}
-.home-footer-sep{
-  color: rgba(255,255,255,0.24);
-  user-select:none;
-}
-#aboutOverlay{
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  z-index: 99997;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 220ms ease, visibility 0s linear 220ms;
-}
-#aboutOverlay.active{
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition: opacity 220ms ease, visibility 0s;
-}
-.about-card{
-  width: 100%;
-  max-width: 460px;
-  background: rgba(18,18,18,0.98);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 22px;
-  padding: 22px 20px 18px;
-  box-shadow: 0 14px 46px rgba(0,0,0,0.58);
-  color: #fff;
-  position: relative;
-  text-align: center;
-  transform: translateY(18px) scale(0.98);
-  opacity: 0;
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
-}
-#aboutOverlay.active .about-card{
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-.about-close-btn{
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.92);
-  font-size: 1.05rem;
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  transition: background 140ms ease, transform 140ms ease;
-}
-.about-close-btn:hover,
-.about-close-btn:focus-visible{
-  background: rgba(255,255,255,0.12);
-}
-.about-close-btn:active{
-  transform: scale(0.97);
-}
-.about-message{
-  margin: 16px 0 18px;
-  font-size: 0.97rem;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.84);
-}
-.about-credit{
-  color: rgba(255,255,255,0.96);
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-.about-socials{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap: 14px;
-}
-.about-socials a{
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  display:grid;
-  place-items:center;
-  color: rgba(255,255,255,0.92);
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
-  transition: background 140ms ease, transform 140ms ease, color 140ms ease;
-}
-.about-socials a:hover,
-.about-socials a:focus-visible{
-  background: rgba(255,255,255,0.12);
-  color: #fff;
-}
-.about-socials a:active{
-  transform: scale(0.97);
-}
-.about-socials i{
-  font-size: 1rem;
-}
-@media (min-width: 900px){
-  .home-about-footer{
-    padding-bottom: 34px;
-  }
-}
-</style>
-
 <style id="service-status-modal-style">
   /* ==============================================
      SERVICE STATUS MODAL (Blurred Backdrop)
@@ -2197,7 +2094,14 @@
         <div class="logo-container">
             <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
         </div>
-<div class="header-right-placeholder"></div>
+<div class="header-right-placeholder">
+            <div class="tmdb-shortcut visually-hidden" id="tmdb-shortcut">
+                <span class="tmdb-beta-badge">Beta</span>
+                <button class="tmdb-search-shortcut" type="button" aria-label="Open TMDB search" title="Open TMDB search" onclick="openTmdbSearchShortcut()">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -2321,7 +2225,7 @@
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
                     <option value="tmdb_movies">TMDB Movies</option>
-                    <option value="tmdb_tv">TMDB TV</option>
+                    <option value="tmdb_tv">TMDB Shows</option>
 </select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
@@ -6050,7 +5954,7 @@ function createTmdbSearchCard(type, item) {
                 if (searchState.lang === 'tmdb_movies' || searchState.lang === 'tmdb_tv') {
                     const isMovieSearch = searchState.lang === 'tmdb_movies';
                     const searchType = isMovieSearch ? 'movie' : 'tv';
-                    const searchLabel = isMovieSearch ? 'TMDB Movies' : 'TMDB TV';
+                    const searchLabel = isMovieSearch ? 'TMDB Movies' : 'TMDB Shows';
                     const searchUrl = `${TMDB_BASE}/search/${searchType}?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
 
                     const r = await fetch(searchUrl);
@@ -6366,14 +6270,37 @@ function isTmdbUnlocked() {
   return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
 }
 
+function openTmdbSearchShortcut(defaultType = 'tmdb_movies') {
+  if (!isTmdbUnlocked()) return;
+
+  switchTab('search');
+
+  const sel = document.getElementById('lang-select');
+  const input = document.getElementById('search-input');
+  if (sel) {
+    const preferred = sel.querySelector(`option[value="${defaultType}"]`) ? defaultType : (sel.querySelector('option[value="tmdb_movies"]') ? 'tmdb_movies' : sel.value);
+    sel.value = preferred;
+  }
+
+  if (input) {
+    input.placeholder = 'Search TMDB movies or shows...';
+    requestAnimationFrame(() => input.focus());
+  }
+}
+
 // Hide TMDB from the search language selector unless unlocked
 function applyTmdbSearchVisibility() {
   const sel = document.getElementById('lang-select');
+  const shortcut = document.getElementById('tmdb-shortcut');
   if (!sel) return;
 
   const unlocked = isTmdbUnlocked();
   const tmdbMovieOpt = sel.querySelector('option[value="tmdb_movies"]');
   const tmdbTvOpt = sel.querySelector('option[value="tmdb_tv"]');
+
+  if (shortcut) {
+    shortcut.classList.toggle('visually-hidden', !unlocked);
+  }
 
   if (!unlocked) {
     if (tmdbMovieOpt) tmdbMovieOpt.remove();
@@ -7148,26 +7075,6 @@ async function processWpRoomData(data){
 
 
 
-
-
-<div id="aboutOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="aboutPopupText" onclick="closeAboutOnOutsideClick(event)">
-  <div class="about-card" role="document">
-    <button class="about-close-btn" type="button" aria-label="Close" onclick="closeAboutPopup()">
-      <i class="fas fa-xmark" aria-hidden="true"></i>
-    </button>
-    <div class="about-message" id="aboutPopupText">Thirai does not store any media on its servers, and only embeds content hosted by 3rd party services.</div>
-    <div class="about-credit">made by nithinan</div>
-    <div class="about-socials" aria-label="Creator links">
-      <a href="https://github.com/nithinana/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-        <i class="fab fa-github" aria-hidden="true"></i>
-      </a>
-      <a href="https://www.snapchat.com/@nithinan_a" target="_blank" rel="noopener noreferrer" aria-label="Snapchat">
-        <i class="fab fa-snapchat" aria-hidden="true"></i>
-      </a>
-    </div>
-  </div>
-</div>
-
 <!-- Service status modal -->
 <div id="serviceStatusOverlay" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="service-status-card" role="document">
@@ -7324,111 +7231,6 @@ async function processWpRoomData(data){
     checkServices();
     setInterval(checkServices, 60 * 1000);
   }
-})();
-</script>
-
-
-<script id="about-popup-script">
-(function(){
-  function getOverlay(){
-    return document.getElementById('aboutOverlay');
-  }
-
-  window.openAboutPopup = function(){
-    const overlay = getOverlay();
-    if(!overlay) return;
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    const closeBtn = overlay.querySelector('.about-close-btn');
-    if(closeBtn) closeBtn.focus({ preventScroll: true });
-  };
-
-  window.closeAboutPopup = function(){
-    const overlay = getOverlay();
-    if(!overlay) return;
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  };
-
-  window.closeAboutOnOutsideClick = function(event){
-    if(event.target && event.target.id === 'aboutOverlay'){
-      window.closeAboutPopup();
-    }
-  };
-
-  document.addEventListener('keydown', function(event){
-    if(event.key === 'Escape'){
-      const overlay = getOverlay();
-      if(overlay && overlay.classList.contains('active')){
-        window.closeAboutPopup();
-      }
-    }
-  });
-})();
-</script>
-
-
-<!-- HOME ABOUT FOOTER -->
-<footer class="home-about-footer" id="homeAboutFooter" style="display:none">
-  <div class="home-about-footer-inner">
-    <a class="home-footer-link" href="https://github.com/nithinana/frontendthirai" target="_blank" rel="noopener">Open Source</a>
-    <span class="home-footer-sep">•</span>
-    <button class="home-footer-btn" id="aboutBtn">About</button>
-  </div>
-</footer>
-
-<!-- ABOUT MODAL -->
-<div id="aboutOverlay" aria-hidden="true">
-  <div class="about-card" role="dialog" aria-modal="true">
-    <button class="about-close-btn" id="aboutClose" aria-label="Close">✕</button>
-    <div class="about-message">
-      Thirai does not store any media on its servers, and only embeds content hosted by 3rd party services.
-    </div>
-    <div class="about-credit">made by nithinan</div>
-    <div class="about-socials">
-      <a href="https://github.com/nithinana/" target="_blank" rel="noopener" aria-label="GitHub">
-        <i class="fa-brands fa-github"></i>
-      </a>
-      <a href="https://www.snapchat.com/@nithinan_a" target="_blank" rel="noopener" aria-label="Snapchat">
-        <i class="fa-brands fa-snapchat"></i>
-      </a>
-    </div>
-  </div>
-</div>
-
-<script>
-// Show footer only on home page
-(function(){
-  function isHome(){
-    return location.pathname === '/' || location.pathname.endsWith('index.html');
-  }
-  var footer = document.getElementById('homeAboutFooter');
-  if(isHome() && footer){ footer.style.display = 'block'; }
-
-  var overlay = document.getElementById('aboutOverlay');
-  var btn = document.getElementById('aboutBtn');
-  var closeBtn = document.getElementById('aboutClose');
-
-  function openModal(){
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden','false');
-    document.body.style.overflow='hidden';
-  }
-  function closeModal(){
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow='';
-  }
-  if(btn) btn.addEventListener('click', openModal);
-  if(closeBtn) closeBtn.addEventListener('click', closeModal);
-  if(overlay) overlay.addEventListener('click', function(e){
-    if(e.target === overlay) closeModal();
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape') closeModal();
-  });
 })();
 </script>
 
