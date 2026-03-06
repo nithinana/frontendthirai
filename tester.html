@@ -2030,20 +2030,127 @@
   }
 </style>
 
-
-<style id="more-like-section-style">
-#more-like-title,
-#more-like-row{
-  transition: opacity 160ms ease;
-}
-#more-like-row.is-loading{
-  min-height: 150px;
-}
-#more-like-row .more-like-meta{
-  display:none;
-}
+<style id="auth-gate-style">
+  body.auth-lock-active {
+    overflow: hidden !important;
+  }
+  body.auth-lock-active > *:not(#authGateOverlay) {
+    filter: blur(18px);
+    pointer-events: none !important;
+    user-select: none !important;
+  }
+  #authGateOverlay{
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 100000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 220ms ease, visibility 0s linear 220ms;
+  }
+  #authGateOverlay.active{
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 220ms ease, visibility 0s;
+  }
+  .auth-gate-card{
+    width: 100%;
+    max-width: 430px;
+    background: rgba(18,18,18,0.98);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 22px;
+    padding: 20px;
+    box-shadow: 0 14px 46px rgba(0,0,0,0.58);
+    color: #fff;
+    transform: translateY(18px) scale(0.98);
+    opacity: 0;
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+  }
+  #authGateOverlay.active .auth-gate-card{
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  .auth-gate-head{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .auth-gate-icon{
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+    flex: 0 0 auto;
+  }
+  .auth-gate-title{
+    font-size: 1.08rem;
+    font-weight: 900;
+    line-height: 1.15;
+  }
+  .auth-gate-body{
+    color: rgba(255,255,255,0.72);
+    font-size: 0.92rem;
+    line-height: 1.45;
+    margin: 8px 0 14px;
+  }
+  .auth-gate-code{
+    width: 100%;
+    height: 50px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    padding: 0 14px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-align: center;
+    outline: none;
+  }
+  .auth-gate-code:focus{
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.08);
+  }
+  .auth-gate-actions{
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .auth-gate-btn{
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #000;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+  }
+  .auth-gate-btn:disabled{
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .auth-gate-error{
+    min-height: 20px;
+    margin-top: 10px;
+    color: #ff7b7b;
+    font-size: 0.84rem;
+    text-align: center;
+  }
 </style>
-
 </head>
 <body>
 
@@ -7196,300 +7303,204 @@ async function processWpRoomData(data){
 })();
 </script>
 
+<!-- First-launch authenticator gate -->
+<div id="authGateOverlay" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="auth-gate-card" role="document">
+    <div class="auth-gate-head">
+      <div class="auth-gate-icon" aria-hidden="true">
+        <i class="fa fa-shield-halved"></i>
+      </div>
+      <div class="auth-gate-title">Enter authenticator code</div>
+    </div>
+    <div class="auth-gate-body">
+      Open your authenticator app and enter the current 6-digit code to use this site.
+    </div>
+    <input
+      id="authGateCode"
+      class="auth-gate-code"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      placeholder="000000"
+      aria-label="Authenticator code"
+    >
+    <div class="auth-gate-actions">
+      <button class="auth-gate-btn" id="authGateSubmitBtn" type="button">Verify</button>
+    </div>
+    <div class="auth-gate-error" id="authGateError"></div>
+  </div>
+</div>
 
-<script id="more-like-section-script">
-(() => {
-  const CACHE_KEY = 'thirai_continue_watching';
-  const SECTION_TITLE_ID = 'more-like-title';
-  const SECTION_ROW_ID = 'more-like-row';
-  const MAX_CAST_PER_MOVIE = 4;
-  const MAX_MOVIES_PER_PERSON = 5;
-  let renderTimer = 0;
-  let renderToken = 0;
-  let storagePatched = false;
-  let observerStarted = false;
+<script id="auth-gate-script">
+(function(){
+  const AUTH_SECRET = 'OLOITMSN6E4I6S6SSJIQRXOGWU7UDTWB';
+  const AUTH_OK_KEY = 'thirai_auth_gate_ok_v1';
+  const AUTH_TS_KEY = 'thirai_auth_gate_ok_ts_v1';
+  const overlay = document.getElementById('authGateOverlay');
+  const input = document.getElementById('authGateCode');
+  const submitBtn = document.getElementById('authGateSubmitBtn');
+  const errorEl = document.getElementById('authGateError');
 
-  function ensureSection() {
-    const wrapper = document.querySelector('#view-home .home-content-wrapper');
-    const cwRow = document.getElementById('continue-watching-row');
-    if (!wrapper || !cwRow) return {};
-
-    let title = document.getElementById(SECTION_TITLE_ID);
-    let row = document.getElementById(SECTION_ROW_ID);
-
-    if (!title) {
-      title = document.createElement('div');
-      title.className = 'section-title visually-hidden';
-      title.id = SECTION_TITLE_ID;
-      title.textContent = 'More Like...';
+  function isAlreadyVerified(){
+    try {
+      return localStorage.getItem(AUTH_OK_KEY) === 'true';
+    } catch (e) {
+      return false;
     }
+  }
 
-    if (!row) {
-      row = document.createElement('div');
-      row.className = 'row-container visually-hidden';
-      row.id = SECTION_ROW_ID;
+  function lockUi(){
+    document.body.classList.add('auth-lock-active');
+    if (overlay) {
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
     }
+    setTimeout(() => input && input.focus(), 80);
+  }
 
-    const afterNode = cwRow.nextElementSibling;
-    if (cwRow.nextElementSibling !== title) {
-      wrapper.insertBefore(title, afterNode || null);
-      wrapper.insertBefore(row, title.nextSibling);
-    } else if (title.nextElementSibling !== row) {
-      wrapper.insertBefore(row, title.nextSibling);
+  function unlockUi(){
+    document.body.classList.remove('auth-lock-active');
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
     }
-
-    return { wrapper, cwRow, title, row };
   }
 
-  function showSection(show) {
-    const title = document.getElementById(SECTION_TITLE_ID);
-    const row = document.getElementById(SECTION_ROW_ID);
-    if (!title || !row) return;
-    title.classList.toggle('visually-hidden', !show);
-    row.classList.toggle('visually-hidden', !show);
+  function setError(message){
+    if (errorEl) errorEl.textContent = message || '';
   }
 
-  function safeParseItems() {
-    let items = [];
-    try { items = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]') || []; } catch (_) {}
-    return items
-      .map(item => {
-        if (!item || typeof item !== 'object') return null;
-        const url = item.url || item.link || '';
-        return { ...item, url };
-      })
-      .filter(item => item && item.url);
+  function sanitizeCode(value){
+    return String(value || '').replace(/\D/g, '').slice(0, 6);
   }
 
-  function extractMovieIdFromUrl(url) {
-    if (!url || typeof url !== 'string') return null;
-    if (/show\.html/i.test(url)) return null;
-    if (!/movie\.html/i.test(url)) return null;
-
-    let match = url.match(/movie\.html\?(\d+)/i);
-    if (match) return Number(match[1]);
-
-    match = url.match(/[?&]id=(\d+)/i);
-    if (match) return Number(match[1]);
-
-    match = url.match(/movie\/(\d+)/i);
-    if (match) return Number(match[1]);
-
-    match = url.match(/(\d+)(?:\D*)$/);
-    return match ? Number(match[1]) : null;
-  }
-
-  function getContinueMovieIds() {
-    const seen = new Set();
-    const ids = [];
-    safeParseItems().forEach(item => {
-      const id = extractMovieIdFromUrl(item.url);
-      if (!id || seen.has(id)) return;
-      seen.add(id);
-      ids.push(id);
-    });
-    return ids;
-  }
-
-  async function fetchJson(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-
-  async function fetchMovieCredits(movieId) {
-    return fetchJson(`${TMDB_BASE}/movie/${movieId}/credits?api_key=${API_KEY}`);
-  }
-
-  async function fetchPersonMovieCredits(personId) {
-    return fetchJson(`${TMDB_BASE}/person/${personId}/movie_credits?api_key=${API_KEY}`);
-  }
-
-  function sortCast(cast) {
-    return [...(cast || [])]
-      .filter(person => person && person.id && (person.known_for_department === 'Acting' || typeof person.order === 'number'))
-      .sort((a, b) => {
-        const aOrder = Number.isFinite(a.order) ? a.order : 999;
-        const bOrder = Number.isFinite(b.order) ? b.order : 999;
-        const aPop = Number(a.popularity || 0);
-        const bPop = Number(b.popularity || 0);
-        return aOrder - bOrder || bPop - aPop;
-      });
-  }
-
-  function sortMovies(movies) {
-    return [...(movies || [])]
-      .filter(movie => movie && movie.id && movie.poster_path && movie.title)
-      .filter(movie => !movie.release_date || !Number.isNaN(Date.parse(movie.release_date)))
-      .sort((a, b) => {
-        const aPop = Number(a.popularity || 0);
-        const bPop = Number(b.popularity || 0);
-        const aVotes = Number(a.vote_count || 0);
-        const bVotes = Number(b.vote_count || 0);
-        const aDate = a.release_date ? Date.parse(a.release_date) : 0;
-        const bDate = b.release_date ? Date.parse(b.release_date) : 0;
-        return bPop - aPop || bVotes - aVotes || bDate - aDate;
-      });
-  }
-
-  function createPosterCard(movie) {
-    if (typeof createTmdbCard === 'function') {
-      return createTmdbCard(movie.poster_path, movie.title || '', () => {
-        window.location.href = `movie.html?${movie.id}`;
-      });
+  function base32ToBytes(base32){
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    const clean = String(base32 || '').toUpperCase().replace(/=+$/g, '').replace(/[^A-Z2-7]/g, '');
+    let bits = '';
+    for (const ch of clean) {
+      const val = alphabet.indexOf(ch);
+      if (val < 0) continue;
+      bits += val.toString(2).padStart(5, '0');
     }
-
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${movie.poster_path}" loading="lazy" alt="${movie.title || ''}">`;
-    div.onclick = () => { window.location.href = `movie.html?${movie.id}`; };
-    return div;
-  }
-
-  async function buildRecommendations(seedMovieIds) {
-    const seedSet = new Set(seedMovieIds);
-    const people = [];
-    const peopleSeen = new Set();
-
-    const creditResults = await Promise.allSettled(seedMovieIds.map(fetchMovieCredits));
-    creditResults.forEach(result => {
-      if (result.status !== 'fulfilled' || !result.value) return;
-      const cast = sortCast(result.value.cast).slice(0, MAX_CAST_PER_MOVIE);
-      cast.forEach(person => {
-        if (peopleSeen.has(person.id)) return;
-        peopleSeen.add(person.id);
-        people.push({ id: person.id, name: person.name || '' });
-      });
-    });
-
-    const recommendations = [];
-    const movieSeen = new Set();
-
-    for (const person of people) {
-      try {
-        const credits = await fetchPersonMovieCredits(person.id);
-        const topMovies = sortMovies(credits.cast)
-          .filter(movie => !seedSet.has(movie.id) && !movieSeen.has(movie.id))
-          .slice(0, MAX_MOVIES_PER_PERSON);
-
-        topMovies.forEach(movie => {
-          movieSeen.add(movie.id);
-          recommendations.push({ ...movie, sourcePerson: person.name || '' });
-        });
-      } catch (error) {
-        console.error('More Like person credits failed', person.id, error);
-      }
+    const out = [];
+    for (let i = 0; i + 8 <= bits.length; i += 8) {
+      out.push(parseInt(bits.slice(i, i + 8), 2));
     }
-
-    return recommendations;
+    return new Uint8Array(out);
   }
 
-  async function renderMoreLike() {
-    const currentToken = ++renderToken;
-    const { title, row } = ensureSection();
-    if (!title || !row) return;
+  async function hmacSha1(keyBytes, msgBytes){
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'HMAC', hash: 'SHA-1' },
+      false,
+      ['sign']
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, msgBytes);
+    return new Uint8Array(sig);
+  }
 
-    const seedMovieIds = getContinueMovieIds();
-    row.innerHTML = '';
+  async function generateTotp(secret, counter){
+    const keyBytes = base32ToBytes(secret);
+    const buf = new ArrayBuffer(8);
+    const view = new DataView(buf);
+    const high = Math.floor(counter / 0x100000000);
+    const low = counter >>> 0;
+    view.setUint32(0, high);
+    view.setUint32(4, low);
 
-    if (!seedMovieIds.length) {
-      showSection(false);
+    const hmac = await hmacSha1(keyBytes, new Uint8Array(buf));
+    const offset = hmac[hmac.length - 1] & 0x0f;
+    const binary =
+      ((hmac[offset] & 0x7f) << 24) |
+      ((hmac[offset + 1] & 0xff) << 16) |
+      ((hmac[offset + 2] & 0xff) << 8) |
+      (hmac[offset + 3] & 0xff);
+
+    return String(binary % 1000000).padStart(6, '0');
+  }
+
+  async function isValidCode(code){
+    const nowStep = Math.floor(Date.now() / 1000 / 30);
+    const candidates = await Promise.all([
+      generateTotp(AUTH_SECRET, nowStep - 1),
+      generateTotp(AUTH_SECRET, nowStep),
+      generateTotp(AUTH_SECRET, nowStep + 1)
+    ]);
+    return candidates.includes(code);
+  }
+
+  async function verifyNow(){
+    const code = sanitizeCode(input && input.value);
+    if (input) input.value = code;
+
+    if (code.length !== 6) {
+      setError('Enter the 6-digit code from your authenticator app.');
       return;
     }
 
-    showSection(true);
-    row.classList.add('is-loading');
+    setError('');
+    if (submitBtn) submitBtn.disabled = true;
 
     try {
-      const movies = await buildRecommendations(seedMovieIds);
-      if (currentToken !== renderToken) return;
-
-      row.innerHTML = '';
-      movies.forEach(movie => {
-        const card = createPosterCard(movie);
-        if (movie.sourcePerson) {
-          card.setAttribute('title', `${movie.title} • ${movie.sourcePerson}`);
+      const ok = await isValidCode(code);
+      if (!ok) {
+        setError('That code is not valid right now. Try the latest code from your authenticator app.');
+        if (input) {
+          input.focus();
+          input.select();
         }
-        row.appendChild(card);
-      });
-
-      const hasMovies = movies.length > 0;
-      showSection(hasMovies);
-
-      if (hasMovies && typeof initHomeRowArrows === 'function') {
-        setTimeout(() => {
-          try { initHomeRowArrows(); } catch (_) {}
-        }, 0);
+        return;
       }
-    } catch (error) {
-      if (currentToken !== renderToken) return;
-      console.error('Failed rendering More Like section', error);
-      showSection(false);
+
+      try {
+        localStorage.setItem(AUTH_OK_KEY, 'true');
+        localStorage.setItem(AUTH_TS_KEY, String(Date.now()));
+      } catch (e) {}
+      unlockUi();
+    } catch (e) {
+      console.error('Authenticator check failed', e);
+      setError('Could not verify the code on this device.');
     } finally {
-      row.classList.remove('is-loading');
+      if (submitBtn) submitBtn.disabled = false;
     }
   }
 
-  function scheduleRender(delay = 120) {
-    clearTimeout(renderTimer);
-    renderTimer = window.setTimeout(() => {
-      renderMoreLike().catch(err => console.error(err));
-    }, delay);
+  if (input) {
+    input.addEventListener('input', () => {
+      input.value = sanitizeCode(input.value);
+      setError('');
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        verifyNow();
+      }
+    });
   }
 
-  function observeContinueWatching() {
-    if (observerStarted) return;
-    const row = document.getElementById('continue-watching-row');
-    if (!row) return;
-    observerStarted = true;
-    const observer = new MutationObserver(() => scheduleRender(60));
-    observer.observe(row, { childList: true, subtree: false, attributes: true, attributeFilter: ['class'] });
+  if (submitBtn) {
+    submitBtn.addEventListener('click', verifyNow);
   }
 
-  function patchStorage() {
-    if (storagePatched || !window.Storage || !Storage.prototype) return;
-    storagePatched = true;
-
-    const originalSetItem = Storage.prototype.setItem;
-    const originalRemoveItem = Storage.prototype.removeItem;
-
-    Storage.prototype.setItem = function(key, value) {
-      const result = originalSetItem.apply(this, arguments);
-      if (key === CACHE_KEY) scheduleRender(60);
-      return result;
-    };
-
-    Storage.prototype.removeItem = function(key) {
-      const result = originalRemoveItem.apply(this, arguments);
-      if (key === CACHE_KEY) scheduleRender(60);
-      return result;
-    };
-  }
-
-  function init() {
-    ensureSection();
-    patchStorage();
-    observeContinueWatching();
-    scheduleRender(20);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  window.addEventListener('load', () => {
-    ensureSection();
-    observeContinueWatching();
-    scheduleRender(40);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!isAlreadyVerified()) {
+      lockUi();
+    } else {
+      unlockUi();
+    }
   });
 
-  window.addEventListener('focus', () => scheduleRender(40));
-  window.addEventListener('pageshow', () => scheduleRender(40));
+  if (document.readyState !== 'loading') {
+    if (!isAlreadyVerified()) {
+      lockUi();
+    }
+  }
 })();
 </script>
-
 </body>
 </html>
     <div id="view-lang-category" class="visually-hidden view-padded">
