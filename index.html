@@ -347,6 +347,16 @@
            5. STANDARD ROWS & GRIDS
            ============================================== */
         .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
+        .tmdb-beta {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.62em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7f7f7f;
+  vertical-align: middle;
+}
         
         .row-container {
             display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
@@ -2112,10 +2122,10 @@
             <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
+            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies <span class="tmdb-beta">BETA</span></div>
             <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB TV Shows</div>
+            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB Shows <span class="tmdb-beta">BETA</span></div>
             <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
         </div>
