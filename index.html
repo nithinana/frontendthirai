@@ -2174,7 +2174,8 @@
                     <option value="kannada">Kannada</option>
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
-                                    <option value="tmdb">TMDB</option>
+                    <option value="tmdb_movies">TMDB Movies</option>
+                    <option value="tmdb_tv">TMDB TV</option>
 </select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
@@ -5900,49 +5901,25 @@ function createTmdbSearchCard(type, item) {
 
             try {
                 
-                if (searchState.lang === 'tmdb') {
-                    const movieUrl = `${TMDB_BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
-                    const tvUrl = `${TMDB_BASE}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
+                if (searchState.lang === 'tmdb_movies' || searchState.lang === 'tmdb_tv') {
+                    const isMovieSearch = searchState.lang === 'tmdb_movies';
+                    const searchType = isMovieSearch ? 'movie' : 'tv';
+                    const searchLabel = isMovieSearch ? 'TMDB Movies' : 'TMDB TV';
+                    const searchUrl = `${TMDB_BASE}/search/${searchType}?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
 
-                    const [mr, tr] = await Promise.all([fetch(movieUrl), fetch(tvUrl)]);
-                    const [md, td] = await Promise.all([mr.json(), tr.json()]);
+                    const r = await fetch(searchUrl);
+                    const d = await r.json();
 
                     if (isNewSearch) grid.innerHTML = ''; // Clear "Loading..."
 
-                    const movieResults = (md.results || []).filter(x => x && x.poster_path);
-                    const tvResults = (td.results || []).filter(x => x && x.poster_path);
+                    const results = (d.results || []).filter(x => x && x.poster_path);
+                    results.forEach(item => grid.appendChild(createTmdbSearchCard(searchType, item)));
 
-                    // Section headers only on new search OR first page
-                    if (pageNumber === 1) {
-                        if (movieResults.length) {
-                            const h = document.createElement('div');
-                            h.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:8px 2px 0;';
-                            h.textContent = 'Movies';
-                            grid.appendChild(h);
-                        }
-                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
-
-                        if (tvResults.length) {
-                            const h2 = document.createElement('div');
-                            h2.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:12px 2px 0;';
-                            h2.textContent = 'TV Shows';
-                            grid.appendChild(h2);
-                        }
-                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
-                    } else {
-                        // Load more: append to the end without repeating headers
-                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
-                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
-                    }
-
-                    // Pagination
-                    const movieHasMore = (md.total_pages || 0) > pageNumber;
-                    const tvHasMore = (td.total_pages || 0) > pageNumber;
                     searchState.page = pageNumber;
-                    searchState.hasMore = movieHasMore || tvHasMore;
+                    searchState.hasMore = (d.total_pages || 0) > pageNumber;
 
-                    if (!movieResults.length && !tvResults.length && isNewSearch) {
-                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in TMDB.</p>`;
+                    if (!results.length && isNewSearch) {
+                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in ${searchLabel}.</p>`;
                     }
 
                     return; // Skip non-TMDB backend search
@@ -6249,12 +6226,14 @@ function applyTmdbSearchVisibility() {
   if (!sel) return;
 
   const unlocked = isTmdbUnlocked();
-  const tmdbOpt = sel.querySelector('option[value="tmdb"]');
+  const tmdbMovieOpt = sel.querySelector('option[value="tmdb_movies"]');
+  const tmdbTvOpt = sel.querySelector('option[value="tmdb_tv"]');
 
   if (!unlocked) {
-    if (tmdbOpt) tmdbOpt.remove();
+    if (tmdbMovieOpt) tmdbMovieOpt.remove();
+    if (tmdbTvOpt) tmdbTvOpt.remove();
     // If somehow TMDB was selected via cached state/URL, fall back to first option
-    if (sel.value === 'tmdb') sel.selectedIndex = 0;
+    if (sel.value === 'tmdb_movies' || sel.value === 'tmdb_tv') sel.selectedIndex = 0;
   }
 }
 
