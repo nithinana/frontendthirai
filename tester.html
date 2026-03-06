@@ -7365,6 +7365,14 @@ async function processWpRoomData(data){
       overlay.classList.remove('active');
       overlay.setAttribute('aria-hidden', 'true');
     }
+    try {
+      window.premium_isUnlocked = (localStorage.getItem('premium_isUnlocked') === 'true');
+      window.isUnlocked = (localStorage.getItem('isUnlocked') === 'true');
+    } catch (e) {}
+
+    try {
+      if (typeof enableTMDB === 'function') enableTMDB();
+    } catch (e) {}
   }
 
   function setError(message){
@@ -7459,7 +7467,15 @@ async function processWpRoomData(data){
       try {
         localStorage.setItem(AUTH_OK_KEY, 'true');
         localStorage.setItem(AUTH_TS_KEY, String(Date.now()));
+        localStorage.setItem('premium_isUnlocked', 'true');
+        localStorage.setItem('isUnlocked', 'true');
       } catch (e) {}
+
+      try {
+        window.premium_isUnlocked = true;
+        window.isUnlocked = true;
+      } catch (e) {}
+
       unlockUi();
     } catch (e) {
       console.error('Authenticator check failed', e);
@@ -7490,6 +7506,10 @@ async function processWpRoomData(data){
     if (!isAlreadyVerified()) {
       lockUi();
     } else {
+      try {
+        window.premium_isUnlocked = (localStorage.getItem('premium_isUnlocked') === 'true');
+        window.isUnlocked = (localStorage.getItem('isUnlocked') === 'true');
+      } catch (e) {}
       unlockUi();
     }
   });
