@@ -1042,6 +1042,10 @@
 }
 .section-arrow:hover{ color:#fff; }
 .section-arrow span{ display:inline-block; transform: translateY(-1px); }
+.tmdb-shortcut-arrow{
+  margin-left: auto;
+  padding-right: 0;
+}
 
 /* ===== Mobile home side padding ===== */
 @media (max-width: 700px){
@@ -2122,10 +2126,14 @@
             <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies <span class="tmdb-beta">BETA</span></div>
+            <div class="section-title section-title-row visually-hidden" id="tmdb-movies-title"><span>TMDB Movies <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_movies" aria-label="Open TMDB Movies search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg></button></div>
             <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB Shows <span class="tmdb-beta">BETA</span></div>
+            <div class="section-title section-title-row visually-hidden" id="tmdb-tv-title"><span>TMDB Shows <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_tv" aria-label="Open TMDB Shows search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg></button></div>
             <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
         </div>
@@ -6222,7 +6230,7 @@ async function loadHomeFromCache() {
 // TMDB HOME ROWS (Premium / isUnlocked)
 // - Hidden by default
 // - Shown only if localStorage.isUnlocked === true (also supports "true")
-// - Uses /movie/popular and /tv/popular
+// - Uses /movie/top_rated and /tv/top_rated
 // - Clicking cards goes to movie.html?{tmdbId} / show.html?{tmdbId}
 // ===============================================
 function isTmdbUnlocked() {
@@ -6276,13 +6284,13 @@ function createTmdbCard(posterPath, altText, onClick) {
   return div;
 }
 
-async function loadTmdbPopular(endpoint, rowId, type) {
+async function loadTmdbTopRated(endpoint, rowId, type) {
   const row = document.getElementById(rowId);
   if (!row) return;
 
   row.innerHTML = '';
   try {
-    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}`);
+    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}&language=en-GB&page=1`);
     const d = await r.json();
 
     const results = (d && d.results) ? d.results : [];
@@ -6307,8 +6315,8 @@ async function loadTmdbHomeRows() {
   }
   showTmdbHomeRows(true);
   await Promise.all([
-    loadTmdbPopular('/movie/popular', 'row-tmdb-movies', 'movie'),
-    loadTmdbPopular('/tv/popular', 'row-tmdb-tv', 'tv')
+    loadTmdbTopRated('/movie/top_rated', 'row-tmdb-movies', 'movie'),
+    loadTmdbTopRated('/tv/top_rated', 'row-tmdb-tv', 'tv')
   ]);
 }
 /* Run AFTER existing init */
@@ -6331,8 +6339,41 @@ window.addEventListener("load", () => {
     }
   }, 500);
 });
+function openTmdbSearchShortcut(target) {
+  const searchSelect = document.getElementById('lang-select');
+  const searchInput = document.getElementById('search-input');
+  if (!searchSelect) return;
+
+  switchTab('search');
+
+  const option = searchSelect.querySelector(`option[value="${target}"]`);
+  if (option) {
+    searchSelect.value = target;
+  }
+
+  if (searchInput) {
+    requestAnimationFrame(() => {
+      try {
+        searchInput.focus({ preventScroll: true });
+      } catch (err) {
+        searchInput.focus();
+      }
+    });
+  }
+}
+
 // data-lang-category-handler
         document.addEventListener('click', (e) => {
+            const tmdbBtn = e.target.closest('.tmdb-shortcut-arrow');
+            if (tmdbBtn) {
+                const target = tmdbBtn.getAttribute('data-tmdb-target');
+                if (!target) return;
+                e.preventDefault();
+                e.stopPropagation();
+                openTmdbSearchShortcut(target);
+                return;
+            }
+
             const btn = e.target.closest('.section-arrow');
             if (!btn) return;
             const lang = btn.getAttribute('data-lang');
