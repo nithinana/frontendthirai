@@ -347,6 +347,16 @@
            5. STANDARD ROWS & GRIDS
            ============================================== */
         .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
+        .tmdb-beta {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.62em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7f7f7f;
+  vertical-align: middle;
+}
         
         .row-container {
             display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
@@ -1032,49 +1042,10 @@
 }
 .section-arrow:hover{ color:#fff; }
 .section-arrow span{ display:inline-block; transform: translateY(-1px); }
-
-/* ===== TMDB beta shortcut ===== */
-.tmdb-shortcut{
-  display:flex;
-  align-items:center;
-  gap:8px;
+.tmdb-shortcut-arrow{
+  margin-left: auto;
+  padding-right: 0;
 }
-.tmdb-beta-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-height:32px;
-  padding:0 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06);
-  color:rgba(255,255,255,0.78);
-  font-size:0.72rem;
-  font-weight:800;
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  white-space:nowrap;
-}
-.tmdb-search-shortcut{
-  pointer-events:auto;
-  width:32px;
-  height:32px;
-  border:none;
-  background:transparent;
-  color:rgba(255,255,255,0.75);
-  font-size:1.25rem;
-  line-height:1;
-  padding:0;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  border-radius:10px;
-  transition:color 140ms ease, background 140ms ease, transform 140ms ease;
-}
-.tmdb-search-shortcut:hover{ color:#fff; background:rgba(255,255,255,0.06); }
-.tmdb-search-shortcut:active{ transform:scale(0.96); }
-.tmdb-search-shortcut i{ font-size:1em; }
 
 /* ===== Mobile home side padding ===== */
 @media (max-width: 700px){
@@ -2073,8 +2044,171 @@
   }
 </style>
 
+
+<style id="totp-auth-gate-style">
+html.auth-gate-open,
+body.auth-gate-open {
+  overflow: hidden !important;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body.auth-gate-open > *:not(#totpAuthOverlay) {
+  filter: blur(18px);
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+#totpAuthOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 5, 5, 0.42);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+#totpAuthOverlay.active {
+  display: flex;
+}
+
+.totp-auth-card {
+  width: min(100%, 420px);
+  padding: 26px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(22,22,22,0.98), rgba(12,12,12,0.98));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+  color: #fff;
+  text-align: center;
+}
+
+.totp-auth-badge {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 1.35rem;
+}
+
+.totp-auth-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.totp-auth-copy {
+  margin: 10px auto 22px;
+  max-width: 290px;
+  color: rgba(255,255,255,0.66);
+  line-height: 1.5;
+  font-size: 0.94rem;
+}
+
+.totp-auth-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.totp-auth-digit {
+  width: 46px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  caret-color: #fff;
+}
+
+.totp-auth-digit:focus {
+  border-color: rgba(255,255,255,0.24);
+  background: rgba(255,255,255,0.08);
+}
+
+.totp-auth-error {
+  min-height: 20px;
+  margin-bottom: 14px;
+  color: #ff7d7d;
+  font-size: 0.88rem;
+}
+
+.totp-auth-button {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 16px;
+  background: #fff;
+  color: #000;
+  font-size: 0.96rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.totp-auth-button:active {
+  transform: scale(0.985);
+}
+
+.totp-auth-hint {
+  margin-top: 12px;
+  color: rgba(255,255,255,0.48);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 480px) {
+  .totp-auth-card {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+  .totp-auth-inputs {
+    gap: 8px;
+  }
+  .totp-auth-digit {
+    width: 42px;
+    height: 52px;
+    font-size: 1.15rem;
+  }
+}
+</style>
+
 </head>
 <body>
+
+<div id="totpAuthOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="totpAuthTitle">
+  <div class="totp-auth-card" role="document">
+    <div class="totp-auth-badge" aria-hidden="true"><i class="fas fa-shield-halved"></i></div>
+    <h2 class="totp-auth-title" id="totpAuthTitle">Authentication Required</h2>
+    <p class="totp-auth-copy">Enter the 6-digit code from the authenticator. DM me for an access code.</p>
+    <form id="totpAuthForm" autocomplete="off">
+      <div class="totp-auth-inputs" id="totpAuthInputs">
+        <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1">
+        <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2">
+        <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3">
+        <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4">
+        <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5">
+        <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6">
+      </div>
+      <div class="totp-auth-error" id="totpAuthError" aria-live="polite"></div>
+      <button class="totp-auth-button" id="totpAuthSubmit" type="submit">Unlock</button>
+      <div class="totp-auth-hint">You’ll only be asked for a code once on this browser.</div>
+    </form>
+  </div>
+</div>
+
 
 <div id="loadingOverlay">
     <img src="https://thirai.me/static/thiraiwhite.png" alt="Loading...">
@@ -2094,14 +2228,7 @@
         <div class="logo-container">
             <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo" onclick="switchTab('home')">
         </div>
-<div class="header-right-placeholder">
-            <div class="tmdb-shortcut visually-hidden" id="tmdb-shortcut">
-                <span class="tmdb-beta-badge">Beta</span>
-                <button class="tmdb-search-shortcut" type="button" aria-label="Open TMDB search" title="Open TMDB search" onclick="openTmdbSearchShortcut()">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                </button>
-            </div>
-        </div>
+<div class="header-right-placeholder"></div>
     </div>
 </header>
 
@@ -2162,10 +2289,14 @@
             <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
+            <div class="section-title section-title-row visually-hidden" id="tmdb-movies-title"><span>TMDB Movies <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_movies" aria-label="Open TMDB Movies search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg></button></div>
             <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB TV Shows</div>
+            <div class="section-title section-title-row visually-hidden" id="tmdb-tv-title"><span>TMDB Shows <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_tv" aria-label="Open TMDB Shows search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg></button></div>
             <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
         </div>
@@ -2225,7 +2356,7 @@
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
                     <option value="tmdb_movies">TMDB Movies</option>
-                    <option value="tmdb_tv">TMDB Shows</option>
+                    <option value="tmdb_tv">TMDB TV</option>
 </select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
@@ -5954,7 +6085,7 @@ function createTmdbSearchCard(type, item) {
                 if (searchState.lang === 'tmdb_movies' || searchState.lang === 'tmdb_tv') {
                     const isMovieSearch = searchState.lang === 'tmdb_movies';
                     const searchType = isMovieSearch ? 'movie' : 'tv';
-                    const searchLabel = isMovieSearch ? 'TMDB Movies' : 'TMDB Shows';
+                    const searchLabel = isMovieSearch ? 'TMDB Movies' : 'TMDB TV';
                     const searchUrl = `${TMDB_BASE}/search/${searchType}?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
 
                     const r = await fetch(searchUrl);
@@ -6262,7 +6393,7 @@ async function loadHomeFromCache() {
 // TMDB HOME ROWS (Premium / isUnlocked)
 // - Hidden by default
 // - Shown only if localStorage.isUnlocked === true (also supports "true")
-// - Uses /movie/popular and /tv/popular
+// - Uses /movie/top_rated and /tv/top_rated
 // - Clicking cards goes to movie.html?{tmdbId} / show.html?{tmdbId}
 // ===============================================
 function isTmdbUnlocked() {
@@ -6270,37 +6401,14 @@ function isTmdbUnlocked() {
   return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
 }
 
-function openTmdbSearchShortcut(defaultType = 'tmdb_movies') {
-  if (!isTmdbUnlocked()) return;
-
-  switchTab('search');
-
-  const sel = document.getElementById('lang-select');
-  const input = document.getElementById('search-input');
-  if (sel) {
-    const preferred = sel.querySelector(`option[value="${defaultType}"]`) ? defaultType : (sel.querySelector('option[value="tmdb_movies"]') ? 'tmdb_movies' : sel.value);
-    sel.value = preferred;
-  }
-
-  if (input) {
-    input.placeholder = 'Search TMDB movies or shows...';
-    requestAnimationFrame(() => input.focus());
-  }
-}
-
 // Hide TMDB from the search language selector unless unlocked
 function applyTmdbSearchVisibility() {
   const sel = document.getElementById('lang-select');
-  const shortcut = document.getElementById('tmdb-shortcut');
   if (!sel) return;
 
   const unlocked = isTmdbUnlocked();
   const tmdbMovieOpt = sel.querySelector('option[value="tmdb_movies"]');
   const tmdbTvOpt = sel.querySelector('option[value="tmdb_tv"]');
-
-  if (shortcut) {
-    shortcut.classList.toggle('visually-hidden', !unlocked);
-  }
 
   if (!unlocked) {
     if (tmdbMovieOpt) tmdbMovieOpt.remove();
@@ -6339,13 +6447,13 @@ function createTmdbCard(posterPath, altText, onClick) {
   return div;
 }
 
-async function loadTmdbPopular(endpoint, rowId, type) {
+async function loadTmdbTopRated(endpoint, rowId, type) {
   const row = document.getElementById(rowId);
   if (!row) return;
 
   row.innerHTML = '';
   try {
-    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}`);
+    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}&language=en-GB&page=1`);
     const d = await r.json();
 
     const results = (d && d.results) ? d.results : [];
@@ -6370,8 +6478,8 @@ async function loadTmdbHomeRows() {
   }
   showTmdbHomeRows(true);
   await Promise.all([
-    loadTmdbPopular('/movie/popular', 'row-tmdb-movies', 'movie'),
-    loadTmdbPopular('/tv/popular', 'row-tmdb-tv', 'tv')
+    loadTmdbTopRated('/movie/top_rated', 'row-tmdb-movies', 'movie'),
+    loadTmdbTopRated('/tv/top_rated', 'row-tmdb-tv', 'tv')
   ]);
 }
 /* Run AFTER existing init */
@@ -6394,8 +6502,41 @@ window.addEventListener("load", () => {
     }
   }, 500);
 });
+function openTmdbSearchShortcut(target) {
+  const searchSelect = document.getElementById('lang-select');
+  const searchInput = document.getElementById('search-input');
+  if (!searchSelect) return;
+
+  switchTab('search');
+
+  const option = searchSelect.querySelector(`option[value="${target}"]`);
+  if (option) {
+    searchSelect.value = target;
+  }
+
+  if (searchInput) {
+    requestAnimationFrame(() => {
+      try {
+        searchInput.focus({ preventScroll: true });
+      } catch (err) {
+        searchInput.focus();
+      }
+    });
+  }
+}
+
 // data-lang-category-handler
         document.addEventListener('click', (e) => {
+            const tmdbBtn = e.target.closest('.tmdb-shortcut-arrow');
+            if (tmdbBtn) {
+                const target = tmdbBtn.getAttribute('data-tmdb-target');
+                if (!target) return;
+                e.preventDefault();
+                e.stopPropagation();
+                openTmdbSearchShortcut(target);
+                return;
+            }
+
             const btn = e.target.closest('.section-arrow');
             if (!btn) return;
             const lang = btn.getAttribute('data-lang');
@@ -7230,6 +7371,199 @@ async function processWpRoomData(data){
     wireEvents();
     checkServices();
     setInterval(checkServices, 60 * 1000);
+  }
+})();
+</script>
+
+
+<script id="totp-auth-gate-script">
+(function () {
+  const STORAGE_KEY = 'thirai_totp_verified_v1';
+  const SECRET = 'OCS5GUUKYB5B7E2SJETYAZICUPELSHNEXEQC2Z6X63SG6KXTG5NQ';
+  const DIGITS = 6;
+  const PERIOD = 30;
+  const WINDOW = [-1, 0, 1];
+
+  const overlay = document.getElementById('totpAuthOverlay');
+  const form = document.getElementById('totpAuthForm');
+  const errorEl = document.getElementById('totpAuthError');
+  const inputEls = Array.from(document.querySelectorAll('.totp-auth-digit'));
+
+  if (!overlay || !form || inputEls.length !== 6) return;
+
+  function setLockedState(locked) {
+    document.documentElement.classList.toggle('auth-gate-open', locked);
+    document.body.classList.toggle('auth-gate-open', locked);
+    overlay.classList.toggle('active', locked);
+    overlay.setAttribute('aria-hidden', locked ? 'false' : 'true');
+  }
+
+  function alreadyVerified() {
+    try {
+      return localStorage.getItem(STORAGE_KEY) === 'true';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markVerified() {
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch (e) {}
+  }
+
+  function getCode() {
+    return inputEls.map(el => (el.value || '').trim()).join('');
+  }
+
+  function clearError() {
+    errorEl.textContent = '';
+  }
+
+  function setError(message) {
+    errorEl.textContent = message;
+  }
+
+  function base32ToBytes(base32) {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    const cleaned = String(base32 || '').toUpperCase().replace(/=+$/g, '').replace(/\s+/g, '');
+    let bits = '';
+
+    for (const char of cleaned) {
+      const val = alphabet.indexOf(char);
+      if (val === -1) throw new Error('Invalid Base32 secret');
+      bits += val.toString(2).padStart(5, '0');
+    }
+
+    const bytes = [];
+    for (let i = 0; i + 8 <= bits.length; i += 8) {
+      bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    }
+    return new Uint8Array(bytes);
+  }
+
+  async function hmacSha1(keyBytes, counterBytes) {
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'HMAC', hash: 'SHA-1' },
+      false,
+      ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, counterBytes);
+    return new Uint8Array(signature);
+  }
+
+  function counterToBytes(counter) {
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
+    const high = Math.floor(counter / 0x100000000);
+    const low = counter % 0x100000000;
+    view.setUint32(0, high, false);
+    view.setUint32(4, low, false);
+    return new Uint8Array(buffer);
+  }
+
+  async function generateTotp(secret, epochSeconds) {
+    const keyBytes = base32ToBytes(secret);
+    const counter = Math.floor(epochSeconds / PERIOD);
+    const hash = await hmacSha1(keyBytes, counterToBytes(counter));
+    const offset = hash[hash.length - 1] & 0x0f;
+    const binary = ((hash[offset] & 0x7f) << 24) |
+      ((hash[offset + 1] & 0xff) << 16) |
+      ((hash[offset + 2] & 0xff) << 8) |
+      (hash[offset + 3] & 0xff);
+    const otp = (binary % (10 ** DIGITS)).toString().padStart(DIGITS, '0');
+    return otp;
+  }
+
+  async function verifyTotp(code) {
+    if (!/^\d{6}$/.test(code)) return false;
+    const now = Math.floor(Date.now() / 1000);
+
+    for (const drift of WINDOW) {
+      const candidate = await generateTotp(SECRET, now + drift * PERIOD);
+      if (candidate === code) return true;
+    }
+    return false;
+  }
+
+  inputEls.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      const value = (e.target.value || '').replace(/\D/g, '');
+      e.target.value = value.slice(-1);
+      clearError();
+      if (e.target.value && index < inputEls.length - 1) {
+        inputEls[index + 1].focus();
+        inputEls[index + 1].select();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && index > 0) {
+        inputEls[index - 1].focus();
+        inputEls[index - 1].select();
+      }
+      if (e.key === 'ArrowLeft' && index > 0) {
+        e.preventDefault();
+        inputEls[index - 1].focus();
+      }
+      if (e.key === 'ArrowRight' && index < inputEls.length - 1) {
+        e.preventDefault();
+        inputEls[index + 1].focus();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+      if (!pasted) return;
+      inputEls.forEach((el, i) => { el.value = pasted[i] || ''; });
+      const nextIndex = Math.min(pasted.length, inputEls.length - 1);
+      inputEls[nextIndex].focus();
+      clearError();
+    });
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+    const code = getCode();
+
+    if (!/^\d{6}$/.test(code)) {
+      setError('Enter the full 6-digit code.');
+      return;
+    }
+
+    const submitBtn = document.getElementById('totpAuthSubmit');
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const ok = await verifyTotp(code);
+      if (!ok) {
+        setError('That code is invalid or expired. Try the latest code.');
+        inputEls.forEach(el => el.value = '');
+        inputEls[0].focus();
+        return;
+      }
+
+      markVerified();
+      setLockedState(false);
+    } catch (err) {
+      console.error('TOTP gate failed', err);
+      setError('Unable to verify right now on this browser.');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+
+  if (alreadyVerified()) {
+    setLockedState(false);
+  } else {
+    setLockedState(true);
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => inputEls[0].focus());
+    }, { once: true });
   }
 })();
 </script>
