@@ -7400,7 +7400,7 @@ async function processWpRoomData(data){
 
   function alreadyVerified() {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'true';
+      return localStorage.getItem(STORAGE_KEY) === 'true' || localStorage.getItem('isUnlocked') === 'true';
     } catch (e) {
       return false;
     }
@@ -7409,6 +7409,8 @@ async function processWpRoomData(data){
   function markVerified() {
     try {
       localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.setItem('isUnlocked', 'true');
+      localStorage.setItem('premium_isUnlocked', 'true');
     } catch (e) {}
   }
 
@@ -7548,6 +7550,12 @@ async function processWpRoomData(data){
       }
 
       markVerified();
+      try {
+        if (typeof applyTmdbSearchVisibility === 'function') applyTmdbSearchVisibility();
+        if (typeof loadTmdbHomeRows === 'function') await loadTmdbHomeRows();
+      } catch (refreshErr) {
+        console.error('TMDB refresh failed after auth', refreshErr);
+      }
       setLockedState(false);
     } catch (err) {
       console.error('TOTP gate failed', err);
