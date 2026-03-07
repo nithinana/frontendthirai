@@ -7543,7 +7543,7 @@ async function processWpRoomData(data){
     try {
       const ok = await verifyTotp(code);
       if (!ok) {
-        setError('Invalid Code');
+        setError('Invalid Code. Please try again.');
         inputEls.forEach(el => el.value = '');
         inputEls[0].focus();
         return;
