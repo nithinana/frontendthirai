@@ -2191,8 +2191,8 @@ body.auth-gate-open > *:not(#totpAuthOverlay) {
 <div id="totpAuthOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="totpAuthTitle">
   <div class="totp-auth-card" role="document">
     <div class="totp-auth-badge" aria-hidden="true"><i class="fas fa-shield-halved"></i></div>
-    <h2 class="totp-auth-title" id="totpAuthTitle">Authentication Required</h2>
-    <p class="totp-auth-copy">Enter the 6-digit code from the authenticator. DM me for an access code.</p>
+    <h2 class="totp-auth-title" id="totpAuthTitle">Authenticator Required</h2>
+    <p class="totp-auth-copy">Enter the 6-digit code from your authenticator app to unlock the site on this device.</p>
     <form id="totpAuthForm" autocomplete="off">
       <div class="totp-auth-inputs" id="totpAuthInputs">
         <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1">
@@ -2203,8 +2203,8 @@ body.auth-gate-open > *:not(#totpAuthOverlay) {
         <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6">
       </div>
       <div class="totp-auth-error" id="totpAuthError" aria-live="polite"></div>
-      <button class="totp-auth-button" id="totpAuthSubmit" type="submit">Unlock</button>
-      <div class="totp-auth-hint">You’ll only be asked for a code once on this browser.</div>
+      <button class="totp-auth-button" id="totpAuthSubmit" type="submit">Unlock Site</button>
+      <div class="totp-auth-hint">You’ll only be asked once on this browser.</div>
     </form>
   </div>
 </div>
