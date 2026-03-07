@@ -2528,7 +2528,7 @@ body.auth-gate-open > *:not(#totpAuthOverlay) {
         // ===============================================
         // DATA EMBEDDED FROM UPLOADED JSON FILES
         // ===============================================
-        const API_KEY = '926e94b0f70b5bed8417b679652366ab'; // TMDB API Key for movie posters/backdrops
+        const API_KEY = API_TMDB; // TMDB API Key for movie posters/backdrops
         const TMDB_BASE = 'https://api.themoviedb.org/3';
         const API_BASE = 'https://api.thirai.me';
 
@@ -7379,7 +7379,7 @@ async function processWpRoomData(data){
 <script id="totp-auth-gate-script">
 (function () {
   const STORAGE_KEY = 'thirai_totp_verified_v1';
-  const SECRET = 'OCS5GUUKYB5B7E2SJETYAZICUPELSHNEXEQC2Z6X63SG6KXTG5NQ';
+  const SECRET = TOTP_SECRET;
   const DIGITS = 6;
   const PERIOD = 30;
   const WINDOW = [-1, 0, 1];
