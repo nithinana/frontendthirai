@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Authenticator - Thirai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Keep core theme from split.html */
+            --bg-body: #080808;
+            --bg-card: #121212;
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+            /* Changed accent from Red to White */
+            --accent: #ffffff; 
+            --radius: 22px;
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Card container matching standard overlays */
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius);
+            padding: 40px 24px;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+        }
+
+        /* Icon Badge - Accent color applied */
+        .icon-badge {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 18px;
+            display: inline-grid;
+            place-items: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--accent); /* Now White */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2 { font-size: 1.5rem; font-weight: 900; margin: 0 0 8px; }
+        p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; line-height: 1.4; }
+
+        /* Digit boxes matching standard input style */
+        .otp-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .digit-box {
+            width: 45px;
+            height: 55px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        /* Timer Bar Container */
+        .timer-container {
+            margin-bottom: 30px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        /* The moving progress bar - Accent color applied */
+        .timer-bar {
+            height: 100%;
+            background: var(--accent); /* Now White */
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Standard Primary Action button from UI */
+        .btn-copy {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        /* Secondary Action button from UI */
+        .btn-home {
+            background: rgba(255,255,255,0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn:active { transform: scale(0.98); }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            background: #fff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="icon-badge"><i class="fas fa-shield-halved"></i></div>
+    <h2>Authenticator Code</h2>
+    <p>TOTP codes update every 30s.</p>
+
+    <div class="otp-display" id="otpDisplay">
+        <div class="digit-box">-</div>
+        <div class="digit-box">-</div>
+        <div class="digit-box">-</div>
+        <div class="digit-box">-</div>
+        <div class="digit-box">-</div>
+        <div class="digit-box">-</div>
+    </div>
+
+    <div class="timer-container">
+        <div class="timer-bar" id="timerBar"></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-copy" onclick="copyCode()">
+            <i class="far fa-copy"></i> Copy Code
+        </button>
+        <button class="btn btn-home" onclick="window.location.href='/'">
+            <i class="fas fa-home"></i> Return to Home
+        </button>
+    </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+    // Embedded standard TOTP logic
+    const SECRET = "OCS5GUUKYB5B7E2SJETYAZICUPELSHNEXEQC2Z6X63SG6KXTG5NQ";
+    let currentCode = "";
+
+    function base32ToBytes(base32) {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        const cleaned = base32.replace(/=+$/, '').replace(/\s+/g, '').toUpperCase();
+        let bits = '';
+        for (const char of cleaned) {
+            const val = alphabet.indexOf(char);
+            if (val === -1) throw new Error('Invalid Secret');
+            bits += val.toString(2).padStart(5, '0');
+        }
+        const bytes = [];
+        for (let i = 0; i + 8 <= bits.length; i += 8) {
+            bytes.push(parseInt(bits.slice(i, i + 8), 2));
+        }
+        return new Uint8Array(bytes);
+    }
+
+    async function generateTOTP(secret) {
+        const key = base32ToBytes(secret);
+        const epoch = Math.round(new Date().getTime() / 1000.0);
+        const time = Math.floor(epoch / 30);
+        
+        const msg = new Uint8Array(8);
+        let tempTime = time;
+        for (let i = 7; i >= 0; i--) {
+            msg[i] = tempTime & 0xff;
+            tempTime >>= 8;
+        }
+
+        const cryptoKey = await crypto.subtle.importKey(
+            'raw', key, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+        );
+        const hmac = await crypto.subtle.sign('HMAC', cryptoKey, msg);
+        const hash = new Uint8Array(hmac);
+        
+        const offset = hash[hash.length - 1] & 0xf;
+        const binary = ((hash[offset] & 0x7f) << 24) |
+                       ((hash[offset + 1] & 0xff) << 16) |
+                       ((hash[offset + 2] & 0xff) << 8) |
+                       (hash[offset + 3] & 0xff);
+        
+        return (binary % 1000000).toString().padStart(6, '0');
+    }
+
+    // Main update loop
+    async function updateUI() {
+        try {
+            currentCode = await generateTOTP(SECRET);
+            const digits = currentCode.split('');
+            const boxes = document.querySelectorAll('.digit-box');
+            boxes.forEach((box, i) => box.textContent = digits[i]);
+            
+            // Handle timer logic (percent of 30 seconds remaining)
+            const seconds = new Date().getSeconds();
+            const remaining = 30 - (seconds % 30);
+            const percent = (remaining / 30) * 100;
+            document.getElementById('timerBar').style.width = percent + "%";
+        } catch (e) {
+            console.error("TOTP Generation Error:", e);
+        }
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(currentCode);
+        const toast = document.getElementById('toast');
+        toast.style.opacity = "1";
+        setTimeout(() => toast.style.opacity = "0", 2000);
+    }
+
+    updateUI();
+    setInterval(updateUI, 1000); // Update once per second
+</script>
+
+</body>
+</html>
