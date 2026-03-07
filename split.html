@@ -2192,7 +2192,7 @@ body.auth-gate-open > *:not(#totpAuthOverlay) {
   <div class="totp-auth-card" role="document">
     <div class="totp-auth-badge" aria-hidden="true"><i class="fas fa-shield-halved"></i></div>
     <h2 class="totp-auth-title" id="totpAuthTitle">Restricted Access</h2>
-    <p class="totp-auth-copy">Enter the 6-digit code from the authenticator or request for a code.</p>
+    <p class="totp-auth-copy">Enter the 6-digit code from the authenticator.</p>
     <form id="totpAuthForm" autocomplete="off">
       <div class="totp-auth-inputs" id="totpAuthInputs">
         <input class="totp-auth-digit" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1">
@@ -2204,7 +2204,7 @@ body.auth-gate-open > *:not(#totpAuthOverlay) {
       </div>
       <div class="totp-auth-error" id="totpAuthError" aria-live="polite"></div>
       <button class="totp-auth-button" id="totpAuthSubmit" type="submit">Unlock</button>
-      <div class="totp-auth-hint">You’ll only be asked once on this browser.</div>
+      <div class="totp-auth-hint">Request for a code if you don't have one.</div>
     </form>
   </div>
 </div>
