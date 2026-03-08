@@ -6,8 +6,6 @@
     <title>Authenticator - Thirai</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
     <style>
         :root {
             --bg-body: #080808;
@@ -58,18 +56,6 @@
         h2 { font-size: 1.5rem; font-weight: 900; margin: 0 0 8px; }
         p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; line-height: 1.4; }
 
-        /* Payment Form Styling */
-        #payment-area { margin-top: 20px; text-align: left; }
-        #card-element {
-            background: rgba(255,255,255,0.04);
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 15px;
-        }
-        #card-errors { color: #ff4b4b; font-size: 0.8rem; margin-bottom: 10px; text-align: center; }
-
-        /* Guarded Content */
         .guarded-content { transition: filter 0.6s ease; }
         .blurred { filter: blur(18px); pointer-events: none; user-select: none; }
 
@@ -86,13 +72,13 @@
         .timer-container { margin-bottom: 30px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
         .timer-bar { height: 100%; background: var(--accent); width: 100%; transition: width 1s linear; }
 
-        .btn { width: 100%; padding: 16px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-pay { background: #635bff; color: white; }
+        .btn { width: 100%; padding: 16px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-pay { background: #635bff; color: white; font-size: 1rem; }
         .btn-copy { background: white; color: black; margin-top: 10px; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .hidden { display: none !important; }
-        .toast { position: fixed; bottom: 30px; background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+        .toast { position: fixed; bottom: 30px; background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -111,11 +97,9 @@
     </div>
 
     <div id="payment-area">
-        <form id="payment-form">
-            <div id="card-element"></div>
-            <div id="card-errors" role="alert"></div>
-            <button class="btn btn-pay" id="pay-button">Pay £0.99 & Unlock</button>
-        </form>
+        <a href="https://buy.stripe.com/eVqdR9gdUfnS6vras118c05" class="btn btn-pay">
+            <i class="fab fa-stripe-s"></i> Pay £0.99 to Unlock
+        </a>
     </div>
 
     <div id="controls-area" class="hidden">
@@ -126,34 +110,25 @@
 <div class="toast" id="toast">Code copied!</div>
 
 <script>
-    // 2. CONFIGURATION - REPLACE pk_live_... WITH YOUR KEY
-    const STRIPE_KEY = 'pk_live_51T8RqqEl6VuxCSbL7Q7DPY3hEMYp4k2pd7mZSxyEX0YgkGF8MRRBxhepMedzrj85ILghYWd35Gzwt6VwMbggFjhj00bEWCnqFh'; 
     const SECRET = "OCS5GUUKYB5B7E2SJETYAZICUPELSHNEXEQC2Z6X63SG6KXTG5NQ";
     let currentCode = "";
 
-    // 3. INITIALIZE STRIPE
-    const stripe = Stripe(STRIPE_KEY);
-    const elements = stripe.elements();
-    const card = elements.create('card', {
-        style: { base: { color: '#ffffff', fontSize: '16px', '::placeholder': { color: '#666' } } }
-    });
-    card.mount('#card-element');
+    // 1. UPDATED ACCESS LOGIC
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Checks for:
+        // - Manual bypass: ?access=granted
+        // - Stripe return: ?payment_intent=...
+        // - Saved state: localStorage
+        const hasAccessParam = urlParams.get('access') === 'granted';
+        const isStripeReturn = urlParams.has('payment_intent') || urlParams.has('session_id');
+        const hasLocalAuth = localStorage.getItem('thirai_access') === 'true';
 
-    // 4. PAYMENT LOGIC
-    document.getElementById('payment-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('pay-button');
-        btn.disabled = true;
-        btn.innerText = "Processing...";
-
-        const {paymentMethod, error} = await stripe.createPaymentMethod('card', card);
-
-        if (error) {
-            document.getElementById('card-errors').textContent = error.message;
-            btn.disabled = false;
-            btn.innerText = "Pay £0.99 & Unlock";
-        } else {
+        if (hasAccessParam || isStripeReturn || hasLocalAuth) {
             unlockSite();
+            // Clean the URL so users don't share the 'granted' link accidentally
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
     });
 
@@ -168,7 +143,7 @@
         startGenerator();
     }
 
-    // 5. TOTP GENERATOR
+    // 2. TOTP ENGINE
     function base32ToBytes(base32) {
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
         const cleaned = base32.replace(/=+$/, '').replace(/\s+/g, '').toUpperCase();
@@ -218,8 +193,6 @@
         t.style.opacity = "1";
         setTimeout(() => t.style.opacity = "0", 2000);
     }
-
-    if (localStorage.getItem('thirai_access') === 'true') unlockSite();
 </script>
 </body>
 </html>
