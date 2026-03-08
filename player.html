@@ -34,64 +34,315 @@
             position: fixed;
             top: 0; width: 100%; z-index: 100;
             box-sizing: border-box;
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222;
         }
 
-        .back-btn {
-            font-size: 1.5rem;
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* --- CONTENT WRAPPER --- */
-        .content-container {
-            margin-top: 80px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+        .title-display {
+            flex-grow: 1;
+            margin-left: 20px;
         }
 
         #movie-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-align: center;
-            color: #fff;
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         #episode-info {
-            font-size: 1rem;
-            color: #aaa;
-            margin-bottom: 30px;
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
         }
 
-        /* --- TV SELECTOR --- */
-        #tv-selector {
-            display: none;
+        .nav-right {
+            display: flex;
             gap: 10px;
-            margin-bottom: 30px;
-            width: 100%;
-            max-width: 500px;
         }
 
-        select {
-            flex: 1;
-            padding: 12px;
-            background: #222;
-            color: #fff;
-            border: 1px solid #444;
+        .back-btn, .episodes-toggle-btn, .servers-toggle-btn {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
             border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
+            backdrop-filter: blur(5px);
+            border: none;
+            transition: 0.3s;
         }
 
-        /* --- SERVER GRID --- */
+        .back-btn:hover, .episodes-toggle-btn:hover, .servers-toggle-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+
+        /* --- DRAWERS (Shared Styles) --- */
+        .drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #333;
+            border-radius: 30px 30px 0 0;
+            z-index: 2000;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+            max-height: 65vh;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 30px; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+
+        .drawer.open { transform: translateY(0); }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .drawer-season-select {
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border: 1px solid #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+        
+        .drawer-season-select:hover { background: rgba(255,255,255,0.1); }
+        .drawer-season-select option { background: #222; color: white; }
+
+        .close-drawer {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            color: #eee;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        
+        .close-drawer:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        /* --- EPISODE DRAWER SPECIFICS --- */
+        .episodes-wrapper {
+            position: relative;
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .episodes-scroll-container {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-behavior: smooth;
+            width: 100%;
+            scrollbar-width: none;
+        }
+        
+        .episodes-scroll-container::-webkit-scrollbar { display: none; }
+
+        .scroll-btn {
+            position: absolute;
+            top: 0;
+            bottom: 10px;
+            width: 60px;
+            z-index: 10;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        .scroll-left { left: 0; background: linear-gradient(to right, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%); justify-content: flex-start; padding-left: 15px; }
+        .scroll-right { right: 0; background: linear-gradient(to left, rgba(15,15,15,0.95) 20%, rgba(15,15,15,0) 100%); justify-content: flex-end; padding-right: 15px; }
+        .scroll-btn.hidden { opacity: 0; pointer-events: none; }
+        .scroll-btn:hover { color: var(--primary); }
+
+        .ep-card {
+            min-width: 220px;
+            max-width: 220px;
+            background: #121212;
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid #222;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .ep-card.active { border-color: var(--primary); background: rgba(13,110,253,0.15); }
+        .ep-thumb { width: 100%; height: 125px; background-size: cover; background-position: center; background-color: #222; }
+        .ep-meta { padding: 10px; }
+        .ep-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ep-desc { font-size: 0.7rem; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* --- SERVER DRAWER SPECIFICS --- */
+        .drawer-server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .drawer-server-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .drawer-server-card.active {
+            border-color: var(--primary);
+            background: rgba(13,110,253,0.1);
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .drawer {
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                padding: 0;
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                background: #000;
+            }
+
+            .drawer-header {
+                padding: 20px 25px;
+                border-bottom: 1px solid #222;
+                background: #0a0a0a;
+                margin-bottom: 0;
+            }
+
+            .drawer-server-grid { padding: 20px; }
+            .scroll-btn { display: none !important; }
+
+            .episodes-wrapper { flex-direction: column; height: 100%; }
+            .episodes-scroll-container {
+                flex-direction: column;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding: 20px;
+                gap: 15px;
+                padding-bottom: 100px; 
+            }
+
+            .ep-card { min-width: 100%; max-width: 100%; display: flex; flex-direction: row; height: 90px; border-radius: 12px; background: #141414; }
+            .ep-thumb { width: 140px; height: 100%; border-radius: 0; flex-shrink: 0; }
+            .ep-meta { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; width: 0; padding-right: 10px; }
+            .ep-title { font-size: 0.95rem; white-space: nowrap; }
+            .ep-desc { font-size: 0.8rem; -webkit-line-clamp: 2; }
+        }
+
+        #selection-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 20px 40px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            #selection-screen { padding: 40px 25px 40px; }
+            .logo-large { max-width: 130px; margin-bottom: 20px; }
+            .server-grid { grid-template-columns: 1fr; }
+            .tv-controls { padding: 15px; }
+        }
+
+        .logo-large { max-width: 160px; margin-bottom: 30px; }
+
+        .tv-controls {
+            display: none;
+            background: #111;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid #222;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+        .nav-btn {
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .nav-btn:hover { background: var(--primary); }
+
+        .tv-select {
+            flex-grow: 1;
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .section-label {
+            width: 100%;
+            max-width: 800px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666;
+            margin: 20px 0 15px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 8px;
+        }
+
         .server-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             width: 100%;
             max-width: 800px;
@@ -99,330 +350,237 @@
 
         .server-card {
             background: var(--card-bg);
-            padding: 20px;
+            border: 1px solid #222;
+            padding: 25px 20px;
             border-radius: 12px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid #333;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 5px;
         }
 
-        .server-card:hover {
-            border-color: var(--rakan-orange);
-            transform: translateY(-3px);
-            background: #1f1f1f;
-        }
+        .server-card:hover { transform: translateY(-5px); }
+        .card-rakan { border-color: rgba(255, 140, 0, 0.2); }
+        .card-rakan:hover { border-color: var(--rakan-orange); }
+        .card-vidking { border-color: rgba(0, 255, 136, 0.1); }
+        .card-vidking:hover { border-color: var(--accent); }
 
-        .server-card i {
-            font-size: 2rem;
-            color: var(--rakan-orange);
-        }
+        .reliable-note { display: block; font-size: 0.7rem; color: var(--rakan-orange); font-weight: 600; }
+        .badge { font-size: 0.6rem; background: #333; color: #888; padding: 2px 10px; border-radius: 20px; font-weight: 800; }
 
-        /* --- UNLOCK SCREEN --- */
         #unlock-screen {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            inset: 0;
+            background: rgba(0,0,0,0.98);
             z-index: 1000;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(15px);
         }
 
-        .code-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
+        .pin-container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 360px;
+            border: 1px solid #333;
         }
+
+        .code-input-container { display: flex; justify-content: center; gap: 12px; margin: 25px 0; }
 
         .code-input {
             width: 50px;
-            height: 60px;
+            height: 65px;
             background: #222;
-            border: 2px solid #444;
-            border-radius: 10px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            color: white;
+            font-size: 28px;
             text-align: center;
-            font-size: 2rem;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .code-input:focus {
-            border-color: var(--rakan-orange);
             outline: none;
         }
 
-        /* --- PLAYER OVERLAY --- */
+        .unlock-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
         #player-screen {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 2000;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        #ui-nav {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 2100;
-            display: none;
-            gap: 15px;
-        }
-
-        .nav-btn {
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: #fff;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-
-        /* --- EPISODE DRAWER --- */
-        #episodes-drawer {
-            position: fixed;
-            bottom: -100%;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 80vh;
-            background: #111;
-            z-index: 3000;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            transition: bottom 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #episodes-drawer.open {
-            bottom: 0;
-        }
-
-        .drawer-header {
-            padding: 20px;
-            border-bottom: 1px solid #222;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #drawer-ep-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            scroll-behavior: smooth;
-        }
-
-        .ep-card {
-            display: flex;
-            gap: 15px;
-            padding: 10px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .ep-card:hover { background: #222; }
-
-        .ep-card.active {
-            border: 1px solid var(--rakan-orange);
-            background: #1f1f1f;
-        }
-
-        .ep-thumb {
-            width: 120px;
-            aspect-ratio: 16/9;
-            background-size: cover;
-            background-position: center;
-            border-radius: 6px;
-            background-color: #333;
-            flex-shrink: 0;
-        }
-
-        .ep-meta {
-            flex: 1;
+            height: 100%;
+            background: #000;
+            z-index: 50;
             overflow: hidden;
         }
 
-        .ep-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #fff;
+        #movie-iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            display: block;
         }
 
-        .ep-desc {
-            font-size: 0.85rem;
-            color: #888;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .scroll-controls {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .server-grid { grid-template-columns: repeat(2, 1fr); }
-        }
     </style>
 </head>
 <body>
 
-    <div class="top-nav">
-        <a href="index.html" class="back-btn"><i class="bi bi-chevron-left"></i></a>
-        <div style="font-weight: 800; color: var(--rakan-orange); font-size: 1.2rem;">THIRAI</div>
-        <div style="width: 24px;"></div>
-    </div>
+    <nav class="top-nav" id="ui-nav" style="display: none;">
+        <div class="back-btn" onclick="handleBack()">
+            <i class="bi bi-arrow-left"></i> Back
+        </div>
+        <div class="title-display">
+            <span id="movie-title">Loading...</span>
+            <span id="episode-info"></span>
+        </div>
+        <div class="nav-right">
+            <button id="servers-btn" class="servers-toggle-btn" onclick="toggleServersDrawer()" style="padding:8px 10px">
+                <i class="bi bi-hdd-network"></i>
+            </button>
+            <button id="episodes-btn" class="episodes-toggle-btn" onclick="toggleEpisodesDrawer()" style="display: none; padding:8px 10px">
+                <i class="bi bi-collection-play-fill"></i>
+            </button>
+        </div>
+    </nav>
 
-    <div class="content-container" id="selection-screen">
-        <h1 id="movie-title">Loading...</h1>
-        <p id="episode-info"></p>
-
-        <div id="tv-selector">
-            <select id="s-select" onchange="fetchEpisodes()"></select>
-            <select id="e-select" onchange="updateSelection()"></select>
+    <div id="selection-screen">
+        <img src="./static/thiraiwhite.png" class="logo-large" alt="Thirai Logo">
+        
+        <div id="tv-selector" class="tv-controls">
+            <div class="control-row">
+                <label style="width: 60px; font-size: 0.8rem;">SEASON</label>
+                <select id="s-select" class="tv-select" onchange="syncSeason(this.value)"></select>
+            </div>
+            <div class="control-row">
+                <label style="width: 60px; font-size: 0.8rem;">EPISODE</label>
+                <button class="nav-btn" onclick="navEpisode(-1)"><i class="bi bi-chevron-left"></i></button>
+                <select id="e-select" class="tv-select" onchange="updateSelection()"></select>
+                <button class="nav-btn" onclick="navEpisode(1)"><i class="bi bi-chevron-right"></i></button>
+            </div>
         </div>
 
+        <div class="section-label">Recommended</div>
         <div class="server-grid">
-            <div class="server-card" onclick="selectServer(1)">
-                <i class="bi bi-rocket-takeoff-fill"></i>
-                <span>Rakan (Fast)</span>
+            <div class="server-card card-vidking" onclick="selectServer(7)">
+                <i class="bi bi-lightning-charge-fill" style="color: var(--accent)"></i>
+                VidKing
+            </div>
+            <div class="server-card card-rakan" onclick="selectServer(1)">
+                <i class="bi bi-shield-fill" style="color: var(--rakan-orange)"></i>
+                Rakan
+                <span class="reliable-note">Reliable</span>
+            </div>
+        </div>
+
+        <div class="section-label">Alternative Servers</div>
+        <div class="server-grid">
+            <div class="server-card" onclick="selectServer(2)">
+                <span class="badge">ADS</span> Bard
             </div>
             <div class="server-card" onclick="selectServer(6)">
-                <i class="bi bi-link-45deg"></i>
-                <span>Ryze (Multi)</span>
+                <span class="badge">ADS</span> Ryze
+            </div>
+            <div class="server-card" onclick="selectServer(4)">
+                <span class="badge">ADS</span> Ekko
+            </div>
+            <div class="server-card" onclick="selectServer(5)">
+                <span class="badge">ADS</span> Naafiri
             </div>
             <div class="server-card" onclick="selectServer(3)">
-                <i class="bi bi-shield-check"></i>
-                <span>Xayah</span>
+                <span class="badge">ADS</span> Xayah
             </div>
-            <div class="server-card" onclick="selectServer(2)">
-                <i class="bi bi-lightning-fill"></i>
-                <span>Bard</span>
+            <div class="server-card" onclick="selectServer(8)">
+                <span class="badge">ADS</span> VidFast
             </div>
             <div class="server-card" onclick="selectServer(9)">
-                <i class="bi bi-collection-play"></i>
-                <span>Server 111</span>
-            </div>
-            <div class="server-card" onclick="selectServer(7)">
-                <i class="bi bi-crown-fill"></i>
-                <span>Vidking</span>
+                <span class="badge">ADS</span> 111
             </div>
         </div>
     </div>
 
-    <div id="ui-nav">
-        <button class="nav-btn" onclick="closePlayer()"><i class="bi bi-x-lg"></i></button>
-        <button class="nav-btn" id="episodes-btn" style="display:none;" onclick="toggleEpisodesDrawer()"><i class="bi bi-stack"></i></button>
+    <div id="episode-drawer" class="drawer">
+        <div class="drawer-header">
+            <select id="drawer-s-select" class="drawer-season-select" onchange="syncSeason(this.value)"></select>
+            <button class="close-drawer" onclick="toggleEpisodesDrawer()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="episodes-wrapper">
+            <button class="scroll-btn scroll-left hidden" onclick="scrollEpisodes(-300)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div id="drawer-ep-list" class="episodes-scroll-container"></div>
+            <button class="scroll-btn scroll-right" onclick="scrollEpisodes(300)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="server-drawer" class="drawer">
+        <div class="drawer-header">
+            <span style="font-weight: 600; font-size: 1.1rem;">Switch Server</span>
+            <button class="close-drawer" onclick="toggleServersDrawer()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div id="drawer-server-list" class="drawer-server-grid"></div>
+    </div>
+
+    <div id="unlock-screen">
+        <div class="pin-container">
+            <h3>Enter PIN</h3>
+            <div class="code-input-container">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+            </div>
+            <button class="unlock-btn" onclick="validatePin()">Unlock Stream</button>
+            <button onclick="document.getElementById('unlock-screen').style.display='none'" style="background:none; border:none; color:#777; cursor:pointer; text-decoration:underline;">Go Back</button>
+            <div id="pin-error" style="color:#ff5555; font-size:0.8rem; margin-top:10px;"></div>
+        </div>
     </div>
 
     <div id="player-screen"></div>
 
-    <div id="unlock-screen">
-        <h2 style="color: var(--rakan-orange);">Enter Access Pin</h2>
-        <p>This server requires authentication</p>
-        <div class="code-container">
-            <input type="number" class="code-input" maxlength="1">
-            <input type="number" class="code-input" maxlength="1">
-            <input type="number" class="code-input" maxlength="1">
-            <input type="number" class="code-input" maxlength="1">
-        </div>
-        <p id="error-msg" style="color: #ff4444; margin-top: 20px; display: none;">Invalid PIN. Please try again.</p>
-    </div>
-
-    <div id="episodes-drawer">
-        <div class="drawer-header">
-            <select id="drawer-s-select" style="max-width: 150px;" onchange="syncAndFetch(this.value)"></select>
-            <div style="display: flex; gap: 10px;">
-                <button class="nav-btn" id="scroll-up-btn" onclick="scrollEpisodes('up')"><i class="bi bi-chevron-up"></i></button>
-                <button class="nav-btn" id="scroll-down-btn" onclick="scrollEpisodes('down')"><i class="bi bi-chevron-down"></i></button>
-                <button class="nav-btn" onclick="toggleEpisodesDrawer()"><i class="bi bi-x-lg"></i></button>
-            </div>
-        </div>
-        <div id="drawer-ep-list"></div>
-    </div>
-
     <script>
         const PIN = "1451";
         const TMDB_KEY = "926e94b0f70b5bed8417b679652366ab";
-        const CACHE_KEY = 'thirai_continue_watching';
-
         const SERVERS = {
             1: { name: "rakan", movie: "https://vidsrc.cc/v2/embed/movie/", tv: "https://vidsrc.cc/v2/embed/tv/", secure: true },
             2: { name: "bard", movie: "https://moviesapi.club/movie/", tv: "https://moviesapi.club/tv/", secure: false },
-            3: { name: "xayah", movie: "https://vidsrc.me/embed/movie?tmdb=", tv: "https://vidsrc.me/embed/tv?tmdb/", secure: false },
+            3: { name: "xayah", movie: "https://vidsrc.me/embed/movie?tmdb=", tv: "https://vidsrc.me/embed/tv?tmdb=", secure: false },
             4: { name: "ekko", movie: "https://player.videasy.net/movie/", tv: "https://player.videasy.net/tv/", secure: false },
             5: { name: "naafiri", movie: "https://vidfast.pro/movie/", tv: "https://vidfast.pro/tv/", secure: false },
             6: { name: "ryze", movie: "https://vidlink.pro/movie/", tv: "https://vidlink.pro/tv/", secure: false },
             7: { name: "vidking", movie: "https://www.vidking.net/embed/movie/", tv: "https://www.vidking.net/embed/tv/", secure: true },
+
             8: { name: "vidfast", movie: "https://vidfast.pro/movie/", tv: "https://vidfast.pro/tv/", secure: false },
             9: { name: "111", movie: "https://111movies.net/movie/", tv: "https://111movies.net/tv/", secure: false }
         };
 
         let selectedServerId = null;
-        let videoData = { type: null, id: null, s: 1, e: 1, title: "", img: "" };
+        let videoData = { type: null, id: null, s: 1, e: 1, title: "" };
         let currentEpisodes = [];
         let isAutoLaunched = false;
 
-        // --- CACHE LOGIC ---
-        function saveToContinueWatching(movie) {
-            let history = JSON.parse(localStorage.getItem(CACHE_KEY)) || [];
-            history = history.filter(item => item.url !== movie.url);
-            history.unshift(movie);
-            if (history.length > 20) history.pop();
-            localStorage.setItem(CACHE_KEY, JSON.stringify(history));
-        }
-
-        function triggerCacheSave() {
-            const serverName = selectedServerId ? SERVERS[selectedServerId].name : 'rakan';
-            let customUrl = "";
-            let displayTitle = videoData.title;
-            
-            if (videoData.type === 'movie') {
-                customUrl = `./player.html?server=${serverName}&movie=${videoData.id}`;
-            } else {
-                customUrl = `./player.html?server=${serverName}&tv=${videoData.id}/${videoData.s}/${videoData.e}`;
-                displayTitle += ` (S${videoData.s}E${videoData.e})`;
-            }
-
-            const cacheObj = {
-                title: displayTitle,
-                img: videoData.img || 'https://via.placeholder.com/500x750?text=No+Poster',
-                url: customUrl
-            };
-            saveToContinueWatching(cacheObj);
-        }
-
-        // --- TMDB FETCHING ---
         async function parseUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const tvParam = urlParams.get('tv');
@@ -451,6 +609,17 @@
                     selectServer(parseInt(sId));
                 }
             }
+            
+            return !!videoData.id;
+        }
+
+        function handleBack() {
+            if (isAutoLaunched) {
+                window.close();
+                if (!window.closed) history.back();
+            } else {
+                location.reload();
+            }
         }
 
         async function fetchShowDetails() {
@@ -458,7 +627,6 @@
                 const res = await fetch(`https://api.themoviedb.org/3/tv/${videoData.id}?api_key=${TMDB_KEY}`);
                 const data = await res.json();
                 videoData.title = data.name;
-                videoData.img = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
                 document.getElementById('movie-title').innerText = data.name;
                 
                 const sSelect = document.getElementById('s-select');
@@ -490,6 +658,7 @@
                 
                 const eSelect = document.getElementById('e-select');
                 const drawerEpList = document.getElementById('drawer-ep-list');
+                
                 eSelect.innerHTML = '';
                 drawerEpList.innerHTML = '';
 
@@ -502,7 +671,6 @@
 
                     const card = document.createElement('div'); 
                     card.className = `ep-card ${ep.episode_number == videoData.e ? 'active' : ''}`;
-                    card.id = `ep-card-${ep.episode_number}`;
                     const thumbUrl = ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '';
                     card.innerHTML = `
                         <div class="ep-thumb" style="background-image: url('${thumbUrl}')"></div>
@@ -511,12 +679,15 @@
                             <div class="ep-desc">${ep.overview || 'No description available.'}</div>
                         </div>
                     `;
+                    
                     card.onclick = () => {
                         videoData.e = ep.episode_number;
                         eSelect.value = ep.episode_number;
                         updateSelection();
                         toggleEpisodesDrawer();
-                        if (document.getElementById('player-screen').style.display === 'block') launchStream();
+                        if (document.getElementById('player-screen').style.display === 'block' && selectedServerId) {
+                            launchStream();
+                        }
                     };
                     drawerEpList.appendChild(card);
                 });
@@ -530,29 +701,127 @@
                 const res = await fetch(`https://api.themoviedb.org/3/movie/${videoData.id}?api_key=${TMDB_KEY}`);
                 const data = await res.json();
                 videoData.title = data.title;
-                videoData.img = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
                 document.getElementById('movie-title').innerText = data.title;
                 document.getElementById('episode-info').innerText = "";
             } catch (e) { console.error(e); }
         }
 
-        // --- CORE UI ACTIONS ---
+        function toggleEpisodesDrawer() {
+            document.getElementById('server-drawer').classList.remove('open');
+            const drawer = document.getElementById('episode-drawer');
+            drawer.classList.toggle('open');
+            if (drawer.classList.contains('open')) {
+                setTimeout(updateScrollButtons, 300);
+            }
+        }
+
+        function toggleServersDrawer() {
+            document.getElementById('episode-drawer').classList.remove('open');
+            const drawer = document.getElementById('server-drawer');
+            drawer.classList.toggle('open');
+            if (drawer.classList.contains('open')) {
+                renderServerDrawer();
+            }
+        }
+
+        function renderServerDrawer() {
+            const list = document.getElementById('drawer-server-list');
+            list.innerHTML = '';
+            Object.keys(SERVERS).forEach(id => {
+                const s = SERVERS[id];
+                const card = document.createElement('div');
+                card.className = `drawer-server-card ${selectedServerId == id ? 'active' : ''}`;
+                card.innerText = s.name;
+                card.onclick = () => {
+                    selectServer(parseInt(id));
+                    toggleServersDrawer();
+                };
+                list.appendChild(card);
+            });
+        }
+
+        function syncSeason(val) {
+            document.getElementById('s-select').value = val;
+            document.getElementById('drawer-s-select').value = val;
+            videoData.e = 1;
+            fetchEpisodes();
+        }
+
+        function updateSelection() {
+            const eSelect = document.getElementById('e-select');
+            if (!eSelect || !eSelect.options[eSelect.selectedIndex]) return;
+
+            videoData.e = eSelect.value;
+            videoData.s = document.getElementById('s-select').value;
+            document.getElementById('drawer-s-select').value = videoData.s;
+            
+            document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+            const cards = document.querySelectorAll('.ep-card');
+            if (cards.length > 0) {
+                 if (cards[eSelect.selectedIndex]) cards[eSelect.selectedIndex].classList.add('active');
+            }
+
+            const epName = eSelect.options[eSelect.selectedIndex].text.split(': ')[1] || "";
+            document.getElementById('episode-info').innerText = `S${videoData.s}E${videoData.e}: ${epName}`;
+            
+            if (videoData.type === 'tv') {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('tv', `${videoData.id}/${videoData.s}/${videoData.e}`);
+                window.history.replaceState({}, '', currentUrl.toString());
+            }
+        }
+
+        function navEpisode(dir) {
+            const select = document.getElementById('e-select');
+            const newIdx = select.selectedIndex + dir;
+            if (newIdx >= 0 && newIdx < select.length) {
+                select.selectedIndex = newIdx;
+                updateSelection();
+                if (document.getElementById('player-screen').style.display === 'block') {
+                    launchStream();
+                }
+            }
+        }
+
+        function scrollEpisodes(amount) {
+            document.getElementById('drawer-ep-list').scrollBy({ left: amount, behavior: 'smooth' });
+        }
+
+        function updateScrollButtons() {
+            const container = document.getElementById('drawer-ep-list');
+            const leftBtn = document.querySelector('.scroll-left');
+            const rightBtn = document.querySelector('.scroll-right');
+            if (!container || !leftBtn || !rightBtn) return;
+            if (container.scrollLeft <= 10) leftBtn.classList.add('hidden');
+            else leftBtn.classList.remove('hidden');
+            if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) rightBtn.classList.add('hidden');
+            else rightBtn.classList.remove('hidden');
+        }
+
         function selectServer(id) {
             selectedServerId = id;
-            if (localStorage.getItem('isUnlocked') === 'true') {
-                launchStream();
-            } else {
+            if (localStorage.getItem('isUnlocked') === 'true') launchStream();
+            else {
                 document.getElementById('unlock-screen').style.display = 'flex';
                 document.querySelectorAll('.code-input')[0].focus();
+            }
+        }
+
+        function validatePin() {
+            const entered = Array.from(document.querySelectorAll('.code-input')).map(i => i.value).join('');
+            if (entered === PIN) {
+                localStorage.setItem('isUnlocked', 'true');
+                launchStream();
+            } else {
+                document.getElementById('pin-error').innerText = "Incorrect PIN.";
             }
         }
 
         function launchStream() {
             const server = SERVERS[selectedServerId];
             let url = "";
-            if (videoData.type === 'movie') {
-                url = server.movie + videoData.id;
-            } else {
+            if (videoData.type === 'movie') url = server.movie + videoData.id;
+            else {
                 if (selectedServerId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
                 else if (selectedServerId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
                 else url = `${server.tv}${videoData.id}/${videoData.s}/${videoData.e}`;
@@ -566,72 +835,15 @@
             playerDiv.style.display = 'block';
             playerDiv.innerHTML = `<iframe id="movie-iframe" src="${url}" allowfullscreen="true" allow="autoplay; encrypted-media" ${server.secure ? 'sandbox="allow-scripts allow-same-origin allow-forms"' : ''}></iframe>`;
             
-            triggerCacheSave();
-
+            // Update URL to reflect selected server
             const currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set('server', server.name);
             window.history.replaceState({}, '', currentUrl.toString());
         }
 
-        function updateSelection() {
-            if (videoData.type === 'tv') {
-                videoData.e = document.getElementById('e-select').value;
-                document.getElementById('episode-info').innerText = `Season ${videoData.s}, Episode ${videoData.e}`;
-            }
-        }
-
-        function syncAndFetch(val) {
-            document.getElementById('s-select').value = val;
-            fetchEpisodes();
-        }
-
-        function toggleEpisodesDrawer() {
-            const drawer = document.getElementById('episodes-drawer');
-            drawer.classList.toggle('open');
-            if (drawer.classList.contains('open')) {
-                setTimeout(() => {
-                    const activeCard = document.querySelector('.ep-card.active');
-                    if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    updateScrollButtons();
-                }, 300);
-            }
-        }
-
-        function scrollEpisodes(dir) {
-            const list = document.getElementById('drawer-ep-list');
-            const amt = dir === 'up' ? -300 : 300;
-            list.scrollBy({ top: amt, behavior: 'smooth' });
-        }
-
-        function updateScrollButtons() {
-            const list = document.getElementById('drawer-ep-list');
-            document.getElementById('scroll-up-btn').style.opacity = list.scrollTop <= 0 ? '0.3' : '1';
-            document.getElementById('scroll-down-btn').style.opacity = (list.scrollHeight - list.scrollTop <= list.clientHeight + 1) ? '0.3' : '1';
-        }
-
-        function closePlayer() {
-            location.reload();
-        }
-
-        // --- PIN HANDLER ---
         document.querySelectorAll('.code-input').forEach((el, i, arr) => {
-            el.addEventListener('input', () => {
-                if (el.value && i < arr.length - 1) arr[i+1].focus();
-                const code = Array.from(arr).map(inp => inp.value).join('');
-                if (code.length === 4) {
-                    if (code === PIN) {
-                        localStorage.setItem('isUnlocked', 'true');
-                        launchStream();
-                    } else {
-                        document.getElementById('error-msg').style.display = 'block';
-                        arr.forEach(inp => inp.value = '');
-                        arr[0].focus();
-                    }
-                }
-            });
-            el.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus();
-            });
+            el.addEventListener('input', () => { if (el.value && i < arr.length - 1) arr[i+1].focus(); });
+            el.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !el.value && i > 0) arr[i-1].focus(); });
         });
 
         const epListContainer = document.getElementById('drawer-ep-list');
