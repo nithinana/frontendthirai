@@ -577,7 +577,7 @@
         };
 
         let selectedServerId = null;
-        let videoData = { type: null, id: null, s: 1, e: 1, title: "" };
+        let videoData = { type: null, id: null, s: 1, e: 1, title: "", poster: "" };
         let currentEpisodes = [];
         let isAutoLaunched = false;
 
@@ -701,6 +701,7 @@
                 const res = await fetch(`https://api.themoviedb.org/3/movie/${videoData.id}?api_key=${TMDB_KEY}`);
                 const data = await res.json();
                 videoData.title = data.title;
+                videoData.poster = data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : "";
                 document.getElementById('movie-title').innerText = data.title;
                 document.getElementById('episode-info').innerText = "";
             } catch (e) { console.error(e); }
@@ -820,7 +821,16 @@
         function launchStream() {
             const server = SERVERS[selectedServerId];
             let url = "";
-            if (videoData.type === 'movie') url = server.movie + videoData.id;
+            if (videoData.type === 'movie') {
+                url = server.movie + videoData.id;
+
+                const continueData = {
+                    title: videoData.title,
+                    img: videoData.poster,
+                    url: `./player.html?movie=${videoData.id}`
+                };
+                localStorage.setItem("thirai_continue_watching", JSON.stringify(continueData));
+            }
             else {
                 if (selectedServerId === 3) url = `${server.tv}${videoData.id}&season=${videoData.s}&episode=${videoData.e}`;
                 else if (selectedServerId === 2) url = `${server.tv}${videoData.id}-${videoData.s}-${videoData.e}`;
