@@ -347,6 +347,16 @@
            5. STANDARD ROWS & GRIDS
            ============================================== */
         .section-title { padding: 0 var(--page-pad); margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; margin-top: 30px; color: #fff; }
+        .tmdb-beta {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.62em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7f7f7f;
+  vertical-align: middle;
+}
         
         .row-container {
             display: flex; gap: 10px; overflow-x: auto; padding: 0 var(--page-pad) 20px;
@@ -1032,6 +1042,10 @@
 }
 .section-arrow:hover{ color:#fff; }
 .section-arrow span{ display:inline-block; transform: translateY(-1px); }
+.tmdb-shortcut-arrow{
+  margin-left: auto;
+  padding-right: 0;
+}
 
 /* ===== Mobile home side padding ===== */
 @media (max-width: 700px){
@@ -2030,127 +2044,6 @@
   }
 </style>
 
-<style id="auth-gate-style">
-  body.auth-lock-active {
-    overflow: hidden !important;
-  }
-  body.auth-lock-active > *:not(#authGateOverlay) {
-    filter: blur(18px);
-    pointer-events: none !important;
-    user-select: none !important;
-  }
-  #authGateOverlay{
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    z-index: 100000;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 220ms ease, visibility 0s linear 220ms;
-  }
-  #authGateOverlay.active{
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition: opacity 220ms ease, visibility 0s;
-  }
-  .auth-gate-card{
-    width: 100%;
-    max-width: 430px;
-    background: rgba(18,18,18,0.98);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 22px;
-    padding: 20px;
-    box-shadow: 0 14px 46px rgba(0,0,0,0.58);
-    color: #fff;
-    transform: translateY(18px) scale(0.98);
-    opacity: 0;
-    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
-  }
-  #authGateOverlay.active .auth-gate-card{
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  .auth-gate-head{
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .auth-gate-icon{
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.10);
-    flex: 0 0 auto;
-  }
-  .auth-gate-title{
-    font-size: 1.08rem;
-    font-weight: 900;
-    line-height: 1.15;
-  }
-  .auth-gate-body{
-    color: rgba(255,255,255,0.72);
-    font-size: 0.92rem;
-    line-height: 1.45;
-    margin: 8px 0 14px;
-  }
-  .auth-gate-code{
-    width: 100%;
-    height: 50px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color: #fff;
-    padding: 0 14px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-align: center;
-    outline: none;
-  }
-  .auth-gate-code:focus{
-    border-color: rgba(255,255,255,0.22);
-    background: rgba(255,255,255,0.08);
-  }
-  .auth-gate-actions{
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-  }
-  .auth-gate-btn{
-    width: 100%;
-    height: 44px;
-    border: none;
-    border-radius: 14px;
-    background: #ffffff;
-    color: #000;
-    font-weight: 900;
-    letter-spacing: 0.2px;
-    cursor: pointer;
-  }
-  .auth-gate-btn:disabled{
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-  .auth-gate-error{
-    min-height: 20px;
-    margin-top: 10px;
-    color: #ff7b7b;
-    font-size: 0.84rem;
-    text-align: center;
-  }
-</style>
 </head>
 <body>
 
@@ -2233,10 +2126,19 @@
             <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-movies-title">TMDB Movies</div>
+            <!-- ===== ANIME ROW (AniList) ===== -->
+            <div class="section-title section-title-row" id="anime-row-title"><span>Anime</span></div>
+            <div class="row-container" id="row-anime"></div>
+            <!-- ===== END ANIME ROW ===== -->
+
+            <div class="section-title section-title-row visually-hidden" id="tmdb-movies-title"><span>TMDB Movies <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_movies" aria-label="Open TMDB Movies search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg></button></div>
             <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
-            <div class="section-title visually-hidden" id="tmdb-tv-title">TMDB TV Shows</div>
+            <div class="section-title section-title-row visually-hidden" id="tmdb-tv-title"><span>TMDB Shows <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_tv" aria-label="Open TMDB Shows search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+  </svg></button></div>
             <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
         </div>
@@ -2295,7 +2197,9 @@
                     <option value="kannada">Kannada</option>
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
-                                    <option value="tmdb">TMDB</option>
+                    <option value="tmdb_movies">TMDB Movies</option>
+                    <option value="tmdb_tv">TMDB TV</option>
+                    <option value="anime">Anime</option>
 </select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
@@ -2352,7 +2256,7 @@
           <i class="fas fa-user-friends" aria-hidden="true"></i>
           <div>
             <div class="watchparty-title">Watch Party</div>
-            <div class="watchparty-sub">Enter a 6‑digit code to join.</div>
+            <div class="watchparty-sub">Enter a 6&#8209;digit code to join.</div>
           </div>
         </div>
 
@@ -2375,7 +2279,7 @@
         <!-- Loading -->
         <div class="wp-loading" id="wpLoading">
           <i class="fas fa-sync-alt" aria-hidden="true"></i>
-          <span>Checking room…</span>
+          <span>Checking room&#8230;</span>
         </div>
 
         <!-- Lobby -->
@@ -2470,6 +2374,12 @@
         const API_KEY = '926e94b0f70b5bed8417b679652366ab'; // TMDB API Key for movie posters/backdrops
         const TMDB_BASE = 'https://api.themoviedb.org/3';
         const API_BASE = 'https://api.thirai.me';
+
+        // ===============================================
+        // ANILIST API CONFIG
+        // ===============================================
+        const ANILIST_API = 'https://graphql.anilist.co';
+        const ANILIST_CLIENT_ID = '37084';
 
         
         // ===============================================
@@ -3377,1401 +3287,45 @@ const tamilData = {
   "language": "tamil",
   "has_more": true,
   "movies": [
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2223-7856.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2223/?lang=tamil",
-      "title": "Raja Rani"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2786-70f7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2786/?lang=tamil",
-      "title": "Thani Oruvan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2937-2069.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2937/?lang=tamil",
-      "title": "Theri"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1671-52bd.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1671/?lang=tamil",
-      "title": "Soodhu Kavvuum"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2639-bcaf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2639/?lang=tamil",
-      "title": "O Kadhal Kanmani"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1561-9d7a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1561/?lang=tamil",
-      "title": "Vishwaroopam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2536-1777.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2536/?lang=tamil",
-      "title": "Kaththi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3QoX-3033.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3QoX/?lang=tamil",
-      "title": "Mersal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2909-173a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2909/?lang=tamil",
-      "title": "Thozha"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/559E-7360.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/559E/?lang=tamil",
-      "title": "Sarkar"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1692-e04a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1692/?lang=tamil",
-      "title": "Singam 2 (Tamil)"
-    },
-	{
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1usm-3175.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1usm/?lang=tamil",
-      "title": "Varisu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1ueW-6c85.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1ueW/?lang=tamil",
-      "title": "Beast Tamil"
-    },
-	{
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6yMk-0d0b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6yMk/?lang=tamil",
-      "title": "Idly Kadai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5i4m-929c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5i4m/?lang=tamil",
-      "title": "Kuberaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4mtx-da28.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4mtx/?lang=tamil",
-      "title": "Nilavuku Enmel Ennadi Kobam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4l4Y-eb9b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4l4Y/?lang=tamil",
-      "title": "Raayan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4JAA-33ac.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4JAA/?lang=tamil",
-      "title": "Captain Miller"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1qP8-5b09.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1qP8/?lang=tamil",
-      "title": "Vaathi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5h4y-29b5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5h4y/?lang=tamil",
-      "title": "Naane Varuven"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/66ih-e021.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/66ih/?lang=tamil",
-      "title": "Thiruchitrambalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/eUzB-0a95.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/eUzB/?lang=tamil",
-      "title": "Maaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5Orl-e1dd.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5Orl/?lang=tamil",
-      "title": "Atrangi Re"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3ULz-bf58.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3ULz/?lang=tamil",
-      "title": "Jagame Thandhiram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6c7h-5dc0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6c7h/?lang=tamil",
-      "title": "Karnan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/27KY-a82b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/27KY/?lang=tamil",
-      "title": "Pattas"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6bNK-ef58.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6bNK/?lang=tamil",
-      "title": "Asuran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/ZHGp-6038.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/ZHGp/?lang=tamil",
-      "title": "Maari 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3KSd-9f84.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3KSd/?lang=tamil",
-      "title": "Vada Chennai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4STi-2862.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4STi/?lang=tamil",
-      "title": "Velaiilla Pattadhari 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4V8X-8b73.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4V8X/?lang=tamil",
-      "title": "Pa Paandi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6nFG-a02f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6nFG/?lang=tamil",
-      "title": "Kodi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9074-a4f7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9074/?lang=tamil",
-      "title": "Thodari"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2990-082a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2990/?lang=tamil",
-      "title": "Amma Kanakku"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2876-1ab0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2876/?lang=tamil",
-      "title": "Visaaranai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2835-b06a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2835/?lang=tamil",
-      "title": "Thanga Magan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2756-b451.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2756/?lang=tamil",
-      "title": "Naanum Rowdy Dhaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2712-587f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2712/?lang=tamil",
-      "title": "Maari"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2659-6814.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2659/?lang=tamil",
-      "title": "Kakka Muttai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2605-4f75.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2605/?lang=tamil",
-      "title": "Kaaki Sattai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2595-b314.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2595/?lang=tamil",
-      "title": "Anegan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2526-ec92.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2526/?lang=tamil",
-      "title": "Velaiyilla Pattathari"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4QKP-c039.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4QKP/?lang=tamil",
-      "title": "Naiyaandi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1694-3629.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1694/?lang=tamil",
-      "title": "Maryan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1691-ce80.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1691/?lang=tamil",
-      "title": "Ambikapathy"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1670-4be4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1670/?lang=tamil",
-      "title": "Ethir Neechal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0753-ffcc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0753/?lang=tamil",
-      "title": "3 - Moonu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0607-6139.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0607/?lang=tamil",
-      "title": "Mayakkam Enna"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0305-bf1f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0305/?lang=tamil",
-      "title": "Venghai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0185-7252.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0185/?lang=tamil",
-      "title": "Mappillai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0218-d922.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0218/?lang=tamil",
-      "title": "Seedan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2526-ec92.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2526/?lang=tamil",
-      "title": "Velaiyilla Pattathari"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2xQm-8702.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2xQm/?lang=tamil",
-      "title": "Thalaivaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0600-a683.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0600/?lang=tamil",
-      "title": "Velayudham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0118-7cec.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0118/?lang=tamil",
-      "title": "Kanthaswamy"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0028-2607.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0028/?lang=tamil",
-      "title": "Silambattam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4bRV-6e9b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4bRV/?lang=tamil",
-      "title": "Madharaasi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1kTx-7208.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1kTx/?lang=tamil",
-      "title": "Amaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1rwz-72bc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1rwz/?lang=tamil",
-      "title": "Kottukkaali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6i18-c3b0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6i18/?lang=tamil",
-      "title": "Ayalaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7C8l-ee60.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7C8l/?lang=tamil",
-      "title": "Maaveeran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4gpM-c6cf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4gpM/?lang=tamil",
-      "title": "Don Tamil"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/sa3L-c583",
-      "page_url": "https://einthusan.tv/movie/watch/sa3L/?lang=tamil",
-      "title": "Doctor"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5mU6-e0da.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5mU6/?lang=tamil",
-      "title": "Hero"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3CnU-5b06.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3CnU/?lang=tamil",
-      "title": "Namma Veettu Pillai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1v4r-a593.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1v4r/?lang=tamil",
-      "title": "Mr. Local"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6FmL-391d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6FmL/?lang=tamil",
-      "title": "Seema Raja"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5Hzc-5ac9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5Hzc/?lang=tamil",
-      "title": "Velaikkaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9073-ae89.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9073/?lang=tamil",
-      "title": "Remo"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2842-5551.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2842/?lang=tamil",
-      "title": "Rajini Murugan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2605-4f75.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2605/?lang=tamil",
-      "title": "Kaaki Sattai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2566-6815.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2566/?lang=tamil",
-      "title": "Vennila Veedu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2538-6316.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2538/?lang=tamil",
-      "title": "Maan Karate"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1670-4be4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1670/?lang=tamil",
-      "title": "Ethir Neechal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3d52-3c00.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3d52/?lang=tamil",
-      "title": "Coolie"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5goY-2e08.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5goY/?lang=tamil",
-      "title": "Vettaiyan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/34ku-bc3b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/34ku/?lang=tamil",
-      "title": "Lal Salaam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6E5G-70df.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6E5G/?lang=tamil",
-      "title": "Jailer"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2aFb-26be",
-      "page_url": "https://einthusan.tv/movie/watch/2aFb/?lang=tamil",
-      "title": "Annaatthe"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7uqZ-572c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7uqZ/?lang=tamil",
-      "title": "Darbar"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1ne5-e0a5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1ne5/?lang=tamil",
-      "title": "Petta"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4M74-fc98.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4M74/?lang=tamil",
-      "title": "Kaala"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9038-47b7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9038/?lang=tamil",
-      "title": "Kabali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2571-e5de.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2571/?lang=tamil",
-      "title": "Lingaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2441-7198.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2441/?lang=tamil",
-      "title": "Kochadaiiyaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0044-e725.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0044/?lang=tamil",
-      "title": "Enthiran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0177-9631.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0177/?lang=tamil",
-      "title": "Kuselan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0111-50f7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0111/?lang=tamil",
-      "title": "Sivaji"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0055-2313.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0055/?lang=tamil",
-      "title": "Chandramukhi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0140-dc7c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0140/?lang=tamil",
-      "title": "Baba"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0019-92cf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0019/?lang=tamil",
-      "title": "Padayappa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0241-304b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0241/?lang=tamil",
-      "title": "Arunachalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0018-9626.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0018/?lang=tamil",
-      "title": "Muthu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0192-c510.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0192/?lang=tamil",
-      "title": "Baasha"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0228-28f1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0228/?lang=tamil",
-      "title": "Veera"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0316-efda.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0316/?lang=tamil",
-      "title": "Ulaipali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0083-c2f4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0083/?lang=tamil",
-      "title": "Yejaman"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0410-d68c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0410/?lang=tamil",
-      "title": "Pandiyan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0011-0b3c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0011/?lang=tamil",
-      "title": "Annamalai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0279-3fd1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0279/?lang=tamil",
-      "title": "Mannan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0310-29cc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0310/?lang=tamil",
-      "title": "Thalapathi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0428-6c3a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0428/?lang=tamil",
-      "title": "Nattukku Oru Nallavan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0250-9c06.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0250/?lang=tamil",
-      "title": "Dharma Durai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3jpM-ce71.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3jpM/?lang=tamil",
-      "title": "Arasan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0429-f02a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0429/?lang=tamil",
-      "title": "Panakkaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/37n4-9298.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/37n4/?lang=tamil",
-      "title": "Thug Life"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1kTx-7208.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1kTx/?lang=tamil",
-      "title": "Amaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1nJq-2cff.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1nJq/?lang=tamil",
-      "title": "Indian 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1S86-022d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1S86/?lang=tamil",
-      "title": "Kalki 2898-AD"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4UPi-d097.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4UPi/?lang=tamil",
-      "title": "Vikram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2MsW-e582.gif",
-      "page_url": "https://einthusan.tv/movie/watch/2MsW/?lang=tamil",
-      "title": "Kadaram Kondan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/73g7-8b67.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/73g7/?lang=tamil",
-      "title": "Vishwaroopam II"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2774-e895.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2774/?lang=tamil",
-      "title": "Thoongaa Vanam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2691-b910.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2691/?lang=tamil",
-      "title": "Papanasam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2649-3dde.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2649/?lang=tamil",
-      "title": "Uttama Villain"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1561-9d7a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1561/?lang=tamil",
-      "title": "Vishwaroopam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0604-cd67.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0604/?lang=tamil",
-      "title": "Anbulla Kamal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0126-d882.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0126/?lang=tamil",
-      "title": "Manmadan Ambu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0050-83a9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0050/?lang=tamil",
-      "title": "Unnaipol Oruvan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0056-d1ba.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0056/?lang=tamil",
-      "title": "Dasavathaaram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0081-eab8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0081/?lang=tamil",
-      "title": "Vettaiyaadu Vilaiyaadu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0146-291c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0146/?lang=tamil",
-      "title": "Mumbai Express"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0129-5f5a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0129/?lang=tamil",
-      "title": "Vasool Raja MBBS"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0099-68a5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0099/?lang=tamil",
-      "title": "Virumaandi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1116-cda8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1116/?lang=tamil",
-      "title": "Nala Damayanthi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0120-64a2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0120/?lang=tamil",
-      "title": "Anbe Sivam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0080-6c23.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0080/?lang=tamil",
-      "title": "Panchathantiram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0164-845e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0164/?lang=tamil",
-      "title": "Pammal K. Sambandam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0235-23e5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0235/?lang=tamil",
-      "title": "Aalavandhan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0073-9872.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0073/?lang=tamil",
-      "title": "Thenali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0257-1371.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0257/?lang=tamil",
-      "title": "Hey Ram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0262-5e78.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0262/?lang=tamil",
-      "title": "Kaathala Kaathala"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0090-84f9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0090/?lang=tamil",
-      "title": "Avvai Shanmughi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0066-3c78.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0066/?lang=tamil",
-      "title": "Indian"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0270-e524.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0270/?lang=tamil",
-      "title": "Kuruthipunal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0275-7053.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0275/?lang=tamil",
-      "title": "Mahanadi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0116-33ac.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0116/?lang=tamil",
-      "title": "Aadukalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0271-3984.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0271/?lang=tamil",
-      "title": "Kutty"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0224-381a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0224/?lang=tamil",
-      "title": "Uthama Puthiran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0127-2125.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0127/?lang=tamil",
-      "title": "Padikathavan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0038-c215.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0038/?lang=tamil",
-      "title": "Yaaradi Nee Mohini"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0293-ff1b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0293/?lang=tamil",
-      "title": "Parattai Engira Azhagu Sundaram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0138-67c1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0138/?lang=tamil",
-      "title": "Thiruvilaiyaadal Aarambam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1063-ce17.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1063/?lang=tamil",
-      "title": "Pudhupettai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0052-95bf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0052/?lang=tamil",
-      "title": "Adhu Oru Kana Kaalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0012-8cbe.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0012/?lang=tamil",
-      "title": "Devathayai Kanden"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0020-1eea.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0020/?lang=tamil",
-      "title": "Puthu Kotaiyilirinthu Sarvanan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0035-af38.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0035/?lang=tamil",
-      "title": "Thiruda Thirudi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2V1b-6e01.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2V1b/?lang=tamil",
-      "title": "Thulluvadho Ilamai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3gi4-77c9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3gi4/?lang=tamil",
-      "title": "Master Tamil"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/274k-a3c0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/274k/?lang=tamil",
-      "title": "Bigil"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/559E-7360.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/559E/?lang=tamil",
-      "title": "Sarkar"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3QoX-3033.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3QoX/?lang=tamil",
-      "title": "Mersal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7Hgm-a330.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7Hgm/?lang=tamil",
-      "title": "Bairavaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2937-2069.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2937/?lang=tamil",
-      "title": "Theri"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2772-3adf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2772/?lang=tamil",
-      "title": "Puli"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2536-1777.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2536/?lang=tamil",
-      "title": "Kaththi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2279-926e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2279/?lang=tamil",
-      "title": "Jilla"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2xQm-8702.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2xQm/?lang=tamil",
-      "title": "Thalaivaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1327-224f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1327/?lang=tamil",
-      "title": "Thuppakki"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0614-3009.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0614/?lang=tamil",
-      "title": "Nanban"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0600-a683.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0600/?lang=tamil",
-      "title": "Velayudham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0031-1622.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0031/?lang=tamil",
-      "title": "Kavalan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0342-0325.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0342/?lang=tamil",
-      "title": "Sura"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0327-8a54.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0327/?lang=tamil",
-      "title": "Villu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0325-c537.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0325/?lang=tamil",
-      "title": "Vettaikaaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0047-d2dd.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0047/?lang=tamil",
-      "title": "Kuruvi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0064-cc50.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0064/?lang=tamil",
-      "title": "Azhagiya Tamil Magan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0089-0a3d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0089/?lang=tamil",
-      "title": "Pokkiri"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0100-c075.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0100/?lang=tamil",
-      "title": "Aathi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0112-1d98.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0112/?lang=tamil",
-      "title": "Sivakasi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0308-3c9e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0308/?lang=tamil",
-      "title": "Sukran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0022-771a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0022/?lang=tamil",
-      "title": "Sachein"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0128-0284.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0128/?lang=tamil",
-      "title": "Thirupaachi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0125-827e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0125/?lang=tamil",
-      "title": "Madurey"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0079-ff6f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0079/?lang=tamil",
-      "title": "Ghilli"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0055-2313.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0055/?lang=tamil",
-      "title": "Chandramukhi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1334-d824.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1334/?lang=tamil",
-      "title": "Naduvula Konjam Pakkatha Kaanom"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/ZHGp-6038.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/ZHGp/?lang=tamil",
-      "title": "Maari 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2605-4f75.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2605/?lang=tamil",
-      "title": "Kaaki Sattai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0037-d004.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0037/?lang=tamil",
-      "title": "Singam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2Fbx-1ce4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2Fbx/?lang=tamil",
-      "title": "96"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2588-9858.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2588/?lang=tamil",
-      "title": "Yennai Arindhaal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2609-74c1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2609/?lang=tamil",
-      "title": "Aambala"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/BCPE-25e8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/BCPE/?lang=tamil",
-      "title": "Viswasam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4UPi-d097.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4UPi/?lang=tamil",
-      "title": "Vikram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2659-6814.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2659/?lang=tamil",
-      "title": "Kakka Muttai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2712-587f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2712/?lang=tamil",
-      "title": "Maari"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2756-b451.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2756/?lang=tamil",
-      "title": "Naanum Rowdy Dhaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1678-3f1c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1678/?lang=tamil",
-      "title": "Neram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2aTX-5620.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2aTX/?lang=tamil",
-      "title": "Ratsasan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0111-50f7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0111/?lang=tamil",
-      "title": "Sivaji"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2562-fb25.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2562/?lang=tamil",
-      "title": "Poojai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7Hgm-a330.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7Hgm/?lang=tamil",
-      "title": "Bairavaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1ne5-e0a5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1ne5/?lang=tamil",
-      "title": "Petta"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/66ih-e021.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/66ih/?lang=tamil",
-      "title": "Thiruchitrambalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0044-e725.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0044/?lang=tamil",
-      "title": "Enthiran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9038-47b7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9038/?lang=tamil",
-      "title": "Kabali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1331-d111.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1331/?lang=tamil",
-      "title": "Neethaane En Ponvasantham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6BU0-8a3a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6BU0/?lang=tamil",
-      "title": "Baahubali 2: The Conclusion"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1694-3629.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1694/?lang=tamil",
-      "title": "Maryan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2741-8470.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2741/?lang=tamil",
-      "title": "Baahubali: The Beginning (Tamil)"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2214-2f58.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2214/?lang=tamil",
-      "title": "Varuthapadatha Valibar Sangam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2254-6bec.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2254/?lang=tamil",
-      "title": "Arrambam"
-    },
-	    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2691-b910.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2691/?lang=tamil",
-      "title": "Papanasam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0089-0a3d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0089/?lang=tamil",
-      "title": "Pokkiri"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1670-4be4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1670/?lang=tamil",
-      "title": "Ethir Neechal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2221-90c4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2221/?lang=tamil",
-      "title": "Moodar Koodam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2571-e5de.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2571/?lang=tamil",
-      "title": "Lingaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2842-5551.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2842/?lang=tamil",
-      "title": "Rajini Murugan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0579-7111.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0579/?lang=tamil",
-      "title": "Mankatha"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9073-ae89.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9073/?lang=tamil",
-      "title": "Remo"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2785-b4f3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2785/?lang=tamil",
-      "title": "Vedalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1usm-3175.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1usm/?lang=tamil",
-      "title": "Varisu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1699-2316.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1699/?lang=tamil",
-      "title": "Pattathu Yaanai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3ZQP-7d50.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3ZQP/?lang=tamil",
-      "title": "Thadam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1302-7117.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1302/?lang=tamil",
-      "title": "English Vinglish"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2306-3d8a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2306/?lang=tamil",
-      "title": "Pulivaal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1299-8e8b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1299/?lang=tamil",
-      "title": "Maatraan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2744-e054.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2744/?lang=tamil",
-      "title": "Vasuvum Saravananum Onna Padichavanga"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0113-53d4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0113/?lang=tamil",
-      "title": "Something Something Unakkum Enakkum"
-    },
-	    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0934-ae4a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0934/?lang=tamil",
-      "title": "Saguni"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1332-b165.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1332/?lang=tamil",
-      "title": "Kumki"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4STi-2862.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4STi/?lang=tamil",
-      "title": "Velaiilla Pattadhari 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4QSl-a33f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4QSl/?lang=tamil",
-      "title": "Kolamaavu Kokila"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0041-e510.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0041/?lang=tamil",
-      "title": "Anniyan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6tv3-e1ea.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6tv3/?lang=tamil",
-      "title": "Leo Tamil"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0029-23c8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0029/?lang=tamil",
-      "title": "Boss Engira Bhaskaran"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2595-b314.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2595/?lang=tamil",
-      "title": "Anegan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0026-b8ab.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0026/?lang=tamil",
-      "title": "Vaaranam Aayiram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6E5G-70df.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6E5G/?lang=tamil",
-      "title": "Jailer"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2669-62de.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2669/?lang=tamil",
-      "title": "Massu Engira Masilamani"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0079-ff6f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0079/?lang=tamil",
-      "title": "Ghilli"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0019-92cf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0019/?lang=tamil",
-      "title": "Padayappa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2526-ec92.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2526/?lang=tamil",
-      "title": "Velaiyilla Pattathari"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0614-3009.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0614/?lang=tamil",
-      "title": "Nanban"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1691-ce80.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1691/?lang=tamil",
-      "title": "Ambikapathy"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1665-2f71.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1665/?lang=tamil",
-      "title": "Udhayam NH4"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0043-b348.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0043/?lang=tamil",
-      "title": "Aadhavan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2649-3dde.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2649/?lang=tamil",
-      "title": "Uttama Villain"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1vh7-09ed.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1vh7/?lang=tamil",
-      "title": "Maanaadu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/50P5-a36a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/50P5/?lang=tamil",
-      "title": "Imaikkaa Nodigal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1689-b066.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1689/?lang=tamil",
-      "title": "Thillu Mullu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0327-8a54.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0327/?lang=tamil",
-      "title": "Villu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0331-6ceb.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0331/?lang=tamil",
-      "title": "Alex Pandian"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2774-e895.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2774/?lang=tamil",
-      "title": "Thoongaa Vanam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2835-b06a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2835/?lang=tamil",
-      "title": "Thanga Magan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1700-ab7d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1700/?lang=tamil",
-      "title": "Sonna Puriyathu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6gF4-f571.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6gF4/?lang=tamil",
-      "title": "Theeran Adhigaaram Ondru"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3KSd-9f84.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3KSd/?lang=tamil",
-      "title": "Vada Chennai"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2569-bb2f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2569/?lang=tamil",
-      "title": "Meaghamann"
-    },
-	    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1687-9bbb.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1687/?lang=tamil",
-      "title": "Kutti Puli"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6jiA-f94b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6jiA/?lang=tamil",
-      "title": "Love Today"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0753-ffcc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0753/?lang=tamil",
-      "title": "3 - Moonu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7Mln-9367.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7Mln/?lang=tamil",
-      "title": "Adanga Maru"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2729-1db8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2729/?lang=tamil",
-      "title": "Sakalakala Vallavan 2015"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1656-820a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1656/?lang=tamil",
-      "title": "Kedi Billa Killadi Ranga"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/41m3-1b5f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/41m3/?lang=tamil",
-      "title": "Super Deluxe"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1349-6466.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1349/?lang=tamil",
-      "title": "Kanna Laddu Thinna Aasaiya"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0217-9f75.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0217/?lang=tamil",
-      "title": "Santosh Subramaniam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1273-8b97.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1273/?lang=tamil",
-      "title": "Sundarapandian"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0600-a683.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0600/?lang=tamil",
-      "title": "Velayudham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0220-77e8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0220/?lang=tamil",
-      "title": "Thillalangadi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2668-51c9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2668/?lang=tamil",
-      "title": "36 Vayadhinile"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1GMg-2d51.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1GMg/?lang=tamil",
-      "title": "Sandakozhi 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2924-6b14.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2924/?lang=tamil",
-      "title": "Manithan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/AtVV-0bb5.png",
-      "page_url": "https://einthusan.tv/movie/watch/AtVV/?lang=tamil",
-      "title": "Bogan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0807-3b46.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0807/?lang=tamil",
-      "title": "Oru Kal Oru Kannadi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1647-1d80.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1647/?lang=tamil",
-      "title": "Chennaiyil Oru Naal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1UlQ-1edd.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1UlQ/?lang=tamil",
-      "title": "Kanaa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2385-f392.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2385/?lang=tamil",
-      "title": "Ennamo Nadakkudhu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2918-615b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2918/?lang=tamil",
-      "title": "Vetrivel"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0155-53b2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0155/?lang=tamil",
-      "title": "Sillunu Oru Kaadhal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1Ud5-f534.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1Ud5/?lang=tamil",
-      "title": "Sardar"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1oaE-94f3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1oaE/?lang=tamil",
-      "title": "Saamy 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6FmL-391d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6FmL/?lang=tamil",
-      "title": "Seema Raja"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1YUm-de73.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1YUm/?lang=tamil",
-      "title": "Singam 3"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2690-05af.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2690/?lang=tamil",
-      "title": "Romeo Juliet"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1ueW-6c85.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1ueW/?lang=tamil",
-      "title": "Beast Tamil"
-    },
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2223-7856.jpg","page_url":"https://einthusan.tv/movie/watch/2223/?lang=tamil","title":"Raja Rani"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2786-70f7.jpg","page_url":"https://einthusan.tv/movie/watch/2786/?lang=tamil","title":"Thani Oruvan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2937-2069.jpg","page_url":"https://einthusan.tv/movie/watch/2937/?lang=tamil","title":"Theri"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1671-52bd.jpg","page_url":"https://einthusan.tv/movie/watch/1671/?lang=tamil","title":"Soodhu Kavvuum"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2639-bcaf.jpg","page_url":"https://einthusan.tv/movie/watch/2639/?lang=tamil","title":"O Kadhal Kanmani"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1561-9d7a.jpg","page_url":"https://einthusan.tv/movie/watch/1561/?lang=tamil","title":"Vishwaroopam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3QoX-3033.jpg","page_url":"https://einthusan.tv/movie/watch/3QoX/?lang=tamil","title":"Mersal"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2909-173a.jpg","page_url":"https://einthusan.tv/movie/watch/2909/?lang=tamil","title":"Thozha"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/559E-7360.jpg","page_url":"https://einthusan.tv/movie/watch/559E/?lang=tamil","title":"Sarkar"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1692-e04a.jpg","page_url":"https://einthusan.tv/movie/watch/1692/?lang=tamil","title":"Singam 2 (Tamil)"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1usm-3175.jpg","page_url":"https://einthusan.tv/movie/watch/1usm/?lang=tamil","title":"Varisu"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1ueW-6c85.jpg","page_url":"https://einthusan.tv/movie/watch/1ueW/?lang=tamil","title":"Beast Tamil"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/5i4m-929c.jpg","page_url":"https://einthusan.tv/movie/watch/5i4m/?lang=tamil","title":"Kuberaa"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/4l4Y-eb9b.jpg","page_url":"https://einthusan.tv/movie/watch/4l4Y/?lang=tamil","title":"Raayan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/4JAA-33ac.jpg","page_url":"https://einthusan.tv/movie/watch/4JAA/?lang=tamil","title":"Captain Miller"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1qP8-5b09.jpg","page_url":"https://einthusan.tv/movie/watch/1qP8/?lang=tamil","title":"Vaathi"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/66ih-e021.jpg","page_url":"https://einthusan.tv/movie/watch/66ih/?lang=tamil","title":"Thiruchitrambalam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/6c7h-5dc0.jpg","page_url":"https://einthusan.tv/movie/watch/6c7h/?lang=tamil","title":"Karnan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/6bNK-ef58.jpg","page_url":"https://einthusan.tv/movie/watch/6bNK/?lang=tamil","title":"Asuran"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3KSd-9f84.jpg","page_url":"https://einthusan.tv/movie/watch/3KSd/?lang=tamil","title":"Vada Chennai"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/41m3-1b5f.jpg","page_url":"https://einthusan.tv/movie/watch/41m3/?lang=tamil","title":"Super Deluxe"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/6tv3-e1ea.jpg","page_url":"https://einthusan.tv/movie/watch/6tv3/?lang=tamil","title":"Leo Tamil"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/6E5G-70df.jpg","page_url":"https://einthusan.tv/movie/watch/6E5G/?lang=tamil","title":"Jailer"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/4UPi-d097.jpg","page_url":"https://einthusan.tv/movie/watch/4UPi/?lang=tamil","title":"Vikram"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1kTx-7208.jpg","page_url":"https://einthusan.tv/movie/watch/1kTx/?lang=tamil","title":"Amaran"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/37n4-9298.jpg","page_url":"https://einthusan.tv/movie/watch/37n4/?lang=tamil","title":"Thug Life"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/5goY-2e08.jpg","page_url":"https://einthusan.tv/movie/watch/5goY/?lang=tamil","title":"Vettaiyan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0044-e725.jpg","page_url":"https://einthusan.tv/movie/watch/0044/?lang=tamil","title":"Enthiran"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0111-50f7.jpg","page_url":"https://einthusan.tv/movie/watch/0111/?lang=tamil","title":"Sivaji"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0019-92cf.jpg","page_url":"https://einthusan.tv/movie/watch/0019/?lang=tamil","title":"Padayappa"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0079-ff6f.jpg","page_url":"https://einthusan.tv/movie/watch/0079/?lang=tamil","title":"Ghilli"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/274k-a3c0.jpg","page_url":"https://einthusan.tv/movie/watch/274k/?lang=tamil","title":"Bigil"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3gi4-77c9.jpg","page_url":"https://einthusan.tv/movie/watch/3gi4/?lang=tamil","title":"Master Tamil"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2aTX-5620.jpg","page_url":"https://einthusan.tv/movie/watch/2aTX/?lang=tamil","title":"Ratsasan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2691-b910.jpg","page_url":"https://einthusan.tv/movie/watch/2691/?lang=tamil","title":"Papanasam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/BCPE-25e8.jpg","page_url":"https://einthusan.tv/movie/watch/BCPE/?lang=tamil","title":"Viswasam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/9038-47b7.jpg","page_url":"https://einthusan.tv/movie/watch/9038/?lang=tamil","title":"Kabali"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0041-e510.jpg","page_url":"https://einthusan.tv/movie/watch/0041/?lang=tamil","title":"Anniyan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0066-3c78.jpg","page_url":"https://einthusan.tv/movie/watch/0066/?lang=tamil","title":"Indian"}
   ]
 };
 const malayalamData = {
@@ -4779,271 +3333,21 @@ const malayalamData = {
   "language": "malayalam",
   "has_more": true,
   "movies": [
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2473-2cf9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2473/?lang=malayalam",
-      "title": "Bangalore Days"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1t88-319c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1t88/?lang=malayalam",
-      "title": "Premalu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3175-1154.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3175/?lang=malayalam",
-      "title": "Premam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2384-f1d0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2384/?lang=malayalam",
-      "title": "Drishyam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2185-d05d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2185/?lang=malayalam",
-      "title": "Ohm Shanthi Oshaana"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2902-c7e3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2902/?lang=malayalam",
-      "title": "Charlie"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2964-5728.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2964/?lang=malayalam",
-      "title": "Kali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2939-fd2e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2939/?lang=malayalam",
-      "title": "Action Hero Biju"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1929-b207.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1929/?lang=malayalam",
-      "title": "ABCD: American-Born Confused Desi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9012-fd32.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9012/?lang=malayalam",
-      "title": "Jacobinte Swargarajyam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2913-83b6.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2913/?lang=malayalam",
-      "title": "Two Countries"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3147-9162.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3147/?lang=malayalam",
-      "title": "Oru Vadakkan Selfie"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2474-d8ce.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2474/?lang=malayalam",
-      "title": "How Old Are You"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4i3K-4445.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4i3K/?lang=malayalam",
-      "title": "Hridayam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2988-e0fc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2988/?lang=malayalam",
-      "title": "Maheshinte Prathikaaram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2148-d60b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2148/?lang=malayalam",
-      "title": "Mumbai Police"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2502-a490.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2502/?lang=malayalam",
-      "title": "Vikramadithyan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3cSj-6f60.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3cSj/?lang=malayalam",
-      "title": "Lucifer"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2286-6d3d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2286/?lang=malayalam",
-      "title": "Memories"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3114-c9bb.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3114/?lang=malayalam",
-      "title": "100 Days Of Love"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3CDy-c531.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3CDy/?lang=malayalam",
-      "title": "Anjaam Pathiraa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/31c8-541c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/31c8/?lang=malayalam",
-      "title": "Aavesham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6GcS-db5d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6GcS/?lang=malayalam",
-      "title": "Jomonte Suvisheshangal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9021-cc9b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9021/?lang=malayalam",
-      "title": "Kammatipaadam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3182-8f5d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3182/?lang=malayalam",
-      "title": "Bhaskar The Rascal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2998-d74b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2998/?lang=malayalam",
-      "title": "James & Alice"
-	},
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2152-763d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2152/?lang=malayalam",
-      "title": "Neelakasham Pachakadal Chuvanna Bhoomi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2339-8dde.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2339/?lang=malayalam",
-      "title": "Punyalan Agarbattis"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3177-14d9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3177/?lang=malayalam",
-      "title": "Thattathin Marayathu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2864-7def.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2864/?lang=malayalam",
-      "title": "Anarkali"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2ZJw-df9e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2ZJw/?lang=malayalam",
-      "title": "Rekhachithram"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2853-fdf2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2853/?lang=malayalam",
-      "title": "Amar Akbar Anthony"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3Tcu-42b4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3Tcu/?lang=malayalam",
-      "title": "Kumbalangi Nights"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5qVL-e1c4.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5qVL/?lang=malayalam",
-      "title": "Mayaanadhi"
-	},
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7uSR-921a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7uSR/?lang=malayalam",
-      "title": "Sookshma Darshini"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2940-352b.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2940/?lang=malayalam",
-      "title": "Puthiya Niyamam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3056-9ede.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3056/?lang=malayalam",
-      "title": "1983"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1841-ac40.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1841/?lang=malayalam",
-      "title": "Ayalum Njanum Thammil"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5U0M-b1ee.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5U0M/?lang=malayalam",
-      "title": "Oppam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6Q0i-750d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6Q0i/?lang=malayalam",
-      "title": "Thalavan"
-	},
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4Fbk-f9e7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4Fbk/?lang=malayalam",
-      "title": "Jaya Jaya Jaya Jaya Hey"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/gamU-ccb2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/gamU/?lang=malayalam",
-      "title": "Thudarum"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3154-8823.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3154/?lang=malayalam",
-      "title": "Ivide"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4vaC-1547.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4vaC/?lang=malayalam",
-      "title": "Abraham Ozler"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3W0w-9dd9.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3W0w/?lang=malayalam",
-      "title": "Salute"
-	},
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/71Oy-2acc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/71Oy/?lang=malayalam",
-      "title": "Varathan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4TPG-9193.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4TPG/?lang=malayalam",
-      "title": "Kishkindha Kaandam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1QMS-f890.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1QMS/?lang=malayalam",
-      "title": "Ponman"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2363-7ccb.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2363/?lang=malayalam",
-      "title": "London Bridge"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/4YfR-d0b6.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/4YfR/?lang=malayalam",
-      "title": "Munthirivallikal Thalirkkumbol"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/6cSk-6567.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/6cSk/?lang=malayalam",
-      "title": "Neru"
-	},
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2328-adf3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2328/?lang=malayalam",
-      "title": "Oru Indian Pranayakatha"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2874-51c0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2874/?lang=malayalam",
-      "title": "Ennu Ninte Moideen"
-    }
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2473-2cf9.jpg","page_url":"https://einthusan.tv/movie/watch/2473/?lang=malayalam","title":"Bangalore Days"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1t88-319c.jpg","page_url":"https://einthusan.tv/movie/watch/1t88/?lang=malayalam","title":"Premalu"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3175-1154.jpg","page_url":"https://einthusan.tv/movie/watch/3175/?lang=malayalam","title":"Premam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2384-f1d0.jpg","page_url":"https://einthusan.tv/movie/watch/2384/?lang=malayalam","title":"Drishyam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2185-d05d.jpg","page_url":"https://einthusan.tv/movie/watch/2185/?lang=malayalam","title":"Ohm Shanthi Oshaana"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2902-c7e3.jpg","page_url":"https://einthusan.tv/movie/watch/2902/?lang=malayalam","title":"Charlie"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3cSj-6f60.jpg","page_url":"https://einthusan.tv/movie/watch/3cSj/?lang=malayalam","title":"Lucifer"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3CDy-c531.jpg","page_url":"https://einthusan.tv/movie/watch/3CDy/?lang=malayalam","title":"Anjaam Pathiraa"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/31c8-541c.jpg","page_url":"https://einthusan.tv/movie/watch/31c8/?lang=malayalam","title":"Aavesham"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/3Tcu-42b4.jpg","page_url":"https://einthusan.tv/movie/watch/3Tcu/?lang=malayalam","title":"Kumbalangi Nights"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/4i3K-4445.jpg","page_url":"https://einthusan.tv/movie/watch/4i3K/?lang=malayalam","title":"Hridayam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2988-e0fc.jpg","page_url":"https://einthusan.tv/movie/watch/2988/?lang=malayalam","title":"Maheshinte Prathikaaram"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/4TPG-9193.jpg","page_url":"https://einthusan.tv/movie/watch/4TPG/?lang=malayalam","title":"Kishkindha Kaandam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/gamU-ccb2.jpg","page_url":"https://einthusan.tv/movie/watch/gamU/?lang=malayalam","title":"Thudarum"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2874-51c0.jpg","page_url":"https://einthusan.tv/movie/watch/2874/?lang=malayalam","title":"Ennu Ninte Moideen"}
   ]
 };
 const hindiData = {
@@ -5051,246 +3355,19 @@ const hindiData = {
   "language": "hindi",
   "has_more": true,
   "movies": [
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2728-6ddc.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2728/?lang=hindi",
-      "title": "Dil Dhadakne Do"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2wt9-5a7c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2wt9/?lang=hindi",
-      "title": "Dunki"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5mCU-1be3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5mCU/?lang=hindi",
-      "title": "Jawan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5Zt9-e3fa.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5Zt9/?lang=hindi",
-      "title": "Pathaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2B37-bcb5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2B37/?lang=hindi",
-      "title": "Zero"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2d7m-031c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2d7m/?lang=hindi",
-      "title": "Jab Harry Met Sejal"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/75K1-38ab.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/75K1/?lang=hindi",
-      "title": "Raees"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1d0X-4a60.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1d0X/?lang=hindi",
-      "title": "Dear Zindagi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/26vf-81ec.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/26vf/?lang=hindi",
-      "title": "Tutak Tutak Tutiya"
-    },
-	      {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1342-3f2d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1342/?lang=hindi",
-      "title": "Jab Tak Hai Jaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0723-1296.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0723/?lang=hindi",
-      "title": "Don 2"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0674-9ed7.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0674/?lang=hindi",
-      "title": "Ra One"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0738-1a6f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0738/?lang=hindi",
-      "title": "My Name Is Khan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0489-427d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0489/?lang=hindi",
-      "title": "Dulha Mil Gaya"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1501-8ad3.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1501/?lang=hindi",
-      "title": "Aao Wish Karein"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0553-0749.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0553/?lang=hindi",
-      "title": "Rab Ne Bana Di Jodi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0629-a21d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0629/?lang=hindi",
-      "title": "Bhoothnath"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0543-d913.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0543/?lang=hindi",
-      "title": "Om Shanti Om"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1204-2497.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1204/?lang=hindi",
-      "title": "Chak De! India"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0981-0fee.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0981/?lang=hindi",
-      "title": "Kal Ho Naa Ho"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0965-77fa.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0965/?lang=hindi",
-      "title": "Chalte Chalte"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0561-7859.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0561/?lang=hindi",
-      "title": "Saathiya"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0571-fb6c.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0571/?lang=hindi",
-      "title": "Veer Zaara"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1611-bb50.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1611/?lang=hindi",
-      "title": "Shakti The Power"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0480-da47.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0480/?lang=hindi",
-      "title": "Devdas"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2840-8ef2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2840/?lang=hindi",
-      "title": "Dilwale"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2504-f4c1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2504/?lang=hindi",
-      "title": "Happy New Year"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/7757-d043.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/7757/?lang=hindi",
-      "title": "Chennai Express"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2277-b511.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2277/?lang=hindi",
-      "title": "Goliyon Ki Raasleela Ram Leela"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2887-0159.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2887/?lang=hindi",
-      "title": "Bajirao Mastani"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2886-155f.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2886/?lang=hindi",
-      "title": "Sanam Teri Kasam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0442-a982.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0442/?lang=hindi",
-      "title": "Kabhi Khushi Kabhie Gham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2356-53ed.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2356/?lang=hindi",
-      "title": "Queen"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2737-3b94.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2737/?lang=hindi",
-      "title": "Bajrangi Bhaijaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2840-8ef2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2840/?lang=hindi",
-      "title": "Dilwale"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2907-4ca8.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2907/?lang=hindi",
-      "title": "Kapoor And Sons"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2464-8daa.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2464/?lang=hindi",
-      "title": "Humpty Sharma Ki Dulhania"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2679-1113.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2679/?lang=hindi",
-      "title": "Tanu Weds Manu Returns"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1342-3f2d.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1342/?lang=hindi",
-      "title": "Jab Tak Hai Jaan"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9097-c32a.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9097/?lang=hindi",
-      "title": "Ae Dil Hai Mushkil"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1335-06a5.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1335/?lang=hindi",
-      "title": "Student Of The Year"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2714-c9a1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2714/?lang=hindi",
-      "title": "Hamari Adhuri Kahani"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2626-0a35.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2626/?lang=hindi",
-      "title": "Dum Laga Ke Haisha"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2504-f4c1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2504/?lang=hindi",
-      "title": "Happy New Year"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2738-6806.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2738/?lang=hindi",
-      "title": "Baahubali: The Beginning"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/0488-b828.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/0488/?lang=hindi",
-      "title": "Dilwale Dulhania Le Jayenge"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2931-04ff.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2931/?lang=hindi",
-      "title": "Ki & Ka"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2678-d9e2.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2678/?lang=hindi",
-      "title": "Piku"
-    }
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2728-6ddc.jpg","page_url":"https://einthusan.tv/movie/watch/2728/?lang=hindi","title":"Dil Dhadakne Do"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2wt9-5a7c.jpg","page_url":"https://einthusan.tv/movie/watch/2wt9/?lang=hindi","title":"Dunki"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/5mCU-1be3.jpg","page_url":"https://einthusan.tv/movie/watch/5mCU/?lang=hindi","title":"Jawan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/5Zt9-e3fa.jpg","page_url":"https://einthusan.tv/movie/watch/5Zt9/?lang=hindi","title":"Pathaan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2887-0159.jpg","page_url":"https://einthusan.tv/movie/watch/2887/?lang=hindi","title":"Bajirao Mastani"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2737-3b94.jpg","page_url":"https://einthusan.tv/movie/watch/2737/?lang=hindi","title":"Bajrangi Bhaijaan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0442-a982.jpg","page_url":"https://einthusan.tv/movie/watch/0442/?lang=hindi","title":"Kabhi Khushi Kabhie Gham"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/0488-b828.jpg","page_url":"https://einthusan.tv/movie/watch/0488/?lang=hindi","title":"Dilwale Dulhania Le Jayenge"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/7757-d043.jpg","page_url":"https://einthusan.tv/movie/watch/7757/?lang=hindi","title":"Chennai Express"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2840-8ef2.jpg","page_url":"https://einthusan.tv/movie/watch/2840/?lang=hindi","title":"Dilwale"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1342-3f2d.jpg","page_url":"https://einthusan.tv/movie/watch/1342/?lang=hindi","title":"Jab Tak Hai Jaan"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2356-53ed.jpg","page_url":"https://einthusan.tv/movie/watch/2356/?lang=hindi","title":"Queen"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2678-d9e2.jpg","page_url":"https://einthusan.tv/movie/watch/2678/?lang=hindi","title":"Piku"}
   ]
 };
 const teluguData = {
@@ -5298,116 +3375,19 @@ const teluguData = {
   "has_more": true,
   "language": "telugu",
   "movies": [
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1RPl-17d0.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1RPl/?lang=telugu",
-      "title": "Arjun Reddy"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2555-9162.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2555/?lang=telugu",
-      "title": "Manam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2RmX-c102.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2RmX/?lang=telugu",
-      "title": "Geetha Govindham"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2858-ec05.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2858/?lang=telugu",
-      "title": "Son Of Satyamurthy"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9050-2d38.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9050/?lang=telugu",
-      "title": "A Aa"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9020-6dee.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9020/?lang=telugu",
-      "title": "Brahmotsavam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2875-0756.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2875/?lang=telugu",
-      "title": "Soggade Chinni Nayana"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2925-1b71.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2925/?lang=telugu",
-      "title": "Srimanthudu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2911-0846.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2911/?lang=telugu",
-      "title": "Oopiri"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2999-ee99.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2999/?lang=telugu",
-      "title": "Nenu Sailaja"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9041-581e.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9041/?lang=telugu",
-      "title": "Kalyana Vaibhogame"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/9036-9bbe.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/9036/?lang=telugu",
-      "title": "Baahubali: The Beginning (Telugu)"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/205O-badb.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/205O/?lang=telugu",
-      "title": "Bharat Ane Nenu"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/5viA-9a98.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/5viA/?lang=telugu",
-      "title": "Rangasthalam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1887-98d1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1887/?lang=telugu",
-      "title": "Mirchi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2953-6ebf.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2953/?lang=telugu",
-      "title": "Krishna Gaadi Veera Prema Gaadha"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2922-1d38.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2922/?lang=telugu",
-      "title": "Kshanam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2573-4e95.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2573/?lang=telugu",
-      "title": "Loukyam"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/2880-a0ef.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/2880/?lang=telugu",
-      "title": "Bhale Bhale Magadivoy"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/1378-dec1.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/1378/?lang=telugu",
-      "title": "Julayi"
-    },
-    {
-      "img_url": "https://img.einthusan.io/etv/s3/moviecovers/3032-3dca.jpg",
-      "page_url": "https://einthusan.tv/movie/watch/3032/?lang=telugu",
-      "title": "1: Nenokkadine"
-    }
-
-  ],
-  "next_page": 2,
-  "page": 1
-};       
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1RPl-17d0.jpg","page_url":"https://einthusan.tv/movie/watch/1RPl/?lang=telugu","title":"Arjun Reddy"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2555-9162.jpg","page_url":"https://einthusan.tv/movie/watch/2555/?lang=telugu","title":"Manam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2RmX-c102.jpg","page_url":"https://einthusan.tv/movie/watch/2RmX/?lang=telugu","title":"Geetha Govindham"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2858-ec05.jpg","page_url":"https://einthusan.tv/movie/watch/2858/?lang=telugu","title":"Son Of Satyamurthy"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/9050-2d38.jpg","page_url":"https://einthusan.tv/movie/watch/9050/?lang=telugu","title":"A Aa"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/205O-badb.jpg","page_url":"https://einthusan.tv/movie/watch/205O/?lang=telugu","title":"Bharat Ane Nenu"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/5viA-9a98.jpg","page_url":"https://einthusan.tv/movie/watch/5viA/?lang=telugu","title":"Rangasthalam"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/2925-1b71.jpg","page_url":"https://einthusan.tv/movie/watch/2925/?lang=telugu","title":"Srimanthudu"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/9036-9bbe.jpg","page_url":"https://einthusan.tv/movie/watch/9036/?lang=telugu","title":"Baahubali: The Beginning (Telugu)"},
+    {"img_url":"https://img.einthusan.io/etv/s3/moviecovers/1378-dec1.jpg","page_url":"https://einthusan.tv/movie/watch/1378/?lang=telugu","title":"Julayi"}
+  ]
+};
+        
         // State management for pagination
         let searchState = { query: '', lang: 'tamil', page: 1, hasMore: false };
         // Auto-search debounce (1s) + load 2 pages at a time
@@ -5426,7 +3406,6 @@ const teluguData = {
             input.addEventListener('input', () => {
                 clearTimeout(_searchDebounce);
                 _searchDebounce = setTimeout(async () => {
-                    // Start a new search and prefetch the next page for fuller results
                     await doSearch(1, true);
                     await prefetchNextSearchPageIfAvailable();
                 }, 1000);
@@ -5434,7 +3413,6 @@ const teluguData = {
         }
 
         async function loadMoreSearch() {
-            // Load 2 pages per click
             const firstPage = searchState.page + 1;
             await doSearch(firstPage, false);
             if (searchState.hasMore) {
@@ -5448,8 +3426,6 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
         // UTILS
         // ===============================================
         function getRedirectUrl(einthusanUrl) {
-            // Extracts ID from: https://einthusan.tv/movie/watch/2223/?lang=tamil
-            // Returns: https://thirai.me/watch?film=2223
             const match = einthusanUrl.match(/\/watch\/([a-zA-Z0-9]+)\//);
             if(match && match[1]) {
                 return `https://thirai.me/watch?film=${match[1]}`;
@@ -5470,7 +3446,6 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
         // ===============================================
         let filterPopupOpen = false;
         function setFilterActive(on){
-            // If Filter is active (popup open or filter-results), make it the ONLY highlighted nav item.
             if(!!on){
                 document.querySelectorAll('.nav-link, .nav-item, .side-item').forEach(el => el.classList.remove('active'));
             }
@@ -5482,7 +3457,6 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
 
         // ===============================================
         // LANGUAGE CATEGORY (Recent/Popular) FULL SCREEN
-        // Uses: (API_BASE)/language/(language)?category=recent|popular&page=(number)
         // ===============================================
         const langCategoryState = { lang: null, category: 'recent', page: 1, hasMore: false };
 
@@ -5492,7 +3466,6 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
             langCategoryState.page = 1;
             langCategoryState.hasMore = false;
 
-            // toggle pills
             document.getElementById('langcat-recent')?.classList.toggle('active', category==='recent');
             document.getElementById('langcat-popular')?.classList.toggle('active', category==='popular');
 
@@ -5548,7 +3521,7 @@ let actorState = { type: 'actor', actorCode: '', lang: 'tamil', actorName: '', p
                 if(clear) grid.innerHTML = '<p style="color:#777; width:100%; text-align:center; padding:16px 0;">Failed to load</p>';
                 langCategoryState.hasMore = false;
             }finally{
-setLoadMoreBtnLoading(loadMoreBtn, false);
+                setLoadMoreBtnLoading(loadMoreBtn, false);
                 loadMoreBtn.disabled = !langCategoryState.hasMore;
                 loadMoreBtn.classList.toggle('visually-hidden', !langCategoryState.hasMore);
             }
@@ -5569,11 +3542,6 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
             }
         }
 
-        
-
-        // ===============================================
-        // LOAD MORE BUTTON (circle) - loading helper
-        // ===============================================
         function setLoadMoreBtnLoading(btnOrId, isLoading){
             const btn = (typeof btnOrId === 'string') ? document.getElementById(btnOrId) : btnOrId;
             if(!btn) return;
@@ -5582,7 +3550,8 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
             if(isLoading) btn.setAttribute('aria-busy', 'true');
             else btn.removeAttribute('aria-busy');
         }
-// ===============================================
+
+        // ===============================================
         // VIEW/NAVIGATION LOGIC
         // ===============================================
         let historyStack = ['home'];
@@ -5592,26 +3561,22 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
             const navItems = document.querySelectorAll('.nav-link, .nav-item, .side-item');
             const backBtn = document.getElementById('back-button');
 
-            // 1. Manage History
             const currentTab = historyStack[historyStack.length - 1];
             if (tab !== currentTab) {
                 if (tab === 'home' || tab === 'collections' || tab === 'search') {
-                    historyStack = [tab]; // Start new main path
+                    historyStack = [tab];
                 } else {
-                    historyStack.push(tab); // Push secondary view (like actor-details)
+                    historyStack.push(tab);
                 }
             }
             
-            // 2. Manage Views and Back Button
             views.forEach(e => e.classList.add('visually-hidden'));
             navItems.forEach(e => e.classList.remove('active'));
             
             document.getElementById(`view-${tab}`).classList.remove('visually-hidden');
 
-            // Keep the main tab highlighted even when opening secondary views (like actor-details / filter-results)
             const mainTab = historyStack[0];
 
-            // Highlight Filter button when using filter feature
             if (tab === 'filter-results') {
                 setFilterActive(true);
             } else if (!filterPopupOpen) {
@@ -5619,16 +3584,15 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
             }
             if(document.getElementById(`btm-${mainTab}`)) document.getElementById(`btm-${mainTab}`).classList.add('active');
             if(document.getElementById(`desk-${mainTab}`)) document.getElementById(`desk-${mainTab}`).classList.add('active');
-            // Prevent sticky focus styling on desktop sidebar buttons
             const deskBtn = document.getElementById(`desk-${mainTab}`);
-            if (deskBtn) { setTimeout(() => deskBtn.blur(), 0); }// Show back button for secondary views (anything that isn't a main bottom-nav tab)
+            if (deskBtn) { setTimeout(() => deskBtn.blur(), 0); }
+
             if (historyStack.length > 1) {
                 backBtn.classList.remove('visually-hidden');
             } else {
                 backBtn.classList.add('visually-hidden');
             }
 
-            // 3. Init Collections on first load
             if(tab === 'collections' && document.getElementById('grid-actors').children.length === 0) {
                 renderFeatured();
                 filterGrid('tamil', document.querySelector('.filter-tab[data-lang="tamil"]'));
@@ -5637,7 +3601,7 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
 
         function goBack() {
             if (historyStack.length > 1) {
-                historyStack.pop(); // remove current secondary view
+                historyStack.pop();
                 const prevTab = historyStack[historyStack.length - 1];
                 switchTab(prevTab);
             } else if (historyStack.length === 1 && historyStack[0] !== 'home') {
@@ -5646,162 +3610,138 @@ setLoadMoreBtnLoading(loadMoreBtn, false);
         }
         
         // ===============================================
-        // FEATURED SLIDESHOW LOGIC (Blurred Carousel)
+        // FEATURED SLIDESHOW LOGIC
         // ===============================================
         let currentFeaturedMode = 'actors';
-        // Infinite-loop state for Featured slider
         let featuredLoop = { baseCount: 0, loopWidth: 0, isJumping: false, navAnimating: false };
 
+        function renderFeatured() {
+            const list = actorsData.castData.featured[currentFeaturedMode] || [];
+            const slider = document.getElementById('featured-slider');
+            if (!slider) return;
 
-        
-function renderFeatured() {
-    const list = actorsData.castData.featured[currentFeaturedMode] || [];
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return;
+            slider.innerHTML = '';
+            featuredLoop.baseCount = list.length;
+            featuredLoop.loopWidth = 0;
+            featuredLoop.isJumping = false;
 
-    slider.innerHTML = '';
-    featuredLoop.baseCount = list.length;
-    featuredLoop.loopWidth = 0;
-    featuredLoop.isJumping = false;
+            const loopList = list.length ? [...list, ...list, ...list] : [];
 
-    // Build 3 copies so we can "wrap" seamlessly.
-    const loopList = list.length ? [...list, ...list, ...list] : [];
+            loopList.forEach(actor => {
+                const div = document.createElement('div');
+                div.className = 'featured-card';
+                div.innerHTML = `
+                    <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
+                    <div class="featured-overlay">
+                        <div class="featured-name">${actor.name}</div>
+                    </div>
+                `;
+                div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
+                slider.appendChild(div);
+            });
 
-    loopList.forEach(actor => {
-        const div = document.createElement('div');
-        div.className = 'featured-card';
-        div.innerHTML = `
-            <img src="${actor.image_url}" loading="lazy" alt="${actor.name}">
-            <div class="featured-overlay">
-                <div class="featured-name">${actor.name}</div>
-            </div>
-        `;
-        div.onclick = () => openActorDetails(actor.actor_code, 'tamil', actor.name);
-        slider.appendChild(div);
-    });
+            slider.removeEventListener('scroll', handleFeaturedScroll);
+            slider.addEventListener('scroll', handleFeaturedScroll, { passive: true });
 
-    // Re-attach scroll listener to update active slide + loop behavior
-    slider.removeEventListener('scroll', handleFeaturedScroll);
-    slider.addEventListener('scroll', handleFeaturedScroll, { passive: true });
+            requestAnimationFrame(() => {
+                const cards = slider.querySelectorAll('.featured-card');
+                if (!cards.length || featuredLoop.baseCount === 0) return;
 
-    // Jump to the middle copy so scrolling "both ways" loops.
-    requestAnimationFrame(() => {
-        const cards = slider.querySelectorAll('.featured-card');
-        if (!cards.length || featuredLoop.baseCount === 0) return;
+                const middleFirst = featuredLoop.baseCount;
+                const c = cards[middleFirst];
 
-        const middleFirst = featuredLoop.baseCount; // first card of the middle copy
-        const c = cards[middleFirst];
+                const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
+                
+                const prevBehavior = slider.style.scrollBehavior;
+                slider.style.scrollBehavior = 'auto';
+                slider.scrollLeft = target;
+                requestAnimationFrame(() => { slider.style.scrollBehavior = prevBehavior || ''; });
 
-        // Center that card
-        const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
-        
-        // Prevent any "auto glide" on load: force instant positioning
-        const prevBehavior = slider.style.scrollBehavior;
-        slider.style.scrollBehavior = 'auto';
-        slider.scrollLeft = target;
-        // Restore (CSS is auto, but keep this safe)
-        requestAnimationFrame(() => { slider.style.scrollBehavior = prevBehavior || ''; });
+                const loopWidth = cards[featuredLoop.baseCount].offsetLeft - cards[0].offsetLeft;
+                featuredLoop.loopWidth = Math.max(1, loopWidth);
 
-
-        // Measure the width of one full copy (distance between copy 0 start and copy 1 start)
-        const loopWidth = cards[featuredLoop.baseCount].offsetLeft - cards[0].offsetLeft;
-        featuredLoop.loopWidth = Math.max(1, loopWidth);
-
-        handleFeaturedScroll(); // Initial call to set active slide
-    });
-}
-
-
-function handleFeaturedScroll() {
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return;
-
-    // --- Infinite loop wrap ---
-    if (featuredLoop.baseCount > 0 && featuredLoop.loopWidth > 0 && !featuredLoop.isJumping && !featuredLoop.navAnimating) {
-        const left = slider.scrollLeft;
-
-        // If we drift too far into the first copy, jump forward one copy.
-        if (left < featuredLoop.loopWidth * 0.5) {
-            featuredLoop.isJumping = true;
-            slider.scrollLeft = left + featuredLoop.loopWidth;
-            requestAnimationFrame(() => { featuredLoop.isJumping = false; });
+                handleFeaturedScroll();
+            });
         }
-        // If we drift too far into the last copy, jump backward one copy.
-        else if (left > featuredLoop.loopWidth * 1.5) {
-            featuredLoop.isJumping = true;
-            slider.scrollLeft = left - featuredLoop.loopWidth;
-            requestAnimationFrame(() => { featuredLoop.isJumping = false; });
+
+        function handleFeaturedScroll() {
+            const slider = document.getElementById('featured-slider');
+            if (!slider) return;
+
+            if (featuredLoop.baseCount > 0 && featuredLoop.loopWidth > 0 && !featuredLoop.isJumping && !featuredLoop.navAnimating) {
+                const left = slider.scrollLeft;
+
+                if (left < featuredLoop.loopWidth * 0.5) {
+                    featuredLoop.isJumping = true;
+                    slider.scrollLeft = left + featuredLoop.loopWidth;
+                    requestAnimationFrame(() => { featuredLoop.isJumping = false; });
+                }
+                else if (left > featuredLoop.loopWidth * 1.5) {
+                    featuredLoop.isJumping = true;
+                    slider.scrollLeft = left - featuredLoop.loopWidth;
+                    requestAnimationFrame(() => { featuredLoop.isJumping = false; });
+                }
+            }
+
+            const cards = slider.querySelectorAll('.featured-card');
+            const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
+
+            cards.forEach(card => {
+                const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+                const distance = Math.abs(scrollCenter - cardCenter);
+                const tolerance = card.offsetWidth * 0.4;
+
+                if (distance < tolerance) card.classList.add('active-slide');
+                else card.classList.remove('active-slide');
+            });
         }
-    }
 
-    // --- Active slide scaling ---
-    const cards = slider.querySelectorAll('.featured-card');
-    const scrollCenter = slider.scrollLeft + (slider.offsetWidth / 2);
+        function featuredScrollToIndex(targetIndex){
+            const slider = document.getElementById('featured-slider');
+            if (!slider) return;
+            const cards = slider.querySelectorAll('.featured-card');
+            if (!cards.length) return;
 
-    cards.forEach(card => {
-        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-        const distance = Math.abs(scrollCenter - cardCenter);
+            const i = Math.max(0, Math.min(cards.length - 1, targetIndex));
+            const c = cards[i];
+            const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
 
-        // Determine if the card is close enough to the center to be "active"
-        const tolerance = card.offsetWidth * 0.4;
-
-        if (distance < tolerance) card.classList.add('active-slide');
-        else card.classList.remove('active-slide');
-    });
-}
-
-
-
-// ===============================================
-// FEATURED CAROUSEL NAV (desktop arrows)
-// ===============================================
-function featuredScrollToIndex(targetIndex){
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return;
-    const cards = slider.querySelectorAll('.featured-card');
-    if (!cards.length) return;
-
-    const i = Math.max(0, Math.min(cards.length - 1, targetIndex));
-    const c = cards[i];
-    const target = c.offsetLeft - (slider.clientWidth / 2) + (c.offsetWidth / 2);
-
-    // Animate on arrow navigation (desktop) without triggering loop-jumps mid-animation
-    featuredLoop.navAnimating = true;
-    clearTimeout(featuredLoop._navTimer);
-    slider.scrollTo({ left: target, behavior: 'smooth' });
-    featuredLoop._navTimer = setTimeout(() => { featuredLoop.navAnimating = false; }, 520);
-}
-
-function featuredGetClosestIndex(){
-    const slider = document.getElementById('featured-slider');
-    if (!slider) return 0;
-    const cards = slider.querySelectorAll('.featured-card');
-    if (!cards.length) return 0;
-
-    const center = slider.scrollLeft + (slider.clientWidth / 2);
-    let bestIdx = 0;
-    let bestDist = Infinity;
-
-    cards.forEach((card, idx) => {
-        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-        const dist = Math.abs(center - cardCenter);
-        if (dist < bestDist){
-            bestDist = dist;
-            bestIdx = idx;
+            featuredLoop.navAnimating = true;
+            clearTimeout(featuredLoop._navTimer);
+            slider.scrollTo({ left: target, behavior: 'smooth' });
+            featuredLoop._navTimer = setTimeout(() => { featuredLoop.navAnimating = false; }, 520);
         }
-    });
-    return bestIdx;
-}
 
-function featuredNext(){
-    const idx = featuredGetClosestIndex();
-    featuredScrollToIndex(idx + 1);
-}
-function featuredPrev(){
-    const idx = featuredGetClosestIndex();
-    featuredScrollToIndex(idx - 1);
-}
-function toggleFeatured() {
+        function featuredGetClosestIndex(){
+            const slider = document.getElementById('featured-slider');
+            if (!slider) return 0;
+            const cards = slider.querySelectorAll('.featured-card');
+            if (!cards.length) return 0;
+
+            const center = slider.scrollLeft + (slider.clientWidth / 2);
+            let bestIdx = 0;
+            let bestDist = Infinity;
+
+            cards.forEach((card, idx) => {
+                const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+                const dist = Math.abs(center - cardCenter);
+                if (dist < bestDist){
+                    bestDist = dist;
+                    bestIdx = idx;
+                }
+            });
+            return bestIdx;
+        }
+
+        function featuredNext(){
+            const idx = featuredGetClosestIndex();
+            featuredScrollToIndex(idx + 1);
+        }
+        function featuredPrev(){
+            const idx = featuredGetClosestIndex();
+            featuredScrollToIndex(idx - 1);
+        }
+        function toggleFeatured() {
             currentFeaturedMode = currentFeaturedMode === 'actors' ? 'actresses' : 'actors';
             const bg = document.getElementById('feat-toggle-bg');
             const btn1 = document.getElementById('btn-actors');
@@ -5817,7 +3757,6 @@ function toggleFeatured() {
                 btn2.classList.remove('active');
             }
             renderFeatured();
-            // Also refresh the "Browse by Language" grid to match the toggle
             try {
                 const activeTab = document.querySelector('#lang-filter-tabs .filter-tab.active');
                 const activeLang = activeTab ? activeTab.getAttribute('data-lang') : 'tamil';
@@ -5825,13 +3764,12 @@ function toggleFeatured() {
             } catch(e) { console.error(e); }
         }
 
-// ===============================================
+        // ===============================================
         // ACTOR DETAILS & PAGINATION
         // ===============================================
         async function openActorDetails(actorCode, lang, actorName) {
             switchTab('actor-details');
             
-            // Set initial state
             actorState = { 
                 type: 'actor',
                 actorCode: actorCode, 
@@ -5842,12 +3780,10 @@ function toggleFeatured() {
             };
             document.getElementById('actor-details-title').textContent = `${actorName}`;
             
-            // Clear previous results and load page 1
             document.getElementById('actor-movies-grid').innerHTML = '';
             document.getElementById('load-more-actor').classList.add('visually-hidden');
             await fetchActorPage(1, true);
         }
-
 
         async function openComposerDetails(composerCode, lang, composerName) {
             switchTab('actor-details');
@@ -5862,7 +3798,6 @@ function toggleFeatured() {
             };
             document.getElementById('actor-details-title').textContent = `${composerName}`;
 
-            // Clear previous results and load page 1
             document.getElementById('actor-movies-grid').innerHTML = '';
             document.getElementById('load-more-actor').classList.add('visually-hidden');
             await fetchActorPage(1, true);
@@ -5883,17 +3818,15 @@ function toggleFeatured() {
 
             try {
                 let d;
-if (type === 'actor' && actorCode === '3TKYioHCAF') {
-    const r = await fetch('/vijay.json');
-    d = await r.json();
-    d.has_more = false; 
-} else if (type === 'actor' && actorCode === '5vCobOqDDx') {
-    const r = await fetch('/Dhanush.json');
-    d = await r.json();
-    d.has_more = false;
-}
-                // ✅ All other actors continue to use the normal API
-                else {
+                if (type === 'actor' && actorCode === '3TKYioHCAF') {
+                    const r = await fetch('/vijay.json');
+                    d = await r.json();
+                    d.has_more = false; 
+                } else if (type === 'actor' && actorCode === '5vCobOqDDx') {
+                    const r = await fetch('/Dhanush.json');
+                    d = await r.json();
+                    d.has_more = false;
+                } else {
                     const basePath = (type === 'composer') ? 'composers' : 'actors';
                     const url = `${API_BASE}/${basePath}/${lang}/${actorCode}?page=${pageNumber}`;
                     const r = await fetch(url);
@@ -5907,7 +3840,6 @@ if (type === 'actor' && actorCode === '3TKYioHCAF') {
                         grid.appendChild(createCard(m));
                     });
                     
-                    // Update state
                     actorState.page = pageNumber;
                     actorState.hasMore = d.has_more || false;
                 } else if (clear) {
@@ -5947,7 +3879,6 @@ if (type === 'actor' && actorCode === '3TKYioHCAF') {
             
             grid.innerHTML = '';
             for(const actor of actors) {
-                // Simplified card, TMDB ID is used for poster fetch only
                 let img = 'https://via.placeholder.com/150';
                 try {
                     const r = await fetch(`${TMDB_BASE}/person/${actor.tmdb_id}/images?api_key=${API_KEY}`);
@@ -5964,34 +3895,47 @@ if (type === 'actor' && actorCode === '3TKYioHCAF') {
                     </div>
                     <div style="font-size:0.85rem; color:#ccc;">${actor.name}</div>
                 `;
-                // On click, use actor_code and language
                 div.onclick = () => openActorDetails(actor.actor_code, actor.language, actor.name);
                 grid.appendChild(div);
             }
 
-            // Render Music Directors for this language
             await renderMusicDirectors(lang);
         }
 
         // ===============================================
-        // SEARCH LOGIC (Dedicated Button)
+        // SEARCH LOGIC
         // ===============================================
-// TMDB SEARCH CARD (separate from TMDB home rows)
-// NOTE: we already have a createTmdbCard() used by the TMDB home rows below.
-// This one is dedicated to the Search tab to avoid name collisions.
-function createTmdbSearchCard(type, item) {
-    const div = document.createElement('div');
-    div.className = 'card';
+        function createTmdbSearchCard(type, item) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            const title = item.title || item.name || '';
+            div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" loading="lazy" alt="${title}">`;
+            div.onclick = () => {
+                if (type === 'movie') window.location.href = `movie.html?${item.id}`;
+                else window.location.href = `show.html?${item.id}`;
+            };
+            return div;
+        }
 
-    const title = item.title || item.name || '';
-    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" loading="lazy" alt="${title}">`;
-
-    div.onclick = () => {
-        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
-        else window.location.href = `show.html?${item.id}`;
-    };
-    return div;
-}
+        // ===============================================
+        // ANIME SEARCH CARD
+        // ===============================================
+        function createAnimeSearchCard(item) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            const title = (item.title && (item.title.english || item.title.romaji)) || '';
+            const poster = item.coverImage && (item.coverImage.large || item.coverImage.medium) || '';
+            div.innerHTML = `<img src="${poster}" loading="lazy" alt="${title}">`;
+            div.onclick = () => {
+                const isMovie = item.format === 'MOVIE';
+                if (isMovie) {
+                    window.location.href = `anime.html?id=${item.id}&dub=true`;
+                } else {
+                    window.location.href = `anime.html?id=${item.id}&ep=1&dub=true`;
+                }
+            };
+            return div;
+        }
 
         async function doSearch(pageNumber, isNewSearch) {
             const q = document.getElementById('search-input').value.trim();
@@ -6006,81 +3950,94 @@ function createTmdbSearchCard(type, item) {
             }
 
             if (isNewSearch) {
-                // Start new search
                 searchState.query = q;
                 searchState.lang = lang;
                 searchState.page = 1;
                 searchState.hasMore = false;
-                grid.innerHTML = ''; // Clear old results
+                grid.innerHTML = '';
                 setLoading('search-results', true, false);
                 loadMoreBtn.classList.add('visually-hidden');
             } else {
-                // Load more
                 setLoadMoreBtnLoading(loadMoreBtn, true);
             }
 
             try {
-                
-                if (searchState.lang === 'tmdb') {
-                    const movieUrl = `${TMDB_BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
-                    const tvUrl = `${TMDB_BASE}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
-
-                    const [mr, tr] = await Promise.all([fetch(movieUrl), fetch(tvUrl)]);
-                    const [md, td] = await Promise.all([mr.json(), tr.json()]);
-
-                    if (isNewSearch) grid.innerHTML = ''; // Clear "Loading..."
-
-                    const movieResults = (md.results || []).filter(x => x && x.poster_path);
-                    const tvResults = (td.results || []).filter(x => x && x.poster_path);
-
-                    // Section headers only on new search OR first page
-                    if (pageNumber === 1) {
-                        if (movieResults.length) {
-                            const h = document.createElement('div');
-                            h.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:8px 2px 0;';
-                            h.textContent = 'Movies';
-                            grid.appendChild(h);
+                // ===== ANIME SEARCH via AniList =====
+                if (searchState.lang === 'anime') {
+                    const perPage = 20;
+                    const aniQuery = `
+                        query ($search: String, $page: Int, $perPage: Int) {
+                            Page(page: $page, perPage: $perPage) {
+                                pageInfo { hasNextPage }
+                                media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
+                                    id
+                                    title { romaji english }
+                                    format
+                                    coverImage { large medium }
+                                }
+                            }
                         }
-                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
+                    `;
+                    const aniRes = await fetch(ANILIST_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({ query: aniQuery, variables: { search: searchState.query, page: pageNumber, perPage } })
+                    });
+                    const aniData = await aniRes.json();
 
-                        if (tvResults.length) {
-                            const h2 = document.createElement('div');
-                            h2.style.cssText = 'grid-column:1/-1;color:#bbb;font-weight:600;margin:12px 2px 0;';
-                            h2.textContent = 'TV Shows';
-                            grid.appendChild(h2);
-                        }
-                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
-                    } else {
-                        // Load more: append to the end without repeating headers
-                        movieResults.forEach(item => grid.appendChild(createTmdbSearchCard('movie', item)));
-                        tvResults.forEach(item => grid.appendChild(createTmdbSearchCard('tv', item)));
-                    }
+                    if (isNewSearch) grid.innerHTML = '';
 
-                    // Pagination
-                    const movieHasMore = (md.total_pages || 0) > pageNumber;
-                    const tvHasMore = (td.total_pages || 0) > pageNumber;
+                    const results = (aniData.data && aniData.data.Page && aniData.data.Page.media) || [];
+                    results.forEach(item => {
+                        if (!item || !item.coverImage) return;
+                        grid.appendChild(createAnimeSearchCard(item));
+                    });
+
                     searchState.page = pageNumber;
-                    searchState.hasMore = movieHasMore || tvHasMore;
+                    searchState.hasMore = !!(aniData.data && aniData.data.Page && aniData.data.Page.pageInfo && aniData.data.Page.pageInfo.hasNextPage);
 
-                    if (!movieResults.length && !tvResults.length && isNewSearch) {
-                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in TMDB.</p>`;
+                    if (!results.length && isNewSearch) {
+                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No anime found for "${q}".</p>`;
                     }
-
-                    return; // Skip non-TMDB backend search
+                    return;
                 }
 
-const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
+                // ===== TMDB SEARCH =====
+                if (searchState.lang === 'tmdb_movies' || searchState.lang === 'tmdb_tv') {
+                    const isMovieSearch = searchState.lang === 'tmdb_movies';
+                    const searchType = isMovieSearch ? 'movie' : 'tv';
+                    const searchLabel = isMovieSearch ? 'TMDB Movies' : 'TMDB TV';
+                    const searchUrl = `${TMDB_BASE}/search/${searchType}?api_key=${API_KEY}&query=${encodeURIComponent(searchState.query)}&page=${pageNumber}&include_adult=false`;
+
+                    const r = await fetch(searchUrl);
+                    const d = await r.json();
+
+                    if (isNewSearch) grid.innerHTML = '';
+
+                    const results = (d.results || []).filter(x => x && x.poster_path);
+                    results.forEach(item => grid.appendChild(createTmdbSearchCard(searchType, item)));
+
+                    searchState.page = pageNumber;
+                    searchState.hasMore = (d.total_pages || 0) > pageNumber;
+
+                    if (!results.length && isNewSearch) {
+                        grid.innerHTML = `<p style="color:#777; width:100%; text-align:center;">No results found for "${q}" in ${searchLabel}.</p>`;
+                    }
+                    return;
+                }
+
+                // ===== STANDARD SEARCH =====
+                const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searchState.query)}&page=${pageNumber}`;
                 const r = await fetch(url);
                 const d = await r.json();
 
-                if (isNewSearch) grid.innerHTML = ''; // Clear "Loading..."
+                if (isNewSearch) grid.innerHTML = '';
 
                 if(d.movies && d.movies.length > 0) {
                     d.movies.forEach(m => {
                         grid.appendChild(createCard(m));
                     });
                     
-                    // Update state and pagination
                     searchState.page = pageNumber;
                     searchState.hasMore = d.has_more || false;
                 } else if (isNewSearch) {
@@ -6125,7 +4082,6 @@ const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searc
                     if(logo) {
                         renderBanner(tmdbItem, logo, movie.page_url);
                     } else {
-                        // Skip if no logo/banner
                         tryBanner(moviesList, index + 1);
                     }
                 } else {
@@ -6159,30 +4115,27 @@ const url = `${API_BASE}/search/${searchState.lang}?q=${encodeURIComponent(searc
             
             rowData.forEach(([id, list]) => {
                 const el = document.getElementById(id);
-                // The refresh button simulates loading the next page (whilst still showing the previous one)
-                // We achieve this by appending the entire list again to show 'more content'
                 const contentToRender = append ? list : list;
                 contentToRender.forEach(item => el.appendChild(createCard(item)));
             });
         }
 
-// ===============================================
-// INIT & EVENT LISTENERS
-// ===============================================
-async function init() {
-    renderRows(false); // Initial render
-    initBanner();
-    setupAutoSearch();
+        // ===============================================
+        // INIT & EVENT LISTENERS
+        // ===============================================
+        async function init() {
+            renderRows(false);
+            initBanner();
+            setupAutoSearch();
 
-    // API Wakeup Call
-    try {
-        const response = await fetch('https://thirai-watch.onrender.com');
-        const status = await response.text();
-        console.log("api reading:", status.trim()); // Should log "ok"
-    } catch (error) {
-        console.error("api reading:", error);
-    }
-}
+            try {
+                const response = await fetch('https://thirai-watch.onrender.com');
+                const status = await response.text();
+                console.log("api reading:", status.trim());
+            } catch (error) {
+                console.error("api reading:", error);
+            }
+        }
 
         window.addEventListener('scroll', () => {
             const h = document.getElementById('main-header');
@@ -6226,19 +4179,16 @@ if ('serviceWorker' in navigator) {
 (function () {
     const CACHE_KEY = 'thirai_continue_watching';
 
-
     function updateContinueTitle() {
         const title = document.getElementById('cw-title');
         if (!title) return;
-        const isLandscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
-        title.textContent = isLandscape ? 'Continue' : 'Continue';
+        title.textContent = 'Continue';
     }
 
     function renderContinueWatching() {
         const row = document.getElementById('continue-watching-row');
         const title = document.getElementById('cw-title');
         if (!row || !title) return;
-
 
         updateContinueTitle();
         let items = [];
@@ -6268,9 +4218,7 @@ if ('serviceWorker' in navigator) {
                 <div class="remove-watch-item">&times;</div>
             `;
 
-            card.onclick = () => {
-                window.location.href = item.url;
-            };
+            card.onclick = () => { window.location.href = item.url; };
 
             card.querySelector('.remove-watch-item').onclick = (e) => {
                 e.stopPropagation();
@@ -6289,7 +4237,6 @@ if ('serviceWorker' in navigator) {
     }
 
     document.addEventListener('DOMContentLoaded', renderContinueWatching);
-
     document.addEventListener('DOMContentLoaded', updateContinueTitle);
     window.addEventListener('resize', updateContinueTitle);
     window.addEventListener('orientationchange', updateContinueTitle);
@@ -6299,7 +4246,6 @@ if ('serviceWorker' in navigator) {
 <script>
 /* ================================
    HOME MOVIES OVERRIDE (CACHE)
-   This overrides ONLY home rows
 ================================ */
 const HOME_LANGS = [
   { id: "row-tamil", lang: "tamil", title: "Tamil" },
@@ -6350,42 +4296,106 @@ async function loadHomeFromCache() {
   }
 }
 
+// ===============================================
+// ANIME HOME ROW (AniList - Popular TV + Movies)
+// ===============================================
+async function loadAnimeHomeRow() {
+  const row = document.getElementById('row-anime');
+  if (!row) return;
 
+  row.innerHTML = '';
+
+  const aniQuery = `
+    query {
+      tvAnime: Page(page: 1, perPage: 20) {
+        media(type: ANIME, sort: POPULARITY_DESC, format_in: [TV, TV_SHORT, ONA, OVA]) {
+          id
+          format
+          title { romaji english }
+          coverImage { large medium }
+        }
+      }
+      movieAnime: Page(page: 1, perPage: 10) {
+        media(type: ANIME, sort: POPULARITY_DESC, format: MOVIE) {
+          id
+          format
+          title { romaji english }
+          coverImage { large medium }
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetch(ANILIST_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ query: aniQuery })
+    });
+    const data = await res.json();
+
+    const tvList = (data.data && data.data.tvAnime && data.data.tvAnime.media) || [];
+    const movieList = (data.data && data.data.movieAnime && data.data.movieAnime.media) || [];
+
+    // Interleave TV and movies: TV first, then movies mixed in
+    const combined = [...tvList];
+    movieList.forEach((m, i) => {
+      const insertAt = Math.min(i * 3 + 2, combined.length);
+      combined.splice(insertAt, 0, m);
+    });
+
+    combined.forEach(item => {
+      if (!item || !item.coverImage) return;
+
+      const poster = item.coverImage.large || item.coverImage.medium || '';
+      const title = (item.title && (item.title.english || item.title.romaji)) || '';
+      const isMovie = item.format === 'MOVIE';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<img src="${poster}" loading="lazy" alt="${title}">`;
+      card.onclick = () => {
+        if (isMovie) {
+          window.location.href = `anime.html?id=${item.id}&dub=true`;
+        } else {
+          window.location.href = `anime.html?id=${item.id}&ep=1&dub=true`;
+        }
+      };
+      row.appendChild(card);
+    });
+
+  } catch (e) {
+    console.error('Failed loading anime row:', e);
+  }
+}
 
 // ===============================================
-// TMDB HOME ROWS (Premium / isUnlocked)
-// - Hidden by default
-// - Shown only if localStorage.isUnlocked === true (also supports "true")
-// - Uses /movie/popular and /tv/popular
-// - Clicking cards goes to movie.html?{tmdbId} / show.html?{tmdbId}
+// TMDB HOME ROWS
 // ===============================================
 function isTmdbUnlocked() {
-  // localStorage values are usually strings; support both boolean and "true"
   return (localStorage.isUnlocked === true || localStorage.isUnlocked === 'true');
 }
 
-// Hide TMDB from the search language selector unless unlocked
 function applyTmdbSearchVisibility() {
   const sel = document.getElementById('lang-select');
   if (!sel) return;
 
   const unlocked = isTmdbUnlocked();
-  const tmdbOpt = sel.querySelector('option[value="tmdb"]');
+  const tmdbMovieOpt = sel.querySelector('option[value="tmdb_movies"]');
+  const tmdbTvOpt = sel.querySelector('option[value="tmdb_tv"]');
 
   if (!unlocked) {
-    if (tmdbOpt) tmdbOpt.remove();
-    // If somehow TMDB was selected via cached state/URL, fall back to first option
-    if (sel.value === 'tmdb') sel.selectedIndex = 0;
+    if (tmdbMovieOpt) tmdbMovieOpt.remove();
+    if (tmdbTvOpt) tmdbTvOpt.remove();
+    if (sel.value === 'tmdb_movies' || sel.value === 'tmdb_tv') sel.selectedIndex = 0;
   }
 }
 
-// Run now if DOM is ready, otherwise on DOMContentLoaded
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', applyTmdbSearchVisibility);
 } else {
   applyTmdbSearchVisibility();
 }
-
 
 function showTmdbHomeRows(show) {
   const movieTitle = document.getElementById('tmdb-movies-title');
@@ -6408,18 +4418,18 @@ function createTmdbCard(posterPath, altText, onClick) {
   return div;
 }
 
-async function loadTmdbPopular(endpoint, rowId, type) {
+async function loadTmdbTopRated(endpoint, rowId, type) {
   const row = document.getElementById(rowId);
   if (!row) return;
 
   row.innerHTML = '';
   try {
-    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}`);
+    const r = await fetch(`${TMDB_BASE}${endpoint}?api_key=${API_KEY}&language=en-GB&page=1`);
     const d = await r.json();
 
     const results = (d && d.results) ? d.results : [];
     results.forEach(item => {
-      if (!item || !item.id || !item.poster_path) return; // hide items with no poster
+      if (!item || !item.id || !item.poster_path) return;
       const title = item.title || item.name || '';
       const card = createTmdbCard(item.poster_path, title, () => {
         if (type === 'movie') window.location.href = `movie.html?${item.id}`;
@@ -6439,17 +4449,19 @@ async function loadTmdbHomeRows() {
   }
   showTmdbHomeRows(true);
   await Promise.all([
-    loadTmdbPopular('/movie/popular', 'row-tmdb-movies', 'movie'),
-    loadTmdbPopular('/tv/popular', 'row-tmdb-tv', 'tv')
+    loadTmdbTopRated('/movie/top_rated', 'row-tmdb-movies', 'movie'),
+    loadTmdbTopRated('/tv/top_rated', 'row-tmdb-tv', 'tv')
   ]);
 }
-/* Run AFTER existing init */
+
+/* Run AFTER existing init — includes anime row */
 window.addEventListener("load", () => {
   setTimeout(async () => {
     try {
       const tasks = [];
       if (typeof loadHomeFromCache === "function") tasks.push(loadHomeFromCache());
       if (typeof loadTmdbHomeRows === "function") tasks.push(loadTmdbHomeRows());
+      if (typeof loadAnimeHomeRow === "function") tasks.push(loadAnimeHomeRow());
       if (tasks.length) {
         await Promise.allSettled(tasks);
       }
@@ -6463,17 +4475,50 @@ window.addEventListener("load", () => {
     }
   }, 500);
 });
-// data-lang-category-handler
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.section-arrow');
-            if (!btn) return;
-            const lang = btn.getAttribute('data-lang');
-            const category = btn.getAttribute('data-category') || 'recent';
-            if (!lang) return;
-            e.preventDefault();
-            e.stopPropagation();
-            try { openLanguageCategory(lang, category); } catch(err) { console.error(err); }
-        }, true);
+
+function openTmdbSearchShortcut(target) {
+  const searchSelect = document.getElementById('lang-select');
+  const searchInput = document.getElementById('search-input');
+  if (!searchSelect) return;
+
+  switchTab('search');
+
+  const option = searchSelect.querySelector(`option[value="${target}"]`);
+  if (option) {
+    searchSelect.value = target;
+  }
+
+  if (searchInput) {
+    requestAnimationFrame(() => {
+      try {
+        searchInput.focus({ preventScroll: true });
+      } catch (err) {
+        searchInput.focus();
+      }
+    });
+  }
+}
+
+document.addEventListener('click', (e) => {
+    const tmdbBtn = e.target.closest('.tmdb-shortcut-arrow');
+    if (tmdbBtn) {
+        const target = tmdbBtn.getAttribute('data-tmdb-target');
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openTmdbSearchShortcut(target);
+        return;
+    }
+
+    const btn = e.target.closest('.section-arrow');
+    if (!btn) return;
+    const lang = btn.getAttribute('data-lang');
+    const category = btn.getAttribute('data-category') || 'recent';
+    if (!lang) return;
+    e.preventDefault();
+    e.stopPropagation();
+    try { openLanguageCategory(lang, category); } catch(err) { console.error(err); }
+}, true);
     
 </script>
 
@@ -6485,7 +4530,6 @@ function scrollToTopInstant() {
   document.body.scrollTop = 0;
 }
 
-/* Wrap openView if it exists */
 if (typeof window.openView === "function") {
   const originalOpenView = window.openView;
   window.openView = function(...args) {
@@ -6494,7 +4538,6 @@ if (typeof window.openView === "function") {
   };
 }
 
-/* Handle navigation clicks */
 document.addEventListener("click", function(e) {
   const btn = e.target.closest('[data-view], .nav-item, .menu-item, .collections-btn, .home-btn, .search-btn');
   if (btn) {
@@ -6502,14 +4545,12 @@ document.addEventListener("click", function(e) {
   }
 });
 
-/* Handle history navigation */
 const originalPushState = history.pushState;
 history.pushState = function(...args) {
   originalPushState.apply(this, args);
   scrollToTopInstant();
 };
 
-/* On page load */
 window.addEventListener("load", scrollToTopInstant);
 </script>
 
@@ -6559,7 +4600,6 @@ function renderContinueWatching() {
   });
 }
 
-// Auto-run when page loads
 document.addEventListener("DOMContentLoaded", renderContinueWatching);
 </script>
 
@@ -6569,7 +4609,6 @@ document.addEventListener("DOMContentLoaded", renderContinueWatching);
   const wrapper = document.querySelector('#view-home .home-content-wrapper');
   if (!wrapper) return;
 
-  // If loadHomeFromCache exists, wrap it so we reveal rows only after it finishes (success or failure).
   const orig = window.loadHomeFromCache;
   if (typeof orig === 'function') {
     window.loadHomeFromCache = async function(...args) {
@@ -6580,7 +4619,6 @@ document.addEventListener("DOMContentLoaded", renderContinueWatching);
       }
     };
   } else {
-    // Fallback: never keep the page blank if the function isn't present for some reason.
     window.addEventListener('DOMContentLoaded', () => {
       wrapper.style.visibility = 'visible';
     });
@@ -6599,7 +4637,6 @@ document.addEventListener("DOMContentLoaded", renderContinueWatching);
     setTimeout(() => { overlay.style.display = "none"; }, 500);
   }
 
-  // Slow network hint (only meaningful while overlay is visible)
   setTimeout(() => {
     const overlay = document.getElementById("loadingOverlay");
     const slowMsg = document.getElementById("slowNetworkMessage");
@@ -6608,16 +4645,12 @@ document.addEventListener("DOMContentLoaded", renderContinueWatching);
     }
   }, 4000);
 
-  // Expose for other scripts if needed
   window.hideLoadingOverlay = hideLoadingOverlay;
-
-  // IMPORTANT: We do NOT hide on window load.
-  // The overlay is hidden after the Home rows finish loading.
 })();
 </script>
 
 
-<!-- Backup Hero Banner Script (ONLY used if TMDB fails) -->
+<!-- Backup Hero Banner Script -->
 <script>
 const HERO_FALLBACK = [
   {
@@ -6647,7 +4680,6 @@ function setHeroBanner(item) {
   link.classList.remove("visually-hidden");
 }
 
-// Wrap original loadHero safely
 const originalLoadHero = window.loadHero;
 
 window.loadHero = async function() {
@@ -6664,7 +4696,6 @@ window.loadHero = async function() {
   }
 };
 
-// Safety fallback if nothing loads after 3 seconds
 setTimeout(() => {
   const bg = document.getElementById("hero-bg");
   if (!bg || !bg.style.backgroundImage) {
@@ -6781,7 +4812,6 @@ setTimeout(() => {
     if (!row || row.dataset.arrowsInit === '1') return;
     row.dataset.arrowsInit = '1';
 
-    // wrap the row so arrows can overlay cleanly
     const wrap = document.createElement('div');
     wrap.className = 'row-wrap';
     row.parentNode.insertBefore(wrap, row);
@@ -6816,7 +4846,6 @@ setTimeout(() => {
         const max = row.scrollWidth - row.clientWidth;
         const left = row.scrollLeft;
 
-        // show/hide based on position
         if (left > 6){
           prev.classList.add('is-visible');
           wrap.classList.add('can-scroll-left');
@@ -6838,7 +4867,6 @@ setTimeout(() => {
     row.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
 
-    // initial + after images load
     update();
     setTimeout(update, 350);
     setTimeout(update, 900);
@@ -6848,24 +4876,20 @@ setTimeout(() => {
     const home = document.getElementById('view-home');
     if (!home) return;
 
-    // language/category rows on home (exclude continue-watching which can be hidden)
     const rows = home.querySelectorAll('.home-content-wrapper .row-container');
     rows.forEach(r => initOneRow(r));
   }
 
-  // run after DOM ready
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', initHomeRowArrows);
   } else {
     initHomeRowArrows();
   }
 
-  // also re-run whenever tab switches (in case home rows re-render)
   const _origSwitchTab = window.switchTab;
   if (typeof _origSwitchTab === 'function'){
     window.switchTab = function(){
       const res = _origSwitchTab.apply(this, arguments);
-      // allow any render to finish
       setTimeout(() => {
         try{ initHomeRowArrows(); }catch(e){}
       }, 50);
@@ -6879,7 +4903,6 @@ setTimeout(() => {
 <script id="watch-party-popup-script">
 /* ===============================================
    WATCH PARTY POPUP (Join in-place)
-   - Mirrors join.html behavior but as a modal
 =============================================== */
 let wpSocket = null;
 let wpCurrentRoomId = "";
@@ -6888,14 +4911,12 @@ function openWatchPartyPopup(){
   const overlay = document.getElementById('watchPartyOverlay');
   if(!overlay) return;
 
-  // Close filter popup if open (avoid stacked modals)
   try{ if(typeof filterPopupOpen !== 'undefined' && filterPopupOpen) toggleFilterPopup(); }catch(e){}
 
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
   resetWatchPartyUI(true);
 
-  // connect socket lazily
   try{
     if(!wpSocket){
       wpSocket = io("https://watchpartybackend-b5a2.onrender.com", { transports: ["websocket", "polling"] });
@@ -6905,7 +4926,6 @@ function openWatchPartyPopup(){
     console.warn("Watch Party socket init failed", err);
   }
 
-  // focus first input
   const first = overlay.querySelector('.wp-code');
   if(first) first.focus();
 }
@@ -6916,7 +4936,6 @@ function closeWatchPartyPopup(){
   overlay.classList.remove('active');
   document.body.style.overflow = '';
 
-  // disconnect to avoid leaking listeners (match join.html behavior)
   try{
     if(wpSocket){
       wpSocket.disconnect();
@@ -6978,7 +4997,7 @@ function wireWatchPartySocket(){
     if(!list) return;
     const realUsers = (users || []).filter(u => u && u.name !== "Preview_User");
     if(realUsers.length === 0){
-      list.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.55); font-size:0.82rem; padding:8px 0;">Waiting for others…</div>';
+      list.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.55); font-size:0.82rem; padding:8px 0;">Waiting for others&#8230;</div>';
     }else{
       list.innerHTML = realUsers.map(u => `
         <div class="wp-user">
@@ -6994,7 +5013,6 @@ function escapeHtml(str){
   return String(str ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
-// Input behavior (auto-advance, paste, enable buttons)
 (function initWatchPartyInputs(){
   const overlay = document.getElementById('watchPartyOverlay');
   if(!overlay) return;
@@ -7042,7 +5060,6 @@ function escapeHtml(str){
     });
     joinBtn.addEventListener('click', () => {
       const name = encodeURIComponent(nickname.value.trim());
-      // ensure socket closes before redirect
       try{ if(wpSocket){ wpSocket.disconnect(); wpSocket = null; } }catch(e){}
       window.location.href = `gurcher.html?join=${encodeURIComponent(wpCurrentRoomId)}&name=${name}`;
     });
@@ -7063,7 +5080,6 @@ function handleWpCodeSearch(roomId){
   if(lobby) lobby.style.display = 'none';
   if(loading){ loading.style.display = 'flex'; }
 
-  // Ensure socket exists
   if(!wpSocket){
     try{
       wpSocket = io("https://watchpartybackend-b5a2.onrender.com", { transports: ["websocket", "polling"] });
@@ -7074,7 +5090,6 @@ function handleWpCodeSearch(roomId){
     }
   }
 
-  // safety timeout (like join.html)
   const timeout = setTimeout(() => {
     if(lobby && lobby.style.display !== 'block'){
       showWpError();
@@ -7113,7 +5128,6 @@ async function processWpRoomData(data){
   const loading = document.getElementById('wpLoading');
   const lobby = document.getElementById('wpLobby');
 
-  // Find film code from URL patterns used by backend
   const url = data.movieUrl || '';
   const filmMatch = url.match(/film=([^&]+)/) || url.match(/watch\/(\d+)/);
   const filmCode = filmMatch ? filmMatch[1] : null;
@@ -7151,10 +5165,10 @@ async function processWpRoomData(data){
       <div class="service-status-icon" aria-hidden="true">
         <i class="fa fa-triangle-exclamation"></i>
       </div>
-      <div class="service-status-title">Temporarily Unavailable</div>
+      <div class="service-status-title">Service Status</div>
     </div>
     <div class="service-status-body">
-      Thirai is currently unavailable, as our server is currently unresponsive. Please try again later.
+      Some features on Thirai may be unavailable, as a service appears to be unresponsive. If it appears functional, please ignore.
     </div>
     <div class="service-status-actions">
       <button class="service-ack-btn" id="serviceAckBtn" type="button">Acknowledge</button>
@@ -7166,9 +5180,8 @@ async function processWpRoomData(data){
 (function(){
   const OVERLAY_ID = "serviceStatusOverlay";
   const ACK_KEY = "thirai_service_down_ack_ts";
-  const ACK_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+  const ACK_COOLDOWN_MS = 5 * 60 * 1000;
 
-  // Endpoints to probe (note: "no-cors" makes responses opaque, but still errors when unreachable).
   const ENDPOINTS = [
     "https://api.thirai.me/",
     "https://einthusan.tv/"
@@ -7196,7 +5209,6 @@ async function processWpRoomData(data){
     if(!overlay) return;
     overlay.classList.add("active");
     overlay.setAttribute("aria-hidden","false");
-    // focus the button for accessibility
     const btn = document.getElementById("serviceAckBtn");
     if(btn) btn.focus({preventScroll:true});
   }
@@ -7209,7 +5221,6 @@ async function processWpRoomData(data){
   }
 
   async function probe(url, timeoutMs=4500){
-    // Use GET + no-cors so this works even if CORS headers aren't present.
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try{
@@ -7220,9 +5231,9 @@ async function processWpRoomData(data){
         redirect: "follow",
         signal: controller.signal
       });
-      return true; // resolved (opaque is fine)
+      return true;
     }catch(e){
-      return false; // network error / abort / DNS / offline
+      return false;
     }finally{
       clearTimeout(timer);
     }
@@ -7231,7 +5242,6 @@ async function processWpRoomData(data){
   async function checkServices(){
     if(shouldSuppress()) return;
 
-    // If we're offline, treat as "down" to explain missing features cleanly.
     if(navigator && navigator.onLine === false){
       showOverlay();
       return;
@@ -7255,7 +5265,6 @@ async function processWpRoomData(data){
       });
     }
 
-    // Click outside card closes too (clean UX)
     if(overlay){
       overlay.addEventListener("click", (e) => {
         if(e.target === overlay){
@@ -7265,7 +5274,6 @@ async function processWpRoomData(data){
       });
     }
 
-    // ESC to close
     document.addEventListener("keydown", (e) => {
       if(e.key === "Escape"){
         const o = getOverlay();
@@ -7276,23 +5284,19 @@ async function processWpRoomData(data){
       }
     });
 
-    // Re-check when tab becomes active again
     document.addEventListener("visibilitychange", () => {
       if(document.visibilityState === "visible"){
         checkServices();
       }
     });
 
-    // Re-check on reconnect
     window.addEventListener("online", () => checkServices());
   }
 
-  // Run after DOM is ready
   if(document.readyState === "loading"){
     document.addEventListener("DOMContentLoaded", () => {
       wireEvents();
       checkServices();
-      // light periodic re-check (won't spam due to cooldown)
       setInterval(checkServices, 60 * 1000);
     });
   }else{
@@ -7301,245 +5305,6 @@ async function processWpRoomData(data){
     setInterval(checkServices, 60 * 1000);
   }
 })();
-</script>
-
-<!-- First-launch authenticator gate -->
-<div id="authGateOverlay" aria-hidden="true" role="dialog" aria-modal="true">
-  <div class="auth-gate-card" role="document">
-    <div class="auth-gate-head">
-      <div class="auth-gate-icon" aria-hidden="true">
-        <i class="fa fa-shield-halved"></i>
-      </div>
-      <div class="auth-gate-title">Enter authenticator code</div>
-    </div>
-    <div class="auth-gate-body">
-      Open your authenticator app and enter the current 6-digit code to use this site.
-    </div>
-    <input
-      id="authGateCode"
-      class="auth-gate-code"
-      type="text"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      maxlength="6"
-      placeholder="000000"
-      aria-label="Authenticator code"
-    >
-    <div class="auth-gate-actions">
-      <button class="auth-gate-btn" id="authGateSubmitBtn" type="button">Verify</button>
-    </div>
-    <div class="auth-gate-error" id="authGateError"></div>
-  </div>
-</div>
-
-<script id="auth-gate-script">
-(function(){
-  const AUTH_SECRET = 'OLOITMSN6E4I6S6SSJIQRXOGWU7UDTWB';
-  const AUTH_OK_KEY = 'thirai_auth_gate_ok_v1';
-  const AUTH_TS_KEY = 'thirai_auth_gate_ok_ts_v1';
-  const overlay = document.getElementById('authGateOverlay');
-  const input = document.getElementById('authGateCode');
-  const submitBtn = document.getElementById('authGateSubmitBtn');
-  const errorEl = document.getElementById('authGateError');
-
-  function isAlreadyVerified(){
-    try {
-      return localStorage.getItem(AUTH_OK_KEY) === 'true';
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function lockUi(){
-    document.body.classList.add('auth-lock-active');
-    if (overlay) {
-      overlay.classList.add('active');
-      overlay.setAttribute('aria-hidden', 'false');
-    }
-    setTimeout(() => input && input.focus(), 80);
-  }
-
-  function unlockUi(){
-    document.body.classList.remove('auth-lock-active');
-    if (overlay) {
-      overlay.classList.remove('active');
-      overlay.setAttribute('aria-hidden', 'true');
-    }
-    try {
-      window.premium_isUnlocked = (localStorage.getItem('premium_isUnlocked') === 'true');
-      window.isUnlocked = (localStorage.getItem('isUnlocked') === 'true');
-    } catch (e) {}
-
-    try {
-      if (typeof enableTMDB === 'function') enableTMDB();
-    } catch (e) {}
-  }
-
-  function setError(message){
-    if (errorEl) errorEl.textContent = message || '';
-  }
-
-  function sanitizeCode(value){
-    return String(value || '').replace(/\D/g, '').slice(0, 6);
-  }
-
-  function base32ToBytes(base32){
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    const clean = String(base32 || '').toUpperCase().replace(/=+$/g, '').replace(/[^A-Z2-7]/g, '');
-    let bits = '';
-    for (const ch of clean) {
-      const val = alphabet.indexOf(ch);
-      if (val < 0) continue;
-      bits += val.toString(2).padStart(5, '0');
-    }
-    const out = [];
-    for (let i = 0; i + 8 <= bits.length; i += 8) {
-      out.push(parseInt(bits.slice(i, i + 8), 2));
-    }
-    return new Uint8Array(out);
-  }
-
-  async function hmacSha1(keyBytes, msgBytes){
-    const key = await crypto.subtle.importKey(
-      'raw',
-      keyBytes,
-      { name: 'HMAC', hash: 'SHA-1' },
-      false,
-      ['sign']
-    );
-    const sig = await crypto.subtle.sign('HMAC', key, msgBytes);
-    return new Uint8Array(sig);
-  }
-
-  async function generateTotp(secret, counter){
-    const keyBytes = base32ToBytes(secret);
-    const buf = new ArrayBuffer(8);
-    const view = new DataView(buf);
-    const high = Math.floor(counter / 0x100000000);
-    const low = counter >>> 0;
-    view.setUint32(0, high);
-    view.setUint32(4, low);
-
-    const hmac = await hmacSha1(keyBytes, new Uint8Array(buf));
-    const offset = hmac[hmac.length - 1] & 0x0f;
-    const binary =
-      ((hmac[offset] & 0x7f) << 24) |
-      ((hmac[offset + 1] & 0xff) << 16) |
-      ((hmac[offset + 2] & 0xff) << 8) |
-      (hmac[offset + 3] & 0xff);
-
-    return String(binary % 1000000).padStart(6, '0');
-  }
-
-  async function isValidCode(code){
-    const nowStep = Math.floor(Date.now() / 1000 / 30);
-    const candidates = await Promise.all([
-      generateTotp(AUTH_SECRET, nowStep - 1),
-      generateTotp(AUTH_SECRET, nowStep),
-      generateTotp(AUTH_SECRET, nowStep + 1)
-    ]);
-    return candidates.includes(code);
-  }
-
-  async function verifyNow(){
-    const code = sanitizeCode(input && input.value);
-    if (input) input.value = code;
-
-    if (code.length !== 6) {
-      setError('Enter the 6-digit code from your authenticator app.');
-      return;
-    }
-
-    setError('');
-    if (submitBtn) submitBtn.disabled = true;
-
-    try {
-      const ok = await isValidCode(code);
-      if (!ok) {
-        setError('That code is not valid right now. Try the latest code from your authenticator app.');
-        if (input) {
-          input.focus();
-          input.select();
-        }
-        return;
-      }
-
-      try {
-        localStorage.setItem(AUTH_OK_KEY, 'true');
-        localStorage.setItem(AUTH_TS_KEY, String(Date.now()));
-        localStorage.setItem('premium_isUnlocked', 'true');
-        localStorage.setItem('isUnlocked', 'true');
-      } catch (e) {}
-
-      try {
-        window.premium_isUnlocked = true;
-        window.isUnlocked = true;
-      } catch (e) {}
-
-      unlockUi();
-    } catch (e) {
-      console.error('Authenticator check failed', e);
-      setError('Could not verify the code on this device.');
-    } finally {
-      if (submitBtn) submitBtn.disabled = false;
-    }
-  }
-
-  if (input) {
-    input.addEventListener('input', () => {
-      input.value = sanitizeCode(input.value);
-      setError('');
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        verifyNow();
-      }
-    });
-  }
-
-  if (submitBtn) {
-    submitBtn.addEventListener('click', verifyNow);
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    if (!isAlreadyVerified()) {
-      lockUi();
-    } else {
-      try {
-        window.premium_isUnlocked = (localStorage.getItem('premium_isUnlocked') === 'true');
-        window.isUnlocked = (localStorage.getItem('isUnlocked') === 'true');
-      } catch (e) {}
-      unlockUi();
-    }
-  });
-
-  if (document.readyState !== 'loading') {
-    if (!isAlreadyVerified()) {
-      lockUi();
-    }
-  }
-})();
-</script>
-
-<script>
-// --- TMDB Enable After Auth ---
-// Replace YOUR_TMDB_API_KEY with your real key
-const TMDB_API_KEY = "YOUR_TMDB_API_KEY";
-
-function enableTMDB(){
-    window.TMDB_ENABLED = true;
-    window.TMDB_API_KEY = TMDB_API_KEY;
-    console.log("TMDB enabled");
-    // Example helper
-    window.tmdbFetch = async function(endpoint){
-        if(!window.TMDB_ENABLED) throw new Error("TMDB not enabled");
-        const url = `https://api.themoviedb.org/3${endpoint}${endpoint.includes('?')?'&':'?'}api_key=${window.TMDB_API_KEY}`;
-        const res = await fetch(url);
-        if(!res.ok) throw new Error("TMDB request failed");
-        return res.json();
-    }
-}
 </script>
 
 </body>
@@ -7555,6 +5320,3 @@ function enableTMDB(){
         <div class="grid-layout" id="lang-category-grid"></div>
         <button class="load-more-btn visually-hidden" id="load-more-lang-category" onclick="loadNextLanguageCategoryPage()" aria-label="Load more"><i class="fas fa-arrow-rotate-right" aria-hidden="true"></i></button>
     </div>
-
-
-
