@@ -1375,6 +1375,116 @@
 #totpSubmitBtn:not(:disabled):hover { opacity: 0.92; }
 #totpSubmitBtn:not(:disabled):active { transform: scale(0.98); }
 
+/* ══════════════════════════════════════════════════════════════════
+   ONE-TIME DISCLAIMER MODAL
+   ══════════════════════════════════════════════════════════════════ */
+#disclaimerOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.60);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 300ms ease, visibility 0s linear 300ms;
+}
+#disclaimerOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 300ms ease, visibility 0s;
+}
+#disclaimerCard {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(13,13,13,0.98);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 24px;
+    padding: 32px 24px 24px;
+    box-shadow: 0 28px 70px rgba(0,0,0,0.75);
+    transform: translateY(22px) scale(0.97);
+    opacity: 0;
+    transition: transform 320ms cubic-bezier(0.22,1,0.36,1), opacity 280ms ease;
+}
+#disclaimerOverlay.active #disclaimerCard {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+#disclaimerIconWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(251,191,36,0.10);
+    border: 1px solid rgba(251,191,36,0.20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+}
+#disclaimerIconWrap i {
+    font-size: 1.35rem;
+    color: #fbbf24;
+}
+#disclaimerTitle {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+}
+#disclaimerBody {
+    font-size: 0.84rem;
+    color: rgba(255,255,255,0.58);
+    line-height: 1.6;
+}
+#disclaimerBody p { margin: 0 0 12px; }
+#disclaimerBody strong { color: rgba(255,255,255,0.82); font-weight: 700; }
+#disclaimerBody ul {
+    margin: 0 0 12px;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+#disclaimerBody li { color: rgba(255,255,255,0.55); }
+#disclaimerDivider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 14px 0;
+}
+#disclaimerContrast {
+    background: rgba(74,222,128,0.06);
+    border: 1px solid rgba(74,222,128,0.15);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: rgba(255,255,255,0.65) !important;
+    font-size: 0.82rem;
+    margin: 0 !important;
+}
+#disclaimerAckBtn {
+    width: 100%;
+    height: 46px;
+    background: #ffffff;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 160ms, transform 160ms;
+}
+#disclaimerAckBtn:hover { opacity: 0.90; }
+#disclaimerAckBtn:active { transform: scale(0.98); }
+
 /* ── TV badge on cards ── */
 .anime-type-badge {
   position:absolute; top:6px; left:6px;
@@ -8255,8 +8365,8 @@ function initDiscoverView(){
 <div id="totpCard">
   <button id="totpCloseBtn" aria-label="Close">&#x2715;</button>
   <div id="totpIconWrap"><i class="fas fa-lock" id="totpLockIcon"></i></div>
-  <div id="totpTitle">Restricted Access</div>
-  <div id="totpSub">Enter your 6-digit authenticator code to unlock.</div>
+  <div id="totpTitle">Premium Access</div>
+  <div id="totpSub">Enter your 6-digit authenticator code to unlock Discover &amp; more.</div>
   <div id="totpInputRow">
     <input type="text" id="totpInput" maxlength="6" inputmode="numeric" placeholder="000000" autocomplete="off" spellcheck="false">
   </div>
@@ -8318,12 +8428,17 @@ function initDiscoverView(){
             btn.style.display='none';
             setTimeout(()=>{
                 closeModal();
-                if(typeof _totpAfterUnlock==='function') _totpAfterUnlock();
-                _totpAfterUnlock=null;
-                /* reset modal for future opens */
-                setTimeout(()=>{
-                    const ov=document.getElementById('totpOverlay'); if(ov) ov.remove();
-                },400);
+                setTimeout(()=>{ const ov=document.getElementById('totpOverlay'); if(ov) ov.remove(); },400);
+                /* show one-time disclaimer */
+                if(localStorage.getItem('disclaimer_ack')!=='true'){
+                    openDisclaimer(function(){
+                        if(typeof _totpAfterUnlock==='function') _totpAfterUnlock();
+                        _totpAfterUnlock=null;
+                    });
+                } else {
+                    if(typeof _totpAfterUnlock==='function') _totpAfterUnlock();
+                    _totpAfterUnlock=null;
+                }
             },900);
         } else {
             err.textContent='Incorrect code. Please try again.';
@@ -8332,6 +8447,38 @@ function initDiscoverView(){
             inp.value='';
             inp.focus();
         }
+    }
+
+    /* ── One-time disclaimer ── */
+    function openDisclaimer(onAck){
+        if(document.getElementById('disclaimerOverlay')) return;
+        const ov=document.createElement('div');
+        ov.id='disclaimerOverlay';
+        ov.innerHTML=`
+<div id="disclaimerCard">
+  <div id="disclaimerIconWrap">
+    <i class="fas fa-triangle-exclamation"></i>
+  </div>
+  <div id="disclaimerTitle">Before you continue</div>
+  <div id="disclaimerBody">
+    <p>This section (Discover &amp; search for TMDB / Anime) streams content through <strong>third-party video players</strong> powered by external API services.</p>
+    <ul>
+      <li>Players may be <strong>unreliable</strong> or go offline without notice</li>
+      <li>Players may contain <strong>ads beyond our control</strong></li>
+      <li>Security cannot be guaranteed on external players</li>
+    </ul>
+    <div id="disclaimerDivider"></div>
+    <p id="disclaimerContrast"><i class="fas fa-circle-check" style="color:#4ade80;margin-right:6px;"></i>Indian language movies on the <strong>main site</strong> use our own reliable source — <strong>zero ads</strong> on the video player, always.</p>
+  </div>
+  <button id="disclaimerAckBtn">I understand, continue</button>
+</div>`;
+        document.body.appendChild(ov);
+        requestAnimationFrame(()=> requestAnimationFrame(()=> ov.classList.add('active')));
+        document.getElementById('disclaimerAckBtn').onclick=function(){
+            localStorage.setItem('disclaimer_ack','true');
+            ov.classList.remove('active');
+            setTimeout(()=>{ ov.remove(); if(typeof onAck==='function') onAck(); },300);
+        };
     }
 
     /* ── Patch switchTab to intercept discover ── */
