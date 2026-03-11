@@ -1235,6 +1235,146 @@
   .discover-section-header { padding: 28px 28px 4px; }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   TOTP GATE MODAL
+   ══════════════════════════════════════════════════════════════════ */
+#totpOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 240ms ease, visibility 0s linear 240ms;
+}
+#totpOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 240ms ease, visibility 0s;
+}
+
+#totpCard {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    background: rgba(14,14,14,0.97);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    text-align: center;
+    transform: translateY(20px) scale(0.97);
+    opacity: 0;
+    transition: transform 280ms cubic-bezier(0.22,1,0.36,1), opacity 240ms ease;
+}
+#totpOverlay.active #totpCard {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+#totpCloseBtn {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(255,255,255,0.07);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms, color 150ms;
+}
+#totpCloseBtn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+#totpIconWrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+#totpLockIcon { font-size: 1.5rem; color: rgba(255,255,255,0.75); transition: color 0.3s; }
+
+#totpTitle {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+#totpSub {
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.50);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+#totpInputRow {
+    margin-bottom: 12px;
+}
+#totpInput {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 15px 16px;
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 0.35em;
+    text-align: center;
+    outline: none;
+    transition: border-color 160ms, background 160ms;
+    font-family: 'Inter', monospace;
+}
+#totpInput:focus {
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.09);
+}
+#totpInput::placeholder { color: rgba(255,255,255,0.18); letter-spacing: 0.2em; font-size: 1.2rem; }
+
+#totpError {
+    min-height: 18px;
+    font-size: 0.8rem;
+    color: #ff6b6b;
+    margin-bottom: 14px;
+    transition: opacity 200ms;
+}
+
+#totpSubmitBtn {
+    width: 100%;
+    height: 46px;
+    background: #ffffff;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: opacity 160ms, transform 160ms;
+}
+#totpSubmitBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+#totpSubmitBtn:not(:disabled):hover { opacity: 0.92; }
+#totpSubmitBtn:not(:disabled):active { transform: scale(0.98); }
+
 /* ── TV badge on cards ── */
 .anime-type-badge {
   position:absolute; top:6px; left:6px;
@@ -2413,15 +2553,7 @@
             <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
-            <div class="section-title section-title-row visually-hidden" id="tmdb-movies-title"><span>TMDB Movies <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_movies" aria-label="Open TMDB Movies search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-  </svg></button></div>
-            <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
-            <div class="section-title section-title-row visually-hidden" id="tmdb-tv-title"><span>TMDB Shows <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_tv" aria-label="Open TMDB Shows search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-  </svg></button></div>
-            <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
         </div>
     </div>
@@ -8040,6 +8172,185 @@ function initDiscoverView(){
         var dv=document.getElementById('view-discover'); if(dv) dv.classList.add('visually-hidden');
         _orig.call(this,tab);
     };
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   TOTP GATE  – Discover tab + search options
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+    /* ── TOTP helpers (RFC 6238 / HOTP SHA-1, vanilla JS) ── */
+    const TOTP_SECRET_B32 = 'OCS5GUUKYB5B7E2SJETYAZICUPELSHNEXEQC2Z6X63SG6KXTG5NQ';
+
+    function b32decode(s){
+        const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        s=s.replace(/=+$/,'').toUpperCase();
+        let bits='',bytes=[];
+        for(const c of s){ const v=CHARS.indexOf(c); if(v<0) continue; bits+=v.toString(2).padStart(5,'0'); }
+        for(let i=0;i+8<=bits.length;i+=8) bytes.push(parseInt(bits.slice(i,i+8),2));
+        return new Uint8Array(bytes);
+    }
+
+    async function hotp(keyBytes,counter){
+        const buf=new ArrayBuffer(8);
+        const view=new DataView(buf);
+        /* write 64-bit big-endian counter */
+        view.setUint32(0,Math.floor(counter/0x100000000),true);
+        view.setUint32(4,counter>>>0,true);
+        /* swap to big-endian */
+        const ctrBuf=new Uint8Array([
+            (counter/0x100000000000000)&0xff,(counter/0x1000000000000)&0xff,
+            (counter/0x10000000000)&0xff,(counter/0x100000000)&0xff,
+            (counter>>>24)&0xff,(counter>>>16)&0xff,(counter>>>8)&0xff,counter&0xff
+        ]);
+        const key=await crypto.subtle.importKey('raw',keyBytes,{name:'HMAC',hash:'SHA-1'},false,['sign']);
+        const sig=await crypto.subtle.sign('HMAC',key,ctrBuf);
+        const h=new Uint8Array(sig);
+        const off=h[19]&0xf;
+        return((h[off]&0x7f)<<24|(h[off+1]&0xff)<<16|(h[off+2]&0xff)<<8|(h[off+3]&0xff))%1000000;
+    }
+
+    async function verifyTOTP(token){
+        const key=b32decode(TOTP_SECRET_B32);
+        const t=Math.floor(Date.now()/1000/30);
+        for(const delta of [0,-1,1]){
+            const code=await hotp(key,t+delta);
+            if(String(code).padStart(6,'0')===String(token).padStart(6,'0')) return true;
+        }
+        return false;
+    }
+
+    /* ── State ── */
+    function isUnlocked(){ return localStorage.getItem('isUnlocked')==='true'; }
+
+    function unlock(){
+        localStorage.setItem('isUnlocked','true');
+        localStorage.setItem('premium_isUnlocked','true');
+        updateSearchOptions();
+    }
+
+    /* ── Search option visibility ── */
+    function updateSearchOptions(){
+        const sel=document.getElementById('lang-select');
+        if(!sel) return;
+        const restricted=['anime','tmdb_movies','tmdb_tv'];
+        restricted.forEach(v=>{
+            const opt=sel.querySelector('option[value="'+v+'"]');
+            if(!opt) return;
+            if(isUnlocked()){
+                opt.disabled=false;
+                opt.style.display='';
+            } else {
+                opt.disabled=true;
+                opt.style.display='none';
+            }
+        });
+    }
+
+    /* ── Modal ── */
+    function buildModal(){
+        if(document.getElementById('totpOverlay')) return;
+        const ov=document.createElement('div');
+        ov.id='totpOverlay';
+        ov.innerHTML=`
+<div id="totpCard">
+  <button id="totpCloseBtn" aria-label="Close">&#x2715;</button>
+  <div id="totpIconWrap"><i class="fas fa-lock" id="totpLockIcon"></i></div>
+  <div id="totpTitle">Restricted Access</div>
+  <div id="totpSub">Enter your 6-digit authenticator code to unlock.</div>
+  <div id="totpInputRow">
+    <input type="text" id="totpInput" maxlength="6" inputmode="numeric" placeholder="000000" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="totpError"></div>
+  <button id="totpSubmitBtn">Verify</button>
+</div>`;
+        document.body.appendChild(ov);
+
+        document.getElementById('totpCloseBtn').onclick=closeModal;
+        ov.addEventListener('click',function(e){ if(e.target===ov) closeModal(); });
+        document.getElementById('totpInput').addEventListener('keydown',function(e){ if(e.key==='Enter') submitTOTP(); });
+        document.getElementById('totpInput').addEventListener('input',function(){
+            document.getElementById('totpError').textContent='';
+            const v=this.value.replace(/\D/g,'');
+            this.value=v;
+            document.getElementById('totpSubmitBtn').disabled=v.length!==6;
+        });
+        document.getElementById('totpSubmitBtn').onclick=submitTOTP;
+        document.getElementById('totpSubmitBtn').disabled=true;
+    }
+
+    function openModal(afterUnlock){
+        buildModal();
+        _totpAfterUnlock=afterUnlock||null;
+        const ov=document.getElementById('totpOverlay');
+        ov.classList.add('active');
+        setTimeout(()=>{ const inp=document.getElementById('totpInput'); if(inp){ inp.value=''; inp.focus(); } },120);
+        document.getElementById('totpError').textContent='';
+        document.getElementById('totpSubmitBtn').disabled=true;
+        /* reset lock icon */
+        const icon=document.getElementById('totpLockIcon');
+        if(icon){ icon.className='fas fa-lock'; icon.style.color=''; }
+    }
+
+    function closeModal(){
+        const ov=document.getElementById('totpOverlay');
+        if(ov) ov.classList.remove('active');
+    }
+
+    let _totpAfterUnlock=null;
+
+    async function submitTOTP(){
+        const inp=document.getElementById('totpInput');
+        const btn=document.getElementById('totpSubmitBtn');
+        const err=document.getElementById('totpError');
+        const token=(inp.value||'').trim();
+        btn.disabled=true;
+        btn.textContent='Checking…';
+        err.textContent='';
+        const ok=await verifyTOTP(token);
+        if(ok){
+            unlock();
+            /* success animation */
+            const icon=document.getElementById('totpLockIcon');
+            if(icon){ icon.className='fas fa-lock-open'; icon.style.color='#4ade80'; }
+            document.getElementById('totpTitle').textContent='Access Granted';
+            document.getElementById('totpSub').textContent='Welcome! All features are now unlocked.';
+            inp.style.display='none';
+            btn.style.display='none';
+            setTimeout(()=>{
+                closeModal();
+                if(typeof _totpAfterUnlock==='function') _totpAfterUnlock();
+                _totpAfterUnlock=null;
+                /* reset modal for future opens */
+                setTimeout(()=>{
+                    const ov=document.getElementById('totpOverlay'); if(ov) ov.remove();
+                },400);
+            },900);
+        } else {
+            err.textContent='Incorrect code. Please try again.';
+            btn.textContent='Verify';
+            btn.disabled=false;
+            inp.value='';
+            inp.focus();
+        }
+    }
+
+    /* ── Patch switchTab to intercept discover ── */
+    const _origSwitch=window.switchTab;
+    window.switchTab=function(tab){
+        if(tab==='discover' && !isUnlocked()){
+            openModal(function(){ _origSwitch.call(this,'discover'); }.bind(this));
+            return;
+        }
+        _origSwitch.apply(this,arguments);
+    };
+
+    /* ── Also patch the btm-discover nav click directly ── */
+    document.addEventListener('DOMContentLoaded',function(){
+        updateSearchOptions();
+    });
+    /* Run immediately in case DOM is already ready */
+    if(document.readyState!=='loading') updateSearchOptions();
+
 })();
 
 /* doSearch — handle 'anime' */
