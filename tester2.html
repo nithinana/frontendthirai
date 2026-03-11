@@ -8422,8 +8422,8 @@ function initDiscoverView(){
             /* success animation */
             const icon=document.getElementById('totpLockIcon');
             if(icon){ icon.className='fas fa-lock-open'; icon.style.color='#4ade80'; }
-            document.getElementById('totpTitle').textContent='Access Granted';
-            document.getElementById('totpSub').textContent='Welcome! All features are now unlocked.';
+            document.getElementById('totpTitle').textContent='Status Verified';
+            document.getElementById('totpSub').textContent='Section is now unlocked.';
             inp.style.display='none';
             btn.style.display='none';
             setTimeout(()=>{
@@ -8461,14 +8461,15 @@ function initDiscoverView(){
   </div>
   <div id="disclaimerTitle">Before you continue</div>
   <div id="disclaimerBody">
-    <p>This section (TMDB / Anime) streams content through <strong>third-party video players</strong> which I <strong>did not</strong> create.</p>
+    <p>This section (TMDB / Anime) streams content through <strong>embedded third-party video players</strong> which I <strong>did not</strong> create.</p>
     <ul>
       <li>This may be <strong>unreliable</strong> or go offline without notice</li>
       <li>Players may contain <strong>ads beyond my control</strong> including <strong>pop-ups<strong/></li>
-      <li>Security </strong>cannot<strong>be guaranteed this way, as with any other site.</li>
+      <li>Security <strong>cannot</strong>be guaranteed this way, as goes with any other site.</li>
+	        <li>This section is still in development, so don't expect the best over here.</li>
     </ul>
     <div id="disclaimerDivider"></div>
-    <p id="disclaimerContrast"><i class="fas fa-circle-check" style="color:#4ade80;margin-right:6px;"></i>The main site, so just Indian movies, is created and moderated by urs truley so u can trust it.</p>
+    <p id="disclaimerContrast"><i class="fas fa-circle-check" style="color:#4ade80;margin-right:6px;"></i>The main site, with just Indian movies, is created and moderated by urs truley so u can trust it.</p>
   </div>
   <button id="disclaimerAckBtn">Acknowledge</button>
 </div>`;
