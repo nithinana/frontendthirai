@@ -1124,10 +1124,121 @@
 }
 @keyframes skelShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
+/* ================================================================
+   DISCOVER VIEW  (merged TMDB + Anime)
+   ================================================================ */
+
+/* Content wrapper — mirrors .home-content-wrapper */
+.discover-content-wrapper {
+  padding-top: 5px;
+}
+
+/* Match home page row/title padding on mobile */
+.discover-content-wrapper .section-title {
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+}
+.discover-content-wrapper .row-container {
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+}
+
+/* Section divider between TMDB and Anime blocks */
+.discover-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 28px var(--page-pad) 0;
+}
+
+/* Section label chips  (e.g. "🎬 Movies & TV" / "⛩ Anime") */
+.discover-section-header {
+  padding: 24px var(--page-pad) 4px;
+}
+.discover-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.40);
+}
+.discover-section-label i {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Row arrows inherit from #view-tmdb / #view-anime rules;
+   extend them to #view-discover */
+#view-discover .row-wrap { position: relative; }
+
+#view-discover .row-wrap .row-nav {
+  position:absolute; top:0; bottom:0; width:64px;
+  border-radius:0; border:none; background:transparent;
+  box-shadow:none; color:rgba(255,255,255,0.92);
+  display:none; align-items:center; justify-content:flex-start;
+  padding-left:14px; cursor:pointer; z-index:40;
+  opacity:0; pointer-events:none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+#view-discover .row-wrap .row-nav svg { width:20px; height:20px; }
+#view-discover .row-wrap .row-nav:active { transform:scale(0.98); }
+#view-discover .row-wrap .row-prev { left:0; }
+#view-discover .row-wrap .row-next { right:0; justify-content:flex-end; padding-right:14px; }
+#view-discover .row-wrap .row-nav.is-visible { opacity:1; pointer-events:auto; }
+
+#view-discover .row-wrap::before,
+#view-discover .row-wrap::after {
+  content:""; position:absolute; top:0; bottom:0; width:84px;
+  pointer-events:none; z-index:20; opacity:0; transition:opacity 140ms ease;
+}
+#view-discover .row-wrap.can-scroll-left::before {
+  left:0; opacity:1;
+  background:linear-gradient(to right,rgba(8,8,8,0.95),rgba(8,8,8,0));
+}
+#view-discover .row-wrap.can-scroll-right::after {
+  right:0; opacity:1;
+  background:linear-gradient(to left,rgba(8,8,8,0.95),rgba(8,8,8,0));
+}
+@media (min-width:900px){
+  #view-discover .row-wrap .row-nav { display:flex; }
+}
+
+/* ── Mobile portrait: match home page tighter spacing ── */
+@media (max-width: 700px) and (orientation: portrait){
+  .discover-content-wrapper .section-title {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    margin-top: 16px !important;
+    margin-bottom: 8px !important;
+  }
+  .discover-content-wrapper .row-container {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    padding-bottom: 10px !important;
+    gap: 8px !important;
+  }
+  .discover-divider { margin-left: 18px; margin-right: 18px; }
+  .discover-section-header { padding-left: 18px; padding-right: 18px; }
+}
+
+/* ── Desktop: center content and widen cards ── */
+@media (min-width: 900px){
+  .discover-content-wrapper {
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .discover-content-wrapper .section-title { padding: 0 28px; }
+  .discover-content-wrapper .row-container { padding: 0 28px 26px; gap: 14px; }
+  .discover-divider { margin: 32px 28px 0; }
+  .discover-section-header { padding: 28px 28px 4px; }
+}
+
 /* ── TV badge on cards ── */
 .anime-type-badge {
   position:absolute; top:6px; left:6px;
-  background:#e50914; color:#fff; font-size:0.6rem; font-weight:800;
+  background:#ffffff; color:#000000; font-size:0.6rem; font-weight:800;
   padding:2px 6px; border-radius:4px; letter-spacing:0.5px; text-transform:uppercase;
   pointer-events:none;
 }
@@ -2256,11 +2367,8 @@
 <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
     <i class="fas fa-sliders"></i>
   </button>
-<button class="side-item" id="desk-anime" onclick="switchTab('anime')" aria-label="Anime" title="Anime">
-    <i class="fas fa-torii-gate"></i>
-  </button>
-<button class="side-item" id="desk-tmdb" onclick="switchTab('tmdb')" aria-label="TMDB" title="TMDB">
-    <i class="fas fa-film"></i>
+<button class="side-item" id="desk-discover" onclick="switchTab('discover')" aria-label="Discover" title="Discover">
+    <i class="fas fa-compass"></i>
   </button>
 
 </aside>
@@ -2414,12 +2522,8 @@
     <i class="fas fa-search"></i> <span>Search</span>
 </div>
 
-<div class="nav-item" onclick="switchTab('anime')" id="btm-anime">
-    <i class="fas fa-torii-gate"></i> <span>Anime</span>
-</div>
-
-<div class="nav-item" onclick="switchTab('tmdb')" id="btm-tmdb">
-    <i class="fas fa-film"></i> <span>TMDB</span>
+<div class="nav-item" onclick="switchTab('discover')" id="btm-discover">
+    <i class="fas fa-compass"></i> <span>Discover</span>
 </div>
 
 <div class="nav-item visually-hidden" id="btm-install">
@@ -2431,37 +2535,9 @@
 
     
     
-    <!-- ══════════════════════ ANIME VIEW ══════════════════════ -->
-    <div id="view-anime" class="visually-hidden">
-        <div class="hero" id="anime-hero">
-            <div id="anime-hero-bg" class="hero-bg" style="transition:background-image 0.7s ease;"></div>
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <div id="anime-hero-logo-container"></div>
-                <button id="anime-hero-btn" class="btn-play visually-hidden" onclick="animeHeroPlay()">
-                    <i class="fas fa-play"></i> Watch Now
-                </button>
-            </div>
-        </div>
-        <div class="extra-hero-dots" id="anime-hero-dots"></div>
-        <div class="home-content-wrapper">
-            <div class="section-title section-title-row"><span>Trending</span></div>
-            <div class="row-container" id="row-anime-trending"></div>
-            <div class="section-title section-title-row"><span>This Season</span></div>
-            <div class="row-container" id="row-anime-seasonal"></div>
-            <div class="section-title section-title-row"><span>Top Rated</span></div>
-            <div class="row-container" id="row-anime-top"></div>
-            <div class="section-title section-title-row"><span>Action &amp; Adventure</span></div>
-            <div class="row-container" id="row-anime-action"></div>
-            <div class="section-title section-title-row"><span>Romance</span></div>
-            <div class="row-container" id="row-anime-romance"></div>
-            <div class="section-title section-title-row"><span>Movies</span></div>
-            <div class="row-container" id="row-anime-movies"></div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════ TMDB VIEW ══════════════════════ -->
-    <div id="view-tmdb" class="visually-hidden">
+    <!-- ══════════════════════ DISCOVER VIEW (TMDB + Anime merged) ══════════════════════ -->
+    <div id="view-discover" class="visually-hidden">
+        <!-- Hero banner (reuses TMDB hero) -->
         <div class="hero" id="tmdb-hero">
             <div id="tmdb-hero-bg" class="hero-bg" style="transition:background-image 0.7s ease;"></div>
             <div class="hero-overlay"></div>
@@ -2473,21 +2549,47 @@
             </div>
         </div>
         <div class="extra-hero-dots" id="tmdb-hero-dots"></div>
-        <div class="home-content-wrapper">
+
+        <div class="discover-content-wrapper">
+            <!-- ── TMDB section ── -->
+            <div class="discover-section-header">
+                <span class="discover-section-label"><i class="fas fa-film"></i> Movies &amp; TV</span>
+            </div>
             <div class="section-title section-title-row"><span>Trending Movies</span></div>
-            <div class="row-container" id="row-tmdb-trending-movies"></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-trending-movies"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
             <div class="section-title section-title-row"><span>Trending TV Shows</span></div>
-            <div class="row-container" id="row-tmdb-trending-tv"></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-trending-tv"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
             <div class="section-title section-title-row"><span>Top Rated Movies</span></div>
-            <div class="row-container" id="row-tmdb-top-movies"></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-top-movies"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
             <div class="section-title section-title-row"><span>Top Rated TV Shows</span></div>
-            <div class="row-container" id="row-tmdb-top-tv"></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-top-tv"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
             <div class="section-title section-title-row"><span>Now Playing</span></div>
-            <div class="row-container" id="row-tmdb-now-playing"></div>
-            <div class="section-title section-title-row"><span>Popular People</span></div>
-            <div class="row-container" id="row-tmdb-people"></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-now-playing"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+
+
+            <!-- ── Divider ── -->
+            <div class="discover-divider"></div>
+
+            <!-- ── Anime section ── -->
+            <div class="discover-section-header">
+                <span class="discover-section-label"><i class="fas fa-torii-gate"></i> Anime</span>
+            </div>
+            <div class="section-title section-title-row"><span>Trending</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-trending"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+
+            <div class="section-title section-title-row"><span>Top Rated</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-top"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Action &amp; Adventure</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-action"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Romance</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-romance"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Movies</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-movies"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
         </div>
     </div>
+    <!-- keep legacy hidden stubs so existing JS refs don't error -->
+    <div id="view-anime" class="visually-hidden"></div>
+    <div id="view-tmdb"  class="visually-hidden"></div>
 
     <!-- ══════════════════ EPISODE OVERLAY ══════════════════════ -->
     <div id="animeEpisodeOverlay" onclick="animeEpOutsideClick(event)">
@@ -7574,13 +7676,9 @@ async function initAnimeView(){
     if(animeLoaded) return;
     animeLoaded=true;
 
-    // Banner first (uses TMDB, fast)
-    await initAnimeBanner();
-
     // Rows: sequential with delay to respect Jikan's 3 req/s limit
     const rows=[
         ['row-anime-trending',  JIKAN+'/top/anime?filter=airing&limit=20'],
-        ['row-anime-seasonal',  JIKAN+'/seasons/now?limit=20'],
         ['row-anime-top',       JIKAN+'/top/anime?filter=bypopularity&limit=20'],
         ['row-anime-action',    JIKAN+'/anime?genres=1,2&order_by=score&sort=desc&limit=20'],
         ['row-anime-romance',   JIKAN+'/anime?genres=22&order_by=score&sort=desc&limit=20'],
@@ -7595,7 +7693,7 @@ async function initAnimeView(){
         await sleep(380); // stay under rate limit
     }
 
-    setTimeout(()=>initViewRowArrows('view-anime'),150);
+    setTimeout(()=>initViewRowArrows('view-discover'),150);
 }
 
 function showAnimeSkeleton(rowId){
@@ -7759,9 +7857,8 @@ async function initTmdbView(){
         loadTmdbTabRow('row-tmdb-top-movies',      '/movie/top_rated'),
         loadTmdbTabRow('row-tmdb-top-tv',          '/tv/top_rated'),
         loadTmdbTabRow('row-tmdb-now-playing',     '/movie/now_playing'),
-        loadTmdbPeopleRow(),
     ]);
-    setTimeout(()=>initViewRowArrows('view-tmdb'),150);
+    setTimeout(()=>initViewRowArrows('view-discover'),150);
 }
 
 async function loadTmdbTabRow(rowId, endpoint){
@@ -7801,27 +7898,70 @@ async function loadTmdbPeopleRow(){
 
 async function initTmdbBanner(){
     try{
-        const r=await fetch(TMDB_BASE+'/trending/movie/week?api_key='+API_KEY+'&language=en-GB');
-        const d=await r.json();
-        const list=(d.results||[]).filter(x=>x.backdrop_path&&(x.title||x.name));
-        for(const item of list.slice(0,10)){
-            try{
-                const type=(item.media_type==='tv'||item.name)?'tv':'movie';
-                const lr=await fetch(TMDB_BASE+'/'+type+'/'+item.id+'/images?api_key='+API_KEY+'&include_image_language=en,null');
-                const ld=await lr.json();
-                const logo=(ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
-                if(logo){
-                    tmdbBanner.addBanner({backdrop:item.backdrop_path,logo_path:logo.file_path,id:item.id,media_type:type,title:item.title||item.name});
-                }
-            }catch(e){}
+        // Fetch movies/tv and anime in parallel
+        const [movRes, animeRes] = await Promise.allSettled([
+            fetch(TMDB_BASE+'/trending/movie/week?api_key='+API_KEY+'&language=en-GB'),
+            fetch(TMDB_BASE+'/discover/tv?api_key='+API_KEY+'&with_genres=16&with_origin_country=JP&sort_by=vote_average.desc&vote_count.gte=500&page=1')
+        ]);
+
+        let allItems = [];
+
+        // Process movies/tv
+        if(movRes.status==='fulfilled'){
+            const d=await movRes.value.json();
+            const list=(d.results||[]).filter(x=>x.backdrop_path&&(x.title||x.name));
+            for(const item of list.slice(0,7)){
+                try{
+                    const type=(item.media_type==='tv'||item.name)?'tv':'movie';
+                    const lr=await fetch(TMDB_BASE+'/'+type+'/'+item.id+'/images?api_key='+API_KEY+'&include_image_language=en,null');
+                    const ld=await lr.json();
+                    const logo=(ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
+                    if(logo){
+                        allItems.push({backdrop:item.backdrop_path,logo_path:logo.file_path,id:item.id,media_type:type,title:item.title||item.name,isAnime:false});
+                    }
+                }catch(e){}
+            }
         }
+
+        // Process anime
+        if(animeRes.status==='fulfilled'){
+            const d=await animeRes.value.json();
+            const animeList=(d.results||[]).filter(x=>x.backdrop_path&&x.name);
+            for(const item of animeList.slice(0,5)){
+                try{
+                    const lr=await fetch(TMDB_BASE+'/tv/'+item.id+'/images?api_key='+API_KEY+'&include_image_language=en,null');
+                    const ld=await lr.json();
+                    const logo=(ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
+                    if(logo){
+                        allItems.push({backdrop:item.backdrop_path,logo_path:logo.file_path,id:item.id,media_type:'tv',title:item.name,isAnime:true,tmdb_id:item.id});
+                    }
+                }catch(e){}
+            }
+        }
+
+        // Interleave: every 3rd item is anime
+        const movies = allItems.filter(x=>!x.isAnime);
+        const anime  = allItems.filter(x=>x.isAnime);
+        const mixed  = [];
+        let ai=0, mi=0;
+        while(mi<movies.length||ai<anime.length){
+            if(mi<movies.length) mixed.push(movies[mi++]);
+            if(mi<movies.length) mixed.push(movies[mi++]);
+            if(ai<anime.length)  mixed.push(anime[ai++]);
+        }
+
+        mixed.forEach(b=>tmdbBanner.addBanner(b));
         tmdbBanner.init();
     }catch(e){ console.error('TMDB banner',e); }
 }
 
 function tmdbHeroPlay(){
     const b=tmdbBanner.getCurrent(); if(!b) return;
-    window.location.href=(b.media_type==='tv'?'show.html?':'movie.html?')+b.id;
+    if(b.isAnime){
+        openAnimeEpisodesByTmdb(b.tmdb_id||b.id, b.title);
+    } else {
+        window.location.href=(b.media_type==='tv'?'show.html?':'movie.html?')+b.id;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -7856,30 +7996,48 @@ async function doAnimeSearch(query,pageNumber,isNewSearch){
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   DISCOVER VIEW  (merged TMDB + Anime)
+   ══════════════════════════════════════════════════════════════════ */
+let discoverLoaded=false;
+function initDiscoverView(){
+    if(discoverLoaded) return;
+    discoverLoaded=true;
+    // load both data sets in parallel
+    Promise.allSettled([
+        initAnimeView(),
+        initTmdbView()
+    ]).then(()=>{
+        setTimeout(()=>initViewRowArrows('view-discover'),200);
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════
    PATCHES
    ══════════════════════════════════════════════════════════════════ */
 
-/* switchTab — handle 'anime' and 'tmdb' */
+/* switchTab — handle 'discover' (merged anime + tmdb), plus keep legacy 'anime'/'tmdb' as aliases */
 (function(){
     const _orig=window.switchTab;
-    const EXTRA=['anime','tmdb'];
+    const EXTRA=['discover','anime','tmdb'];
     window.switchTab=function(tab){
-        const allViewIds='#view-home,#view-collections,#view-search,#view-actor-details,#view-filter-results,#view-lang-category,#view-anime,#view-tmdb';
-        if(EXTRA.indexOf(tab)!==-1){
+        // Alias legacy tab names to discover
+        if(tab==='anime'||tab==='tmdb') tab='discover';
+
+        const allViewIds='#view-home,#view-collections,#view-search,#view-actor-details,#view-filter-results,#view-lang-category,#view-anime,#view-tmdb,#view-discover';
+        if(tab==='discover'){
             document.querySelectorAll(allViewIds).forEach(e=>e.classList.add('visually-hidden'));
-            var v=document.getElementById('view-'+tab); if(v) v.classList.remove('visually-hidden');
+            var v=document.getElementById('view-discover'); if(v) v.classList.remove('visually-hidden');
             document.querySelectorAll('.nav-link,.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
-            var ba=document.getElementById('btm-'+tab); if(ba) ba.classList.add('active');
-            var da=document.getElementById('desk-'+tab); if(da) da.classList.add('active');
+            var ba=document.getElementById('btm-discover'); if(ba) ba.classList.add('active');
+            var da=document.getElementById('desk-discover'); if(da) da.classList.add('active');
             var bb=document.getElementById('back-button'); if(bb) bb.classList.add('visually-hidden');
-            historyStack=[tab];
+            historyStack=['discover'];
             window.scrollTo({top:0,behavior:'instant'});
-            if(tab==='anime') initAnimeView();
-            if(tab==='tmdb')  initTmdbView();
+            initDiscoverView();
             return;
         }
-        // hide extra views when switching back
-        EXTRA.forEach(id=>{ var v=document.getElementById('view-'+id); if(v) v.classList.add('visually-hidden'); });
+        // hide discover view when switching back
+        var dv=document.getElementById('view-discover'); if(dv) dv.classList.add('visually-hidden');
         _orig.call(this,tab);
     };
 })();
