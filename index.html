@@ -1053,6 +1053,539 @@
   #view-home .section-title{ padding-left: 24px; padding-right: 24px; }
 }
 
+
+/* ================================================================
+   ANIME + TMDB VIEWS  — mirror #view-home styles
+   ================================================================ */
+
+/* ── Shared: row arrows for view-anime and view-tmdb ── */
+#view-anime .row-wrap,
+#view-tmdb  .row-wrap { position: relative; }
+
+#view-anime .row-wrap .row-nav,
+#view-tmdb  .row-wrap .row-nav {
+  position:absolute; top:0; bottom:0; width:64px;
+  border-radius:0; border:none; background:transparent;
+  box-shadow:none; color:rgba(255,255,255,0.92);
+  display:none; align-items:center; justify-content:flex-start;
+  padding-left:14px; cursor:pointer; z-index:40;
+  opacity:0; pointer-events:none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+#view-anime .row-wrap .row-nav svg,
+#view-tmdb  .row-wrap .row-nav svg { width:20px; height:20px; }
+#view-anime .row-wrap .row-nav:active,
+#view-tmdb  .row-wrap .row-nav:active { transform:scale(0.98); }
+#view-anime .row-wrap .row-prev,
+#view-tmdb  .row-wrap .row-prev { left:0; }
+#view-anime .row-wrap .row-next,
+#view-tmdb  .row-wrap .row-next { right:0; justify-content:flex-end; padding-right:14px; }
+#view-anime .row-wrap .row-nav.is-visible,
+#view-tmdb  .row-wrap .row-nav.is-visible { opacity:1; pointer-events:auto; }
+
+#view-anime .row-wrap::before, #view-anime .row-wrap::after,
+#view-tmdb  .row-wrap::before, #view-tmdb  .row-wrap::after {
+  content:""; position:absolute; top:0; bottom:0; width:84px;
+  pointer-events:none; z-index:20; opacity:0; transition:opacity 140ms ease;
+}
+#view-anime .row-wrap.can-scroll-left::before,
+#view-tmdb  .row-wrap.can-scroll-left::before {
+  left:0; opacity:1;
+  background:linear-gradient(to right,rgba(8,8,8,0.95),rgba(8,8,8,0));
+}
+#view-anime .row-wrap.can-scroll-right::after,
+#view-tmdb  .row-wrap.can-scroll-right::after {
+  right:0; opacity:1;
+  background:linear-gradient(to left,rgba(8,8,8,0.95),rgba(8,8,8,0));
+}
+@media (min-width:900px){
+  #view-anime .row-wrap .row-nav,
+  #view-tmdb  .row-wrap .row-nav { display:flex; }
+}
+
+/* ── Banner cycling dots (shared) ── */
+.extra-hero-dots {
+  display:flex; gap:6px; justify-content:center;
+  position:relative; z-index:3; margin-top:-18px; margin-bottom:8px;
+}
+.extra-hero-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(255,255,255,0.35); border:none; padding:0;
+  cursor:pointer; transition:background 0.2s, transform 0.2s;
+}
+.extra-hero-dot.active { background:#fff; transform:scale(1.25); }
+
+/* ── Skeleton loading card ── */
+.anime-skeleton {
+  background: linear-gradient(90deg,#1a1a1a 25%,#242424 50%,#1a1a1a 75%);
+  background-size:200% 100%;
+  animation: skelShimmer 1.4s infinite;
+  border-radius:var(--radius); aspect-ratio:2/3; width:100px; flex-shrink:0;
+}
+@keyframes skelShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ================================================================
+   DISCOVER VIEW  (merged TMDB + Anime)
+   ================================================================ */
+
+/* Content wrapper — mirrors .home-content-wrapper */
+.discover-content-wrapper {
+  padding-top: 5px;
+}
+
+/* Match home page row/title padding on mobile */
+.discover-content-wrapper .section-title {
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+}
+.discover-content-wrapper .row-container {
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+}
+
+/* Section divider between TMDB and Anime blocks */
+.discover-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 28px var(--page-pad) 0;
+}
+
+/* Section label chips  (e.g. "🎬 Movies & TV" / "⛩ Anime") */
+.discover-section-header {
+  padding: 24px var(--page-pad) 4px;
+}
+.discover-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.40);
+}
+.discover-section-label i {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Row arrows inherit from #view-tmdb / #view-anime rules;
+   extend them to #view-discover */
+#view-discover .row-wrap { position: relative; }
+
+#view-discover .row-wrap .row-nav {
+  position:absolute; top:0; bottom:0; width:64px;
+  border-radius:0; border:none; background:transparent;
+  box-shadow:none; color:rgba(255,255,255,0.92);
+  display:none; align-items:center; justify-content:flex-start;
+  padding-left:14px; cursor:pointer; z-index:40;
+  opacity:0; pointer-events:none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+#view-discover .row-wrap .row-nav svg { width:20px; height:20px; }
+#view-discover .row-wrap .row-nav:active { transform:scale(0.98); }
+#view-discover .row-wrap .row-prev { left:0; }
+#view-discover .row-wrap .row-next { right:0; justify-content:flex-end; padding-right:14px; }
+#view-discover .row-wrap .row-nav.is-visible { opacity:1; pointer-events:auto; }
+
+#view-discover .row-wrap::before,
+#view-discover .row-wrap::after {
+  content:""; position:absolute; top:0; bottom:0; width:84px;
+  pointer-events:none; z-index:20; opacity:0; transition:opacity 140ms ease;
+}
+#view-discover .row-wrap.can-scroll-left::before {
+  left:0; opacity:1;
+  background:linear-gradient(to right,rgba(8,8,8,0.95),rgba(8,8,8,0));
+}
+#view-discover .row-wrap.can-scroll-right::after {
+  right:0; opacity:1;
+  background:linear-gradient(to left,rgba(8,8,8,0.95),rgba(8,8,8,0));
+}
+@media (min-width:900px){
+  #view-discover .row-wrap .row-nav { display:flex; }
+}
+
+/* ── Mobile portrait: match home page tighter spacing ── */
+@media (max-width: 700px) and (orientation: portrait){
+  .discover-content-wrapper .section-title {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    margin-top: 16px !important;
+    margin-bottom: 8px !important;
+  }
+  .discover-content-wrapper .row-container {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    padding-bottom: 10px !important;
+    gap: 8px !important;
+  }
+  .discover-divider { margin-left: 18px; margin-right: 18px; }
+  .discover-section-header { padding-left: 18px; padding-right: 18px; }
+}
+
+/* ── Desktop: center content and widen cards ── */
+@media (min-width: 900px){
+  .discover-content-wrapper {
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .discover-content-wrapper .section-title { padding: 0 28px; }
+  .discover-content-wrapper .row-container { padding: 0 28px 26px; gap: 14px; }
+  .discover-divider { margin: 32px 28px 0; }
+  .discover-section-header { padding: 28px 28px 4px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TOTP GATE MODAL
+   ══════════════════════════════════════════════════════════════════ */
+#totpOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 240ms ease, visibility 0s linear 240ms;
+}
+#totpOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 240ms ease, visibility 0s;
+}
+
+#totpCard {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    background: rgba(14,14,14,0.97);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    text-align: center;
+    transform: translateY(20px) scale(0.97);
+    opacity: 0;
+    transition: transform 280ms cubic-bezier(0.22,1,0.36,1), opacity 240ms ease;
+}
+#totpOverlay.active #totpCard {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+#totpCloseBtn {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(255,255,255,0.07);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms, color 150ms;
+}
+#totpCloseBtn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+#totpIconWrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+#totpLockIcon { font-size: 1.5rem; color: rgba(255,255,255,0.75); transition: color 0.3s; }
+
+#totpTitle {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+#totpSub {
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.50);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+#totpInputRow {
+    margin-bottom: 12px;
+}
+#totpInput {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 15px 16px;
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 0.35em;
+    text-align: center;
+    outline: none;
+    transition: border-color 160ms, background 160ms;
+    font-family: 'Inter', monospace;
+}
+#totpInput:focus {
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.09);
+}
+#totpInput::placeholder { color: rgba(255,255,255,0.18); letter-spacing: 0.2em; font-size: 1.2rem; }
+
+#totpError {
+    min-height: 18px;
+    font-size: 0.8rem;
+    color: #ff6b6b;
+    margin-bottom: 14px;
+    transition: opacity 200ms;
+}
+
+#totpSubmitBtn {
+    width: 100%;
+    height: 46px;
+    background: #ffffff;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: opacity 160ms, transform 160ms;
+}
+#totpSubmitBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+#totpSubmitBtn:not(:disabled):hover { opacity: 0.92; }
+#totpSubmitBtn:not(:disabled):active { transform: scale(0.98); }
+
+/* ══════════════════════════════════════════════════════════════════
+   ONE-TIME DISCLAIMER MODAL
+   ══════════════════════════════════════════════════════════════════ */
+#disclaimerOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.60);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 300ms ease, visibility 0s linear 300ms;
+}
+#disclaimerOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 300ms ease, visibility 0s;
+}
+#disclaimerCard {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(13,13,13,0.98);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 24px;
+    padding: 32px 24px 24px;
+    box-shadow: 0 28px 70px rgba(0,0,0,0.75);
+    transform: translateY(22px) scale(0.97);
+    opacity: 0;
+    transition: transform 320ms cubic-bezier(0.22,1,0.36,1), opacity 280ms ease;
+}
+#disclaimerOverlay.active #disclaimerCard {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+#disclaimerIconWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(251,191,36,0.10);
+    border: 1px solid rgba(251,191,36,0.20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+}
+#disclaimerIconWrap i {
+    font-size: 1.35rem;
+    color: #fbbf24;
+}
+#disclaimerTitle {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+}
+#disclaimerBody {
+    font-size: 0.84rem;
+    color: rgba(255,255,255,0.58);
+    line-height: 1.6;
+}
+#disclaimerBody p { margin: 0 0 12px; }
+#disclaimerBody strong { color: rgba(255,255,255,0.82); font-weight: 700; }
+#disclaimerBody ul {
+    margin: 0 0 12px;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+#disclaimerBody li { color: rgba(255,255,255,0.55); }
+#disclaimerDivider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 14px 0;
+}
+#disclaimerContrast {
+    background: rgba(74,222,128,0.06);
+    border: 1px solid rgba(74,222,128,0.15);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: rgba(255,255,255,0.65) !important;
+    font-size: 0.82rem;
+    margin: 0 !important;
+}
+#disclaimerAckBtn {
+    width: 100%;
+    height: 46px;
+    background: #ffffff;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 160ms, transform 160ms;
+}
+#disclaimerAckBtn:hover { opacity: 0.90; }
+#disclaimerAckBtn:active { transform: scale(0.98); }
+
+/* ── TV badge on cards ── */
+.anime-type-badge {
+  position:absolute; top:6px; left:6px;
+  background:#ffffff; color:#000000; font-size:0.6rem; font-weight:800;
+  padding:2px 6px; border-radius:4px; letter-spacing:0.5px; text-transform:uppercase;
+  pointer-events:none;
+}
+
+/* ── Episode Selector Overlay ── */
+#animeEpisodeOverlay {
+  position:fixed; inset:0; z-index:9000;
+  display:flex; align-items:flex-end; justify-content:center;
+  background:transparent; pointer-events:none;
+  transition:background 0.3s ease;
+}
+#animeEpisodeOverlay.active { pointer-events:all; background:rgba(0,0,0,0.55); }
+#animeEpisodeOverlay .anime-ep-backdrop {
+  position:absolute; inset:0;
+  backdrop-filter:blur(0px); -webkit-backdrop-filter:blur(0px);
+  transition:backdrop-filter 0.35s ease,-webkit-backdrop-filter 0.35s ease;
+}
+#animeEpisodeOverlay.active .anime-ep-backdrop {
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+}
+.anime-ep-sheet {
+  position:relative; z-index:1;
+  width:100%; max-width:560px; max-height:82vh;
+  background:#141414; border-radius:20px 20px 0 0;
+  padding:0 0 env(safe-area-inset-bottom,12px);
+  display:flex; flex-direction:column;
+  transform:translateY(110%);
+  transition:transform 0.38s cubic-bezier(0.32,1,0.46,1);
+  box-shadow:0 -8px 40px rgba(0,0,0,0.7); overflow:hidden;
+}
+#animeEpisodeOverlay.active .anime-ep-sheet { transform:translateY(0); }
+.anime-ep-handle {
+  width:36px; height:4px; border-radius:2px;
+  background:rgba(255,255,255,0.18); margin:12px auto 4px; flex-shrink:0;
+}
+.anime-ep-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 18px; flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.anime-ep-title {
+  font-size:0.95rem; font-weight:700; color:#fff;
+  flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:10px;
+}
+.anime-ep-close {
+  background:rgba(255,255,255,0.08); border:none; color:#fff;
+  width:30px; height:30px; border-radius:50%; font-size:1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.anime-subdub-toggle {
+  display:flex; background:rgba(255,255,255,0.08); border-radius:8px;
+  padding:3px; margin:10px 18px 12px; flex-shrink:0; width:fit-content;
+}
+.anime-subdub-btn {
+  padding:6px 18px; border:none; border-radius:6px;
+  background:transparent; color:rgba(255,255,255,0.55);
+  font-size:0.82rem; font-weight:700; cursor:pointer;
+  transition:background 0.2s,color 0.2s;
+}
+.anime-subdub-btn.active { background:#e50914; color:#fff; }
+.anime-season-bar {
+  display:flex; gap:8px; padding:0 18px 10px;
+  overflow-x:auto; scrollbar-width:none; flex-shrink:0;
+}
+.anime-season-bar::-webkit-scrollbar { display:none; }
+.anime-season-pill {
+  padding:5px 14px; border-radius:16px;
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.7); font-size:0.78rem; font-weight:700;
+  white-space:nowrap; cursor:pointer;
+  transition:background 0.15s,border-color 0.15s,color 0.15s;
+}
+.anime-season-pill.active {
+  background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.30); color:#fff;
+}
+.anime-ep-list {
+  overflow-y:auto; flex:1; padding:6px 18px 16px;
+  scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.1) transparent;
+}
+.anime-ep-list::-webkit-scrollbar { width:4px; }
+.anime-ep-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.12); border-radius:4px; }
+.anime-ep-item {
+  display:flex; align-items:center; gap:12px; padding:11px 12px;
+  border-radius:10px; cursor:pointer;
+  background:rgba(255,255,255,0.03); border:1px solid transparent;
+  margin-bottom:7px; transition:background 0.15s,border-color 0.15s;
+}
+.anime-ep-item:active,.anime-ep-item:hover {
+  background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.10);
+}
+.anime-ep-num { font-size:0.78rem; font-weight:800; color:rgba(255,255,255,0.35); min-width:28px; text-align:center; }
+.anime-ep-info { flex:1; overflow:hidden; }
+.anime-ep-name { font-size:0.88rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.anime-ep-meta { font-size:0.72rem; color:rgba(255,255,255,0.4); margin-top:2px; }
+.anime-ep-play-icon { color:rgba(255,255,255,0.35); font-size:0.85rem; flex-shrink:0; }
+.anime-ep-loading { text-align:center; color:rgba(255,255,255,0.4); padding:28px 0; font-size:0.9rem; }
+
 </style>
 
 <style>
@@ -2084,6 +2617,10 @@
 <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
     <i class="fas fa-sliders"></i>
   </button>
+<button class="side-item" id="desk-discover" onclick="switchTab('discover')" aria-label="Discover" title="Discover">
+    <i class="fas fa-compass"></i>
+  </button>
+
 </aside>
 
 
@@ -2126,15 +2663,7 @@
             <div class="section-title section-title-row"><span>Bengali</span><button class="section-arrow" data-lang="bengali" data-category="recent" aria-label="Bengali recent"><span>›</span></button></div>
             <div class="row-container" id="row-bengali"></div>
 
-            <div class="section-title section-title-row visually-hidden" id="tmdb-movies-title"><span>TMDB Movies <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_movies" aria-label="Open TMDB Movies search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-  </svg></button></div>
-            <div class="row-container visually-hidden" id="row-tmdb-movies"></div>
 
-            <div class="section-title section-title-row visually-hidden" id="tmdb-tv-title"><span>TMDB Shows <span class="tmdb-beta">BETA</span></span><button class="section-arrow tmdb-shortcut-arrow" data-tmdb-target="tmdb_tv" aria-label="Open TMDB Shows search"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-    <path d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-  </svg></button></div>
-            <div class="row-container visually-hidden" id="row-tmdb-tv"></div>
 
         </div>
     </div>
@@ -2192,8 +2721,10 @@
                     <option value="kannada">Kannada</option>
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
+                    <option value="anime">Anime</option>
                     <option value="tmdb_movies">TMDB Movies</option>
-                    <option value="tmdb_tv">TMDB TV</option>
+                    <option value="tmdb_tv">TMDB TV Shows</option>
+
 </select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
@@ -2233,6 +2764,10 @@
     <i class="fas fa-search"></i> <span>Search</span>
 </div>
 
+<div class="nav-item" onclick="switchTab('discover')" id="btm-discover">
+    <i class="fas fa-compass"></i> <span>Discover</span>
+</div>
+
 <div class="nav-item visually-hidden" id="btm-install">
     <i class="fas fa-download"></i> <span>Install</span>
 </div>
@@ -2241,6 +2776,83 @@
     </div>
 
     
+    
+    <!-- ══════════════════════ DISCOVER VIEW (TMDB + Anime merged) ══════════════════════ -->
+    <div id="view-discover" class="visually-hidden">
+        <!-- Hero banner (reuses TMDB hero) -->
+        <div class="hero" id="tmdb-hero">
+            <div id="tmdb-hero-bg" class="hero-bg" style="transition:background-image 0.7s ease;"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div id="tmdb-hero-logo-container"></div>
+                <button id="tmdb-hero-btn" class="btn-play visually-hidden" onclick="tmdbHeroPlay()">
+                    <i class="fas fa-play"></i> Watch Now
+                </button>
+            </div>
+        </div>
+        <div class="extra-hero-dots" id="tmdb-hero-dots"></div>
+
+        <div class="discover-content-wrapper">
+            <!-- ── TMDB section ── -->
+            <div class="discover-section-header">
+                <span class="discover-section-label"><i class="fas fa-film"></i> TMDB</span>
+            </div>
+            <div class="section-title section-title-row"><span>Trending Movies</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-trending-movies"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Trending TV Shows</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-trending-tv"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Top Rated Movies</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-top-movies"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Top Rated TV Shows</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-top-tv"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Now Playing</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-tmdb-now-playing"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+
+
+            <!-- ── Divider ── -->
+            <div class="discover-divider"></div>
+
+            <!-- ── Anime section ── -->
+            <div class="discover-section-header">
+                <span class="discover-section-label"><i class="fas fa-torii-gate"></i> Anime</span>
+            </div>
+            <div class="section-title section-title-row"><span>Trending</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-trending"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+
+            <div class="section-title section-title-row"><span>Top Rated</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-top"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Action &amp; Adventure</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-action"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Romance</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-romance"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+            <div class="section-title section-title-row"><span>Movies</span></div>
+            <div class="row-wrap"><button class="row-nav row-prev" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 19.5L8 12l7.5-7.5"/></svg></button><div class="row-container" id="row-anime-movies"></div><button class="row-nav row-next" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L16 12l-7.5 7.5"/></svg></button></div>
+        </div>
+    </div>
+    <!-- keep legacy hidden stubs so existing JS refs don't error -->
+    <div id="view-anime" class="visually-hidden"></div>
+    <div id="view-tmdb"  class="visually-hidden"></div>
+
+    <!-- ══════════════════ EPISODE OVERLAY ══════════════════════ -->
+    <div id="animeEpisodeOverlay" onclick="animeEpOutsideClick(event)">
+        <div class="anime-ep-backdrop"></div>
+        <div class="anime-ep-sheet" id="animeEpSheet">
+            <div class="anime-ep-handle"></div>
+            <div class="anime-ep-header">
+                <div class="anime-ep-title" id="animeEpTitle">Episodes</div>
+                <button class="anime-ep-close" onclick="closeAnimeEpisodes()" aria-label="Close">&times;</button>
+            </div>
+            <div class="anime-subdub-toggle">
+                <button class="anime-subdub-btn active" id="animeSubBtn" onclick="setAnimeAudioMode('sub')">SUB</button>
+                <button class="anime-subdub-btn"        id="animeDubBtn" onclick="setAnimeAudioMode('dub')">DUB</button>
+            </div>
+            <div class="anime-season-bar" id="animeSeasonBar" style="display:none;"></div>
+            <div class="anime-ep-list"    id="animeEpList">
+                <div class="anime-ep-loading">Loading episodes…</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Watch Party Overlay -->
     <div id="watchPartyOverlay" onclick="closeWatchPartyOnOutsideClick(event)">
       <div class="watchparty-card" role="dialog" aria-modal="true" aria-label="Watch Party">
@@ -7190,6 +7802,722 @@ async function processWpRoomData(data){
     setInterval(checkServices, 60 * 1000);
   }
 })();
+
+
+/* ================================================================
+   ANIME + TMDB MODULE  v3
+   - Jikan loaded sequentially with delay to avoid rate-limits
+   - Retry with back-off on 429 / 503
+   - URL: /anime?id=ID&dub=true|false
+          /anime?id=ID&ep=N&dub=true|false
+   ================================================================ */
+
+/* ── Helpers ────────────────────────────────────────────────────── */
+const JIKAN = 'https://api.jikan.moe/v4';
+
+function xEsc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function jikanFetch(url, retries=3){
+    for(let i=0;i<retries;i++){
+        try{
+            const r = await fetch(url);
+            if(r.status===429||r.status===503){
+                await sleep(1000*(i+1));
+                continue;
+            }
+            if(!r.ok) throw new Error('HTTP '+r.status);
+            return await r.json();
+        }catch(e){
+            if(i===retries-1) throw e;
+            await sleep(600*(i+1));
+        }
+    }
+}
+
+/* ── Row-wrap arrow initialiser (shared for anime + tmdb) ────────── */
+function initViewRowArrows(viewId){
+    const view=document.getElementById(viewId); if(!view) return;
+    view.querySelectorAll('.home-content-wrapper .row-container').forEach(row=>{
+        if(row.dataset.extArrows==='1') return;
+        row.dataset.extArrows='1';
+        const wrap=document.createElement('div'); wrap.className='row-wrap';
+        row.parentNode.insertBefore(wrap,row); wrap.appendChild(row);
+        function mkBtn(dir){
+            const b=document.createElement('button');
+            b.type='button'; b.className='row-nav '+(dir==='prev'?'row-prev':'row-next');
+            b.setAttribute('aria-label',dir==='prev'?'Scroll left':'Scroll right');
+            b.innerHTML=dir==='prev'
+                ?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                :'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            return b;
+        }
+        const prev=mkBtn('prev'),next=mkBtn('next');
+        wrap.appendChild(prev); wrap.appendChild(next);
+        prev.addEventListener('click',()=>row.scrollBy({left:-Math.max(240,row.clientWidth*.85),behavior:'smooth'}));
+        next.addEventListener('click',()=>row.scrollBy({left:Math.max(240,row.clientWidth*.85),behavior:'smooth'}));
+        let raf=0;
+        function upd(){
+            cancelAnimationFrame(raf);
+            raf=requestAnimationFrame(()=>{
+                const ov=(row.scrollWidth-row.clientWidth)>6;
+                wrap.classList.toggle('has-overflow',ov);
+                if(!ov){prev.classList.remove('is-visible');next.classList.remove('is-visible');return;}
+                const max=row.scrollWidth-row.clientWidth,l=row.scrollLeft;
+                prev.classList.toggle('is-visible',l>6); wrap.classList.toggle('can-scroll-left',l>6);
+                next.classList.toggle('is-visible',l<max-6); wrap.classList.toggle('can-scroll-right',l<max-6);
+            });
+        }
+        row.addEventListener('scroll',upd,{passive:true}); window.addEventListener('resize',upd);
+        upd(); setTimeout(upd,400); setTimeout(upd,1000);
+    });
+}
+
+/* ── Shared hero banner builder ──────────────────────────────────── */
+function buildHeroBannerSystem(bgId, logoId, btnId, dotsId){
+    const banners=[]; let idx=0, timer=null, current=null;
+    function buildDots(){
+        const bar=document.getElementById(dotsId); if(!bar) return;
+        bar.innerHTML='';
+        banners.forEach((_,i)=>{
+            const d=document.createElement('button');
+            d.className='extra-hero-dot'+(i===0?' active':'');
+            d.setAttribute('aria-label','Banner '+(i+1));
+            d.onclick=()=>{ clearInterval(timer); idx=i; show(i); startTimer(); };
+            bar.appendChild(d);
+        });
+    }
+    function show(i){
+        const b=banners[i]; if(!b) return;
+        current=b; idx=i;
+        const bg=document.getElementById(bgId);
+        const lc=document.getElementById(logoId);
+        const btn=document.getElementById(btnId);
+        if(bg) bg.style.backgroundImage="url('https://image.tmdb.org/t/p/original"+b.backdrop+"')";
+        if(lc) lc.innerHTML=b.logo_path
+            ?'<img src="https://image.tmdb.org/t/p/w500'+b.logo_path+'" class="hero-logo" alt="'+xEsc(b.title)+' logo">'
+            :'<div style="font-size:1.4rem;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.8)">'+xEsc(b.title)+'</div>';
+        if(btn) btn.classList.remove('visually-hidden');
+        document.querySelectorAll('#'+dotsId+' .extra-hero-dot').forEach((d,j)=>d.classList.toggle('active',j===i));
+    }
+    function startTimer(){ clearInterval(timer); timer=setInterval(()=>{ idx=(idx+1)%banners.length; show(idx); },6000); }
+    function addBanner(b){ banners.push(b); }
+    function init(){ if(banners.length){ show(0); buildDots(); startTimer(); } }
+    function getCurrent(){ return current; }
+    return { addBanner, init, getCurrent };
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANIME
+   ══════════════════════════════════════════════════════════════════ */
+let animeLoaded=false;
+let animeState={mal_id:null,title:'',audioMode:'sub',season:1,seasonMap:{},episodes:[]};
+const animeBanner=buildHeroBannerSystem('anime-hero-bg','anime-hero-logo-container','anime-hero-btn','anime-hero-dots');
+
+async function initAnimeView(){
+    if(animeLoaded) return;
+    animeLoaded=true;
+
+    // Rows: sequential with delay to respect Jikan's 3 req/s limit
+    const rows=[
+        ['row-anime-trending',  JIKAN+'/top/anime?filter=airing&limit=20'],
+        ['row-anime-top',       JIKAN+'/top/anime?filter=bypopularity&limit=20'],
+        ['row-anime-action',    JIKAN+'/anime?genres=1,2&order_by=score&sort=desc&limit=20'],
+        ['row-anime-romance',   JIKAN+'/anime?genres=22&order_by=score&sort=desc&limit=20'],
+        ['row-anime-movies',    JIKAN+'/top/anime?type=movie&limit=20'],
+    ];
+
+    // Show skeletons immediately
+    rows.forEach(([id])=>showAnimeSkeleton(id));
+
+    for(const [id,url] of rows){
+        await loadAnimeRow(id,url);
+        await sleep(380); // stay under rate limit
+    }
+
+    setTimeout(()=>initViewRowArrows('view-discover'),150);
+}
+
+function showAnimeSkeleton(rowId){
+    const row=document.getElementById(rowId); if(!row) return;
+    row.innerHTML='';
+    for(let i=0;i<8;i++){
+        const s=document.createElement('div'); s.className='anime-skeleton'; row.appendChild(s);
+    }
+}
+
+async function loadAnimeRow(rowId,url){
+    const row=document.getElementById(rowId); if(!row) return;
+    try{
+        const d=await jikanFetch(url);
+        row.innerHTML='';
+        (d.data||[]).forEach(a=>{
+            const c=buildAnimeCard(a); if(c) row.appendChild(c);
+        });
+        if(!row.children.length) row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Nothing found.</p>';
+    }catch(e){
+        row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Failed \u2014 try again later.</p>';
+    }
+}
+
+function buildAnimeCard(anime){
+    if(!anime) return null;
+    const isTv=(anime.type==='TV'||!anime.episodes||anime.episodes>1);
+    const img=(anime.images&&anime.images.jpg&&anime.images.jpg.image_url)||'';
+    const div=document.createElement('div');
+    div.className='card'; div.style.position='relative';
+    div.innerHTML='<img src="'+img+'" loading="lazy" alt="'+xEsc(anime.title)+'">'+(isTv?'<span class="anime-type-badge">TV</span>':'');
+    div.onclick=()=>isTv?openAnimeEpisodes(anime.mal_id,anime.title):launchAnimePlayer(anime.mal_id,null,animeState.audioMode);
+    return div;
+}
+
+/* Anime hero */
+async function initAnimeBanner(){
+    try{
+        const r=await fetch(TMDB_BASE+'/discover/tv?api_key='+API_KEY+'&with_genres=16&with_origin_country=JP&sort_by=vote_average.desc&vote_count.gte=500&page=1');
+        const d=await r.json();
+        const list=(d.results||[]).filter(x=>x.backdrop_path&&x.name);
+        for(const item of list.slice(0,12)){
+            try{
+                const lr=await fetch(TMDB_BASE+'/tv/'+item.id+'/images?api_key='+API_KEY+'&include_image_language=en,null');
+                const ld=await lr.json();
+                const logo=(ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
+                animeBanner.addBanner({backdrop:item.backdrop_path,logo_path:logo?logo.file_path:null,tmdb_id:item.id,title:item.name});
+                if(animeBanner.getCurrent()===null&&animeBanner) {} // keep going to 6
+            }catch(e){}
+            // stop after collecting enough
+            const cur=animeBanner.getCurrent();
+        }
+        animeBanner.init();
+    }catch(e){ console.error('Anime banner',e); }
+}
+
+function animeHeroPlay(){
+    const b=animeBanner.getCurrent(); if(!b) return;
+    openAnimeEpisodesByTmdb(b.tmdb_id,b.title);
+}
+async function openAnimeEpisodesByTmdb(tmdb_id,title){
+    try{
+        const d=await jikanFetch(JIKAN+'/anime?q='+encodeURIComponent(title)+'&limit=1');
+        const hit=d.data&&d.data[0];
+        openAnimeEpisodes(hit?hit.mal_id:tmdb_id,hit?hit.title||title:title);
+    }catch(e){ openAnimeEpisodes(tmdb_id,title); }
+}
+
+/* ── Episode Selector ─────────────────────────────────────────────── */
+async function openAnimeEpisodes(mal_id,title){
+    animeState.mal_id=mal_id; animeState.title=title;
+    animeState.episodes=[]; animeState.seasonMap={};
+    document.getElementById('animeEpTitle').textContent=title;
+    document.getElementById('animeEpList').innerHTML='<div class="anime-ep-loading">Loading\u2026</div>';
+    document.getElementById('animeSeasonBar').style.display='none';
+    document.getElementById('animeSeasonBar').innerHTML='';
+    syncSubDubUI();
+    document.getElementById('animeEpisodeOverlay').classList.add('active');
+    document.body.style.overflow='hidden';
+
+    let allEps=[];
+    try{
+        for(let p=1;p<=5;p++){
+            const d=await jikanFetch(JIKAN+'/anime/'+mal_id+'/episodes?page='+p);
+            allEps=allEps.concat(d.data||[]);
+            if(!d.pagination||!d.pagination.has_next_page) break;
+            await sleep(350);
+        }
+    }catch(e){
+        document.getElementById('animeEpList').innerHTML='<div class="anime-ep-loading">Failed to load episodes.</div>';
+        return;
+    }
+    if(!allEps.length) allEps=[{mal_id:1,title:'Episode 1',aired:''}];
+    animeState.episodes=allEps;
+    if(allEps.length>52){
+        const sz=26,count=Math.ceil(allEps.length/sz);
+        for(let s=1;s<=count;s++) animeState.seasonMap[s]=allEps.slice((s-1)*sz,s*sz);
+        renderSeasonPills(count);
+    }else{ animeState.seasonMap[1]=allEps; }
+    animeState.season=1; renderEpisodeList();
+}
+
+function renderSeasonPills(count){
+    const bar=document.getElementById('animeSeasonBar'); bar.innerHTML='';
+    for(let s=1;s<=count;s++){
+        const p=document.createElement('button');
+        p.className='anime-season-pill'+(s===1?' active':'');
+        p.textContent='Season '+s;
+        p.onclick=()=>{ animeState.season=s; bar.querySelectorAll('.anime-season-pill').forEach((x,i)=>x.classList.toggle('active',i+1===s)); renderEpisodeList(); };
+        bar.appendChild(p);
+    }
+    bar.style.display='flex';
+}
+
+function renderEpisodeList(){
+    const list=document.getElementById('animeEpList');
+    const eps=animeState.seasonMap[animeState.season]||animeState.episodes;
+    list.innerHTML='';
+    if(!eps.length){ list.innerHTML='<div class="anime-ep-loading">No episodes found.</div>'; return; }
+    eps.forEach(ep=>{
+        const num=ep.mal_id||ep.episode_id||'?';
+        const name=ep.title||('Episode '+num);
+        const aired=ep.aired?new Date(ep.aired).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+        const item=document.createElement('div'); item.className='anime-ep-item';
+        item.innerHTML='<span class="anime-ep-num">Ep '+num+'</span><div class="anime-ep-info"><div class="anime-ep-name">'+xEsc(name)+'</div>'+(aired?'<div class="anime-ep-meta">'+aired+'</div>':'')+'</div><i class="fas fa-play anime-ep-play-icon"></i>';
+        item.onclick=()=>{ closeAnimeEpisodes(); launchAnimePlayer(animeState.mal_id,num,animeState.audioMode); };
+        list.appendChild(item);
+    });
+}
+
+function setAnimeAudioMode(mode){ animeState.audioMode=mode; syncSubDubUI(); }
+function syncSubDubUI(){
+    var s=document.getElementById('animeSubBtn'); if(s) s.classList.toggle('active',animeState.audioMode==='sub');
+    var d=document.getElementById('animeDubBtn'); if(d) d.classList.toggle('active',animeState.audioMode==='dub');
+}
+function closeAnimeEpisodes(){ document.getElementById('animeEpisodeOverlay').classList.remove('active'); document.body.style.overflow=''; }
+function animeEpOutsideClick(e){ if(e.target===document.getElementById('animeEpisodeOverlay')||e.target.classList.contains('anime-ep-backdrop')) closeAnimeEpisodes(); }
+
+/* URL: /anime?id=ID&dub=true|false  or  /anime?id=ID&ep=N&dub=true|false */
+function launchAnimePlayer(mal_id,episode,mode){
+    const dub=(mode==='dub')?'true':'false';
+    let url='https://thirai.me/anime?id='+mal_id+'&dub='+dub;
+    if(episode!=null) url+='&ep='+episode;
+    window.location.href=url;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TMDB TAB
+   ══════════════════════════════════════════════════════════════════ */
+let tmdbTabLoaded=false;
+const tmdbBanner=buildHeroBannerSystem('tmdb-hero-bg','tmdb-hero-logo-container','tmdb-hero-btn','tmdb-hero-dots');
+let tmdbHeroCurrent=null;
+
+async function initTmdbView(){
+    if(tmdbTabLoaded) return;
+    tmdbTabLoaded=true;
+    await Promise.allSettled([
+        initTmdbBanner(),
+        loadTmdbTabRow('row-tmdb-trending-movies', '/trending/movie/week'),
+        loadTmdbTabRow('row-tmdb-trending-tv',     '/trending/tv/week'),
+        loadTmdbTabRow('row-tmdb-top-movies',      '/movie/top_rated'),
+        loadTmdbTabRow('row-tmdb-top-tv',          '/tv/top_rated'),
+        loadTmdbTabRow('row-tmdb-now-playing',     '/movie/now_playing'),
+    ]);
+    setTimeout(()=>initViewRowArrows('view-discover'),150);
+}
+
+async function loadTmdbTabRow(rowId, endpoint){
+    const row=document.getElementById(rowId); if(!row) return;
+    row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Loading\u2026</p>';
+    try{
+        const r=await fetch(TMDB_BASE+endpoint+'?api_key='+API_KEY+'&language=en-GB&page=1');
+        const d=await r.json();
+        row.innerHTML='';
+        const isTV=endpoint.includes('/tv/');
+        (d.results||[]).filter(x=>x&&x.poster_path).forEach(item=>{
+            const div=document.createElement('div'); div.className='card';
+            div.innerHTML='<img src="https://image.tmdb.org/t/p/w342'+item.poster_path+'" loading="lazy" alt="'+xEsc(item.title||item.name||'')+'">';
+            div.onclick=()=>window.location.href=(isTV?'show.html?':'movie.html?')+item.id;
+            row.appendChild(div);
+        });
+        if(!row.children.length) row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Nothing found.</p>';
+    }catch(e){ row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Failed to load.</p>'; }
+}
+
+async function loadTmdbPeopleRow(){
+    const row=document.getElementById('row-tmdb-people'); if(!row) return;
+    row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Loading\u2026</p>';
+    try{
+        const r=await fetch(TMDB_BASE+'/person/popular?api_key='+API_KEY+'&language=en-GB&page=1');
+        const d=await r.json();
+        row.innerHTML='';
+        (d.results||[]).filter(x=>x&&x.profile_path).forEach(person=>{
+            const div=document.createElement('div'); div.className='card';
+            div.innerHTML='<img src="https://image.tmdb.org/t/p/w342'+person.profile_path+'" loading="lazy" alt="'+xEsc(person.name||'')+'">';
+            div.onclick=()=>window.location.href='person.html?'+person.id;
+            row.appendChild(div);
+        });
+        if(!row.children.length) row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Nothing found.</p>';
+    }catch(e){ row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Failed to load.</p>'; }
+}
+
+async function initTmdbBanner(){
+    try{
+        // Fetch movies/tv and anime in parallel
+        const [movRes, animeRes] = await Promise.allSettled([
+            fetch(TMDB_BASE+'/trending/movie/week?api_key='+API_KEY+'&language=en-GB'),
+            fetch(TMDB_BASE+'/discover/tv?api_key='+API_KEY+'&with_genres=16&with_origin_country=JP&sort_by=vote_average.desc&vote_count.gte=500&page=1')
+        ]);
+
+        let allItems = [];
+
+        // Process movies/tv
+        if(movRes.status==='fulfilled'){
+            const d=await movRes.value.json();
+            const list=(d.results||[]).filter(x=>x.backdrop_path&&(x.title||x.name));
+            for(const item of list.slice(0,7)){
+                try{
+                    const type=(item.media_type==='tv'||item.name)?'tv':'movie';
+                    const lr=await fetch(TMDB_BASE+'/'+type+'/'+item.id+'/images?api_key='+API_KEY+'&include_image_language=en,null');
+                    const ld=await lr.json();
+                    const logo=(ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
+                    if(logo){
+                        allItems.push({backdrop:item.backdrop_path,logo_path:logo.file_path,id:item.id,media_type:type,title:item.title||item.name,isAnime:false});
+                    }
+                }catch(e){}
+            }
+        }
+
+        // Process anime
+        if(animeRes.status==='fulfilled'){
+            const d=await animeRes.value.json();
+            const animeList=(d.results||[]).filter(x=>x.backdrop_path&&x.name);
+            for(const item of animeList.slice(0,5)){
+                try{
+                    const lr=await fetch(TMDB_BASE+'/tv/'+item.id+'/images?api_key='+API_KEY+'&include_image_language=en,null');
+                    const ld=await lr.json();
+                    const logo=(ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
+                    if(logo){
+                        allItems.push({backdrop:item.backdrop_path,logo_path:logo.file_path,id:item.id,media_type:'tv',title:item.name,isAnime:true,tmdb_id:item.id});
+                    }
+                }catch(e){}
+            }
+        }
+
+        // Interleave: every 3rd item is anime
+        const movies = allItems.filter(x=>!x.isAnime);
+        const anime  = allItems.filter(x=>x.isAnime);
+        const mixed  = [];
+        let ai=0, mi=0;
+        while(mi<movies.length||ai<anime.length){
+            if(mi<movies.length) mixed.push(movies[mi++]);
+            if(mi<movies.length) mixed.push(movies[mi++]);
+            if(ai<anime.length)  mixed.push(anime[ai++]);
+        }
+
+        mixed.forEach(b=>tmdbBanner.addBanner(b));
+        tmdbBanner.init();
+    }catch(e){ console.error('TMDB banner',e); }
+}
+
+function tmdbHeroPlay(){
+    const b=tmdbBanner.getCurrent(); if(!b) return;
+    if(b.isAnime){
+        openAnimeEpisodesByTmdb(b.tmdb_id||b.id, b.title);
+    } else {
+        window.location.href=(b.media_type==='tv'?'show.html?':'movie.html?')+b.id;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANIME SEARCH via Jikan
+   ══════════════════════════════════════════════════════════════════ */
+async function doAnimeSearch(query,pageNumber,isNewSearch){
+    const grid=document.getElementById('search-results');
+    const loadMoreBtn=document.getElementById('load-more-search');
+    if(isNewSearch){ grid.innerHTML=''; setLoading('search-results',true,false); loadMoreBtn.classList.add('visually-hidden'); }
+    else setLoadMoreBtnLoading(loadMoreBtn,true);
+    try{
+        const d=await jikanFetch(JIKAN+'/anime?q='+encodeURIComponent(query)+'&page='+pageNumber+'&limit=20');
+        if(isNewSearch) grid.innerHTML='';
+        const list=(d.data||[]).filter(a=>a.images&&a.images.jpg&&a.images.jpg.image_url);
+        list.forEach(a=>{
+            const isTv=(a.type==='TV'||!a.episodes||a.episodes>1);
+            const card=document.createElement('div'); card.className='card'; card.style.position='relative';
+            card.innerHTML='<img src="'+a.images.jpg.image_url+'" loading="lazy" alt="'+xEsc(a.title)+'">'+(isTv?'<span class="anime-type-badge">TV</span>':'');
+            card.onclick=()=>isTv?openAnimeEpisodes(a.mal_id,a.title):launchAnimePlayer(a.mal_id,null,animeState.audioMode);
+            grid.appendChild(card);
+        });
+        searchState.page=pageNumber;
+        searchState.hasMore=!!(d.pagination&&d.pagination.has_next_page);
+        if(!list.length&&isNewSearch) grid.innerHTML='<p style="color:#777;width:100%;text-align:center;">No anime found for &ldquo;'+xEsc(query)+'&rdquo;.</p>';
+    }catch(e){
+        if(isNewSearch) grid.innerHTML='<p style="color:red;width:100%;text-align:center;">Anime search failed. Try again in a moment.</p>';
+    }finally{
+        setLoadMoreBtnLoading(loadMoreBtn,false);
+        if(searchState.hasMore) loadMoreBtn.classList.remove('visually-hidden');
+        else loadMoreBtn.classList.add('visually-hidden');
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DISCOVER VIEW  (merged TMDB + Anime)
+   ══════════════════════════════════════════════════════════════════ */
+let discoverLoaded=false;
+function initDiscoverView(){
+    if(discoverLoaded) return;
+    discoverLoaded=true;
+    // load both data sets in parallel
+    Promise.allSettled([
+        initAnimeView(),
+        initTmdbView()
+    ]).then(()=>{
+        setTimeout(()=>initViewRowArrows('view-discover'),200);
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PATCHES
+   ══════════════════════════════════════════════════════════════════ */
+
+/* switchTab — handle 'discover' (merged anime + tmdb), plus keep legacy 'anime'/'tmdb' as aliases */
+(function(){
+    const _orig=window.switchTab;
+    const EXTRA=['discover','anime','tmdb'];
+    window.switchTab=function(tab){
+        // Alias legacy tab names to discover
+        if(tab==='anime'||tab==='tmdb') tab='discover';
+
+        const allViewIds='#view-home,#view-collections,#view-search,#view-actor-details,#view-filter-results,#view-lang-category,#view-anime,#view-tmdb,#view-discover';
+        if(tab==='discover'){
+            document.querySelectorAll(allViewIds).forEach(e=>e.classList.add('visually-hidden'));
+            var v=document.getElementById('view-discover'); if(v) v.classList.remove('visually-hidden');
+            document.querySelectorAll('.nav-link,.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
+            var ba=document.getElementById('btm-discover'); if(ba) ba.classList.add('active');
+            var da=document.getElementById('desk-discover'); if(da) da.classList.add('active');
+            var bb=document.getElementById('back-button'); if(bb) bb.classList.add('visually-hidden');
+            historyStack=['discover'];
+            window.scrollTo({top:0,behavior:'instant'});
+            initDiscoverView();
+            return;
+        }
+        // hide discover view when switching back
+        var dv=document.getElementById('view-discover'); if(dv) dv.classList.add('visually-hidden');
+        _orig.call(this,tab);
+    };
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   TOTP GATE  – Discover tab + search options
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+    /* ── TOTP helpers (RFC 6238 / HOTP SHA-1, vanilla JS) ── */
+    const TOTP_SECRET_B32 = 'OCS5GUUKYB5B7E2SJETYAZICUPELSHNEXEQC2Z6X63SG6KXTG5NQ';
+
+    function b32decode(s){
+        const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        s=s.replace(/=+$/,'').toUpperCase();
+        let bits='',bytes=[];
+        for(const c of s){ const v=CHARS.indexOf(c); if(v<0) continue; bits+=v.toString(2).padStart(5,'0'); }
+        for(let i=0;i+8<=bits.length;i+=8) bytes.push(parseInt(bits.slice(i,i+8),2));
+        return new Uint8Array(bytes);
+    }
+
+    async function hotp(keyBytes,counter){
+        const buf=new ArrayBuffer(8);
+        const view=new DataView(buf);
+        /* write 64-bit big-endian counter */
+        view.setUint32(0,Math.floor(counter/0x100000000),true);
+        view.setUint32(4,counter>>>0,true);
+        /* swap to big-endian */
+        const ctrBuf=new Uint8Array([
+            (counter/0x100000000000000)&0xff,(counter/0x1000000000000)&0xff,
+            (counter/0x10000000000)&0xff,(counter/0x100000000)&0xff,
+            (counter>>>24)&0xff,(counter>>>16)&0xff,(counter>>>8)&0xff,counter&0xff
+        ]);
+        const key=await crypto.subtle.importKey('raw',keyBytes,{name:'HMAC',hash:'SHA-1'},false,['sign']);
+        const sig=await crypto.subtle.sign('HMAC',key,ctrBuf);
+        const h=new Uint8Array(sig);
+        const off=h[19]&0xf;
+        return((h[off]&0x7f)<<24|(h[off+1]&0xff)<<16|(h[off+2]&0xff)<<8|(h[off+3]&0xff))%1000000;
+    }
+
+    async function verifyTOTP(token){
+        const key=b32decode(TOTP_SECRET_B32);
+        const t=Math.floor(Date.now()/1000/30);
+        for(const delta of [0,-1,1]){
+            const code=await hotp(key,t+delta);
+            if(String(code).padStart(6,'0')===String(token).padStart(6,'0')) return true;
+        }
+        return false;
+    }
+
+    /* ── State ── */
+    function isUnlocked(){ return localStorage.getItem('isUnlocked')==='true'; }
+
+    function unlock(){
+        localStorage.setItem('isUnlocked','true');
+        localStorage.setItem('premium_isUnlocked','true');
+        updateSearchOptions();
+    }
+
+    /* ── Search option visibility ── */
+    function updateSearchOptions(){
+        const sel=document.getElementById('lang-select');
+        if(!sel) return;
+        const restricted=['anime','tmdb_movies','tmdb_tv'];
+        restricted.forEach(v=>{
+            const opt=sel.querySelector('option[value="'+v+'"]');
+            if(!opt) return;
+            if(isUnlocked()){
+                opt.disabled=false;
+                opt.style.display='';
+            } else {
+                opt.disabled=true;
+                opt.style.display='none';
+            }
+        });
+    }
+
+    /* ── Modal ── */
+    function buildModal(){
+        if(document.getElementById('totpOverlay')) return;
+        const ov=document.createElement('div');
+        ov.id='totpOverlay';
+        ov.innerHTML=`
+<div id="totpCard">
+  <button id="totpCloseBtn" aria-label="Close">&#x2715;</button>
+  <div id="totpIconWrap"><i class="fas fa-lock" id="totpLockIcon"></i></div>
+  <div id="totpTitle">Restricted Access</div>
+  <div id="totpSub">Enter your 6-digit code to unlock or ask for one.</div>
+  <div id="totpInputRow">
+    <input type="text" id="totpInput" maxlength="6" inputmode="numeric" placeholder="000000" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="totpError"></div>
+  <button id="totpSubmitBtn">Verify</button>
+</div>`;
+        document.body.appendChild(ov);
+
+        document.getElementById('totpCloseBtn').onclick=closeModal;
+        ov.addEventListener('click',function(e){ if(e.target===ov) closeModal(); });
+        document.getElementById('totpInput').addEventListener('keydown',function(e){ if(e.key==='Enter') submitTOTP(); });
+        document.getElementById('totpInput').addEventListener('input',function(){
+            document.getElementById('totpError').textContent='';
+            const v=this.value.replace(/\D/g,'');
+            this.value=v;
+            document.getElementById('totpSubmitBtn').disabled=v.length!==6;
+        });
+        document.getElementById('totpSubmitBtn').onclick=submitTOTP;
+        document.getElementById('totpSubmitBtn').disabled=true;
+    }
+
+    function openModal(afterUnlock){
+        buildModal();
+        _totpAfterUnlock=afterUnlock||null;
+        const ov=document.getElementById('totpOverlay');
+        ov.classList.add('active');
+        setTimeout(()=>{ const inp=document.getElementById('totpInput'); if(inp){ inp.value=''; inp.focus(); } },120);
+        document.getElementById('totpError').textContent='';
+        document.getElementById('totpSubmitBtn').disabled=true;
+        /* reset lock icon */
+        const icon=document.getElementById('totpLockIcon');
+        if(icon){ icon.className='fas fa-lock'; icon.style.color=''; }
+    }
+
+    function closeModal(){
+        const ov=document.getElementById('totpOverlay');
+        if(ov) ov.classList.remove('active');
+    }
+
+    let _totpAfterUnlock=null;
+
+    async function submitTOTP(){
+        const inp=document.getElementById('totpInput');
+        const btn=document.getElementById('totpSubmitBtn');
+        const err=document.getElementById('totpError');
+        const token=(inp.value||'').trim();
+        btn.disabled=true;
+        btn.textContent='Checking…';
+        err.textContent='';
+        const ok=await verifyTOTP(token);
+        if(ok){
+            unlock();
+            /* success animation */
+            const icon=document.getElementById('totpLockIcon');
+            if(icon){ icon.className='fas fa-lock-open'; icon.style.color='#4ade80'; }
+            document.getElementById('totpTitle').textContent='Status Verified';
+            document.getElementById('totpSub').textContent='Section is now unlocked.';
+            inp.style.display='none';
+            btn.style.display='none';
+            setTimeout(()=>{
+                closeModal();
+                setTimeout(()=>{ const ov=document.getElementById('totpOverlay'); if(ov) ov.remove(); },400);
+                /* show one-time disclaimer */
+                if(localStorage.getItem('disclaimer_ack')!=='true'){
+                    openDisclaimer(function(){
+                        if(typeof _totpAfterUnlock==='function') _totpAfterUnlock();
+                        _totpAfterUnlock=null;
+                    });
+                } else {
+                    if(typeof _totpAfterUnlock==='function') _totpAfterUnlock();
+                    _totpAfterUnlock=null;
+                }
+            },900);
+        } else {
+            err.textContent='Incorrect code. Please try again.';
+            btn.textContent='Verify';
+            btn.disabled=false;
+            inp.value='';
+            inp.focus();
+        }
+    }
+
+    /* ── One-time disclaimer ── */
+    function openDisclaimer(onAck){
+        if(document.getElementById('disclaimerOverlay')) return;
+        const ov=document.createElement('div');
+        ov.id='disclaimerOverlay';
+        ov.innerHTML=`
+<div id="disclaimerCard">
+  <div id="disclaimerIconWrap">
+    <i class="fas fa-triangle-exclamation"></i>
+  </div>
+  <div id="disclaimerTitle">Before you continue</div>
+  <div id="disclaimerBody">
+    <p>This section (TMDB / Anime) streams content through <strong>embedded third-party video players</strong> which I <strong>did not</strong> create.</p>
+    <ul>
+      <li>This may be <strong>unreliable</strong> or go offline without notice</li>
+      <li>Players may contain <strong> ads beyond my control</strong> including <strong>pop-ups</strong></li>
+      <li>Security <strong>cannot</strong> be guaranteed this way, as goes with any other site.</li>
+	        <li>This section is still in development, so don't expect the best over here.</li>
+    </ul>
+    <div id="disclaimerDivider"></div>
+    <p id="disclaimerContrast"><i class="fas fa-circle-check" style="color:#4ade80;margin-right:6px;"></i>The main site, with just Indian movies, is created and moderated by urs truley so u can trust it.</p>
+  </div>
+  <button id="disclaimerAckBtn">Acknowledge</button>
+</div>`;
+        document.body.appendChild(ov);
+        requestAnimationFrame(()=> requestAnimationFrame(()=> ov.classList.add('active')));
+        document.getElementById('disclaimerAckBtn').onclick=function(){
+            localStorage.setItem('disclaimer_ack','true');
+            ov.classList.remove('active');
+            setTimeout(()=>{ ov.remove(); if(typeof onAck==='function') onAck(); },300);
+        };
+    }
+
+    /* ── Patch switchTab to intercept discover ── */
+    const _origSwitch=window.switchTab;
+    window.switchTab=function(tab){
+        if(tab==='discover' && !isUnlocked()){
+            openModal(function(){ _origSwitch.call(this,'discover'); }.bind(this));
+            return;
+        }
+        _origSwitch.apply(this,arguments);
+    };
+
+    /* ── Also patch the btm-discover nav click directly ── */
+    document.addEventListener('DOMContentLoaded',function(){
+        updateSearchOptions();
+    });
+    /* Run immediately in case DOM is already ready */
+    if(document.readyState!=='loading') updateSearchOptions();
+
+})();
+
+/* doSearch — handle 'anime' */
+(function(){
+    var _orig=window.doSearch;
+    if(typeof _orig!=='function') return;
+    window.doSearch=function(pageNumber,isNewSearch){
+        var lang=document.getElementById('lang-select')&&document.getElementById('lang-select').value;
+        if(lang==='anime'){
+            var q=document.getElementById('search-input')&&document.getElementById('search-input').value.trim();
+            if(!q||q.length<1){ document.getElementById('search-results').innerHTML='<p style="color:#777;width:100%;text-align:center;padding:20px 0;">Enter a search term.</p>'; return; }
+            if(isNewSearch){ searchState.query=q; searchState.lang='anime'; searchState.page=1; searchState.hasMore=false; }
+            doAnimeSearch(searchState.query,pageNumber,isNewSearch);
+            return;
+        }
+        _orig.call(this,pageNumber,isNewSearch);
+    };
+})();
+
 </script>
 
 </body>
