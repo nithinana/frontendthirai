@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actor Lookup & List Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a38;
+    --accent: #e8c547;
+    --accent2: #ff6b35;
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --code-bg: #0d1117;
+    --green: #4ade80;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,197,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,197,71,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header { text-align: center; margin-bottom: 40px; }
+
+  .badge {
+    display: inline-block;
+    background: rgba(232,197,71,0.12);
+    border: 1px solid rgba(232,197,71,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #f0f0f5 0%, #8888aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* List Staging Area */
+  #stagingArea {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    margin-bottom: 40px;
+    padding: 24px;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .staging-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .staging-title { font-weight: 800; color: var(--accent); text-transform: uppercase; font-size: 14px; }
+  
+  .staging-btns { display: flex; gap: 10px; }
+
+  .btn-sm {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-copy-all { background: var(--green); color: #0a0a0f; border: none; }
+  .btn-clear { background: transparent; color: var(--muted); }
+  .btn-clear:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  #bulkPreview {
+    background: var(--code-bg);
+    padding: 15px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #cdd6f4;
+    white-space: pre;
+    border: 1px solid var(--border);
+  }
+
+  /* Search Styles */
+  .search-wrap { position: relative; margin-bottom: 40px; }
+  .search-wrap svg { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+
+  #searchInput {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 18px 18px 18px 52px; border-radius: 6px; outline: none;
+    font-family: 'Syne', sans-serif; transition: all 0.2s;
+  }
+
+  #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,197,71,0.1); }
+
+  #results {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px; margin-bottom: 40px;
+  }
+
+  .actor-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    overflow: hidden; cursor: pointer; transition: all 0.2s; animation: fadeUp 0.3s ease both;
+  }
+
+  .actor-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .actor-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+  .actor-card .info { padding: 12px; }
+  .actor-card .name { font-size: 13px; font-weight: 700; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+    z-index: 100; display: flex; align-items: center; justify-content: center;
+    padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    width: 100%; max-width: 500px; padding: 30px; position: relative;
+  }
+
+  .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--muted); cursor: pointer; }
+
+  .modal-actor { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .modal-actor img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .field-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+
+  .modal input, .modal select {
+    width: 100%; background: var(--code-bg); border: 1px solid var(--border);
+    color: var(--text); padding: 10px; border-radius: 4px; outline: none; font-family: 'DM Mono', monospace;
+  }
+
+  .btn-group { display: flex; gap: 10px; }
+  .generate-btn { flex: 1; background: var(--accent); color: #0a0a0f; border: none; font-weight: 800; padding: 12px; border-radius: 4px; cursor: pointer; }
+  .add-list-btn { flex: 1; background: transparent; color: var(--accent); border: 1px solid var(--accent); font-weight: 800; padding: 12px; border-radius: 4px; cursor: pointer; }
+  .add-list-btn:hover { background: rgba(232,197,71,0.1); }
+
+  .loader { display: none; text-align: center; padding: 20px; }
+  .loader-dots span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; margin: 0 3px; animation: bounce 0.8s infinite; }
+  @keyframes bounce { 0%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+  #codeOutput { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; display: none; }
+  pre { background: var(--code-bg); padding: 15px; border-radius: 4px; font-size: 12px; color: #a6e3a1; overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">Einthusan Tools</div>
+    <h1>Actor <span>Lookup</span></h1>
+  </header>
+
+  <div id="stagingArea">
+    <div class="staging-header">
+      <div class="staging-title">Staged Actors (<span id="listCount">0</span>)</div>
+      <div class="staging-btns">
+        <button class="btn-sm btn-clear" id="clearListBtn">Clear</button>
+        <button class="btn-sm btn-copy-all" id="copyAllBtn">Copy All</button>
+      </div>
+    </div>
+    <div id="bulkPreview"></div>
+  </div>
+
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search for an actor..." autocomplete="off">
+  </div>
+
+  <div class="loader" id="loader"><div class="loader-dots"><span></span><span></span><span></span></div></div>
+  <div id="results"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-actor">
+      <img id="modalImg" src="">
+      <div class="modal-actor-info">
+        <div class="name" id="modalName"></div>
+        <div class="field-label">TMDB ID: <span id="modalTmdbId" style="color:var(--accent)"></span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:15px">
+      <div class="field-label">Einthusan URL</div>
+      <input type="text" id="einthusanUrl" placeholder="Paste URL to autofill...">
+    </div>
+
+    <div class="input-row">
+      <div>
+        <div class="field-label">Actor ID</div>
+        <input type="text" id="einthusanId">
+      </div>
+      <div>
+        <div class="field-label">Language</div>
+        <select id="languageSelect">
+          <option value="tamil">Tamil</option>
+          <option value="telugu">Telugu</option>
+          <option value="malayalam">Malayalam</option>
+          <option value="kannada">Kannada</option>
+          <option value="hindi">Hindi</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="add-list-btn" id="addToListBtn">Add to List</button>
+      <button class="generate-btn" id="generateBtn">Get Snippet</button>
+    </div>
+
+    <div id="codeOutput">
+      <pre id="codeSnippet"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TMDB_KEY = '926e94b0f70b5bed8417b679652366ab';
+  const IMG_BASE = 'https://image.tmdb.org/t/p/w185';
+  let selectedActor = null;
+  let actorList = [];
+
+  const searchInput = document.getElementById('searchInput');
+  const results = document.getElementById('results');
+  const loader = document.getElementById('loader');
+
+  // Search Logic
+  searchInput.addEventListener('input', e => {
+    const q = e.target.value.trim();
+    if (!q) { results.innerHTML = ''; return; }
+    clearTimeout(window.searchTimer);
+    window.searchTimer = setTimeout(() => performSearch(q), 400);
+  });
+
+  async function performSearch(q) {
+    loader.style.display = 'block';
+    const res = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    loader.style.display = 'none';
+    results.innerHTML = '';
+    data.results.slice(0, 12).forEach(actor => {
+      const card = document.createElement('div');
+      card.className = 'actor-card';
+      card.innerHTML = `<img src="${actor.profile_path ? IMG_BASE+actor.profile_path : ''}"><div class="info"><div class="name">${actor.name}</div></div>`;
+      card.onclick = () => openModal(actor);
+      results.appendChild(card);
+    });
+  }
+
+  function openModal(actor) {
+    selectedActor = actor;
+    document.getElementById('modalName').textContent = actor.name;
+    document.getElementById('modalTmdbId').textContent = actor.id;
+    document.getElementById('modalImg').src = actor.profile_path ? IMG_BASE + actor.profile_path : '';
+    document.getElementById('einthusanUrl').value = '';
+    document.getElementById('einthusanId').value = '';
+    document.getElementById('codeOutput').style.display = 'none';
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+
+  document.getElementById('modalClose').onclick = () => document.getElementById('modalOverlay').classList.remove('active');
+
+  // URL Parser
+  document.getElementById('einthusanUrl').addEventListener('input', function() {
+    try {
+      const url = new URL(this.value);
+      const id = url.searchParams.get('id');
+      const lang = url.searchParams.get('lang');
+      if (id) document.getElementById('einthusanId').value = id;
+      if (lang) document.getElementById('languageSelect').value = lang.toLowerCase();
+    } catch(e) {}
+  });
+
+  // Generate Single
+  document.getElementById('generateBtn').onclick = () => {
+    const snippet = createSnippet();
+    document.getElementById('codeSnippet').innerText = JSON.stringify(snippet, null, 2) + ',';
+    document.getElementById('codeOutput').style.display = 'block';
+  };
+
+  // Add to List Logic
+  document.getElementById('addToListBtn').onclick = () => {
+    const snippet = createSnippet();
+    actorList.push(snippet);
+    updateStagingArea();
+    document.getElementById('modalOverlay').classList.remove('active');
+  };
+
+  function createSnippet() {
+    return {
+      name: selectedActor.name,
+      tmdb_id: String(selectedActor.id),
+      actor_code: document.getElementById('einthusanId').value,
+      language: document.getElementById('languageSelect').value
+    };
+  }
+
+  function updateStagingArea() {
+    const area = document.getElementById('stagingArea');
+    const preview = document.getElementById('bulkPreview');
+    const count = document.getElementById('listCount');
+    
+    if (actorList.length > 0) {
+      area.style.display = 'block';
+      count.textContent = actorList.length;
+      preview.textContent = actorList.map(a => JSON.stringify(a, null, 4) + ',').join('\n');
+    } else {
+      area.style.display = 'none';
+    }
+  }
+
+  document.getElementById('clearListBtn').onclick = () => {
+    actorList = [];
+    updateStagingArea();
+  };
+
+  document.getElementById('copyAllBtn').onclick = function() {
+    const fullText = actorList.map(a => JSON.stringify(a, null, 4) + ',').join('\n');
+    navigator.clipboard.writeText(fullText).then(() => {
+      const originalText = this.textContent;
+      this.textContent = 'Copied!';
+      setTimeout(() => this.textContent = originalText, 2000);
+    });
+  };
+</script>
+</body>
+</html>
