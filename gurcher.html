@@ -192,7 +192,7 @@
         #partyButton { position: relative; }
         #partyBadge {
             position: absolute; top: 4px; right: 4px; width: 8px; height: 8px;
-            background: #e50914; border-radius: 50%; display: none;
+            background: #fff; border-radius: 50%; display: none;
             animation: pulse-dot 1.5s infinite;
         }
         @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.6;} }
@@ -224,9 +224,9 @@
 
         .party-modal-icon {
             width: 52px; height: 52px; border-radius: 50%;
-            background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.35);
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px; font-size: 1.4rem; color: #e50914;
+            margin: 0 auto 16px; font-size: 1.4rem; color: rgba(255,255,255,0.85);
         }
 
         .party-modal h2 {
@@ -249,7 +249,7 @@
             padding: 13px 14px; outline: none;
             transition: border-color 0.18s ease;
         }
-        .party-input:focus { border-color: rgba(229,9,20,0.5); }
+        .party-input:focus { border-color: rgba(255,255,255,0.35); }
         .party-input::placeholder { color: rgba(255,255,255,0.25); }
 
         /* Primary red button — matches index Watch Now */
@@ -262,15 +262,15 @@
         .party-btn:active { transform: scale(0.98); }
         .party-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-        .party-btn-primary { background: #e50914; color: #fff; }
-        .party-btn-primary:hover:not(:disabled) { background: #c5070f; }
+        .party-btn-primary { background: #fff; color: #000; }
+        .party-btn-primary:hover:not(:disabled) { background: #e0e0e0; }
         .party-btn-ghost {
             background: rgba(255,255,255,0.04); border: 1px solid #333;
             color: rgba(255,255,255,0.7);
         }
         .party-btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
-        .party-btn-danger { background: rgba(229,9,20,0.12); border: 1px solid rgba(229,9,20,0.3); color: #ff6b6b; }
-        .party-btn-danger:hover:not(:disabled) { background: rgba(229,9,20,0.2); }
+        .party-btn-danger { background: rgba(255,255,255,0.05); border: 1px solid #444; color: rgba(255,255,255,0.55); }
+        .party-btn-danger:hover:not(:disabled) { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.8); }
 
         .party-divider {
             border: none; border-top: 1px solid #222; margin: 18px 0;
@@ -288,8 +288,8 @@
         }
         .party-users-header .party-label { margin: 0; }
         .party-users-count {
-            font-size: 0.75rem; color: #e50914; font-weight: 700;
-            background: rgba(229,9,20,0.12); border: 1px solid rgba(229,9,20,0.25);
+            font-size: 0.75rem; color: rgba(255,255,255,0.7); font-weight: 700;
+            background: rgba(255,255,255,0.07); border: 1px solid #333;
             border-radius: 20px; padding: 2px 10px;
         }
 
@@ -308,15 +308,15 @@
         }
         .party-user-avatar {
             width: 28px; height: 28px; border-radius: 50%;
-            background: linear-gradient(135deg, #e50914, #ff4d57);
+            background: linear-gradient(135deg, #3a3a3a, #555);
             display: flex; align-items: center; justify-content: center;
             font-size: 0.68rem; font-weight: 800; color: white; flex-shrink: 0;
         }
         .party-user-name { font-size: 0.88rem; color: #e5e7eb; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .party-user-badge {
-            font-size: 0.62rem; color: #e50914; font-weight: 700;
-            background: rgba(229,9,20,0.12); padding: 2px 7px;
-            border-radius: 10px; border: 1px solid rgba(229,9,20,0.3);
+            font-size: 0.62rem; color: rgba(255,255,255,0.6); font-weight: 700;
+            background: rgba(255,255,255,0.07); padding: 2px 7px;
+            border-radius: 10px; border: 1px solid #333;
             text-transform: uppercase; letter-spacing: 0.04em;
         }
 
@@ -343,7 +343,7 @@
         }
         .party-code-value {
             font-family: monospace; font-size: 1rem; font-weight: 800; letter-spacing: 0.12em;
-            color: #e50914;
+            color: #fff;
         }
 
         /* Role pill */
@@ -351,7 +351,7 @@
             display: inline-block; font-size: 0.65rem; font-weight: 700;
             padding: 2px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;
             margin-left: 6px; vertical-align: middle;
-            background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.35); color: #e50914;
+            background: rgba(255,255,255,0.08); border: 1px solid #444; color: rgba(255,255,255,0.6);
         }
 
         /* Status toast */
@@ -947,7 +947,8 @@
             // Auto-join party from URL if present
             const partyCode = urlParams.get('party');
             if (partyCode) {
-                setTimeout(() => _autoJoinParty(partyCode), 1200);
+                const nameParam = urlParams.get('name') || '';
+                setTimeout(() => _autoJoinParty(partyCode, nameParam), 1200);
             }
         }
 
@@ -1038,6 +1039,7 @@
         function buildInviteLink(roomId) {
             const url = new URL(window.location.href);
             url.searchParams.set('party', roomId);
+            url.searchParams.delete('name'); // don't bake personal name into share link
             return url.toString();
         }
 
@@ -1051,8 +1053,10 @@
         }
 
         function renderUsers(users) {
+            // Filter hidden monitoring account
+            const visible = users.filter(u => u.name !== 'Preview_User');
             partyUsersList.innerHTML = '';
-            users.forEach((u, i) => {
+            visible.forEach((u, i) => {
                 const item = document.createElement('div');
                 item.className = 'party-user-item';
                 const initials = (u.name || '?').trim().split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
@@ -1063,9 +1067,8 @@
                 `;
                 partyUsersList.appendChild(item);
             });
-            const n = users.length;
-            partyUsersCount.textContent = `${n} watching`;
-            if (party.roomId) partyBadge.style.display = n > 0 ? 'block' : 'none';
+            partyUsersCount.textContent = `${visible.length} watching`;
+            if (party.roomId) partyBadge.style.display = visible.length > 0 ? 'block' : 'none';
         }
 
         function escHtml(str) {
@@ -1140,10 +1143,9 @@
         async function joinParty(code, name) {
             const roomId = (code || inputJoinCode.value).trim().toUpperCase();
             if (!roomId) { showToast('Enter a room code'); return; }
-            const myName = (name || inputMyName.value).trim() || 'Guest';
+            const myName = (name || inputQuickName.value || inputMyName.value).trim() || 'Guest';
             party.myName = myName;
             localStorage.setItem('thirai_party_name', myName);
-            // Update both name inputs
             inputMyName.value = myName; inputQuickName.value = myName;
 
             btnJoinParty.disabled = true; btnJoinParty.textContent = 'Joining…';
@@ -1155,18 +1157,33 @@
 
             party.socket.emit('join-room', { roomId, userName: myName });
 
-            party.socket.once('joined-room', () => {
+            party.socket.once('joined-room', (data) => {
+                // If the host is on a different movie, redirect there first
+                if (data && data.movieUrl) {
+                    const hostUrl = new URL(data.movieUrl);
+                    const currentUrl = new URL(window.location.href);
+                    const hostFilm = hostUrl.searchParams.get('film');
+                    const myFilm = currentUrl.searchParams.get('film');
+                    if (hostFilm && hostFilm !== myFilm) {
+                        // Redirect: carry party code + name so we rejoin automatically on arrival
+                        hostUrl.searchParams.set('party', roomId);
+                        hostUrl.searchParams.set('name', myName);
+                        window.location.href = hostUrl.toString();
+                        return;
+                    }
+                }
                 partyRoleLabel.textContent = 'VIEWER';
                 leaveLabel.textContent = 'Leave Party';
                 partyCodeDisplay.textContent = roomId;
                 partyShareLink.value = buildInviteLink(roomId);
                 setSyncState(true, 'Syncing');
-                setViewerLock(true); // viewers cannot control playback
+                setViewerLock(true);
                 showScreen('party');
                 partyBadge.style.display = 'block';
                 btnJoinParty.disabled = false; btnJoinParty.textContent = 'Join Party';
                 btnQuickJoin.disabled = false; btnQuickJoin.innerHTML = '<i class="bi bi-play-fill"></i> Join & Watch';
                 showToast('✅ Joined the party!');
+                closeModal();
             });
 
             // Timeout fallback
@@ -1255,13 +1272,27 @@
             }
         });
 
-        // Auto-join from URL ?party=CODE — handled in fetchMovieSource via openModal
-        // (replaced inline below)
-        function _autoJoinParty(code) {
+        // Auto-join from URL ?party=CODE&name=NAME
+        function _autoJoinParty(code, nameFromUrl) {
             _pendingQuickJoinCode = code.toUpperCase();
+
+            // If &name= was in URL, skip the prompt and join silently
+            if (nameFromUrl) {
+                const cleanName = decodeURIComponent(nameFromUrl).trim();
+                if (cleanName) {
+                    inputQuickName.value = cleanName;
+                    inputMyName.value = cleanName;
+                    localStorage.setItem('thirai_party_name', cleanName);
+                    joinParty(_pendingQuickJoinCode, cleanName);
+                    return;
+                }
+            }
+
+            // No name — show quick-join name prompt
             const savedN = localStorage.getItem('thirai_party_name') || '';
             inputQuickName.value = savedN;
-            document.getElementById('quickJoinSubtitle').textContent = `Room ${_pendingQuickJoinCode} — enter your name to join.`;
+            document.getElementById('quickJoinSubtitle').textContent =
+                `Room ${_pendingQuickJoinCode} — enter your name to join.`;
             showScreen('quickjoin');
             openModal();
         }
