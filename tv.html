@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thirai TV</title>
+<link rel="icon" type="image/png" href="https://thirai.me/static/ios/icon-96x96.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ══════════════════════════════════════════════
+   VARIABLES & RESET
+══════════════════════════════════════════════ */
+:root {
+  --sidebar-w: 88px;
+  --bg: #080808;
+  --bg2: #111111;
+  --bg3: #1a1a1a;
+  --accent: #e50914;
+  --accent-dim: rgba(229,9,20,0.18);
+  --text: #ffffff;
+  --muted: #888888;
+  --radius: 8px;
+  --card-w: 150px;
+  --focus-ring: 0 0 0 3px rgba(229,9,20,0.7), 0 8px 32px rgba(0,0,0,0.8);
+}
+
+*{box-sizing:border-box;outline:none;-webkit-tap-highlight-color:transparent;scrollbar-width:none;}
+*::-webkit-scrollbar{display:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;margin:0;padding:0;cursor:none;}
+a{text-decoration:none;color:inherit;}
+.hidden{display:none!important;}
+
+/* ══════════════════════════════════════════════
+   LOADING OVERLAY
+══════════════════════════════════════════════ */
+#loadingOverlay{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  transition:opacity 0.5s;
+}
+#loadingOverlay img{height:40px;opacity:0.9;}
+#loadingOverlay .spinner{width:36px;height:36px;border:3px solid #222;border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ══════════════════════════════════════════════
+   LAYOUT: SIDEBAR + MAIN
+══════════════════════════════════════════════ */
+#app{display:flex;width:100%;height:100%;}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 0 24px;gap:6px;
+  background:linear-gradient(to right,rgba(0,0,0,0.95),rgba(0,0,0,0.6));
+  position:relative;z-index:100;
+}
+#sidebar .logo{height:26px;margin-bottom:20px;opacity:0.95;}
+
+.side-btn{
+  width:60px;height:56px;border:none;background:transparent;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  font-size:0.62rem;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;
+  cursor:pointer;border-radius:12px;transition:color 0.15s,background 0.15s;
+  position:relative;
+}
+.side-btn i{font-size:1.3rem;}
+.side-btn:hover,.side-btn.tv-focus{background:var(--accent-dim);color:#fff;}
+.side-btn.active{color:var(--accent);}
+.side-btn.active::before{
+  content:'';position:absolute;left:-2px;top:50%;transform:translateY(-50%);
+  width:3px;height:26px;background:var(--accent);border-radius:0 3px 3px 0;
+}
+.side-btn.tv-focus{
+  background:var(--accent-dim);color:#fff;
+  box-shadow:var(--focus-ring);
+}
+
+/* ── Main Content ── */
+#main{flex:1;overflow-y:scroll;overflow-x:hidden;scroll-behavior:smooth;position:relative;}
+
+/* ══════════════════════════════════════════════
+   VIEWS
+══════════════════════════════════════════════ */
+.view{display:none;min-height:100vh;}
+.view.active{display:block;}
+
+/* ══════════════════════════════════════════════
+   HERO BANNER
+══════════════════════════════════════════════ */
+.hero{
+  position:relative;width:100%;height:75vh;max-height:760px;
+  overflow:hidden;display:flex;align-items:flex-end;
+}
+.hero-bg{
+  position:absolute;inset:0;background-size:cover;background-position:top center;
+  transform:scale(1.04);transition:background-image 0.8s ease;
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,8,8,0) 0%,rgba(8,8,8,0.4) 50%,rgba(8,8,8,0.96) 85%,var(--bg) 100%);
+}
+.hero-content{position:relative;z-index:2;padding:0 40px 50px;width:100%;}
+.hero-logo{max-width:320px;max-height:110px;width:auto;height:auto;display:block;margin-bottom:22px;filter:drop-shadow(0 2px 12px rgba(0,0,0,0.7));}
+.hero-meta{font-size:0.95rem;color:#ccc;margin-bottom:18px;display:flex;gap:14px;align-items:center;}
+.hero-meta .dot{color:var(--muted);}
+
+.btn-play{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#fff;color:#000;font-weight:700;font-size:1.1rem;
+  padding:13px 32px;border-radius:5px;border:none;cursor:pointer;
+  transition:transform 0.15s,background 0.15s;
+}
+.btn-play:hover,.btn-play.tv-focus{background:#e0e0e0;transform:scale(1.04);}
+.btn-play.tv-focus{box-shadow:var(--focus-ring);}
+.btn-play i{font-size:1rem;}
+
+/* ══════════════════════════════════════════════
+   CONTENT ROWS
+══════════════════════════════════════════════ */
+.content-pad{padding:0 40px 80px;}
+
+.section-row{margin-bottom:32px;}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-title{font-size:1.15rem;font-weight:700;color:#fff;}
+.section-more{
+  font-size:0.8rem;color:var(--muted);background:transparent;border:none;
+  cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:6px;
+  transition:color 0.15s,background 0.15s;
+}
+.section-more:hover,.section-more.tv-focus{color:#fff;background:rgba(255,255,255,0.08);}
+.section-more.tv-focus{box-shadow:var(--focus-ring);}
+
+.row-wrap{position:relative;}
+.row-container{
+  display:flex;gap:12px;overflow-x:scroll;padding:6px 2px 12px;
+  scroll-behavior:smooth;
+}
+.row-nav{
+  position:absolute;top:0;bottom:12px;width:60px;z-index:10;
+  background:transparent;border:none;color:#fff;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  font-size:1.4rem;opacity:0;transition:opacity 0.2s;
+}
+.row-wrap:hover .row-nav.visible{display:flex;opacity:1;}
+.row-prev{left:0;background:linear-gradient(to right,rgba(8,8,8,0.95),transparent);}
+.row-next{right:0;background:linear-gradient(to left,rgba(8,8,8,0.95),transparent);}
+
+/* ══════════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════════ */
+.card{
+  flex-shrink:0;width:var(--card-w);border-radius:var(--radius);overflow:hidden;
+  cursor:pointer;position:relative;
+  background:var(--bg3);
+  outline:3px solid transparent;
+  transition:transform 0.15s,outline 0.12s,box-shadow 0.15s;
+}
+.card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
+.card:hover,.card.tv-focus{
+  transform:scale(1.1);z-index:10;
+  outline:3px solid var(--accent);
+  box-shadow:var(--focus-ring);
+}
+/* TMDB backdrop cards (16:9) */
+.card.wide{width:240px;}
+.card.wide img{aspect-ratio:16/9;}
+
+/* ══════════════════════════════════════════════
+   TMDB BROWSE (view-tmdb)
+══════════════════════════════════════════════ */
+/* reuses rows above */
+
+/* ══════════════════════════════════════════════
+   SEARCH VIEW
+══════════════════════════════════════════════ */
+#view-search{padding-top:30px;}
+.search-bar{
+  display:flex;gap:12px;align-items:center;
+  padding:0 40px 24px;
+}
+.search-input{
+  flex:1;background:var(--bg3);border:2px solid #2a2a2a;color:#fff;
+  padding:14px 18px;font-size:1rem;border-radius:var(--radius);
+  transition:border-color 0.15s;
+}
+.search-input:focus,.search-input.tv-focus{border-color:var(--accent);outline:none;}
+.lang-select{
+  background:var(--bg3);border:2px solid #2a2a2a;color:#fff;
+  padding:14px 14px;font-size:0.9rem;border-radius:var(--radius);
+  cursor:pointer;transition:border-color 0.15s;
+}
+.lang-select:focus,.lang-select.tv-focus{border-color:var(--accent);}
+.btn-search{
+  background:var(--accent);color:#fff;border:none;
+  padding:14px 24px;font-size:1rem;font-weight:700;
+  border-radius:var(--radius);cursor:pointer;white-space:nowrap;
+  transition:background 0.15s,transform 0.1s;
+}
+.btn-search:hover,.btn-search.tv-focus{background:#c00010;transform:scale(1.03);}
+.btn-search.tv-focus{box-shadow:var(--focus-ring);}
+
+.grid-layout{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(var(--card-w),1fr));
+  gap:14px;padding:0 40px 40px;
+}
+.grid-layout .card{width:100%;}
+
+/* ══════════════════════════════════════════════
+   COLLECTIONS VIEW
+══════════════════════════════════════════════ */
+#view-collections{padding-top:30px;}
+.filter-tabs{
+  display:flex;gap:8px;overflow-x:scroll;padding:0 40px 20px;
+  flex-wrap:nowrap;
+}
+.filter-tab{
+  flex-shrink:0;padding:9px 20px;font-size:0.9rem;font-weight:600;
+  border-radius:20px;border:2px solid #2a2a2a;background:transparent;
+  color:var(--muted);cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+.filter-tab:hover,.filter-tab.tv-focus,.filter-tab.active{
+  border-color:var(--accent);color:#fff;background:var(--accent-dim);
+}
+.filter-tab.tv-focus{box-shadow:var(--focus-ring);}
+
+/* ══════════════════════════════════════════════
+   LANG CATEGORY VIEW (browse by language)
+══════════════════════════════════════════════ */
+#view-lang-category{padding-top:20px;}
+.lang-cat-header{
+  display:flex;align-items:center;gap:16px;padding:0 40px 20px;
+}
+.btn-back{
+  background:transparent;border:none;color:#fff;font-size:1.1rem;
+  cursor:pointer;padding:8px 12px;border-radius:var(--radius);
+  transition:background 0.15s;
+}
+.btn-back:hover,.btn-back.tv-focus{background:rgba(255,255,255,0.1);}
+.btn-back.tv-focus{box-shadow:var(--focus-ring);}
+
+.cat-pills{display:flex;gap:8px;padding:0 40px 20px;}
+.cat-pill{
+  padding:8px 20px;font-size:0.9rem;font-weight:600;border-radius:20px;
+  border:2px solid #2a2a2a;background:transparent;color:var(--muted);
+  cursor:pointer;transition:all 0.15s;
+}
+.cat-pill:hover,.cat-pill.tv-focus,.cat-pill.active{
+  border-color:var(--accent);color:#fff;background:var(--accent-dim);
+}
+.cat-pill.tv-focus{box-shadow:var(--focus-ring);}
+
+/* ══════════════════════════════════════════════
+   FILTER OVERLAY
+══════════════════════════════════════════════ */
+#filterOverlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.7);align-items:center;justify-content:center;
+}
+#filterOverlay.active{display:flex;}
+.filter-panel{
+  background:var(--bg2);border-radius:14px;padding:30px;
+  width:min(560px,90vw);max-height:85vh;overflow-y:auto;
+}
+.filter-panel h2{margin:0 0 20px;font-size:1.2rem;}
+.filter-row{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.filter-row label{font-size:0.85rem;color:var(--muted);font-weight:600;}
+.filter-select,.filter-input{
+  background:var(--bg3);border:2px solid #2a2a2a;color:#fff;
+  padding:10px 14px;font-size:0.95rem;border-radius:var(--radius);width:100%;
+}
+.filter-select:focus{border-color:var(--accent);}
+.decade-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.decade-btn{
+  padding:7px 14px;font-size:0.85rem;background:var(--bg3);border:2px solid #2a2a2a;
+  color:#ccc;border-radius:var(--radius);cursor:pointer;transition:all 0.15s;
+}
+.decade-btn:hover,.decade-btn.tv-focus,.decade-btn.active{
+  border-color:var(--accent);color:#fff;background:var(--accent-dim);
+}
+.year-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.year-btn-small{
+  padding:5px 10px;font-size:0.8rem;background:var(--bg3);border:2px solid #2a2a2a;
+  color:#ccc;border-radius:6px;cursor:pointer;transition:all 0.15s;
+}
+.year-btn-small:hover,.year-btn-small.active{border-color:var(--accent);color:#fff;}
+.filter-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-go{
+  flex:1;background:var(--accent);color:#fff;border:none;padding:12px;
+  font-size:1rem;font-weight:700;border-radius:var(--radius);cursor:pointer;
+}
+.btn-go:hover{background:#c00010;}
+.btn-close-filter{
+  background:var(--bg3);color:#fff;border:none;padding:12px 20px;
+  font-size:1rem;border-radius:var(--radius);cursor:pointer;
+}
+
+/* ══════════════════════════════════════════════
+   FILTER RESULTS VIEW
+══════════════════════════════════════════════ */
+#view-filter-results{padding-top:20px;}
+
+/* ══════════════════════════════════════════════
+   LOAD MORE BTN
+══════════════════════════════════════════════ */
+.load-more-wrap{display:flex;justify-content:center;padding:20px 0 40px;}
+.load-more-btn{
+  background:var(--bg3);border:2px solid #2a2a2a;color:#fff;
+  padding:12px 32px;font-size:0.95rem;font-weight:600;
+  border-radius:var(--radius);cursor:pointer;transition:all 0.15s;
+}
+.load-more-btn:hover,.load-more-btn.tv-focus{border-color:var(--accent);background:var(--accent-dim);}
+.load-more-btn.tv-focus{box-shadow:var(--focus-ring);}
+.load-more-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* ══════════════════════════════════════════════
+   TV FOCUS INDICATOR (sidebar label popup)
+══════════════════════════════════════════════ */
+#tv-tooltip{
+  position:fixed;left:calc(var(--sidebar-w) + 10px);
+  background:rgba(0,0,0,0.85);color:#fff;font-size:0.85rem;font-weight:600;
+  padding:6px 12px;border-radius:6px;pointer-events:none;z-index:9998;
+  display:none;white-space:nowrap;
+}
+
+/* ══════════════════════════════════════════════
+   NO INTERNET
+══════════════════════════════════════════════ */
+#noInternet{
+  display:none;position:fixed;inset:0;z-index:9998;background:var(--bg);
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  font-size:1.1rem;color:var(--muted);
+}
+#noInternet.show{display:flex;}
+#noInternet button{
+  background:var(--accent);color:#fff;border:none;padding:12px 28px;
+  font-size:1rem;font-weight:700;border-radius:var(--radius);cursor:pointer;margin-top:8px;
+}
+
+/* ══════════════════════════════════════════════
+   TMDB VIEW
+══════════════════════════════════════════════ */
+#view-tmdb{padding-top:0;}
+
+/* ══════════════════════════════════════════════
+   ACTOR DETAILS
+══════════════════════════════════════════════ */
+#view-actor-details{padding-top:20px;}
+.actor-header{padding:0 40px 20px;display:flex;align-items:center;gap:14px;}
+
+/* ══════════════════════════════════════════════
+   COLLECTIONS GRID (actors)
+══════════════════════════════════════════════ */
+.actor-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:16px;padding:0 40px 40px;
+}
+.actor-card{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;border-radius:var(--radius);padding:10px;
+  transition:background 0.15s,transform 0.15s;
+  outline:2px solid transparent;
+}
+.actor-card:hover,.actor-card.tv-focus{background:rgba(255,255,255,0.06);transform:scale(1.05);}
+.actor-card.tv-focus{outline-color:var(--accent);box-shadow:var(--focus-ring);}
+.actor-card img{
+  width:90px;height:90px;border-radius:50%;object-fit:cover;
+  border:2px solid #2a2a2a;
+}
+.actor-card span{font-size:0.78rem;color:#ccc;text-align:center;line-height:1.3;}
+
+/* ══════════════════════════════════════════════
+   SECTION HEADER VIEW TITLE
+══════════════════════════════════════════════ */
+.view-title{font-size:1.4rem;font-weight:700;padding:0 40px 20px;}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingOverlay">
+  <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai">
+  <div class="spinner"></div>
+</div>
+
+<!-- No internet -->
+<div id="noInternet">
+  <i class="fas fa-wifi" style="font-size:3rem;"></i>
+  <span>No internet connection</span>
+  <button onclick="location.reload()">Retry</button>
+</div>
+
+<!-- TV tooltip -->
+<div id="tv-tooltip"></div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- ── Sidebar ── -->
+  <nav id="sidebar">
+    <img src="https://thirai.me/static/thiraiwhite.png" alt="Thirai" class="logo">
+
+    <button class="side-btn active" id="btn-home" data-tab="home" tabindex="0">
+      <i class="fas fa-home"></i><span>Home</span>
+    </button>
+    <button class="side-btn" id="btn-tmdb" data-tab="tmdb" tabindex="0">
+      <i class="fas fa-film"></i><span>Movies</span>
+    </button>
+    <button class="side-btn" id="btn-collections" data-tab="collections" tabindex="0">
+      <i class="fas fa-layer-group"></i><span>Cast</span>
+    </button>
+    <button class="side-btn" id="btn-search" data-tab="search" tabindex="0">
+      <i class="fas fa-search"></i><span>Search</span>
+    </button>
+    <button class="side-btn" id="btn-filter" data-tab="filter" tabindex="0">
+      <i class="fas fa-sliders"></i><span>Filter</span>
+    </button>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main id="main">
+
+    <!-- ════ HOME ════ -->
+    <div id="view-home" class="view active">
+      <div class="hero">
+        <div id="hero-bg" class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div id="hero-logo-container"></div>
+          <button id="hero-play-btn" class="btn-play hidden" tabindex="0">
+            <i class="fas fa-play"></i> Watch Now
+          </button>
+        </div>
+      </div>
+
+      <div class="content-pad">
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Tamil</div>
+            <button class="section-more" data-lang="tamil" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tamil"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Malayalam</div>
+            <button class="section-more" data-lang="malayalam" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-malayalam"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Hindi</div>
+            <button class="section-more" data-lang="hindi" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-hindi"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Telugu</div>
+            <button class="section-more" data-lang="telugu" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-telugu"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Kannada</div>
+            <button class="section-more" data-lang="kannada" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-kannada"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Punjabi</div>
+            <button class="section-more" data-lang="punjabi" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-punjabi"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Bengali</div>
+            <button class="section-more" data-lang="bengali" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-bengali"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head">
+            <div class="section-title">Marathi</div>
+            <button class="section-more" data-lang="marathi" tabindex="0">See all <i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev" aria-label="left"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-marathi"></div>
+            <button class="row-nav row-next" aria-label="right"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ TMDB BROWSE ════ -->
+    <div id="view-tmdb" class="view">
+      <div class="hero">
+        <div id="tmdb-hero-bg" class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div id="tmdb-hero-logo"></div>
+          <button id="tmdb-hero-btn" class="btn-play hidden" tabindex="0">
+            <i class="fas fa-play"></i> Watch Now
+          </button>
+        </div>
+      </div>
+      <div class="content-pad">
+
+        <div class="section-row">
+          <div class="section-head"><div class="section-title">Trending Movies</div></div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tmdb-trending-movies"></div>
+            <button class="row-nav row-next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head"><div class="section-title">Trending TV Shows</div></div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tmdb-trending-tv"></div>
+            <button class="row-nav row-next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head"><div class="section-title">Top Rated Movies</div></div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tmdb-top-movies"></div>
+            <button class="row-nav row-next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head"><div class="section-title">Top Rated TV</div></div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tmdb-top-tv"></div>
+            <button class="row-nav row-next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head"><div class="section-title">Now Playing</div></div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tmdb-now-playing"></div>
+            <button class="row-nav row-next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="section-head"><div class="section-title">Upcoming</div></div>
+          <div class="row-wrap">
+            <button class="row-nav row-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="row-container" id="row-tmdb-upcoming"></div>
+            <button class="row-nav row-next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ COLLECTIONS ════ -->
+    <div id="view-collections" class="view">
+      <div class="view-title">Browse by Language</div>
+      <div class="filter-tabs" id="lang-filter-tabs">
+        <button class="filter-tab active" data-lang="tamil" tabindex="0">Tamil</button>
+        <button class="filter-tab" data-lang="hindi" tabindex="0">Hindi</button>
+        <button class="filter-tab" data-lang="malayalam" tabindex="0">Malayalam</button>
+        <button class="filter-tab" data-lang="telugu" tabindex="0">Telugu</button>
+        <button class="filter-tab" data-lang="kannada" tabindex="0">Kannada</button>
+        <button class="filter-tab" data-lang="marathi" tabindex="0">Marathi</button>
+        <button class="filter-tab" data-lang="punjabi" tabindex="0">Punjabi</button>
+        <button class="filter-tab" data-lang="bengali" tabindex="0">Bengali</button>
+      </div>
+      <div class="actor-grid" id="grid-actors"></div>
+    </div>
+
+    <!-- ════ SEARCH ════ -->
+    <div id="view-search" class="view">
+      <div class="view-title">Search</div>
+      <div class="search-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="Search movies, shows..." tabindex="0" autocomplete="off">
+        <select id="lang-select" class="lang-select" tabindex="0">
+          <option value="tamil">Tamil</option>
+          <option value="hindi">Hindi</option>
+          <option value="malayalam">Malayalam</option>
+          <option value="telugu">Telugu</option>
+          <option value="kannada">Kannada</option>
+          <option value="marathi">Marathi</option>
+          <option value="punjabi">Punjabi</option>
+          <option value="bengali">Bengali</option>
+          <option value="tmdb_movies">TMDB Movies</option>
+          <option value="tmdb_tv">TMDB TV</option>
+        </select>
+        <button class="btn-search" id="btn-do-search" tabindex="0"><i class="fas fa-search"></i> Search</button>
+      </div>
+      <div class="grid-layout" id="search-results"></div>
+      <div class="load-more-wrap">
+        <button class="load-more-btn hidden" id="load-more-search" tabindex="0">Load More</button>
+      </div>
+    </div>
+
+    <!-- ════ ACTOR DETAILS ════ -->
+    <div id="view-actor-details" class="view">
+      <div class="actor-header">
+        <button class="btn-back" id="actor-back-btn" tabindex="0"><i class="fas fa-arrow-left"></i></button>
+        <div class="section-title" id="actor-details-title">Movies</div>
+      </div>
+      <div class="cat-pills">
+        <button class="cat-pill active" id="pill-recent" tabindex="0">Recent</button>
+        <button class="cat-pill" id="pill-popular" tabindex="0">Popular</button>
+      </div>
+      <div class="grid-layout" id="actor-movies-grid"></div>
+      <div class="load-more-wrap">
+        <button class="load-more-btn hidden" id="load-more-actor" tabindex="0">Load More</button>
+      </div>
+    </div>
+
+    <!-- ════ LANG CATEGORY ════ -->
+    <div id="view-lang-category" class="view">
+      <div class="lang-cat-header">
+        <button class="btn-back" id="langcat-back-btn" tabindex="0"><i class="fas fa-arrow-left"></i></button>
+        <div class="section-title" id="lang-category-title">Movies</div>
+      </div>
+      <div class="cat-pills">
+        <button class="cat-pill active" id="langcat-recent" tabindex="0">Recent</button>
+        <button class="cat-pill" id="langcat-popular" tabindex="0">Popular</button>
+      </div>
+      <div class="grid-layout" id="lang-category-grid"></div>
+      <div class="load-more-wrap">
+        <button class="load-more-btn hidden" id="load-more-lang-category" tabindex="0">Load More</button>
+      </div>
+    </div>
+
+    <!-- ════ FILTER RESULTS ════ -->
+    <div id="view-filter-results" class="view">
+      <div class="lang-cat-header">
+        <button class="btn-back" id="filter-back-btn" tabindex="0"><i class="fas fa-arrow-left"></i></button>
+        <div class="section-title" id="filter-results-title">Results</div>
+      </div>
+      <div class="grid-layout" id="filter-results-grid"></div>
+      <div class="load-more-wrap">
+        <button class="load-more-btn hidden" id="load-more-filter" tabindex="0">Load More</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════ FILTER OVERLAY ════ -->
+<div id="filterOverlay" onclick="filterOutsideClick(event)">
+  <div class="filter-panel" id="filter-panel">
+    <h2><i class="fas fa-sliders" style="margin-right:10px;color:var(--accent)"></i>Filter Movies</h2>
+
+    <div class="filter-row">
+      <label>Language</label>
+      <select id="filter-ln" class="filter-select" tabindex="0">
+        <option value="tamil">Tamil</option>
+        <option value="hindi">Hindi</option>
+        <option value="malayalam">Malayalam</option>
+        <option value="telugu">Telugu</option>
+        <option value="kannada">Kannada</option>
+        <option value="marathi">Marathi</option>
+        <option value="punjabi">Punjabi</option>
+      </select>
+    </div>
+
+    <div class="filter-row">
+      <label>Decade</label>
+      <div class="decade-grid" id="decade-grid"></div>
+      <div class="year-grid" id="year-grid" style="display:none;"></div>
+    </div>
+
+    <div class="filter-row">
+      <label>Minimum Ratings</label>
+      <select id="filter-ratecount" class="filter-select" tabindex="0">
+        <option value="1">Any</option>
+        <option value="10">10+</option>
+        <option value="25">25+</option>
+        <option value="50" selected>50+</option>
+        <option value="100">100+</option>
+      </select>
+    </div>
+
+    <div id="filter-slider-container"></div>
+
+    <div class="filter-actions">
+      <button class="btn-go" id="filter-go-btn" tabindex="0" onclick="runFilterGo()"><i class="fas fa-play"></i> Go</button>
+      <button class="btn-close-filter" id="filter-close-btn" tabindex="0" onclick="closeFilter()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════════ */
+const API_KEY   = '926e94b0f70b5bed8417b679652366ab';
+const TMDB      = 'https://api.themoviedb.org/3';
+const THIRAI    = 'https://api.thirai.me';
+const THIRAI_FB = 'https://backendthirai-test.onrender.com';
+const IMG_W     = 'https://image.tmdb.org/t/p/w342';
+const IMG_ORIG  = 'https://image.tmdb.org/t/p/original';
+const IMG_W500  = 'https://image.tmdb.org/t/p/w500';
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let currentView = 'home';
+let historyStack = ['home'];
+let tmdbLoaded = false;
+let collectionsLoaded = false;
+
+const searchState   = { query:'', lang:'tamil', page:1, hasMore:false };
+const actorState    = { code:'', lang:'tamil', name:'', category:'recent', page:1, hasMore:false };
+const langCatState  = { lang:'', category:'recent', page:1, hasMore:false };
+const filterState   = { mode:'', params:{}, page:1, hasMore:false };
+
+let heroCurrent = null;
+let filterApiBase = THIRAI;
+
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function getWatchUrl(einthusanUrl) {
+  const m = String(einthusanUrl||'').match(/\/watch\/([a-zA-Z0-9]+)\//);
+  return m ? `https://thirai.me/watch?film=${m[1]}` : einthusanUrl;
+}
+
+function setLoading(id, show) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(show) el.innerHTML = '<p style="color:#555;padding:20px 0;text-align:center;width:100%">Loading…</p>';
+}
+
+function showBtn(id, show) {
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('hidden', !show);
+}
+
+async function safeFetch(url) {
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+/* ══════════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════════ */
+function makeThiraiCard(item) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.tabIndex = 0;
+  div.innerHTML = `<img src="${esc(item.img_url)}" loading="lazy" alt="${esc(item.title||'')}">`;
+  div.onclick = () => { window.location.href = getWatchUrl(item.page_url); };
+  return div;
+}
+
+function makeTmdbCard(item, type) {
+  if(!item.poster_path) return null;
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.tabIndex = 0;
+  div.innerHTML = `<img src="${IMG_W}${item.poster_path}" loading="lazy" alt="${esc(item.title||item.name||'')}">`;
+  const isTV = (type === 'tv') || (!item.title && !!item.name);
+  div.onclick = () => { window.location.href = (isTV ? 'https://thirai.me/show.html?' : 'https://thirai.me/movie.html?') + item.id; };
+  return div;
+}
+
+/* ══════════════════════════════════════════════
+   VIEW SWITCHING
+══════════════════════════════════════════════ */
+function switchView(view) {
+  // Hide all
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  // Show target
+  const el = document.getElementById('view-' + view);
+  if(el) el.classList.add('active');
+
+  currentView = view;
+  document.getElementById('main').scrollTop = 0;
+
+  // Sidebar active state
+  document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+  const mainTab = historyStack[0];
+  const mainBtn = document.getElementById('btn-' + mainTab);
+  if(mainBtn) mainBtn.classList.add('active');
+
+  // Back button visibility
+  const hasBack = historyStack.length > 1;
+  // (handled per-view via back buttons)
+
+  // Lazy inits
+  if(view === 'tmdb' && !tmdbLoaded) initTmdb();
+  if(view === 'collections' && !collectionsLoaded) initCollections();
+}
+
+function goTo(view) {
+  const main = ['home','tmdb','collections','search'];
+  if(main.includes(view)) {
+    historyStack = [view];
+  } else {
+    historyStack.push(view);
+  }
+  switchView(view);
+}
+
+function goBack() {
+  if(historyStack.length > 1) {
+    historyStack.pop();
+    switchView(historyStack[historyStack.length - 1]);
+  } else {
+    goTo('home');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR TABS
+══════════════════════════════════════════════ */
+document.querySelectorAll('.side-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    if(tab === 'filter') {
+      openFilter();
+    } else {
+      goTo(tab);
+    }
+  });
+});
+
+/* ══════════════════════════════════════════════
+   HOME — ROWS
+══════════════════════════════════════════════ */
+const HOME_LANGS = [
+  { id:'row-tamil',     lang:'tamil'    },
+  { id:'row-malayalam', lang:'malayalam'},
+  { id:'row-hindi',     lang:'hindi'    },
+  { id:'row-telugu',    lang:'telugu'   },
+  { id:'row-kannada',   lang:'kannada'  },
+  { id:'row-punjabi',   lang:'punjabi'  },
+  { id:'row-bengali',   lang:'bengali'  },
+  { id:'row-marathi',   lang:'marathi'  },
+];
+
+async function loadHomeRow(rowId, lang) {
+  const row = document.getElementById(rowId);
+  if(!row || row.children.length > 0) return;
+  row.innerHTML = '<p style="color:#333;padding:0 4px;font-size:0.85rem;">Loading…</p>';
+  try {
+    const d = await safeFetch(`${THIRAI}/language/${lang}?category=popular&page=1`);
+    row.innerHTML = '';
+    (d.movies || d.results || []).forEach(item => row.appendChild(makeThiraiCard(item)));
+  } catch(e) {
+    try {
+      const d2 = await safeFetch(`${THIRAI_FB}/language/${lang}?category=popular&page=1`);
+      row.innerHTML = '';
+      (d2.movies || d2.results || []).forEach(item => row.appendChild(makeThiraiCard(item)));
+    } catch(e2) {
+      row.innerHTML = '<p style="color:#555;padding:0 4px;font-size:0.85rem;">Failed to load.</p>';
+    }
+  }
+}
+
+async function loadAllHomeRows() {
+  // Load first 2 immediately, rest lazily
+  await Promise.allSettled([
+    loadHomeRow('row-tamil', 'tamil'),
+    loadHomeRow('row-malayalam', 'malayalam'),
+  ]);
+  for(const cfg of HOME_LANGS.slice(2)) {
+    loadHomeRow(cfg.id, cfg.lang);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   HOME — BANNER
+══════════════════════════════════════════════ */
+async function initBanner() {
+  try {
+    // pick a random popular Tamil or Malayalam movie and find its TMDB backdrop
+    const d = await safeFetch(`${THIRAI}/language/tamil?category=popular&page=1`);
+    const movies = (d.movies || []).filter(m => m.title);
+    if(!movies.length) return;
+    const pick = movies[Math.floor(Math.random() * Math.min(movies.length, 15))];
+    const sd = await safeFetch(`${TMDB}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(pick.title)}`);
+    const tmdbItem = (sd.results || []).find(r => r.backdrop_path);
+    if(!tmdbItem) return;
+    const ld = await safeFetch(`${TMDB}/movie/${tmdbItem.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
+    const logo = (ld.logos || []).find(i => i.iso_639_1==='en') || (ld.logos||[])[0];
+    if(!logo) return;
+
+    document.getElementById('hero-bg').style.backgroundImage = `url('${IMG_ORIG}${tmdbItem.backdrop_path}')`;
+    document.getElementById('hero-logo-container').innerHTML = `<img class="hero-logo" src="${IMG_W500}${logo.file_path}" alt="${esc(tmdbItem.title)}">`;
+    const btn = document.getElementById('hero-play-btn');
+    btn.classList.remove('hidden');
+    btn.onclick = () => { window.location.href = getWatchUrl(pick.page_url); };
+  } catch(e) {}
+}
+
+/* ══════════════════════════════════════════════
+   SECTION MORE ARROWS → LANG CATEGORY
+══════════════════════════════════════════════ */
+document.querySelectorAll('.section-more').forEach(btn => {
+  btn.addEventListener('click', () => {
+    openLangCategory(btn.dataset.lang, 'recent');
+  });
+});
+
+/* ══════════════════════════════════════════════
+   TMDB VIEW
+══════════════════════════════════════════════ */
+async function initTmdb() {
+  tmdbLoaded = true;
+  initTmdbBanner();
+  await Promise.allSettled([
+    loadTmdbRow('row-tmdb-trending-movies', '/trending/movie/week',  'movie'),
+    loadTmdbRow('row-tmdb-trending-tv',     '/trending/tv/week',     'tv'),
+    loadTmdbRow('row-tmdb-top-movies',      '/movie/top_rated',      'movie'),
+    loadTmdbRow('row-tmdb-top-tv',          '/tv/top_rated',         'tv'),
+    loadTmdbRow('row-tmdb-now-playing',     '/movie/now_playing',    'movie'),
+    loadTmdbRow('row-tmdb-upcoming',        '/movie/upcoming',       'movie'),
+  ]);
+}
+
+async function loadTmdbRow(rowId, endpoint, type) {
+  const row = document.getElementById(rowId);
+  if(!row) return;
+  row.innerHTML = '<p style="color:#333;padding:0 4px;font-size:0.85rem;">Loading…</p>';
+  try {
+    const d = await safeFetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=en-GB&page=1`);
+    row.innerHTML = '';
+    (d.results||[]).filter(x=>x&&x.poster_path).forEach(item => {
+      const card = makeTmdbCard(item, type);
+      if(card) row.appendChild(card);
+    });
+    if(!row.children.length) row.innerHTML = '<p style="color:#555;padding:0 4px;font-size:0.85rem;">Nothing found.</p>';
+  } catch(e) {
+    row.innerHTML = '<p style="color:#555;padding:0 4px;font-size:0.85rem;">Failed to load.</p>';
+  }
+}
+
+async function initTmdbBanner() {
+  try {
+    const d = await safeFetch(`${TMDB}/trending/movie/week?api_key=${API_KEY}&language=en-GB`);
+    const items = (d.results||[]).filter(x=>x.backdrop_path&&x.title);
+    if(!items.length) return;
+    const item = items[Math.floor(Math.random()*Math.min(items.length,10))];
+    const ld = await safeFetch(`${TMDB}/movie/${item.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
+    const logo = (ld.logos||[]).find(i=>i.iso_639_1==='en')||(ld.logos||[])[0];
+    if(!logo) return;
+
+    document.getElementById('tmdb-hero-bg').style.backgroundImage = `url('${IMG_ORIG}${item.backdrop_path}')`;
+    document.getElementById('tmdb-hero-logo').innerHTML = `<img class="hero-logo" src="${IMG_W500}${logo.file_path}" alt="${esc(item.title)}">`;
+    const btn = document.getElementById('tmdb-hero-btn');
+    btn.classList.remove('hidden');
+    btn.onclick = () => { window.location.href = `https://thirai.me/movie.html?${item.id}`; };
+  } catch(e) {}
+}
+
+/* ══════════════════════════════════════════════
+   COLLECTIONS (Browse actors by language)
+══════════════════════════════════════════════ */
+const actorsData = {
+  tamil: [
+    {name:'Vijay',code:'NMLsrb8tdE'},{name:'Ajith Kumar',code:'3BBlxDKuXA'},{name:'Rajinikanth',code:'6rJvo6oT0w'},
+    {name:'Kamal Haasan',code:'2oU01UMMDb'},{name:'Vikram',code:'5BBlxDKuXA'},{name:'Dhanush',code:'2INxqiVkLp'},
+    {name:'Sivakarthikeyan',code:'2j3eX8r3I3'},{name:'Vijay Sethupathi',code:'4MHvQzkyOh'},
+    {name:'Suriya',code:'3JI2Af0eZ2'},{name:'Karthi',code:'3LovLOeCrk'}
+  ],
+  hindi:[
+    {name:'Shah Rukh Khan',code:'2qX0k3esTW'},{name:'Salman Khan',code:'22UUYFMUwi'},
+    {name:'Aamir Khan',code:'63W89Vu5jE'},{name:'Akshay Kumar',code:'63W89Vu5jE'},
+    {name:'Hrithik Roshan',code:'2j3eX8r3I3'},{name:'Ranveer Singh',code:'4MHvQzkyOh'},
+  ],
+  malayalam:[
+    {name:'Mohanlal',code:'2oU01UMMDb'},{name:'Mammootty',code:'NMLsrb8tdE'},
+    {name:'Dulquer Salmaan',code:'3LovLOeCrk'},{name:'Fahadh Faasil',code:'3BBlxDKuXA'},
+    {name:'Prithviraj',code:'2INxqiVkLp'},
+  ],
+  telugu:[
+    {name:'Prabhas',code:'2qX0k3esTW'},{name:'Jr NTR',code:'22UUYFMUwi'},
+    {name:'Ram Charan',code:'63W89Vu5jE'},{name:'Allu Arjun',code:'4MHvQzkyOh'},
+    {name:'Mahesh Babu',code:'3JI2Af0eZ2'},
+  ],
+  kannada:[
+    {name:'Yash',code:'2oU01UMMDb'},{name:'Darshan',code:'NMLsrb8tdE'},
+    {name:'Sudeep',code:'3LovLOeCrk'},
+  ],
+  marathi:[{name:'Riteish Deshmukh',code:'2j3eX8r3I3'}],
+  punjabi:[{name:'Diljit Dosanjh',code:'4MHvQzkyOh'}],
+  bengali:[{name:'Dev',code:'3JI2Af0eZ2'}],
+};
+
+let collectionsLang = 'tamil';
+const tmdbPersonCache = new Map();
+
+async function getTmdbProfile(name) {
+  if(tmdbPersonCache.has(name)) return tmdbPersonCache.get(name);
+  let img = 'https://placehold.co/90x90/1a1a1a/555?text=?';
+  try {
+    const d = await safeFetch(`${TMDB}/search/person?api_key=${API_KEY}&query=${encodeURIComponent(name)}`);
+    const top = (d.results||[])[0];
+    if(top?.profile_path) img = `https://image.tmdb.org/t/p/w185${top.profile_path}`;
+  } catch(e) {}
+  tmdbPersonCache.set(name, img);
+  return img;
+}
+
+async function initCollections() {
+  collectionsLoaded = true;
+  renderActors('tamil');
+
+  document.querySelectorAll('#lang-filter-tabs .filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#lang-filter-tabs .filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderActors(tab.dataset.lang);
+    });
+  });
+}
+
+async function renderActors(lang) {
+  collectionsLang = lang;
+  const grid = document.getElementById('grid-actors');
+  grid.innerHTML = '<p style="color:#555;padding:20px;text-align:center;width:100%">Loading…</p>';
+  const list = actorsData[lang] || [];
+  grid.innerHTML = '';
+  for(const actor of list) {
+    const img = await getTmdbProfile(actor.name);
+    const div = document.createElement('div');
+    div.className = 'actor-card';
+    div.tabIndex = 0;
+    div.innerHTML = `<img src="${img}" alt="${esc(actor.name)}"><span>${esc(actor.name)}</span>`;
+    div.onclick = () => openActorMovies(actor.code, lang, actor.name);
+    grid.appendChild(div);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   ACTOR MOVIES
+══════════════════════════════════════════════ */
+async function openActorMovies(code, lang, name) {
+  actorState.code = code; actorState.lang = lang; actorState.name = name;
+  actorState.category = 'recent'; actorState.page = 1; actorState.hasMore = false;
+  document.getElementById('actor-details-title').textContent = name;
+  document.getElementById('pill-recent').classList.add('active');
+  document.getElementById('pill-popular').classList.remove('active');
+  historyStack.push('actor-details');
+  switchView('actor-details');
+  await fetchActorMovies(1, true);
+}
+
+async function fetchActorMovies(page, clear) {
+  const grid = document.getElementById('actor-movies-grid');
+  if(clear) grid.innerHTML = '<p style="color:#555;text-align:center;width:100%;padding:20px">Loading…</p>';
+  try {
+    const d = await safeFetch(`${THIRAI}/actor/${actorState.code}/${actorState.lang}?category=${actorState.category}&page=${page}`);
+    if(clear) grid.innerHTML = '';
+    const movies = d.movies || d.results || [];
+    movies.forEach(m => grid.appendChild(makeThiraiCard(m)));
+    actorState.page = page;
+    actorState.hasMore = d.has_more || d.hasMore || false;
+    if(!movies.length && clear) grid.innerHTML = '<p style="color:#777;text-align:center;width:100%;padding:20px">No movies found.</p>';
+  } catch(e) {
+    if(clear) grid.innerHTML = '<p style="color:#777;text-align:center;width:100%;padding:20px">Failed to load.</p>';
+  }
+  showBtn('load-more-actor', actorState.hasMore);
+}
+
+document.getElementById('actor-back-btn').addEventListener('click', goBack);
+document.getElementById('pill-recent').addEventListener('click', () => {
+  actorState.category = 'recent';
+  document.getElementById('pill-recent').classList.add('active');
+  document.getElementById('pill-popular').classList.remove('active');
+  fetchActorMovies(1, true);
+});
+document.getElementById('pill-popular').addEventListener('click', () => {
+  actorState.category = 'popular';
+  document.getElementById('pill-popular').classList.add('active');
+  document.getElementById('pill-recent').classList.remove('active');
+  fetchActorMovies(1, true);
+});
+document.getElementById('load-more-actor').addEventListener('click', () => {
+  if(actorState.hasMore) fetchActorMovies(actorState.page + 1, false);
+});
+
+/* ══════════════════════════════════════════════
+   LANG CATEGORY
+══════════════════════════════════════════════ */
+async function openLangCategory(lang, category) {
+  langCatState.lang = lang; langCatState.category = category;
+  langCatState.page = 1; langCatState.hasMore = false;
+  const nice = lang.charAt(0).toUpperCase() + lang.slice(1);
+  document.getElementById('lang-category-title').textContent = `${nice} • ${category.charAt(0).toUpperCase()+category.slice(1)}`;
+  document.getElementById('langcat-recent').classList.toggle('active', category==='recent');
+  document.getElementById('langcat-popular').classList.toggle('active', category==='popular');
+  historyStack.push('lang-category');
+  switchView('lang-category');
+  await fetchLangCategory(1, true);
+}
+
+async function fetchLangCategory(page, clear) {
+  const grid = document.getElementById('lang-category-grid');
+  if(clear) grid.innerHTML = '<p style="color:#555;text-align:center;width:100%;padding:20px">Loading…</p>';
+  try {
+    const d = await safeFetch(`${THIRAI}/language/${langCatState.lang}?category=${langCatState.category}&page=${page}`);
+    if(clear) grid.innerHTML = '';
+    const movies = d.movies || d.results || [];
+    movies.forEach(m => grid.appendChild(makeThiraiCard(m)));
+    langCatState.page = page;
+    langCatState.hasMore = d.has_more || d.hasMore || false;
+    if(!movies.length && clear) grid.innerHTML = '<p style="color:#777;text-align:center;width:100%;padding:20px">No movies found.</p>';
+  } catch(e) {
+    if(clear) grid.innerHTML = '<p style="color:#777;text-align:center;width:100%;padding:20px">Failed to load.</p>';
+  }
+  showBtn('load-more-lang-category', langCatState.hasMore);
+}
+
+document.getElementById('langcat-back-btn').addEventListener('click', goBack);
+document.getElementById('langcat-recent').addEventListener('click', () => {
+  langCatState.category = 'recent';
+  document.getElementById('langcat-recent').classList.add('active');
+  document.getElementById('langcat-popular').classList.remove('active');
+  document.getElementById('lang-category-title').textContent =
+    langCatState.lang.charAt(0).toUpperCase()+langCatState.lang.slice(1)+' • Recent';
+  fetchLangCategory(1, true);
+});
+document.getElementById('langcat-popular').addEventListener('click', () => {
+  langCatState.category = 'popular';
+  document.getElementById('langcat-popular').classList.add('active');
+  document.getElementById('langcat-recent').classList.remove('active');
+  document.getElementById('lang-category-title').textContent =
+    langCatState.lang.charAt(0).toUpperCase()+langCatState.lang.slice(1)+' • Popular';
+  fetchLangCategory(1, true);
+});
+document.getElementById('load-more-lang-category').addEventListener('click', () => {
+  if(langCatState.hasMore) fetchLangCategory(langCatState.page + 1, false);
+});
+
+/* ══════════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════════ */
+async function doSearch(page, isNew) {
+  const q = document.getElementById('search-input').value.trim();
+  const lang = document.getElementById('lang-select').value;
+  if(!q) return;
+  if(isNew) {
+    searchState.query = q; searchState.lang = lang;
+    searchState.page = 1; searchState.hasMore = false;
+  }
+  const grid = document.getElementById('search-results');
+  if(isNew) grid.innerHTML = '<p style="color:#555;text-align:center;width:100%;padding:20px">Searching…</p>';
+  const btn = document.getElementById('load-more-search');
+
+  try {
+    if(lang === 'tmdb_movies' || lang === 'tmdb_tv') {
+      const type = lang === 'tmdb_movies' ? 'movie' : 'tv';
+      const d = await safeFetch(`${TMDB}/search/${type}?api_key=${API_KEY}&query=${encodeURIComponent(q)}&page=${page}&include_adult=false`);
+      if(isNew) grid.innerHTML = '';
+      (d.results||[]).filter(x=>x.poster_path).forEach(item => {
+        const card = makeTmdbCard(item, type);
+        if(card) grid.appendChild(card);
+      });
+      searchState.page = page;
+      searchState.hasMore = (d.total_pages||0) > page;
+      if(!grid.children.length && isNew) grid.innerHTML = `<p style="color:#777;text-align:center;width:100%;padding:20px">No results for "${esc(q)}".</p>`;
+    } else {
+      const d = await safeFetch(`${THIRAI}/search/${lang}?q=${encodeURIComponent(q)}&page=${page}`);
+      if(isNew) grid.innerHTML = '';
+      const movies = d.movies || d.results || [];
+      movies.forEach(m => grid.appendChild(makeThiraiCard(m)));
+      searchState.page = page;
+      searchState.hasMore = d.has_more || d.hasMore || false;
+      if(!movies.length && isNew) grid.innerHTML = `<p style="color:#777;text-align:center;width:100%;padding:20px">No results for "${esc(q)}".</p>`;
+    }
+  } catch(e) {
+    if(isNew) grid.innerHTML = '<p style="color:red;text-align:center;width:100%;padding:20px">Search failed.</p>';
+  }
+  showBtn('load-more-search', searchState.hasMore);
+}
+
+document.getElementById('btn-do-search').addEventListener('click', () => doSearch(1, true));
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if(e.key === 'Enter') doSearch(1, true);
+});
+document.getElementById('load-more-search').addEventListener('click', () => {
+  if(searchState.hasMore) doSearch(searchState.page + 1, false);
+});
+
+/* ══════════════════════════════════════════════
+   FILTER
+══════════════════════════════════════════════ */
+function openFilter() {
+  buildDecadeGrid();
+  buildFilterSliders();
+  document.getElementById('filterOverlay').classList.add('active');
+}
+
+function closeFilter() {
+  document.getElementById('filterOverlay').classList.remove('active');
+}
+
+function filterOutsideClick(e) {
+  if(e.target === document.getElementById('filterOverlay')) closeFilter();
+}
+
+function buildDecadeGrid() {
+  const g = document.getElementById('decade-grid');
+  if(g.children.length) return;
+  const cur = new Date().getFullYear();
+  const start = 1950;
+  for(let d = Math.floor(cur/10)*10; d >= start; d -= 10) {
+    const btn = document.createElement('button');
+    btn.className = 'decade-btn';
+    btn.tabIndex = 0;
+    btn.textContent = `${d}s`;
+    btn.dataset.decade = d;
+    btn.addEventListener('click', () => toggleDecade(btn, d));
+    g.appendChild(btn);
+  }
+}
+
+let activeDecade = null;
+function toggleDecade(btn, decade) {
+  const yg = document.getElementById('year-grid');
+  if(activeDecade === decade) {
+    activeDecade = null;
+    btn.classList.remove('active');
+    yg.style.display = 'none';
+    yg.innerHTML = '';
+    return;
+  }
+  document.querySelectorAll('.decade-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeDecade = decade;
+  yg.innerHTML = '';
+  yg.style.display = 'flex';
+  const cur = new Date().getFullYear();
+  for(let y = decade; y <= decade+9 && y <= cur; y++) {
+    const yb = document.createElement('button');
+    yb.className = 'year-btn-small';
+    yb.tabIndex = 0;
+    yb.textContent = y;
+    yb.addEventListener('click', () => {
+      closeFilter();
+      openYearResults(document.getElementById('filter-ln').value, y);
+    });
+    yg.appendChild(yb);
+  }
+  const expBtn = document.createElement('button');
+  expBtn.className = 'year-btn-small';
+  expBtn.tabIndex = 0;
+  expBtn.style.borderColor='var(--accent)';
+  expBtn.textContent = `Explore ${decade}s`;
+  expBtn.addEventListener('click', () => {
+    closeFilter();
+    openDecadeResults(document.getElementById('filter-ln').value, decade);
+  });
+  yg.appendChild(expBtn);
+}
+
+const FILTER_CATS = ['action','comedy','romance','storyline','performance'];
+function buildFilterSliders() {
+  const c = document.getElementById('filter-slider-container');
+  if(c.children.length) return;
+  FILTER_CATS.forEach(cat => {
+    const div = document.createElement('div');
+    div.style.cssText='margin-bottom:12px;';
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <label style="font-size:0.85rem;color:var(--muted);font-weight:600;text-transform:capitalize;">${cat}: <b id="fv-${cat}">ANY</b></label>
+        <label style="font-size:0.8rem;color:var(--muted);display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="fc-${cat}" checked onchange="handleFilterAny('${cat}')"> ANY
+        </label>
+      </div>
+      <input type="range" id="fs-${cat}" min="1" max="4" value="4" disabled style="width:100%;accent-color:var(--accent);" oninput="updateFilterLabel('${cat}')">
+    `;
+    c.appendChild(div);
+  });
+}
+
+function handleFilterAny(id) {
+  const s = document.getElementById('fs-'+id);
+  const chk = document.getElementById('fc-'+id);
+  s.disabled = chk.checked;
+  updateFilterLabel(id);
+}
+function updateFilterLabel(id) {
+  const lbl = document.getElementById('fv-'+id);
+  if(!lbl) return;
+  lbl.textContent = document.getElementById('fc-'+id).checked ? 'ANY' : document.getElementById('fs-'+id).value;
+}
+function runFilterGo() {
+  const lang = document.getElementById('filter-ln').value;
+  const ratecount = document.getElementById('filter-ratecount').value;
+  const getV = cat => {
+    const any = document.getElementById('fc-'+cat).checked;
+    return any ? 0 : document.getElementById('fs-'+cat).value;
+  };
+  closeFilter();
+  openGenreResults({
+    lang, ratecount,
+    action:getV('action'), comedy:getV('comedy'), romance:getV('romance'),
+    storyline:getV('storyline'), performance:getV('performance'),
+  });
+}
+
+/* ══════════════════════════════════════════════
+   FILTER RESULTS
+══════════════════════════════════════════════ */
+function buildFilterEndpoint(base, mode, params, page) {
+  const b = base.replace(/\/$/, '');
+  if(mode === 'year')    return `${b}/year/${params.lang}/${params.year}?page=${page}`;
+  if(mode === 'decade')  return `${b}/decade/${params.lang}/${params.decade}?page=${page}`;
+  if(mode === 'genre') {
+    const q = Object.entries(params).filter(([k,v])=>k!=='lang'&&v).map(([k,v])=>`${k}=${v}`).join('&');
+    return `${b}/filter/${params.lang}?${q}&page=${page}`;
+  }
+  return b;
+}
+
+async function openYearResults(lang, year) {
+  filterState.mode = 'year'; filterState.params = {lang, year}; filterState.page = 1; filterState.hasMore = false;
+  filterApiBase = THIRAI;
+  document.getElementById('filter-results-title').textContent = `${lang.charAt(0).toUpperCase()+lang.slice(1)} • ${year}`;
+  historyStack.push('filter-results'); switchView('filter-results');
+  await fetchFilterResults(1, true);
+}
+async function openDecadeResults(lang, decade) {
+  filterState.mode = 'decade'; filterState.params = {lang, decade}; filterState.page = 1; filterState.hasMore = false;
+  filterApiBase = THIRAI;
+  document.getElementById('filter-results-title').textContent = `${lang.charAt(0).toUpperCase()+lang.slice(1)} • ${decade}s`;
+  historyStack.push('filter-results'); switchView('filter-results');
+  await fetchFilterResults(1, true);
+}
+async function openGenreResults(params) {
+  filterState.mode = 'genre'; filterState.params = params; filterState.page = 1; filterState.hasMore = false;
+  filterApiBase = THIRAI;
+  document.getElementById('filter-results-title').textContent = `${params.lang.charAt(0).toUpperCase()+params.lang.slice(1)} • Filtered`;
+  historyStack.push('filter-results'); switchView('filter-results');
+  await fetchFilterResults(1, true);
+}
+
+async function fetchFilterResults(page, clear) {
+  const grid = document.getElementById('filter-results-grid');
+  if(clear) grid.innerHTML = '<p style="color:#555;text-align:center;width:100%;padding:20px">Loading…</p>';
+  let url = buildFilterEndpoint(filterApiBase, filterState.mode, filterState.params, page);
+  try {
+    let d;
+    try { d = await safeFetch(url); }
+    catch(e) {
+      if(filterApiBase === THIRAI) {
+        filterApiBase = THIRAI_FB;
+        url = buildFilterEndpoint(filterApiBase, filterState.mode, filterState.params, page);
+        d = await safeFetch(url);
+      } else throw e;
+    }
+    if(clear) grid.innerHTML = '';
+    const movies = d.movies || d.results || [];
+    movies.forEach(m => grid.appendChild(makeThiraiCard(m)));
+    filterState.page = page;
+    filterState.hasMore = d.has_more || d.hasMore || false;
+    if(!movies.length && clear) grid.innerHTML = '<p style="color:#777;text-align:center;width:100%;padding:20px">No movies found.</p>';
+  } catch(e) {
+    if(clear) grid.innerHTML = '<p style="color:#777;text-align:center;width:100%;padding:20px">Failed to load.</p>';
+  }
+  showBtn('load-more-filter', filterState.hasMore);
+}
+
+document.getElementById('filter-back-btn').addEventListener('click', goBack);
+document.getElementById('load-more-filter').addEventListener('click', () => {
+  if(filterState.hasMore) fetchFilterResults(filterState.page + 1, false);
+});
+
+/* ══════════════════════════════════════════════
+   TV D-PAD NAVIGATION
+══════════════════════════════════════════════ */
+const FOCUSABLE_SEL = [
+  '.side-btn', '.card', '.btn-play', '.section-more',
+  '.filter-tab', '.cat-pill', '.load-more-btn:not(.hidden)',
+  '.actor-card', '.btn-back', '.btn-search', '#btn-do-search',
+  '.decade-btn', '.year-btn-small', '.btn-go', '.btn-close-filter',
+  '#filter-go-btn', '#filter-close-btn', '#filter-ln', '#filter-ratecount',
+  '.filter-tab', '#load-more-search', '#load-more-actor',
+  '#load-more-lang-category', '#load-more-filter',
+  '#search-input', '#lang-select',
+  '#tmdb-hero-btn', '#hero-play-btn'
+].join(',');
+
+let tvFocus = null;
+let tvMode = false;   // activated on first D-pad press
+
+function ensureFocusable() {
+  document.querySelectorAll(FOCUSABLE_SEL).forEach(el => {
+    if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+  });
+}
+
+function getVisible() {
+  return Array.from(document.querySelectorAll(FOCUSABLE_SEL)).filter(el => {
+    const r = el.getBoundingClientRect();
+    if(r.width <= 0 || r.height <= 0) return false;
+    // Must be visible in the sidebar or the active view
+    const view = el.closest('.view');
+    if(view && !view.classList.contains('active')) return false;
+    const overlay = el.closest('#filterOverlay');
+    if(overlay && !overlay.classList.contains('active')) return false;
+    return true;
+  });
+}
+
+function nearestIn(dir, from) {
+  const all = getVisible();
+  if(!all.length) return null;
+  if(!from) return all[0];
+
+  const cr = from.getBoundingClientRect();
+  const cx = cr.left + cr.width/2, cy = cr.top + cr.height/2;
+
+  let best = null, bestScore = Infinity;
+  const AW = 2.5; // axis weight — prefer same axis
+
+  all.forEach(el => {
+    if(el === from) return;
+    const r = el.getBoundingClientRect();
+    const ex = r.left + r.width/2, ey = r.top + r.height/2;
+    const dx = ex - cx, dy = ey - cy;
+    let ok = false;
+    if(dir==='right' && dx>6) ok = Math.abs(dy) < Math.abs(dx)*AW;
+    if(dir==='left'  && dx<-6) ok = Math.abs(dy) < Math.abs(dx)*AW;
+    if(dir==='down'  && dy>6) ok = Math.abs(dx) < Math.abs(dy)*AW;
+    if(dir==='up'    && dy<-6) ok = Math.abs(dx) < Math.abs(dy)*AW;
+    if(!ok) return;
+    const score = dx*dx + dy*dy;
+    if(score < bestScore) { bestScore = score; best = el; }
+  });
+  return best;
+}
+
+function tvSetFocus(el) {
+  if(!el) return;
+  if(tvFocus) tvFocus.classList.remove('tv-focus');
+  tvFocus = el;
+  el.classList.add('tv-focus');
+  el.focus({preventScroll:false});
+  el.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
+}
+
+function tvInit() {
+  ensureFocusable();
+  const first = getVisible()[0];
+  if(first) tvSetFocus(first);
+}
+
+document.addEventListener('keydown', e => {
+  const k = e.keyCode || e.which;
+
+  // Direction keys
+  const dirs = {37:'left',21:'left', 39:'right',22:'right', 38:'up',19:'up', 40:'down',20:'down'};
+  if(dirs[k]) {
+    tvMode = true;
+    document.body.style.cursor = 'none';
+    e.preventDefault();
+    ensureFocusable();
+    if(!tvFocus) { tvInit(); return; }
+    const next = nearestIn(dirs[k], tvFocus);
+    if(next) tvSetFocus(next);
+
+    // Auto-scroll row containers when navigating cards
+    if(tvFocus) {
+      const row = tvFocus.closest('.row-container');
+      if(row) row.scrollLeft = tvFocus.offsetLeft - row.clientWidth/2 + tvFocus.offsetWidth/2;
+    }
+    return;
+  }
+
+  // OK / Select / Enter
+  if(k===13 || k===23) {
+    if(tvFocus) {
+      e.preventDefault();
+      tvFocus.click();
+      // If it's an input, show keyboard by not preventing default normally
+    }
+    return;
+  }
+
+  // Back / Escape
+  if(k===27 || k===4) {
+    e.preventDefault();
+    // Close filter overlay first
+    const overlay = document.getElementById('filterOverlay');
+    if(overlay.classList.contains('active')) { closeFilter(); return; }
+    // Otherwise go back in history
+    goBack();
+    return;
+  }
+
+  // Play/Pause media keys
+  if(k===179 || k===227) { // MEDIA_PLAY_PAUSE / KEYCODE_MEDIA_PLAY_PAUSE
+    const v = document.querySelector('video');
+    if(v) v.paused ? v.play() : v.pause();
+  }
+}, true);
+
+// Mouse move re-shows cursor and deactivates TV mode
+document.addEventListener('mousemove', () => {
+  if(tvMode) {
+    tvMode = false;
+    document.body.style.cursor = '';
+    if(tvFocus) { tvFocus.classList.remove('tv-focus'); tvFocus = null; }
+  }
+});
+
+/* ══════════════════════════════════════════════
+   MUTATION OBSERVER — re-run focusable on DOM changes
+══════════════════════════════════════════════ */
+new MutationObserver(() => {
+  if(tvMode) ensureFocusable();
+}).observe(document.body, { childList:true, subtree:true });
+
+/* ══════════════════════════════════════════════
+   ROW SCROLL ARROWS (mouse)
+══════════════════════════════════════════════ */
+document.querySelectorAll('.row-wrap').forEach(wrap => {
+  const row = wrap.querySelector('.row-container');
+  const prev = wrap.querySelector('.row-prev');
+  const next = wrap.querySelector('.row-next');
+  if(!row) return;
+
+  function update() {
+    if(!prev||!next) return;
+    prev.classList.toggle('visible', row.scrollLeft > 10);
+    next.classList.toggle('visible', row.scrollLeft < row.scrollWidth - row.clientWidth - 10);
+  }
+  row.addEventListener('scroll', update, {passive:true});
+  setTimeout(update, 500);
+
+  if(prev) prev.addEventListener('click', () => { row.scrollBy({left:-row.clientWidth*0.7,behavior:'smooth'}); });
+  if(next) next.addEventListener('click', () => { row.scrollBy({left:row.clientWidth*0.7,behavior:'smooth'}); });
+});
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+async function init() {
+  // Check network
+  if(!navigator.onLine) {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('noInternet').classList.add('show');
+    return;
+  }
+
+  try {
+    await loadAllHomeRows();
+    initBanner();
+  } catch(e) {
+    console.error('Init error', e);
+  }
+
+  // Hide loading
+  const lo = document.getElementById('loadingOverlay');
+  lo.style.opacity = '0';
+  setTimeout(() => { lo.style.display = 'none'; }, 500);
+
+  // Announce TV mode availability
+  console.log('[ThiraiTV] Ready — D-pad navigation active');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
