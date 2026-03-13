@@ -365,69 +365,51 @@
         }
         #partyToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* ===== PARTY OVERLAY (replaces minimal sync indicator) ===== */
-        #partyOverlay {
-            position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
-            z-index: 500; display: none; align-items: center; gap: 12px;
-            background: rgba(14,14,14,0.88);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px; padding: 10px 14px 10px 10px;
-            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-            font-family: 'Inter', sans-serif;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
-            max-width: calc(100vw - 2rem);
-            pointer-events: auto;
+        /* ===== PARTY MOVIE CARD (shown in modal) ===== */
+        .party-movie-card {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.04); border: 1px solid #2a2a2a;
+            border-radius: 12px; padding: 10px 12px; margin-bottom: 16px;
         }
-        #partyOverlay.visible { display: flex; }
-
-        #partyOverlayPoster {
-            width: 44px; height: 62px; border-radius: 7px; object-fit: cover;
-            flex-shrink: 0; background: #1a1a1a;
-            border: 1px solid rgba(255,255,255,0.1);
+        .party-movie-poster {
+            width: 40px; height: 56px; border-radius: 6px; object-fit: cover;
+            flex-shrink: 0; background: #1a1a1a; border: 1px solid #2a2a2a;
         }
-
-        #partyOverlayInfo {
-            display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0;
+        .party-movie-poster.no-img { display: none; }
+        .party-movie-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+        .party-movie-name {
+            font-size: 0.82rem; font-weight: 700; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-
-        #partyOverlayTitle {
-            font-size: 0.78rem; font-weight: 700; color: #fff;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;
-        }
-
-        #partyOverlayTimestamp {
-            font-size: 0.72rem; color: rgba(255,255,255,0.5); font-weight: 500;
+        .party-movie-time {
+            font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 500;
             font-variant-numeric: tabular-nums;
         }
-
-        #partyOverlayStatus {
+        .party-movie-status {
             display: flex; align-items: center; gap: 5px;
-            font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.75);
-            margin-top: 1px;
+            font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.65);
         }
-        #partyStatusDot {
-            width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex-shrink: 0;
+        .party-status-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
         }
-        #partyStatusDot.paused { background: rgba(255,255,255,0.4); animation: none; }
-        #partyStatusDot.buffering { background: #f59e0b; animation: pulse-dot 0.8s infinite; }
-        #partyStatusDot.live { background: #22c55e; animation: pulse-dot 1.5s infinite; }
+        .party-status-dot.live { background: #22c55e; animation: pulse-dot 1.5s infinite; }
+        .party-status-dot.paused { background: rgba(255,255,255,0.35); }
+        .party-status-dot.buffering { background: #f59e0b; animation: pulse-dot 0.8s infinite; }
 
-        .party-overlay-divider {
-            width: 1px; height: 40px; background: rgba(255,255,255,0.1); flex-shrink: 0;
-        }
-
-        #partyOverlayCode {
-            display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0;
-            cursor: pointer; padding: 4px 6px; border-radius: 8px;
+        /* copy code pill inside card */
+        .party-code-copy-btn {
+            flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 1px;
+            cursor: pointer; padding: 6px 8px; border-radius: 8px;
+            background: rgba(255,255,255,0.06); border: 1px solid #2a2a2a;
             transition: background 0.15s;
         }
-        #partyOverlayCode:hover { background: rgba(255,255,255,0.07); }
-        #partyOverlayCodeValue {
-            font-family: monospace; font-size: 0.9rem; font-weight: 800; letter-spacing: 0.1em;
-            color: #fff;
+        .party-code-copy-btn:hover { background: rgba(255,255,255,0.1); }
+        .party-code-copy-val {
+            font-family: monospace; font-size: 0.85rem; font-weight: 800;
+            letter-spacing: 0.1em; color: #fff;
         }
-        #partyOverlayCodeHint {
-            font-size: 0.58rem; color: rgba(255,255,255,0.35); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+        .party-code-copy-hint {
+            font-size: 0.57rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.04em;
         }
 
         /* Screens inside modal */
@@ -502,24 +484,6 @@
         </div>
     </div>
 
-    <!-- Party Overlay: poster + timestamp + status + room code copy -->
-    <div id="partyOverlay">
-        <img id="partyOverlayPoster" src="" alt="">
-        <div id="partyOverlayInfo">
-            <div id="partyOverlayTitle">Watching</div>
-            <div id="partyOverlayTimestamp">00:00</div>
-            <div id="partyOverlayStatus">
-                <span id="partyStatusDot" class="live"></span>
-                <span id="partyStatusText">Live</span>
-            </div>
-        </div>
-        <div class="party-overlay-divider"></div>
-        <div id="partyOverlayCode" title="Copy room code">
-            <div id="partyOverlayCodeValue">——</div>
-            <div id="partyOverlayCodeHint">Copy code</div>
-        </div>
-    </div>
-
     <!-- Toast -->
     <div id="partyToast"></div>
 
@@ -546,6 +510,24 @@
 
                 <label class="party-label" style="margin-bottom:6px">Room code</label>
                 <input class="party-input" id="inputJoinCode" placeholder="e.g. ABC123" maxlength="6" style="text-transform:uppercase;margin-bottom:10px;letter-spacing:0.12em;font-weight:700">
+
+                <!-- Preview card appears here when 6-char code is typed -->
+                <div class="party-movie-card" id="lbMovieCard" style="display:none">
+                    <img class="party-movie-poster no-img" id="lbPoster" src="" alt="">
+                    <div class="party-movie-meta">
+                        <div class="party-movie-name" id="lbTitle">Loading…</div>
+                        <div class="party-movie-time" id="lbTime">—</div>
+                        <div class="party-movie-status">
+                            <span class="party-status-dot live" id="lbDot"></span>
+                            <span id="lbStatusText">Live</span>
+                        </div>
+                    </div>
+                    <div class="party-code-copy-btn" id="lbCopyCode" title="Copy room code">
+                        <div class="party-code-copy-val" id="lbCodeVal">——</div>
+                        <div class="party-code-copy-hint" id="lbCodeHint">Copy code</div>
+                    </div>
+                </div>
+
                 <button class="party-btn party-btn-ghost" id="btnJoinParty" style="margin-bottom:10px">
                     Join Party
                 </button>
@@ -563,6 +545,23 @@
                 <h2>Join Party</h2>
                 <p class="party-subtitle" id="quickJoinSubtitle">Enter your name to join.</p>
 
+                <!-- Movie preview card -->
+                <div class="party-movie-card" id="qjMovieCard" style="display:none">
+                    <img class="party-movie-poster" id="qjPoster" src="" alt="">
+                    <div class="party-movie-meta">
+                        <div class="party-movie-name" id="qjTitle">Loading…</div>
+                        <div class="party-movie-time" id="qjTime">—</div>
+                        <div class="party-movie-status">
+                            <span class="party-status-dot live" id="qjDot"></span>
+                            <span id="qjStatusText">Live</span>
+                        </div>
+                    </div>
+                    <div class="party-code-copy-btn" id="qjCopyCode" title="Copy room code">
+                        <div class="party-code-copy-val" id="qjCodeVal">——</div>
+                        <div class="party-code-copy-hint" id="qjCodeHint">Copy code</div>
+                    </div>
+                </div>
+
                 <label class="party-label">Your name</label>
                 <input class="party-input" id="inputQuickName" placeholder="Enter your name…" maxlength="32" style="margin-bottom:16px">
 
@@ -576,18 +575,32 @@
 
             <!-- SCREEN 3: ACTIVE PARTY -->
             <div class="party-screen" id="screenParty">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
                     <div>
                         <div style="font-size:1.05rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px">
-                            <i class="bi bi-people-fill" style="color:#e50914"></i>
+                            <i class="bi bi-people-fill" style="color:rgba(255,255,255,0.7)"></i>
                             Watch Party
                             <span class="party-role-pill" id="partyRoleLabel">Host</span>
                         </div>
-                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:3px">
-                            Room <span class="party-code-value" id="partyCodeDisplay"></span>
-                        </div>
                     </div>
                     <button class="party-copy-btn" id="btnCloseParty" style="border-radius:8px;padding:6px 12px;font-size:0.8rem">Done</button>
+                </div>
+
+                <!-- Live movie card -->
+                <div class="party-movie-card" id="apMovieCard">
+                    <img class="party-movie-poster" id="apPoster" src="" alt="">
+                    <div class="party-movie-meta">
+                        <div class="party-movie-name" id="apTitle">Watching</div>
+                        <div class="party-movie-time" id="apTime">00:00</div>
+                        <div class="party-movie-status">
+                            <span class="party-status-dot live" id="apDot"></span>
+                            <span id="apStatusText">Live</span>
+                        </div>
+                    </div>
+                    <div class="party-code-copy-btn" id="apCopyCode" title="Copy room code">
+                        <div class="party-code-copy-val" id="apCodeVal">——</div>
+                        <div class="party-code-copy-hint" id="apCodeHint">Copy code</div>
+                    </div>
                 </div>
 
                 <div class="party-users-header">
@@ -1068,17 +1081,91 @@
         const partyRoleLabel = document.getElementById('partyRoleLabel');
         const leaveLabel = document.getElementById('leaveLabel');
         const partyShareLink = document.getElementById('partyShareLink');
-        const partyCodeDisplay = document.getElementById('partyCodeDisplay');
         const btnCopyLink = document.getElementById('btnCopyLink');
-        const syncIndicator = document.getElementById('syncIndicator');
-        const syncLabel = document.getElementById('syncLabel');
+        const syncIndicator = null; // removed — using in-modal cards now
+        const syncLabel = null;
         const partyToast = document.getElementById('partyToast');
 
         // Restore saved name
         const savedName = localStorage.getItem('thirai_party_name');
         if (savedName) { inputMyName.value = savedName; inputQuickName.value = savedName; }
 
-        inputJoinCode.addEventListener('input', () => { inputJoinCode.value = inputJoinCode.value.toUpperCase(); });
+        // ---- Room preview (show movie card before joining) ----
+        let _previewDebounce = null;
+        let _previewRoomId = null;
+
+        async function previewRoom(roomId) {
+            if (!roomId || roomId.length < 6) return;
+            _previewRoomId = roomId;
+
+            // Show loading on both lobby card and quickjoin card
+            ['qj', 'lb'].forEach(prefix => {
+                const cardEl = document.getElementById(prefix + 'MovieCard');
+                if (!cardEl) return;
+                cardEl.style.display = 'flex';
+                document.getElementById(prefix + 'Title').textContent = 'Loading…';
+                document.getElementById(prefix + 'Time').textContent = '—';
+                document.getElementById(prefix + 'CodeVal').textContent = roomId;
+                document.getElementById(prefix + 'Poster').classList.add('no-img');
+            });
+
+            try {
+                await connectSocket();
+                const data = await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('timeout')), 5000);
+                    party.socket.emit('join-room', { roomId, userName: 'Preview_User' });
+                    party.socket.once('joined-room', (d) => {
+                        clearTimeout(timeout);
+                        party.socket.emit('leave-room', { roomId });
+                        resolve(d);
+                    });
+                    party.socket.once('error', () => { clearTimeout(timeout); reject(new Error('not found')); });
+                });
+
+                if (_previewRoomId !== roomId) return;
+
+                let title = 'Watching'; let poster = '';
+                if (data && data.movieUrl) {
+                    try {
+                        const u = new URL(data.movieUrl);
+                        const filmCode = u.searchParams.get('film');
+                        if (filmCode) {
+                            const res = await fetch(`https://api.thirai.me/watch?url=${encodeURIComponent('https://einthusan.tv/movie/watch/' + filmCode + '/')}`);
+                            if (res.ok) { const d = await res.json(); if (d.title) title = d.title; if (d.img_url) poster = d.img_url; }
+                        }
+                    } catch(e) {}
+                }
+
+                ['qj', 'lb'].forEach(prefix => {
+                    const cardEl = document.getElementById(prefix + 'MovieCard');
+                    if (!cardEl) return;
+                    cardEl.style.display = 'flex';
+                    document.getElementById(prefix + 'Title').textContent = title;
+                    document.getElementById(prefix + 'Time').textContent = '—';
+                    _setCardStatus(document.getElementById(prefix + 'Dot'), document.getElementById(prefix + 'StatusText'), 'live');
+                    const posterEl = document.getElementById(prefix + 'Poster');
+                    if (poster) { posterEl.src = poster; posterEl.classList.remove('no-img'); } else { posterEl.classList.add('no-img'); }
+                    _makeCopyCode(document.getElementById(prefix + 'CodeVal'), document.getElementById(prefix + 'CodeHint'), roomId);
+                });
+
+            } catch(e) {
+                if (_previewRoomId !== roomId) return;
+                ['qj', 'lb'].forEach(prefix => {
+                    const t = document.getElementById(prefix + 'Title');
+                    if (t) t.textContent = 'Room not found';
+                });
+            }
+        }
+
+        // Auto-uppercase + debounced room preview
+        inputJoinCode.addEventListener('input', () => {
+            inputJoinCode.value = inputJoinCode.value.toUpperCase();
+            const code = inputJoinCode.value.trim();
+            clearTimeout(_previewDebounce);
+            const lbCard = document.getElementById('lbMovieCard');
+            if (code.length < 6) { if (lbCard) lbCard.style.display = 'none'; return; }
+            _previewDebounce = setTimeout(() => previewRoom(code), 450);
+        });
 
         function showToast(msg, duration = 2800) {
             partyToast.textContent = msg;
@@ -1142,68 +1229,118 @@
             return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
-        // ===== Party Overlay =====
-        const partyOverlay = document.getElementById('partyOverlay');
-        const partyOverlayPoster = document.getElementById('partyOverlayPoster');
-        const partyOverlayTitle = document.getElementById('partyOverlayTitle');
-        const partyOverlayTimestamp = document.getElementById('partyOverlayTimestamp');
-        const partyOverlayCodeValue = document.getElementById('partyOverlayCodeValue');
-        const partyStatusDot = document.getElementById('partyStatusDot');
-        const partyStatusText = document.getElementById('partyStatusText');
+        // ===== In-modal movie cards =====
         let _posterUrl = '';
+        let _cardTimerInterval = null;
 
-        function setOverlayVisible(visible) {
-            partyOverlay.classList.toggle('visible', visible);
+        function _setCardStatus(dotEl, textEl, state) {
+            dotEl.className = 'party-status-dot ' + state;
+            textEl.textContent = state === 'live' ? 'Live' : state === 'paused' ? 'Paused' : 'Buffering…';
         }
 
-        function updateOverlayStatus(state) {
-            // state: 'live' | 'paused' | 'buffering'
-            partyStatusDot.className = state;
-            partyStatusText.textContent = state === 'live' ? 'Live' : state === 'paused' ? 'Paused' : 'Buffering…';
+        function _makeCopyCode(codeValEl, codeHintEl, roomId) {
+            codeValEl.textContent = roomId;
+            const btn = codeValEl.closest('.party-code-copy-btn');
+            btn.onclick = () => {
+                const code = codeValEl.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(code).then(() => showToast('📋 Code copied!'));
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = code; document.body.appendChild(ta); ta.select();
+                    document.execCommand('copy'); document.body.removeChild(ta);
+                    showToast('📋 Copied!');
+                }
+                codeHintEl.textContent = 'Copied!';
+                setTimeout(() => { codeHintEl.textContent = 'Copy code'; }, 1800);
+            };
         }
 
-        function updateOverlayTimestamp() {
-            if (party.roomId) {
-                partyOverlayTimestamp.textContent = formatTime(moviePlayer.currentTime);
-            }
-        }
+        function populateMovieCard(prefix, roomId) {
+            // prefix is 'ap' (active party) or 'qj' (quick join preview)
+            const titleEl = document.getElementById(prefix + 'Title');
+            const timeEl = document.getElementById(prefix + 'Time');
+            const dotEl = document.getElementById(prefix + 'Dot');
+            const statusEl = document.getElementById(prefix + 'StatusText');
+            const posterEl = document.getElementById(prefix + 'Poster');
+            const codeValEl = document.getElementById(prefix + 'CodeVal');
+            const codeHintEl = document.getElementById(prefix + 'CodeHint');
 
-        // Refresh timestamp every second when overlay is visible
-        setInterval(() => { if (party.roomId) updateOverlayTimestamp(); }, 1000);
+            titleEl.textContent = movieTitleDisplay.textContent || 'Watching';
+            timeEl.textContent = formatTime(moviePlayer.currentTime);
+            _setCardStatus(dotEl, statusEl, moviePlayer.paused ? 'paused' : 'live');
 
-        // Update status from player events
-        moviePlayer.addEventListener('play', () => { if (party.roomId) updateOverlayStatus('live'); });
-        moviePlayer.addEventListener('pause', () => { if (party.roomId) updateOverlayStatus('paused'); });
-        moviePlayer.addEventListener('waiting', () => { if (party.roomId) updateOverlayStatus('buffering'); });
-        moviePlayer.addEventListener('playing', () => { if (party.roomId) updateOverlayStatus('live'); });
-
-        // Copy code from overlay
-        document.getElementById('partyOverlayCode').addEventListener('click', () => {
-            const code = partyOverlayCodeValue.textContent;
-            if (!code || code === '——') return;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(code).then(() => showToast('📋 Code copied!'));
+            if (_posterUrl) {
+                posterEl.src = _posterUrl;
+                posterEl.classList.remove('no-img');
             } else {
-                const ta = document.createElement('textarea');
-                ta.value = code; document.body.appendChild(ta); ta.select();
-                document.execCommand('copy'); document.body.removeChild(ta);
-                showToast('📋 Copied!');
+                posterEl.classList.add('no-img');
             }
-            document.getElementById('partyOverlayCodeHint').textContent = 'Copied!';
-            setTimeout(() => { document.getElementById('partyOverlayCodeHint').textContent = 'Copy code'; }, 1800);
+
+            _makeCopyCode(codeValEl, codeHintEl, roomId);
+
+            // Show the card container if it was hidden
+            const cardEl = document.getElementById(prefix + 'MovieCard');
+            if (cardEl) cardEl.style.display = 'flex';
+        }
+
+        function startCardTimer() {
+            clearInterval(_cardTimerInterval);
+            _cardTimerInterval = setInterval(() => {
+                if (!party.roomId) { clearInterval(_cardTimerInterval); return; }
+                ['ap', 'qj'].forEach(prefix => {
+                    const timeEl = document.getElementById(prefix + 'Time');
+                    if (timeEl && timeEl.closest('.party-screen.active')) {
+                        timeEl.textContent = formatTime(moviePlayer.currentTime);
+                    }
+                });
+            }, 1000);
+        }
+
+        // Update dot status from player events
+        moviePlayer.addEventListener('play', () => {
+            if (!party.roomId) return;
+            ['ap', 'qj'].forEach(p => {
+                const d = document.getElementById(p + 'Dot'), s = document.getElementById(p + 'StatusText');
+                if (d) _setCardStatus(d, s, 'live');
+            });
+        });
+        moviePlayer.addEventListener('pause', () => {
+            if (!party.roomId) return;
+            ['ap', 'qj'].forEach(p => {
+                const d = document.getElementById(p + 'Dot'), s = document.getElementById(p + 'StatusText');
+                if (d) _setCardStatus(d, s, 'paused');
+            });
+        });
+        moviePlayer.addEventListener('waiting', () => {
+            if (!party.roomId) return;
+            ['ap', 'qj'].forEach(p => {
+                const d = document.getElementById(p + 'Dot'), s = document.getElementById(p + 'StatusText');
+                if (d) _setCardStatus(d, s, 'buffering');
+            });
+        });
+        moviePlayer.addEventListener('playing', () => {
+            if (!party.roomId) return;
+            ['ap', 'qj'].forEach(p => {
+                const d = document.getElementById(p + 'Dot'), s = document.getElementById(p + 'StatusText');
+                if (d) _setCardStatus(d, s, 'live');
+            });
         });
 
-        function initOverlay(roomId) {
-            partyOverlayCodeValue.textContent = roomId;
-            partyOverlayTitle.textContent = movieTitleDisplay.textContent || 'Watching';
-            if (_posterUrl) partyOverlayPoster.src = _posterUrl;
-            updateOverlayTimestamp();
-            updateOverlayStatus(moviePlayer.paused ? 'paused' : 'live');
-            setOverlayVisible(true);
+        // Also refresh card when modal opens
+        partyModalBackdrop.addEventListener('click', () => {}); // noop, just ensure backdrop ref
+        function refreshCardOnOpen() {
+            if (party.roomId) {
+                populateMovieCard('ap', party.roomId);
+            }
         }
 
-        // Legacy shim so old setSyncState calls still work (noop now — overlay handles it)
-        function setSyncState(active) { setOverlayVisible(active); }
+        // Legacy shim — no-op, overlay removed
+        function setSyncState() {}
+        function initOverlay(roomId) {
+            populateMovieCard('ap', roomId);
+            startCardTimer();
+        }
 
         function connectSocket() {
             if (party.socket && party.socket.connected) return Promise.resolve();
@@ -1253,7 +1390,6 @@
             party.socket.once('room-created', () => {
                 partyRoleLabel.textContent = 'HOST';
                 leaveLabel.textContent = 'End Party';
-                partyCodeDisplay.textContent = roomId;
                 partyShareLink.value = buildInviteLink(roomId);
                 setSyncState(true, 'Broadcasting');
                 setViewerLock(false); // host keeps controls
@@ -1300,7 +1436,6 @@
                 }
                 partyRoleLabel.textContent = 'VIEWER';
                 leaveLabel.textContent = 'Leave Party';
-                partyCodeDisplay.textContent = roomId;
                 partyShareLink.value = buildInviteLink(roomId);
                 setSyncState(true, 'Syncing');
                 setViewerLock(true);
@@ -1340,7 +1475,7 @@
         // ---- Button wiring ----
 
         partyButton.addEventListener('click', () => {
-            if (party.roomId) showScreen('party');
+            if (party.roomId) { showScreen('party'); refreshCardOnOpen(); }
             else showScreen('lobby');
             openModal();
             showControls();
@@ -1415,13 +1550,18 @@
                 }
             }
 
-            // No name — show quick-join name prompt
+            // No name — show quick-join name prompt + preview the room's movie
             const savedN = localStorage.getItem('thirai_party_name') || '';
             inputQuickName.value = savedN;
             document.getElementById('quickJoinSubtitle').textContent =
                 `Room ${_pendingQuickJoinCode} — enter your name to join.`;
+            // Hide card until preview loads
+            const qjCard = document.getElementById('qjMovieCard');
+            if (qjCard) qjCard.style.display = 'none';
             showScreen('quickjoin');
             openModal();
+            // Kick off preview in background — card appears when data arrives
+            previewRoom(_pendingQuickJoinCode);
         }
     </script>
 </body>
