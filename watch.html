@@ -898,6 +898,7 @@
         });
 
         playPauseButton.addEventListener('click', () => {
+            if (party.roomId && !party.isHost) return; // guests cannot control playback
             if (moviePlayer.paused || moviePlayer.ended) {
                 moviePlayer.play();
             } else {
@@ -907,6 +908,7 @@
         });
 
         rewindButton.addEventListener('click', () => {
+            if (party.roomId && !party.isHost) return;
             if (!rewindButton.disabled) {
                 moviePlayer.currentTime = Math.max(0, moviePlayer.currentTime - SEEK_TIME);
                 showControls();
@@ -914,6 +916,7 @@
         });
 
         forwardButton.addEventListener('click', () => {
+            if (party.roomId && !party.isHost) return;
             if (!forwardButton.disabled) {
                 moviePlayer.currentTime = Math.min(moviePlayer.duration, moviePlayer.currentTime + SEEK_TIME);
                 showControls();
@@ -1013,9 +1016,11 @@
         }
 
         progressBarContainer.addEventListener('mousedown', (e) => {
+            if (party.roomId && !party.isHost) return;
             if (moviePlayer.readyState >= 2) { isDraggingProgressBar = true; progressBarContainer.classList.add('dragging'); updateSeek(e); showControls(); }
         });
         progressBarContainer.addEventListener('touchstart', (e) => {
+            if (party.roomId && !party.isHost) return;
             if (moviePlayer.readyState >= 2) { isDraggingProgressBar = true; progressBarContainer.classList.add('dragging'); updateSeek(e.touches[0]); showControls(); }
         });
         document.addEventListener('mousemove', (e) => { if (isDraggingProgressBar) updateSeek(e); });
@@ -1204,6 +1209,14 @@
             isHost: false,
             myName: '',
             lastSyncSent: 0,
+        };
+
+        // Block guests from ever self-resuming. Wrapping native play() catches every
+        // code path: buttons, autoplay, modal-close resumes, buffering recovery, etc.
+        const _nativePlay = moviePlayer.play.bind(moviePlayer);
+        moviePlayer.play = function() {
+            if (party.roomId && !party.isHost) return Promise.resolve(); // guest — silently block
+            return _nativePlay();
         };
 
         let isSyncingFromRemote = false;
@@ -1511,7 +1524,7 @@
                     const diff = Math.abs(moviePlayer.currentTime - data.time);
                     if (diff > 1.5) moviePlayer.currentTime = data.time;
                     if (data.state === 'playing' && moviePlayer.paused) {
-                        moviePlayer.play().catch(() => {});
+                        _nativePlay().catch(() => {}); // use native — guest wrapper would block this
                     } else if (data.state === 'paused' && !moviePlayer.paused) {
                         moviePlayer.pause();
                     }
