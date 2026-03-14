@@ -9875,7 +9875,7 @@ function initDiscoverView(){
     const genresHtml = (d.genres||[]).map(g=>`<span class="mp-genre-pill">${esc(g.name)}</span>`).join('');
 
     const castHtml = (d.credits&&d.credits.cast||[]).filter(c=>c.profile_path).slice(0,12).map(c=>`
-      <div class="mp-cast-item" onclick="window.location.href='/cast.html?${c.id}'" role="button" tabindex="0">
+      <div class="mp-cast-item" onclick="openCastOverlay(${c.id})" role="button" tabindex="0">
         <img src="${IMG_W185}${c.profile_path}" class="mp-cast-img" alt="${esc(c.name)}" loading="lazy">
         <div class="mp-cast-name">${esc(c.name)}</div>
         <div class="mp-cast-char">${esc(c.character)}</div>
@@ -9961,7 +9961,7 @@ function initDiscoverView(){
     const year   = d.first_air_date ? new Date(d.first_air_date).getFullYear() : '';
 
     const castHtml = (d.credits&&d.credits.cast||[]).filter(c=>c.profile_path).slice(0,12).map(c=>`
-      <div class="mp-cast-item" onclick="window.location.href='/cast.html?${c.id}'" role="button" tabindex="0">
+      <div class="mp-cast-item" onclick="openCastOverlay(${c.id})" role="button" tabindex="0">
         <img src="${IMG_W185}${c.profile_path}" class="mp-cast-img" alt="${esc(c.name)}" loading="lazy">
         <div class="mp-cast-name">${esc(c.name)}</div>
         <div class="mp-cast-char">${esc(c.character)}</div>
@@ -10134,5 +10134,476 @@ function initDiscoverView(){
         <div class="grid-layout" id="lang-category-grid"></div>
         <button class="load-more-btn visually-hidden" id="load-more-lang-category" onclick="loadNextLanguageCategoryPage()" aria-label="Load more"><i class="fas fa-arrow-rotate-right" aria-hidden="true"></i></button>
     </div>
+
+<!-- ================================================================
+     CAST MEMBER OVERLAY  (inline, no page nav)
+     ================================================================ -->
+<style id="cast-overlay-style">
+/* ── Backdrop ── */
+#castOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9200;
+  background: rgba(0,0,0,0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 340ms cubic-bezier(0.4,0,0.2,1),
+    visibility 0s linear 340ms,
+    background 340ms ease,
+    backdrop-filter 340ms ease;
+}
+#castOverlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  transition:
+    opacity 340ms cubic-bezier(0.4,0,0.2,1),
+    visibility 0s,
+    background 340ms ease,
+    backdrop-filter 340ms ease;
+}
+
+/* ── Sheet ── */
+#castSheet {
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  background: #0f0f0f;
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 400ms cubic-bezier(0.32,1,0.46,1);
+  box-shadow: 0 -12px 60px rgba(0,0,0,0.8);
+}
+#castOverlay.active #castSheet {
+  transform: translateY(0);
+}
+
+/* ── Handle bar ── */
+.cast-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  margin: 14px auto 0;
+  flex-shrink: 0;
+}
+
+/* ── Hero area inside sheet ── */
+.cast-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px 20px;
+  flex-shrink: 0;
+}
+.cast-hero-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  filter: blur(28px) brightness(0.35);
+  transform: scale(1.08);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  z-index: 0;
+  border-radius: 24px 24px 0 0;
+}
+.cast-hero > * { position: relative; z-index: 1; }
+
+.cast-avatar {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid rgba(255,255,255,0.12);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.55);
+  flex-shrink: 0;
+  background: #222;
+}
+.cast-hero-info { flex: 1; min-width: 0; }
+.cast-hero-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  margin: 0 0 6px;
+}
+.cast-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.60);
+}
+.cast-hero-meta span { display: flex; align-items: center; gap: 5px; }
+.cast-hero-meta i { color: #e50914; font-size: 0.72rem; }
+
+/* ── Bio ── */
+.cast-bio-wrap { padding: 0 20px 14px; flex-shrink: 0; }
+.cast-bio {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.55);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+.cast-bio.expanded { -webkit-line-clamp: unset; }
+.cast-bio-toggle {
+  background: none; border: none;
+  color: #e50914; font-size: 0.8rem; font-weight: 700;
+  padding: 4px 0 0; cursor: pointer;
+  display: none;
+}
+
+/* ── Filter chips ── */
+.cast-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.cast-filters::-webkit-scrollbar { display: none; }
+.cast-chip {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.55);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.cast-chip.active {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.26);
+  color: #fff;
+}
+.cast-chip.hidden { display: none; }
+
+/* ── Filmography grid ── */
+.cast-filmography {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+.cast-filmography::-webkit-scrollbar { width: 3px; }
+.cast-filmography::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 2px; }
+
+.cast-film-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 14px 10px;
+}
+.cast-film-card {
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.cast-film-card:active { transform: scale(0.95); opacity: 0.8; }
+.cast-film-poster {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1c1c1c;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+.cast-film-poster img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.cast-film-rating {
+  position: absolute; top: 5px; right: 5px;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
+  color: #fbbf24;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 2px 5px; border-radius: 5px;
+}
+.cast-film-title {
+  font-size: 0.76rem; font-weight: 600;
+  color: rgba(255,255,255,0.80);
+  margin-top: 6px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cast-film-year {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+
+/* ── Loading / Empty ── */
+.cast-spinner {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 0; color: rgba(255,255,255,0.30); font-size: 0.9rem; gap: 10px;
+}
+.cast-spinner i { animation: co-spin 0.8s linear infinite; font-size: 1.1rem; }
+@keyframes co-spin { to { transform: rotate(360deg); } }
+
+/* ── Close button ── */
+.cast-close-btn {
+  position: absolute;
+  top: 18px; right: 18px;
+  z-index: 2;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.50);
+  backdrop-filter: blur(10px);
+  color: #fff; font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+}
+.cast-close-btn:active { transform: scale(0.92); }
+
+/* Desktop: centre the sheet */
+@media (min-width: 640px) {
+  #castOverlay { align-items: center; padding: 40px 20px; }
+  #castSheet {
+    border-radius: 22px;
+    max-height: 85vh;
+    transform: translateY(28px) scale(0.97);
+    opacity: 0;
+    transition:
+      transform 380ms cubic-bezier(0.22,1,0.36,1),
+      opacity 300ms ease;
+  }
+  #castOverlay.active #castSheet {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  .cast-handle { display: none; }
+}
+</style>
+
+<!-- Cast Overlay DOM -->
+<div id="castOverlay" aria-modal="true" role="dialog" aria-label="Cast Member">
+  <div id="castSheet">
+    <div class="cast-handle"></div>
+    <div class="cast-hero" id="castHero">
+      <div class="cast-hero-backdrop" id="castHeroBackdrop"></div>
+      <button class="cast-close-btn" onclick="closeCastOverlay()" aria-label="Close"><i class="fas fa-times"></i></button>
+      <img class="cast-avatar" id="castAvatar" src="" alt="">
+      <div class="cast-hero-info">
+        <h2 class="cast-hero-name" id="castName">Loading…</h2>
+        <div class="cast-hero-meta" id="castMeta"></div>
+      </div>
+    </div>
+    <div class="cast-bio-wrap" id="castBioWrap" style="display:none;">
+      <p class="cast-bio" id="castBio"></p>
+      <button class="cast-bio-toggle" id="castBioToggle">Read more</button>
+    </div>
+    <div class="cast-filters" id="castFilters">
+      <button class="cast-chip active" data-filter="known" id="castChipKnown">⭐ Known For</button>
+      <button class="cast-chip" data-filter="movie" id="castChipMovie">Movies</button>
+      <button class="cast-chip" data-filter="tv" id="castChipTV">TV Shows</button>
+    </div>
+    <div class="cast-filmography" id="castFilmography">
+      <div class="cast-spinner"><i class="fas fa-circle-notch"></i> Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script id="cast-overlay-script">
+(function(){
+  const TMDB_KEY = '926e94b0f70b5bed8417b679652366ab';
+  const TMDB_API = 'https://api.themoviedb.org/3';
+  const IMG_W500 = 'https://image.tmdb.org/t/p/w500';
+  const IMG_W185 = 'https://image.tmdb.org/t/p/w185';
+
+  let _castCredits = [];
+  let _knownForIds = [];
+  let _hasKnownFor = false;
+  let _activeFilter = 'known';
+
+  // ── Helpers ──────────────────────────────────────────────────
+  function esc(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function yearOf(str){ return str ? str.split('-')[0] : ''; }
+  function ageOf(bday, dday){
+    if(!bday) return null;
+    const end = dday ? new Date(dday) : new Date();
+    return Math.floor((end - new Date(bday)) / 31557600000);
+  }
+
+  // ── Open ─────────────────────────────────────────────────────
+  window.openCastOverlay = async function(personId){
+    // Reset
+    document.getElementById('castName').textContent = 'Loading…';
+    document.getElementById('castMeta').innerHTML = '';
+    document.getElementById('castAvatar').src = '';
+    document.getElementById('castHeroBackdrop').style.backgroundImage = '';
+    document.getElementById('castBioWrap').style.display = 'none';
+    document.getElementById('castFilmography').innerHTML =
+      '<div class="cast-spinner"><i class="fas fa-circle-notch"></i> Loading…</div>';
+    _castCredits = []; _knownForIds = []; _hasKnownFor = false; _activeFilter = 'known';
+    _resetChips();
+
+    document.getElementById('castOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    try {
+      const res = await fetch(`${TMDB_API}/person/${personId}?api_key=${TMDB_KEY}&append_to_response=combined_credits`);
+      const data = await res.json();
+      _renderCast(data);
+    } catch(e) {
+      document.getElementById('castFilmography').innerHTML =
+        '<div class="cast-spinner" style="color:#ff6b6b;">Failed to load.</div>';
+    }
+  };
+
+  function _renderCast(data){
+    // Avatar + blurred hero backdrop
+    const avatarEl = document.getElementById('castAvatar');
+    const backdropEl = document.getElementById('castHeroBackdrop');
+    if(data.profile_path){
+      avatarEl.src = IMG_W500 + data.profile_path;
+      backdropEl.style.backgroundImage = `url(${IMG_W500}${data.profile_path})`;
+    }
+
+    document.getElementById('castName').textContent = data.name || '';
+
+    // Meta: dept + age
+    const meta = [];
+    if(data.known_for_department) meta.push(`<span><i class="fas fa-briefcase"></i>${esc(data.known_for_department)}</span>`);
+    const age = ageOf(data.birthday, data.deathday);
+    if(age) meta.push(`<span><i class="fas fa-cake-candles"></i>${age} yrs</span>`);
+    if(data.place_of_birth) meta.push(`<span><i class="fas fa-location-dot"></i>${esc(data.place_of_birth.split(',').slice(-1)[0].trim())}</span>`);
+    document.getElementById('castMeta').innerHTML = meta.join('');
+
+    // Bio
+    if(data.biography && data.biography.trim()){
+      const bioWrap = document.getElementById('castBioWrap');
+      const bioEl = document.getElementById('castBio');
+      const toggleBtn = document.getElementById('castBioToggle');
+      bioEl.textContent = data.biography;
+      bioWrap.style.display = 'block';
+      if(data.biography.length > 180){
+        toggleBtn.style.display = 'inline-block';
+        toggleBtn.onclick = () => {
+          const exp = bioEl.classList.toggle('expanded');
+          toggleBtn.textContent = exp ? 'Show less' : 'Read more';
+        };
+      }
+    }
+
+    // Known For IDs
+    if(data.known_for && data.known_for.length){
+      _knownForIds = data.known_for.map(i=>i.id);
+      _hasKnownFor = true;
+    }
+
+    // Process credits
+    const seen = new Set();
+    _castCredits = (data.combined_credits && data.combined_credits.cast || [])
+      .filter(c => c.poster_path && c.id)
+      .filter(c => { const k=`${c.id}|${c.media_type}`; if(seen.has(k)) return false; seen.add(k); return true; })
+      .map(c => ({
+        id: c.id,
+        title: c.title || c.name,
+        poster: c.poster_path,
+        rating: c.vote_average ? c.vote_average.toFixed(1) : null,
+        year: yearOf(c.release_date || c.first_air_date),
+        fullDate: new Date(c.release_date || c.first_air_date || '1900-01-01'),
+        type: c.media_type
+      }));
+
+    // Chip visibility
+    const chipKnown = document.getElementById('castChipKnown');
+    chipKnown.textContent = _hasKnownFor ? '⭐ Known For' : 'All';
+    if(!_castCredits.filter(c=>c.type==='movie').length) document.getElementById('castChipMovie').classList.add('hidden');
+    if(!_castCredits.filter(c=>c.type==='tv').length) document.getElementById('castChipTV').classList.add('hidden');
+
+    _renderGrid('known');
+  }
+
+  function _renderGrid(filter){
+    _activeFilter = filter;
+    let list;
+    if(filter === 'known'){
+      list = _hasKnownFor
+        ? _castCredits.filter(c => _knownForIds.includes(c.id))
+        : [..._castCredits].sort((a,b)=>b.fullDate-a.fullDate);
+      if(_hasKnownFor && !list.length) list = _castCredits;
+    } else {
+      list = _castCredits.filter(c=>c.type===filter).sort((a,b)=>b.fullDate-a.fullDate);
+    }
+
+    const el = document.getElementById('castFilmography');
+    if(!list.length){ el.innerHTML = '<div class="cast-spinner">Nothing here.</div>'; return; }
+
+    el.innerHTML = `<div class="cast-film-grid">${list.map(item=>`
+      <div class="cast-film-card" onclick="closeCastOverlay();openMediaPopup('${item.type==='movie'?'movie':'tv'}',${item.id})">
+        <div class="cast-film-poster">
+          <img src="${IMG_W185}${item.poster}" alt="${esc(item.title)}" loading="lazy">
+          ${item.rating ? `<div class="cast-film-rating">★ ${item.rating}</div>` : ''}
+        </div>
+        <div class="cast-film-title">${esc(item.title)}</div>
+        ${item.year ? `<div class="cast-film-year">${item.year}</div>` : ''}
+      </div>`).join('')}
+    </div>`;
+  }
+
+  function _resetChips(){
+    document.querySelectorAll('#castFilters .cast-chip').forEach(c=>{
+      c.classList.remove('active','hidden');
+    });
+    document.getElementById('castChipKnown').classList.add('active');
+  }
+
+  // ── Close ─────────────────────────────────────────────────────
+  window.closeCastOverlay = function(){
+    document.getElementById('castOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  // Backdrop click closes
+  document.getElementById('castOverlay').addEventListener('click', function(e){
+    if(e.target === this) closeCastOverlay();
+  });
+
+  // ESC key
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.getElementById('castOverlay').classList.contains('active')){
+      closeCastOverlay();
+    }
+  });
+
+  // Filter chips
+  document.getElementById('castFilters').addEventListener('click', function(e){
+    const chip = e.target.closest('.cast-chip');
+    if(!chip) return;
+    document.querySelectorAll('#castFilters .cast-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    _renderGrid(chip.dataset.filter);
+  });
+})();
+</script>
+
 </body>
 </html>
