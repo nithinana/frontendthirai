@@ -778,6 +778,9 @@
             display: flex; justify-content: space-around; align-items: center;
             background-color: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255,255,255,0.05); z-index: 200;
+            transform: translateZ(0);
+            will-change: transform;
+            -webkit-backface-visibility: hidden;
         }
 .bottom-nav .nav-item {
     display: flex;
@@ -795,6 +798,168 @@
         .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
         .bottom-nav .nav-item span { display: none !important; }
         .bottom-nav .nav-item i { margin-bottom: 0 !important; }
+
+/* ==============================================
+   6b. MORE MENU OVERLAY (Mobile only)
+   ============================================== */
+
+/* Only show on portrait mobile */
+@media (min-width: 900px) {
+    #moreMenuOverlay { display: none !important; }
+}
+
+#moreMenuOverlay {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    align-items: flex-end;
+    justify-content: center;
+
+    /* backdrop */
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+
+    /* hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 260ms ease, visibility 0s linear 260ms,
+                background 260ms ease, backdrop-filter 260ms ease;
+}
+
+#moreMenuOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 260ms ease, visibility 0s,
+                background 260ms ease, backdrop-filter 260ms ease;
+}
+
+#moreMenuSheet {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(16, 16, 16, 0.98);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 24px 24px 0 0;
+    padding: 12px 20px 32px;
+    /* leave space above bottom nav */
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 16px);
+
+    transform: translateY(100%);
+    transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+#moreMenuOverlay.active #moreMenuSheet {
+    transform: translateY(0);
+}
+
+#moreMenuHandle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+}
+
+.more-menu-section-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: rgba(255, 255, 255, 0.38);
+    margin-bottom: 18px;
+}
+
+/* 3-icon row */
+.more-menu-icon-grid {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.more-menu-icon-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.more-menu-icon-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.85);
+    transition: background 140ms ease, transform 120ms ease;
+}
+
+.more-menu-icon-btn:active .more-menu-icon-wrap {
+    background: rgba(255, 255, 255, 0.13);
+    transform: scale(0.95);
+}
+
+.more-menu-icon-btn span {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.65);
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Discover wide bar */
+.more-menu-discover-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    padding: 16px 18px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 140ms ease, transform 120ms ease;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.more-menu-discover-btn:active {
+    background: rgba(255, 255, 255, 0.11);
+    transform: scale(0.98);
+}
+
+.more-menu-discover-btn > i:first-child {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.more-menu-discover-btn span {
+    flex: 1;
+}
+
+.more-menu-discover-arrow {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* "More" button active state when menu is open */
+#btm-more.menu-open {
+    color: white;
+}
 
     /* ==============================================
    7. DESKTOP FRIENDLY LAYOUT (Responsive Enhancements)
@@ -2757,30 +2922,50 @@
         <div class="nav-item active" onclick="switchTab('home')" id="btm-home">
             <i class="fas fa-home"></i> <span>Home</span>
         </div>
+        <div class="nav-item" onclick="switchTab('search')" id="btm-search">
+            <i class="fas fa-search"></i> <span>Search</span>
+        </div>
         <div class="nav-item" onclick="switchTab('collections')" id="btm-collections">
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
-
-        <div class="nav-item" onclick="openWatchPartyPopup()" id="btm-watchparty">
-            <i class="fas fa-user-friends"></i> <span>Watch Party</span>
+        <div class="nav-item" onclick="toggleMoreMenu()" id="btm-more">
+            <i class="fas fa-border-all" id="btm-more-icon"></i> <span>More</span>
         </div>
-
-<div class="nav-item" onclick="toggleFilterPopup()" id="btm-filter">
-            <i class="fas fa-sliders"></i> <span>Filter</span>
+        <div class="nav-item visually-hidden" id="btm-install">
+            <i class="fas fa-download"></i> <span>Install</span>
         </div>
-<div class="nav-item" onclick="switchTab('search')" id="btm-search">
-    <i class="fas fa-search"></i> <span>Search</span>
-</div>
+    </div>
 
-<div class="nav-item" onclick="switchTab('discover')" id="btm-discover">
-    <i class="fas fa-compass"></i> <span>Discover</span>
-</div>
+    <!-- More Menu Overlay (mobile only) -->
+    <div id="moreMenuOverlay" onclick="closeMoreMenuOnOutside(event)">
+        <div id="moreMenuSheet">
+            <div id="moreMenuHandle"></div>
 
-<div class="nav-item visually-hidden" id="btm-install">
-    <i class="fas fa-download"></i> <span>Install</span>
-</div>
+            <!-- Features label -->
+            <div class="more-menu-section-label">Features</div>
+
+            <!-- Icon grid: Watch Party, Filter, Discover -->
+            <div class="more-menu-icon-grid">
+                <div class="more-menu-icon-btn" onclick="moreMenuAction('watchparty')">
+                    <div class="more-menu-icon-wrap">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <span>Watch Party</span>
+                </div>
+                <div class="more-menu-icon-btn" onclick="moreMenuAction('filter')">
+                    <div class="more-menu-icon-wrap">
+                        <i class="fas fa-sliders"></i>
+                    </div>
+                    <span>Filter</span>
+                </div>
+                <div class="more-menu-icon-btn" onclick="moreMenuAction('discover')">
+                    <div class="more-menu-icon-wrap">
+                        <i class="fas fa-compass"></i>
+                    </div>
+                    <span>Discover</span>
+                </div>
+            </div>
         </div>
-
     </div>
 
     
@@ -3060,6 +3245,46 @@
         let FILTER_API_BASE_URL = FILTER_PRIMARY_API_URL;
 
         const FILTER_CATEGORIES = ['action', 'comedy', 'romance', 'storyline', 'performance'];
+
+        /* ── More Menu (mobile overlay) ── */
+        let moreMenuOpen = false;
+
+        function toggleMoreMenu() {
+            moreMenuOpen ? closeMoreMenu() : openMoreMenu();
+        }
+
+        function openMoreMenu() {
+            moreMenuOpen = true;
+            document.getElementById('moreMenuOverlay').classList.add('active');
+            document.getElementById('btm-more').classList.add('menu-open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMoreMenu() {
+            moreMenuOpen = false;
+            document.getElementById('moreMenuOverlay').classList.remove('active');
+            document.getElementById('btm-more').classList.remove('menu-open');
+            document.body.style.overflow = '';
+        }
+
+        function closeMoreMenuOnOutside(event) {
+            if (event.target === document.getElementById('moreMenuOverlay')) {
+                closeMoreMenu();
+            }
+        }
+
+        function moreMenuAction(action) {
+            closeMoreMenu();
+            if (action === 'collections') {
+                setTimeout(() => switchTab('collections'), 60);
+            } else if (action === 'watchparty') {
+                setTimeout(() => openWatchPartyPopup(), 60);
+            } else if (action === 'filter') {
+                setTimeout(() => toggleFilterPopup(), 60);
+            } else if (action === 'discover') {
+                setTimeout(() => switchTab('discover'), 60);
+            }
+        }
 
         function toggleFilterPopup() {
             const overlay = document.getElementById('filterOverlay');
