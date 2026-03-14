@@ -458,35 +458,114 @@
         .party-screen { display: none; }
         .party-screen.active { display: block; }
 
-        /* ===== MOBILE LANDSCAPE: compact scrollable centered card ===== */
+        /* Layout wrappers — stack normally on portrait/desktop */
+        .ls-header, .ls-name, .ls-create { margin-bottom: 0; }
+        .ls-name { margin-top: 0; }
+        .ls-divider-block, .ls-join-block { display: contents; }
+        /* Active party col wrappers: full width by default */
+        .ap-left, .ap-right { display: contents; }
+        #screenParty.active { display: block; }
+
+        /* ===== MOBILE LANDSCAPE: two-column side-by-side layout ===== */
         @media (max-height: 500px) and (orientation: landscape) {
+
             .party-modal-backdrop {
                 align-items: center;
+                justify-content: center;
                 padding: 8px 16px;
             }
+
+            /* Wider card, NO scroll — everything fits in two columns */
             .party-modal {
                 width: 100%;
-                max-width: 420px;
-                max-height: 92vh;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                padding: 14px 16px 18px;
-                border-radius: 16px;
-                transform: translateY(10px);
+                max-width: 640px;
+                max-height: 96vh;
+                padding: 14px 16px;
+                border-radius: 14px;
+                transform: scale(0.96);
+                transition: transform 0.2s ease;
+                overflow: visible;
             }
-            .party-modal-backdrop.open .party-modal { transform: translateY(0); }
+            .party-modal-backdrop.open .party-modal { transform: scale(1); }
 
+            /* Two-column grid for lobby & quickjoin screens */
+            #screenLobby,
+            #screenQuickJoin {
+                display: none; /* overridden by .active below */
+            }
+            #screenLobby.active,
+            #screenQuickJoin.active {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto;
+                column-gap: 14px;
+                align-items: start;
+            }
+
+            /* Left column: header + name field */
+            .ls-header {
+                grid-column: 1; grid-row: 1; display: block;
+            }
+            .ls-name {
+                grid-column: 1; grid-row: 2; display: block;
+            }
+            .ls-create {
+                grid-column: 1; grid-row: 3; display: block;
+            }
+
+            /* Right column: divider + code + join + cancel */
+            .ls-divider-block {
+                grid-column: 2; grid-row: 1 / span 2;
+                display: flex; flex-direction: column; justify-content: flex-start;
+            }
+            .ls-join-block {
+                grid-column: 2; grid-row: 3;
+                display: flex; flex-direction: column; gap: 6px;
+            }
+            /* Active party columns */
+            .ap-left {
+                grid-column: 1; display: flex; flex-direction: column; gap: 6px;
+            }
+            .ap-right {
+                grid-column: 2; display: flex; flex-direction: column; gap: 8px; justify-content: flex-start;
+            }
+
+
+            /* Hide decorative icon */
             .party-modal-icon { display: none; }
-            .party-modal h2 { font-size: 0.95rem; margin-bottom: 2px; }
-            .party-modal .party-subtitle { font-size: 0.75rem; margin-bottom: 10px; }
-            .party-label { font-size: 0.7rem; margin-bottom: 4px; }
-            .party-input { padding: 9px 11px; font-size: 0.85rem; border-radius: 10px; }
-            .party-btn { padding: 10px; font-size: 0.85rem; border-radius: 10px; }
-            .party-divider { margin: 8px 0; }
-            .party-users-list { max-height: 70px; }
-            .party-movie-card { padding: 7px 9px; margin-bottom: 10px; gap: 9px; }
-            .party-movie-poster { width: 32px; height: 44px; }
-            .party-share-row { margin-bottom: 10px !important; }
+
+            /* Tighter typography */
+            .party-modal h2 { font-size: 0.9rem; margin: 0 0 1px; }
+            .party-modal .party-subtitle { font-size: 0.72rem; margin: 0 0 8px; }
+            .party-label { font-size: 0.68rem; margin-bottom: 3px; }
+            .party-input { padding: 8px 10px; font-size: 0.82rem; border-radius: 9px; margin-bottom: 0 !important; }
+            .party-btn { padding: 8px 10px; font-size: 0.82rem; border-radius: 9px; margin-bottom: 0 !important; }
+            .party-divider { margin: 6px 0; }
+            .party-movie-card { padding: 6px 8px; margin-bottom: 6px !important; gap: 8px; }
+            .party-movie-poster { width: 28px; height: 38px; }
+            .party-movie-name { font-size: 0.75rem; }
+            .party-movie-time { font-size: 0.65rem; }
+
+            /* Active party screen: two columns */
+            #screenParty.active {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                column-gap: 14px;
+                align-items: start;
+            }
+            /* Left: header + movie card + users */
+            .ap-left {
+                grid-column: 1;
+                display: flex; flex-direction: column; gap: 6px;
+            }
+            /* Right: share + leave */
+            .ap-right {
+                grid-column: 2;
+                display: flex; flex-direction: column; gap: 6px;
+            }
+            .party-users-list { max-height: 72px; }
+            .party-users-header { margin-bottom: 4px; }
+            .party-share-row { margin-bottom: 0 !important; }
         }
 
         /* ===== MOBILE PORTRAIT: bottom-sheet modal ===== */
@@ -540,6 +619,8 @@
 
             /* Tighten movie card */
             .party-movie-card { padding: 8px 10px; margin-bottom: 12px; }
+            /* Ensure column wrappers don't add spacing in portrait */
+            .ls-divider-block, .ls-join-block, .ap-left, .ap-right { display: contents; }
         }
 
         /* ===== FULLSCREEN: keep modal & toast inside the fullscreen element ===== */
@@ -638,133 +719,156 @@
 
             <!-- SCREEN 1: LOBBY (create or join) -->
             <div class="party-screen active" id="screenLobby">
-                <div class="party-modal-icon">
-                    <i class="bi bi-people-fill"></i>
+
+                <!-- LEFT COLUMN (portrait: full width) -->
+                <div class="ls-header">
+                    <div class="party-modal-icon"><i class="bi bi-people-fill"></i></div>
+                    <h2>Watch Party</h2>
+                    <p class="party-subtitle">Watch together, in sync.</p>
                 </div>
-                <h2>Watch Party</h2>
-                <p class="party-subtitle">Watch together, in sync.</p>
 
-                <label class="party-label">Your name</label>
-                <input class="party-input" id="inputMyName" placeholder="Enter your name…" maxlength="32" style="margin-bottom:16px">
+                <div class="ls-name">
+                    <label class="party-label">Your name</label>
+                    <input class="party-input" id="inputMyName" placeholder="Enter your name…" maxlength="32" style="margin-bottom:16px">
+                </div>
 
-                <button class="party-btn party-btn-primary" id="btnCreateParty" style="margin-bottom:10px">
-                    <i class="bi bi-plus-circle-fill"></i> Create Party
-                </button>
+                <div class="ls-create">
+                    <button class="party-btn party-btn-primary" id="btnCreateParty">
+                        <i class="bi bi-plus-circle-fill"></i> Create Party
+                    </button>
+                </div>
 
-                <div class="party-divider"><span>or join</span></div>
+                <!-- RIGHT COLUMN (portrait: full width) -->
+                <div class="ls-divider-block">
+                    <div class="party-divider" style="margin-top:8px"><span>or join</span></div>
+                    <label class="party-label" style="margin-top:8px;margin-bottom:6px">Room code</label>
+                    <input class="party-input" id="inputJoinCode" placeholder="e.g. ABC123" maxlength="6" style="text-transform:uppercase;margin-bottom:10px;letter-spacing:0.12em;font-weight:700">
 
-                <label class="party-label" style="margin-bottom:6px">Room code</label>
-                <input class="party-input" id="inputJoinCode" placeholder="e.g. ABC123" maxlength="6" style="text-transform:uppercase;margin-bottom:10px;letter-spacing:0.12em;font-weight:700">
-
-                <!-- Preview card appears here when 6-char code is typed -->
-                <div class="party-movie-card" id="lbMovieCard" style="display:none">
-                    <img class="party-movie-poster no-img" id="lbPoster" src="" alt="">
-                    <div class="party-movie-meta">
-                        <div class="party-movie-name" id="lbTitle">Loading…</div>
-                        <div class="party-movie-time" id="lbTime">—</div>
-                        <div class="party-movie-status">
-                            <span class="party-status-dot live" id="lbDot"></span>
-                            <span id="lbStatusText">Live</span>
+                    <!-- Preview card -->
+                    <div class="party-movie-card" id="lbMovieCard" style="display:none">
+                        <img class="party-movie-poster no-img" id="lbPoster" src="" alt="">
+                        <div class="party-movie-meta">
+                            <div class="party-movie-name" id="lbTitle">Loading…</div>
+                            <div class="party-movie-time" id="lbTime">—</div>
+                            <div class="party-movie-status">
+                                <span class="party-status-dot live" id="lbDot"></span>
+                                <span id="lbStatusText">Live</span>
+                            </div>
+                        </div>
+                        <div class="party-code-copy-btn" id="lbCopyCode" title="Copy room code">
+                            <div class="party-code-copy-val" id="lbCodeVal">——</div>
+                            <div class="party-code-copy-hint" id="lbCodeHint">Copy code</div>
                         </div>
                     </div>
-                    <div class="party-code-copy-btn" id="lbCopyCode" title="Copy room code">
-                        <div class="party-code-copy-val" id="lbCodeVal">——</div>
-                        <div class="party-code-copy-hint" id="lbCodeHint">Copy code</div>
-                    </div>
                 </div>
 
-                <button class="party-btn party-btn-ghost" id="btnJoinParty" style="margin-bottom:10px">
-                    Join Party
-                </button>
+                <div class="ls-join-block">
+                    <button class="party-btn party-btn-ghost" id="btnJoinParty">Join Party</button>
+                    <button class="party-btn party-btn-ghost" id="btnCloseLobby" style="font-size:0.85rem;opacity:0.6">Cancel</button>
+                </div>
 
-                <button class="party-btn party-btn-ghost" id="btnCloseLobby" style="font-size:0.85rem;opacity:0.6">
-                    Cancel
-                </button>
             </div>
 
             <!-- SCREEN 2: QUICK JOIN (arrived via invite link — just ask for name) -->
             <div class="party-screen" id="screenQuickJoin">
-                <div class="party-modal-icon">
-                    <i class="bi bi-person-fill-add"></i>
-                </div>
-                <h2>Join Party</h2>
-                <p class="party-subtitle" id="quickJoinSubtitle">Enter your name to join.</p>
 
-                <!-- Movie preview card -->
-                <div class="party-movie-card" id="qjMovieCard" style="display:none">
-                    <img class="party-movie-poster" id="qjPoster" src="" alt="">
-                    <div class="party-movie-meta">
-                        <div class="party-movie-name" id="qjTitle">Loading…</div>
-                        <div class="party-movie-time" id="qjTime">—</div>
-                        <div class="party-movie-status">
-                            <span class="party-status-dot live" id="qjDot"></span>
-                            <span id="qjStatusText">Live</span>
+                <!-- LEFT COLUMN -->
+                <div class="ls-header">
+                    <div class="party-modal-icon"><i class="bi bi-person-fill-add"></i></div>
+                    <h2>Join Party</h2>
+                    <p class="party-subtitle" id="quickJoinSubtitle">Enter your name to join.</p>
+                </div>
+
+                <!-- Movie preview card (left, spans naturally) -->
+                <div class="ls-name">
+                    <div class="party-movie-card" id="qjMovieCard" style="display:none">
+                        <img class="party-movie-poster" id="qjPoster" src="" alt="">
+                        <div class="party-movie-meta">
+                            <div class="party-movie-name" id="qjTitle">Loading…</div>
+                            <div class="party-movie-time" id="qjTime">—</div>
+                            <div class="party-movie-status">
+                                <span class="party-status-dot live" id="qjDot"></span>
+                                <span id="qjStatusText">Live</span>
+                            </div>
+                        </div>
+                        <div class="party-code-copy-btn" id="qjCopyCode" title="Copy room code">
+                            <div class="party-code-copy-val" id="qjCodeVal">——</div>
+                            <div class="party-code-copy-hint" id="qjCodeHint">Copy code</div>
                         </div>
                     </div>
-                    <div class="party-code-copy-btn" id="qjCopyCode" title="Copy room code">
-                        <div class="party-code-copy-val" id="qjCodeVal">——</div>
-                        <div class="party-code-copy-hint" id="qjCodeHint">Copy code</div>
-                    </div>
                 </div>
 
-                <label class="party-label">Your name</label>
-                <input class="party-input" id="inputQuickName" placeholder="Enter your name…" maxlength="32" style="margin-bottom:16px">
+                <!-- RIGHT COLUMN -->
+                <div class="ls-divider-block">
+                    <div style="height:8px"></div><!-- spacer aligns with left header -->
+                    <label class="party-label">Your name</label>
+                    <input class="party-input" id="inputQuickName" placeholder="Enter your name…" maxlength="32" style="margin-bottom:10px">
+                </div>
 
-                <button class="party-btn party-btn-primary" id="btnQuickJoin" style="margin-bottom:10px">
-                    <i class="bi bi-play-fill"></i> Join &amp; Watch
-                </button>
-                <button class="party-btn party-btn-ghost" id="btnCancelQuickJoin" style="font-size:0.85rem;opacity:0.6">
-                    Cancel
-                </button>
+                <div class="ls-join-block">
+                    <button class="party-btn party-btn-primary" id="btnQuickJoin">
+                        <i class="bi bi-play-fill"></i> Join &amp; Watch
+                    </button>
+                    <button class="party-btn party-btn-ghost" id="btnCancelQuickJoin" style="font-size:0.85rem;opacity:0.6">Cancel</button>
+                </div>
+
             </div>
 
             <!-- SCREEN 3: ACTIVE PARTY -->
             <div class="party-screen" id="screenParty">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                    <div>
+
+                <!-- LEFT COLUMN -->
+                <div class="ap-left">
+                    <!-- Header row -->
+                    <div style="display:flex;align-items:center;justify-content:space-between">
                         <div style="font-size:1.05rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px">
                             <i class="bi bi-people-fill" style="color:rgba(255,255,255,0.7)"></i>
                             Watch Party
                             <span class="party-role-pill" id="partyRoleLabel">Host</span>
                         </div>
+                        <button class="party-copy-btn ap-done-btn" id="btnCloseParty" style="border-radius:8px;padding:6px 12px;font-size:0.8rem">Done</button>
                     </div>
-                    <button class="party-copy-btn" id="btnCloseParty" style="border-radius:8px;padding:6px 12px;font-size:0.8rem">Done</button>
-                </div>
 
-                <!-- Live movie card -->
-                <div class="party-movie-card" id="apMovieCard">
-                    <img class="party-movie-poster" id="apPoster" src="" alt="">
-                    <div class="party-movie-meta">
-                        <div class="party-movie-name" id="apTitle">Watching</div>
-                        <div class="party-movie-time" id="apTime">00:00</div>
-                        <div class="party-movie-status">
-                            <span class="party-status-dot live" id="apDot"></span>
-                            <span id="apStatusText">Live</span>
+                    <!-- Live movie card -->
+                    <div class="party-movie-card" id="apMovieCard" style="margin-bottom:0">
+                        <img class="party-movie-poster" id="apPoster" src="" alt="">
+                        <div class="party-movie-meta">
+                            <div class="party-movie-name" id="apTitle">Watching</div>
+                            <div class="party-movie-time" id="apTime">00:00</div>
+                            <div class="party-movie-status">
+                                <span class="party-status-dot live" id="apDot"></span>
+                                <span id="apStatusText">Live</span>
+                            </div>
+                        </div>
+                        <div class="party-code-copy-btn" id="apCopyCode" title="Copy room code">
+                            <div class="party-code-copy-val" id="apCodeVal">——</div>
+                            <div class="party-code-copy-hint" id="apCodeHint">Copy code</div>
                         </div>
                     </div>
-                    <div class="party-code-copy-btn" id="apCopyCode" title="Copy room code">
-                        <div class="party-code-copy-val" id="apCodeVal">——</div>
-                        <div class="party-code-copy-hint" id="apCodeHint">Copy code</div>
+
+                    <!-- Users -->
+                    <div class="party-users-header" style="margin-bottom:6px">
+                        <span class="party-label" style="margin:0">Watching now</span>
+                        <span class="party-users-count" id="partyUsersCount">1</span>
                     </div>
+                    <div class="party-users-list" id="partyUsersList"></div>
                 </div>
 
-                <div class="party-users-header">
-                    <span class="party-label" style="margin:0">Watching now</span>
-                    <span class="party-users-count" id="partyUsersCount">1</span>
-                </div>
-                <div class="party-users-list" id="partyUsersList" style="margin-bottom:16px"></div>
+                <!-- RIGHT COLUMN -->
+                <div class="ap-right">
+                    <label class="party-label">Invite link</label>
+                    <div class="party-share-row">
+                        <input class="party-share-input" id="partyShareLink" readonly>
+                        <button class="party-copy-btn" id="btnCopyLink"><i class="bi bi-clipboard"></i> Copy</button>
+                        <button class="party-copy-btn" id="btnShowQr" title="Show QR code" style="padding:10px 12px;"><i class="bi bi-qr-code"></i></button>
+                    </div>
 
-                <label class="party-label">Invite link</label>
-                <div class="party-share-row" style="margin-bottom:16px">
-                    <input class="party-share-input" id="partyShareLink" readonly>
-                    <button class="party-copy-btn" id="btnCopyLink"><i class="bi bi-clipboard"></i> Copy</button>
-                    <button class="party-copy-btn" id="btnShowQr" title="Show QR code" style="padding:10px 12px;"><i class="bi bi-qr-code"></i></button>
+                    <button class="party-btn party-btn-danger" id="btnLeaveParty" style="margin-top:auto">
+                        <i class="bi bi-box-arrow-left"></i>
+                        <span id="leaveLabel">Leave Party</span>
+                    </button>
                 </div>
 
-                <button class="party-btn party-btn-danger" id="btnLeaveParty">
-                    <i class="bi bi-box-arrow-left"></i>
-                    <span id="leaveLabel">Leave Party</span>
-                </button>
             </div>
 
         </div>
