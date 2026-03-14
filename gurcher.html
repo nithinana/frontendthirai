@@ -753,14 +753,6 @@
             } else {
                 moviePlayer.pause();
             }
-            // Immediately broadcast state if host
-            if (party.isHost && party.roomId) {
-                party.socket.emit('sync-video', {
-                    roomId: party.roomId,
-                    state: moviePlayer.paused ? 'paused' : 'playing',
-                    time: moviePlayer.currentTime
-                });
-            }
             showControls();
         });
 
@@ -838,12 +830,20 @@
             playPauseIcon.classList.remove('bi-play-fill'); playPauseIcon.classList.add('bi-pause-fill');
             loadingSpinner.style.display = 'none'; playPauseIcon.style.display = 'block';
             showControls();
+            // Host broadcasts play to all guests
+            if (party.isHost && party.roomId && !isSyncingFromRemote) {
+                party.socket.emit('sync-video', { roomId: party.roomId, state: 'playing', time: moviePlayer.currentTime });
+            }
         });
 
         moviePlayer.addEventListener('pause', () => {
             playPauseIcon.classList.remove('bi-pause-fill'); playPauseIcon.classList.add('bi-play-fill');
             loadingSpinner.style.display = 'none'; playPauseIcon.style.display = 'block';
             showControls();
+            // Host broadcasts pause to all guests
+            if (party.isHost && party.roomId && !isSyncingFromRemote) {
+                party.socket.emit('sync-video', { roomId: party.roomId, state: 'paused', time: moviePlayer.currentTime });
+            }
         });
 
         moviePlayer.addEventListener('ended', () => {
@@ -1007,8 +1007,9 @@
                         movieTitleDisplay.textContent = data.title;
                         document.title = data.title;
                         _posterUrl = data.img_url || '';
-                        const currentUrl = `./watch${ORIGINAL_SEARCH_PARAMS}`;
-                        const cacheObj = { title: data.title, img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image', url: currentUrl };
+                        const filmCode2 = urlParams.get('film');
+                        const cleanCacheUrl = filmCode2 ? `./watch?film=${filmCode2}` : `./watch`;
+                        const cacheObj = { title: data.title, img: data.img_url || 'https://via.placeholder.com/400x600?text=No+Image', url: cleanCacheUrl };
                         saveToContinueWatching(cacheObj);
                         movieKey = `movie_progress_${data.title}`;
                         const savedTime = localStorage.getItem(movieKey);
@@ -1359,10 +1360,13 @@
                     clearTimeout(syncTimeout);
                     const diff = Math.abs(moviePlayer.currentTime - data.time);
                     if (diff > 1.5) moviePlayer.currentTime = data.time;
-                    if (data.state === 'playing' && moviePlayer.paused) moviePlayer.play().catch(() => {});
-                    else if (data.state === 'paused' && !moviePlayer.paused) moviePlayer.pause();
+                    if (data.state === 'playing' && moviePlayer.paused) {
+                        moviePlayer.play().catch(() => {});
+                    } else if (data.state === 'paused' && !moviePlayer.paused) {
+                        moviePlayer.pause();
+                    }
                     setSyncState(true, 'Live');
-                    syncTimeout = setTimeout(() => { isSyncingFromRemote = false; }, 300);
+                    syncTimeout = setTimeout(() => { isSyncingFromRemote = false; }, 500);
                 });
 
                 party.socket.on('party-ended', () => {
@@ -1410,6 +1414,9 @@
             localStorage.setItem('thirai_party_name', myName);
             inputMyName.value = myName; inputQuickName.value = myName;
 
+            // Pause video while connecting — don't let it play in the background
+            moviePlayer.pause();
+
             btnJoinParty.disabled = true; btnJoinParty.textContent = 'Joining…';
             btnQuickJoin.disabled = true; btnQuickJoin.innerHTML = '<i class="bi bi-hourglass-split"></i> Joining…';
 
@@ -1427,7 +1434,6 @@
                     const hostFilm = hostUrl.searchParams.get('film');
                     const myFilm = currentUrl.searchParams.get('film');
                     if (hostFilm && hostFilm !== myFilm) {
-                        // Redirect: carry party code + name so we rejoin automatically on arrival
                         hostUrl.searchParams.set('party', roomId);
                         hostUrl.searchParams.set('name', myName);
                         window.location.href = hostUrl.toString();
@@ -1448,12 +1454,13 @@
                 closeModal();
             });
 
-            // Timeout fallback
+            // Timeout fallback — resume video and reset
             setTimeout(() => {
                 if (!screenParty.classList.contains('active')) {
                     btnJoinParty.disabled = false; btnJoinParty.textContent = 'Join Party';
                     btnQuickJoin.disabled = false; btnQuickJoin.innerHTML = '<i class="bi bi-play-fill"></i> Join & Watch';
                     party.roomId = null;
+                    moviePlayer.play().catch(() => {}); // resume since join failed
                     showToast('❌ Room not found');
                 }
             }, 5000);
@@ -1470,6 +1477,8 @@
             setSyncState(false);
             setViewerLock(false);
             partyUsersList.innerHTML = '';
+            // Resume video after leaving
+            moviePlayer.play().catch(() => {});
         }
 
         // ---- Button wiring ----
@@ -1490,8 +1499,12 @@
             joinParty(_pendingQuickJoinCode, name);
         });
 
-        btnCloseLobby.addEventListener('click', closeModal);
-        btnCancelQuickJoin.addEventListener('click', closeModal);
+        btnCloseLobby.addEventListener('click', () => {
+            if (party.roomId) { showScreen('party'); refreshCardOnOpen(); } else { moviePlayer.play().catch(()=>{}); closeModal(); }
+        });
+        btnCancelQuickJoin.addEventListener('click', () => {
+            if (party.roomId) { showScreen('party'); refreshCardOnOpen(); } else { moviePlayer.play().catch(()=>{}); closeModal(); }
+        });
         btnCloseParty.addEventListener('click', closeModal);
 
         btnLeaveParty.addEventListener('click', () => {
@@ -1511,7 +1524,9 @@
         });
 
         partyModalBackdrop.addEventListener('click', (e) => {
-            if (e.target === partyModalBackdrop) closeModal();
+            if (e.target !== partyModalBackdrop) return;
+            if (party.roomId) { showScreen('party'); refreshCardOnOpen(); }
+            else { moviePlayer.play().catch(()=>{}); closeModal(); }
         });
 
         // Enter key shortcuts
