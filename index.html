@@ -2795,6 +2795,717 @@
   }
 </style>
 
+
+<style id="media-popup-style">
+/* ================================================================
+   MEDIA DETAIL POPUP  (replaces movie.html + show.html navigation)
+   ================================================================ */
+
+/* --- Overlay backdrop --- */
+#mediaPopupOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8500;
+  background: rgba(0,0,0,0.0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 360ms,
+              background 360ms ease,
+              backdrop-filter 360ms ease;
+  overflow-y: auto;
+}
+#mediaPopupOverlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s,
+              background 360ms ease,
+              backdrop-filter 360ms ease;
+}
+
+/* --- Modal container --- */
+.mp-modal {
+  position: relative;
+  width: 100%;
+  max-width: 840px;
+  background: #0d0d0d;
+  border-radius: 28px;
+  overflow: hidden;
+  transform: translateY(32px) scale(0.985);
+  opacity: 0;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 320ms ease;
+  margin: 0 auto;
+  min-height: 100vh;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+}
+#mediaPopupOverlay.active .mp-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* ── Mobile: true bottom sheet ── */
+@media (max-width: 639px) {
+  #mediaPopupOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .mp-modal {
+    /* Curved top, flush to screen bottom */
+    border-radius: 24px 24px 0 0;
+    min-height: 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Slide up from below */
+    transform: translateY(100%);
+    opacity: 1;
+    width: 100%;
+  }
+  #mediaPopupOverlay.active .mp-modal {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  /* No drag handle bar */
+  .mp-modal::before { display: none; }
+
+  /* Banner fills the curved top of the sheet */
+  .mp-banner {
+    border-radius: 24px 24px 0 0;
+    height: 64vw;
+    min-height: 240px;
+    max-height: 360px;
+    overflow: hidden;
+  }
+
+  /* Logo centred horizontally in the fade, pushed lower */
+  .mp-banner-content {
+    text-align: center;
+    padding: 0 20px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .mp-logo-img {
+    max-width: min(240px, 70vw);
+    max-height: 80px;
+    margin: 0 auto 16px;
+  }
+  .mp-title-text {
+    text-align: center;
+  }
+
+  /* Play + Trailer centred, equal size */
+  .mp-action-row {
+    justify-content: center;
+    gap: 10px;
+  }
+  .mp-btn-play {
+    flex: 1;
+    max-width: 160px;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+  .mp-btn-trailer {
+    flex: 1;
+    max-width: 160px;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  /* Tighter body padding */
+  .mp-body {
+    padding: 14px 18px 80px;
+  }
+
+  /* Close button — top-right of banner */
+  .mp-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (min-width: 640px) {
+  #mediaPopupOverlay {
+    padding: 48px 20px 80px;
+    align-items: flex-start;
+  }
+  .mp-modal {
+    border-radius: 28px;
+    min-height: auto;
+  }
+}
+
+/* --- Close button --- */
+.mp-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 8510;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.52);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.mp-close:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
+.mp-close:active { transform: scale(0.92); }
+
+/* On desktop: stay absolute inside modal */
+@media (min-width: 640px) {
+  .mp-close {
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+}
+.mp-banner {
+  position: relative;
+  width: 100%;
+  height: 56vw;
+  max-height: 440px;
+  min-height: 230px;
+  background: #111;
+  background-size: cover;
+  background-position: center 20%;
+  overflow: hidden;
+}
+.mp-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, #0e0e0e 0%, rgba(14,14,14,0.6) 45%, rgba(14,14,14,0.15) 75%, transparent 100%),
+    linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 55%);
+}
+/* Mobile: symmetrical gradient so logo looks centred */
+@media (max-width: 639px) {
+  .mp-banner::after {
+    background:
+      linear-gradient(to top, #0d0d0d 0%, rgba(13,13,13,0.75) 38%, rgba(13,13,13,0.1) 65%, transparent 100%),
+      radial-gradient(ellipse at center, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 100%);
+  }
+}
+.mp-banner-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  padding: 0 20px 16px;
+}
+.mp-logo-img {
+  max-width: min(280px, 62vw);
+  max-height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.85));
+  margin-bottom: 14px;
+  display: block;
+}
+.mp-title-text {
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  margin: 0 0 14px;
+  color: #fff;
+}
+.mp-action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.mp-btn-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 11px 26px;
+  font-weight: 700;
+  font-size: 0.97rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.mp-btn-play:hover { background: #ddd; transform: scale(1.02); }
+.mp-btn-trailer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(109,109,110,0.4);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 11px 22px;
+  font-weight: 600;
+  font-size: 0.97rem;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+/* --- Body content --- */
+.mp-body {
+  padding: 14px 24px 40px;
+}
+
+/* Meta row: rating / year / runtime / seasons */
+.mp-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 14px;
+  color: #999;
+  font-size: 0.88rem;
+  align-items: center;
+}
+.mp-meta-row .mp-rating-badge {
+  background: #46d369;
+  color: #000;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+.mp-meta-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Genres */
+.mp-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 20px;
+}
+.mp-genre-pill {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #bbb;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Overview */
+.mp-overview {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #bbb;
+  margin-bottom: 24px;
+  cursor: pointer;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mp-overview.expanded {
+  display: block;
+}
+
+/* Cast */
+.mp-cast-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: #555;
+  margin-bottom: 16px;
+}
+.mp-cast-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 28px;
+  padding-bottom: 4px;
+}
+.mp-cast-row::-webkit-scrollbar { display: none; }
+.mp-cast-item {
+  flex: 0 0 auto;
+  width: 80px;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.15s ease;
+}
+.mp-cast-item:hover { opacity: 0.80; }
+.mp-cast-img {
+  width: 80px;
+  height: 108px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #1a1a1a;
+  display: block;
+}
+.mp-cast-name {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #ccc;
+  margin-top: 6px;
+  line-height: 1.25;
+}
+.mp-cast-char {
+  font-size: 0.63rem;
+  color: #555;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+/* Details grid */
+.mp-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+  background: #131313;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 28px;
+}
+.mp-detail-item label {
+  display: block;
+  color: #444;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  margin-bottom: 4px;
+}
+.mp-detail-item p {
+  font-size: 0.88rem;
+  margin: 0;
+  color: #eee;
+}
+.mp-age-icon { height: 24px; width: auto; vertical-align: middle; }
+
+/* Recommendations */
+.mp-rec-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: #555;
+  margin-bottom: 16px;
+}
+.mp-rec-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 24px;
+}
+.mp-rec-row::-webkit-scrollbar { display: none; }
+.mp-rec-item {
+  flex: 0 0 auto;
+  width: 110px;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.mp-rec-item:hover { opacity: 0.80; }
+.mp-rec-img {
+  width: 110px;
+  height: 165px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #1a1a1a;
+  display: block;
+}
+.mp-rec-name {
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: #bbb;
+  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Divider --- */
+.mp-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin: 24px 0;
+}
+
+/* ===================== TV SHOW EPISODES ===================== */
+.mp-seasons-wrap {
+  margin-top: 6px;
+}
+.mp-season-select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 11px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 260px;
+  appearance: menulist-button;
+  cursor: pointer;
+}
+.mp-episode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.mp-episode-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  /* NO transform/translate on hover — only background color change */
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+.mp-episode-item:last-child { border-bottom: none; }
+.mp-episode-item:hover {
+  background: rgba(255,255,255,0.05);
+  /* NO padding shift, NO translation — purely a grey tint */
+}
+.mp-ep-thumb-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  width: 124px;
+  height: 70px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1e1e1e;
+}
+@media (max-width: 440px) {
+  .mp-ep-thumb-wrap { width: 100px; height: 56px; }
+}
+.mp-ep-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mp-ep-num-badge {
+  position: absolute;
+  top: 0; left: 0;
+  background: rgba(0,0,0,0.65);
+  color: rgba(255,255,255,0.85);
+  font-size: 0.63rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 8px 0 5px 0;
+}
+.mp-ep-info { flex: 1; min-width: 0; }
+.mp-ep-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e8e8e8;
+  margin-bottom: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mp-ep-desc {
+  font-size: 0.76rem;
+  color: #666;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.45;
+}
+.mp-ep-play-icon {
+  color: rgba(255,255,255,0.25);
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+.mp-episode-item:hover .mp-ep-play-icon {
+  color: rgba(255,255,255,0.55);
+}
+
+/* --- Inner server picker (reuses server overlay styles but scoped) --- */
+#mpServerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8600;
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 280ms ease, visibility 0s linear 280ms;
+}
+#mpServerOverlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 280ms ease, visibility 0s;
+}
+.mp-server-modal {
+  position: relative;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 22px;
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 24px 20px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+  transform: translateY(18px) scale(0.98);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+#mpServerOverlay.active .mp-server-modal {
+  transform: translateY(0) scale(1);
+}
+.mp-server-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid #2a2a2a;
+  background: #1e1e1e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mp-server-close:hover { background: #2a2a2a; }
+.mp-server-header {
+  text-align: center;
+  margin-bottom: 22px;
+  padding-right: 30px;
+}
+.mp-server-header h4 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.mp-server-header p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #888;
+}
+.mp-server-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 380px) {
+  .mp-server-grid { grid-template-columns: 1fr; }
+}
+.mp-server-option {
+  position: relative;
+  background: #202020;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 14px 10px;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  overflow: hidden;
+  transition: background 0.18s, border-color 0.18s, transform 0.14s;
+}
+.mp-server-option:hover { background: #282828; border-color: #0d6efd; transform: scale(1.02); }
+.mp-server-option.mp-recommended { border-color: rgba(255,140,0,0.35); }
+.mp-server-option.mp-recommended i { color: #ff8c00; }
+.mp-server-option.mp-thirai-exclusive {
+  border-color: #46d369;
+  background: rgba(70,211,105,0.08);
+  grid-column: 1 / -1;
+}
+.mp-server-option.mp-thirai-exclusive img { height: 20px; width: auto; }
+.mp-server-status {
+  position: absolute;
+  top: 5px; right: 7px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.55;
+  letter-spacing: 0.5px;
+}
+.mp-thirai-exclusive .mp-server-status { color: #46d369; opacity: 1; }
+.mp-server-option i { font-size: 1.15rem; }
+
+/* Loading skeleton for popup */
+.mp-skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: mp-shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+@keyframes mp-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.mp-loading-banner {
+  width: 100%;
+  height: 280px;
+}
+.mp-loading-body { padding: 20px; }
+.mp-loading-line {
+  height: 14px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+}
+</style>
 </head>
 <body>
 
@@ -6914,13 +7625,14 @@ if (type === 'actor' && actorCode === '3TKYioHCAF') {
 function createTmdbSearchCard(type, item) {
     const div = document.createElement('div');
     div.className = 'card';
-
     const title = item.title || item.name || '';
     div.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" loading="lazy" alt="${title}">`;
-
     div.onclick = () => {
-        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
-        else window.location.href = `show.html?${item.id}`;
+        if (typeof window.openMediaPopup === 'function') {
+            window.openMediaPopup(type === 'movie' ? 'movie' : 'tv', item.id);
+        } else {
+            window.location.href = (type === 'movie' ? 'movie.html?' : 'show.html?') + item.id;
+        }
     };
     return div;
 }
@@ -7332,8 +8044,11 @@ async function loadTmdbTopRated(endpoint, rowId, type) {
       if (!item || !item.id || !item.poster_path) return; // hide items with no poster
       const title = item.title || item.name || '';
       const card = createTmdbCard(item.poster_path, title, () => {
-        if (type === 'movie') window.location.href = `movie.html?${item.id}`;
-        else window.location.href = `show.html?${item.id}`;
+        if (typeof window.openMediaPopup === 'function') {
+          window.openMediaPopup(type === 'movie' ? 'movie' : 'tv', item.id);
+        } else {
+          window.location.href = (type === 'movie' ? 'movie.html?' : 'show.html?') + item.id;
+        }
       });
       row.appendChild(card);
     });
@@ -7753,14 +8468,18 @@ setTimeout(() => {
         if (!overflow){
           prev.classList.remove('is-visible');
           next.classList.remove('is-visible');
+          wrap.classList.remove('can-scroll-left', 'can-scroll-right');
           return;
         }
 
         const max = row.scrollWidth - row.clientWidth;
         const left = row.scrollLeft;
 
-        // show/hide based on position
-        if (left > 6){
+        // Only show prev when scrolled meaningfully from start (8px threshold prevents jump)
+        const canLeft = left > 8;
+        const canRight = left < max - 8;
+
+        if (canLeft){
           prev.classList.add('is-visible');
           wrap.classList.add('can-scroll-left');
         } else {
@@ -7768,7 +8487,7 @@ setTimeout(() => {
           wrap.classList.remove('can-scroll-left');
         }
 
-        if (left < max - 6){
+        if (canRight){
           next.classList.add('is-visible');
           wrap.classList.add('can-scroll-right');
         } else {
@@ -8279,41 +8998,67 @@ async function jikanFetch(url, retries=3){
     }
 }
 
-/* ── Row-wrap arrow initialiser (shared for anime + tmdb) ────────── */
+/* ── Row-wrap arrow initialiser (shared for anime + tmdb + discover) ── */
 function initViewRowArrows(viewId){
     const view=document.getElementById(viewId); if(!view) return;
-    view.querySelectorAll('.home-content-wrapper .row-container').forEach(row=>{
+
+    function bindRow(row, wrap){
         if(row.dataset.extArrows==='1') return;
         row.dataset.extArrows='1';
-        const wrap=document.createElement('div'); wrap.className='row-wrap';
-        row.parentNode.insertBefore(wrap,row); wrap.appendChild(row);
-        function mkBtn(dir){
-            const b=document.createElement('button');
-            b.type='button'; b.className='row-nav '+(dir==='prev'?'row-prev':'row-next');
-            b.setAttribute('aria-label',dir==='prev'?'Scroll left':'Scroll right');
-            b.innerHTML=dir==='prev'
-                ?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-                :'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-            return b;
+        let prev=wrap.querySelector('.row-prev');
+        let next=wrap.querySelector('.row-next');
+        if(!prev){
+            function mkBtn(dir){
+                const b=document.createElement('button');
+                b.type='button'; b.className='row-nav '+(dir==='prev'?'row-prev':'row-next');
+                b.setAttribute('aria-label',dir==='prev'?'Scroll left':'Scroll right');
+                b.innerHTML=dir==='prev'
+                    ?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19.5L8 12l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                    :'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5L16 12l-7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                return b;
+            }
+            prev=mkBtn('prev'); next=mkBtn('next');
+            wrap.appendChild(prev); wrap.appendChild(next);
         }
-        const prev=mkBtn('prev'),next=mkBtn('next');
-        wrap.appendChild(prev); wrap.appendChild(next);
-        prev.addEventListener('click',()=>row.scrollBy({left:-Math.max(240,row.clientWidth*.85),behavior:'smooth'}));
-        next.addEventListener('click',()=>row.scrollBy({left:Math.max(240,row.clientWidth*.85),behavior:'smooth'}));
+        prev.addEventListener('click',()=>{
+            row.scrollBy({left:-Math.max(240,row.clientWidth*.85),behavior:'smooth'});
+        });
+        next.addEventListener('click',()=>{
+            row.scrollBy({left:Math.max(240,row.clientWidth*.85),behavior:'smooth'});
+        });
         let raf=0;
         function upd(){
             cancelAnimationFrame(raf);
             raf=requestAnimationFrame(()=>{
                 const ov=(row.scrollWidth-row.clientWidth)>6;
                 wrap.classList.toggle('has-overflow',ov);
-                if(!ov){prev.classList.remove('is-visible');next.classList.remove('is-visible');return;}
+                if(!ov){prev.classList.remove('is-visible');next.classList.remove('is-visible');wrap.classList.remove('can-scroll-left','can-scroll-right');return;}
                 const max=row.scrollWidth-row.clientWidth,l=row.scrollLeft;
-                prev.classList.toggle('is-visible',l>6); wrap.classList.toggle('can-scroll-left',l>6);
-                next.classList.toggle('is-visible',l<max-6); wrap.classList.toggle('can-scroll-right',l<max-6);
+                // Only show prev when actually scrolled away from start (threshold 8px to avoid jump)
+                const canLeft = l > 8;
+                const canRight = l < max - 8;
+                prev.classList.toggle('is-visible', canLeft);
+                wrap.classList.toggle('can-scroll-left', canLeft);
+                next.classList.toggle('is-visible', canRight);
+                wrap.classList.toggle('can-scroll-right', canRight);
             });
         }
         row.addEventListener('scroll',upd,{passive:true}); window.addEventListener('resize',upd);
         upd(); setTimeout(upd,400); setTimeout(upd,1000);
+    }
+
+    /* Static .row-wrap already in HTML (discover view, anime, tmdb) */
+    view.querySelectorAll('.row-wrap').forEach(wrap=>{
+        const row=wrap.querySelector('.row-container');
+        if(row) bindRow(row, wrap);
+    });
+
+    /* Bare .row-container in content wrappers (home view style) */
+    view.querySelectorAll('.home-content-wrapper .row-container, .discover-content-wrapper .row-container').forEach(row=>{
+        if(row.dataset.extArrows==='1') return;
+        const wrap=document.createElement('div'); wrap.className='row-wrap';
+        row.parentNode.insertBefore(wrap,row); wrap.appendChild(row);
+        bindRow(row, wrap);
     });
 }
 
@@ -8554,11 +9299,11 @@ async function loadTmdbTabRow(rowId, endpoint){
         const r=await fetch(TMDB_BASE+endpoint+'?api_key='+API_KEY+'&language=en-GB&page=1');
         const d=await r.json();
         row.innerHTML='';
-        const isTV=endpoint.includes('/tv/');
+        const isTV=endpoint.includes('/tv/')||endpoint.startsWith('tv/')||endpoint.startsWith('/tv/');
         (d.results||[]).filter(x=>x&&x.poster_path).forEach(item=>{
             const div=document.createElement('div'); div.className='card';
             div.innerHTML='<img src="https://image.tmdb.org/t/p/w342'+item.poster_path+'" loading="lazy" alt="'+xEsc(item.title||item.name||'')+'">';
-            div.onclick=()=>window.location.href=(isTV?'show.html?':'movie.html?')+item.id;
+            div.onclick=()=>{ if(typeof window.openMediaPopup==='function') window.openMediaPopup(isTV?'tv':'movie',item.id); else window.location.href=(isTV?'show.html?':'movie.html?')+item.id; };
             row.appendChild(div);
         });
         if(!row.children.length) row.innerHTML='<p style="color:#555;padding:0 20px;font-size:0.85rem;">Nothing found.</p>';
@@ -8646,7 +9391,8 @@ function tmdbHeroPlay(){
     if(b.isAnime){
         openAnimeEpisodesByTmdb(b.tmdb_id||b.id, b.title);
     } else {
-        window.location.href=(b.media_type==='tv'?'show.html?':'movie.html?')+b.id;
+        if(typeof window.openMediaPopup==='function') window.openMediaPopup(b.media_type==='tv'?'tv':'movie',b.id);
+        else window.location.href=(b.media_type==='tv'?'show.html?':'movie.html?')+b.id;
     }
 }
 
@@ -8964,9 +9710,420 @@ function initDiscoverView(){
 
 </script>
 
-</body>
-</html>
-    <div id="view-lang-category" class="visually-hidden view-padded">
+
+<!-- ================================================================
+     MEDIA DETAIL POPUP  (movie + show combined inline modal)
+     ================================================================ -->
+<div id="mediaPopupOverlay" aria-modal="true" role="dialog" aria-label="Media Details">
+  <div class="mp-modal" id="mpModal">
+    <button class="mp-close" onclick="closeMediaPopup()" aria-label="Close"><i class="fas fa-times"></i></button>
+    <!-- Dynamic content injected by JS -->
+    <div id="mpContent">
+      <div class="mp-loading-banner mp-skeleton"></div>
+      <div class="mp-loading-body">
+        <div class="mp-loading-line mp-skeleton" style="width:55%;height:28px;margin-bottom:16px;"></div>
+        <div class="mp-loading-line mp-skeleton" style="width:80%;"></div>
+        <div class="mp-loading-line mp-skeleton" style="width:70%;"></div>
+        <div class="mp-loading-line mp-skeleton" style="width:90%;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Server picker (inside popup flow) -->
+<div id="mpServerOverlay" aria-modal="true" role="dialog" aria-label="Select Server">
+  <div class="mp-server-modal">
+    <button class="mp-server-close" onclick="closeMpServerOverlay()" aria-label="Close"><i class="fas fa-times"></i></button>
+    <div class="mp-server-header">
+      <h4>Select Server</h4>
+      <p id="mpServerLabel"></p>
+    </div>
+    <div class="mp-server-grid" id="mpServerGrid"></div>
+  </div>
+</div>
+
+
+<script id="media-popup-script">
+/* ================================================================
+   MEDIA DETAIL POPUP  –  replaces movie.html + show.html
+   ================================================================ */
+(function(){
+
+  const TMDB_KEY  = '926e94b0f70b5bed8417b679652366ab';
+  const TMDB_API  = 'https://api.themoviedb.org/3';
+  const IMG_W342  = 'https://image.tmdb.org/t/p/w342';
+  const IMG_W500  = 'https://image.tmdb.org/t/p/w500';
+  const IMG_ORIG  = 'https://image.tmdb.org/t/p/original';
+  const IMG_W185  = 'https://image.tmdb.org/t/p/w185';
+
+  const SERVERS = [
+    { name:"VidKing",  slug:"vidking",  icon:"fa-shield-alt",           recommended:true,  status:" "   },
+    { name:"Rakan",    slug:"rakan",    icon:"fa-bolt",                  recommended:true,  status:" "   },
+    { name:"Bard",     slug:"bard",     icon:"fa-play-circle",           recommended:false, status:"Ads" },
+    { name:"Ekko",     slug:"ekko",     icon:"fa-play-circle",           recommended:false, status:"Ads" },
+    { name:"Naafiri",  slug:"naafiri",  icon:"fa-play-circle",           recommended:false, status:"Ads" },
+    { name:"Xayah",    slug:"xayah",    icon:"fa-play-circle",           recommended:false, status:"Ads" },
+    { name:"Ryze",     slug:"ryze",     icon:"fa-play-circle",           recommended:false, status:"Ads" },
+    { name:"111",      slug:"111",      icon:"fa-play-circle",           recommended:false, status:"Ads" },
+    { name:"VidFast",  slug:"vidfast",  icon:"fa-play-circle",           recommended:false, status:"Ads" }
+  ];
+
+  const LANG_MAP = { ta:'tamil', hi:'hindi', ml:'malayalam', kn:'kannada', te:'telugu', bn:'bengali', pa:'punjabi' };
+
+  // --- State ---
+  let _currentType   = null; // 'movie' | 'tv'
+  let _currentId     = null;
+  let _movieData     = null;
+  let _showSeasons   = [];
+  let _pendingEp     = null; // {s, e, epName} for server picker
+
+  // ── Public entry-points ───────────────────────────────────────
+  window.openMediaPopup = function(type, id){
+    _currentType = type;
+    _currentId   = id;
+    _movieData   = null;
+    _showSeasons = [];
+    _pendingEp   = null;
+
+    // Reset content to loading skeleton
+    document.getElementById('mpContent').innerHTML = `
+      <div class="mp-loading-banner mp-skeleton"></div>
+      <div class="mp-loading-body">
+        <div class="mp-loading-line mp-skeleton" style="width:55%;height:28px;margin-bottom:16px;"></div>
+        <div class="mp-loading-line mp-skeleton" style="width:80%;"></div>
+        <div class="mp-loading-line mp-skeleton" style="width:70%;"></div>
+        <div class="mp-loading-line mp-skeleton" style="width:90%;"></div>
+      </div>`;
+
+    document.getElementById('mediaPopupOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    if(type === 'movie') _loadMovie(id);
+    else                  _loadShow(id);
+  };
+
+  window.closeMediaPopup = function(){
+    document.getElementById('mediaPopupOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+    closeMpServerOverlay();
+  };
+
+  // Close on backdrop click
+  document.getElementById('mediaPopupOverlay').addEventListener('click', function(e){
+    if(e.target === this) window.closeMediaPopup();
+  });
+
+  // ESC key
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      if(document.getElementById('mpServerOverlay').classList.contains('active')){
+        closeMpServerOverlay(); return;
+      }
+      if(document.getElementById('mediaPopupOverlay').classList.contains('active')){
+        window.closeMediaPopup();
+      }
+    }
+  });
+
+  // ── Escape HTML helper ─────────────────────────────────────────
+  function esc(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  // ── UK Age Rating icon ─────────────────────────────────────────
+  const AGE_ICONS = {
+    U:'https://www.cineworld.co.uk/xmedia/img/10108/rating/U.png',
+    PG:'https://www.cineworld.co.uk/xmedia/img/10108/rating/PG.png',
+    '12':'https://www.cineworld.co.uk/xmedia/img/10108/rating/12.png',
+    '12A':'https://www.cineworld.co.uk/xmedia/img/10108/rating/12.png',
+    '15':'https://www.cineworld.co.uk/xmedia/img/10108/rating/15.png',
+    '18':'https://www.cineworld.co.uk/xmedia/img/10108/rating/18.png',
+    TBC:'https://www.cineworld.co.uk/xmedia/img/10108/rating/TBC.png'
+  };
+  function ukAgeRatingHtml(data){
+    try{
+      const gb = (data.release_dates&&data.release_dates.results||[]).find(r=>r.iso_3166_1==='GB');
+      if(!gb) return '<img class="mp-age-icon" src="'+AGE_ICONS['TBC']+'" alt="TBC">';
+      const cert = (gb.release_dates||[]).map(x=>(x.certification||'').trim()).find(c=>c) || 'TBC';
+      const key = cert.toUpperCase();
+      if(AGE_ICONS[key]) return '<img class="mp-age-icon" src="'+AGE_ICONS[key]+'" alt="'+key+'">';
+      return '<span>'+esc(cert)+'</span>';
+    }catch(e){ return '<img class="mp-age-icon" src="'+AGE_ICONS['TBC']+'" alt="TBC">'; }
+  }
+
+  // ── MOVIE ──────────────────────────────────────────────────────
+  async function _loadMovie(id){
+    try{
+      const r = await fetch(TMDB_API+'/movie/'+id+'?api_key='+TMDB_KEY+'&append_to_response=credits,images,videos,recommendations,release_dates');
+      const d = await r.json();
+      _movieData = d;
+      _renderMovie(d);
+    }catch(e){
+      document.getElementById('mpContent').innerHTML = '<div style="padding:40px;text-align:center;color:#ff6b6b;">Failed to load movie.</div>';
+    }
+  }
+
+  function _renderMovie(d){
+    const logo = (d.images&&d.images.logos||[]).find(l=>l.iso_639_1==='en')||(d.images&&d.images.logos||[])[0];
+    const logoHtml = logo
+      ? `<img src="${IMG_W500}${logo.file_path}" class="mp-logo-img" alt="${esc(d.title)}">`
+      : `<h2 class="mp-title-text">${esc(d.title)}</h2>`;
+
+    const trailer = (d.videos&&d.videos.results||[]).find(v=>v.type==='Trailer'&&v.site==='YouTube');
+    const trailerBtn = trailer
+      ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="mp-btn-trailer"><i class="fas fa-clapperboard"></i> Trailer</a>`
+      : '';
+
+    const genresHtml = (d.genres||[]).map(g=>`<span class="mp-genre-pill">${esc(g.name)}</span>`).join('');
+
+    const castHtml = (d.credits&&d.credits.cast||[]).filter(c=>c.profile_path).slice(0,12).map(c=>`
+      <div class="mp-cast-item" onclick="window.location.href='/cast.html?${c.id}'" role="button" tabindex="0">
+        <img src="${IMG_W185}${c.profile_path}" class="mp-cast-img" alt="${esc(c.name)}" loading="lazy">
+        <div class="mp-cast-name">${esc(c.name)}</div>
+        <div class="mp-cast-char">${esc(c.character)}</div>
+      </div>`).join('');
+
+    const recHtml = (d.recommendations&&d.recommendations.results||[]).filter(x=>x.poster_path).slice(0,12).map(m=>`
+      <div class="mp-rec-item" onclick="openMediaPopup('movie',${m.id})">
+        <img src="${IMG_W185}${m.poster_path}" class="mp-rec-img" alt="${esc(m.title)}" loading="lazy">
+        <div class="mp-rec-name">${esc(m.title)}</div>
+      </div>`).join('');
+
+    const rating = (typeof d.vote_average==='number') ? d.vote_average.toFixed(1) : '';
+    const year   = d.release_date ? d.release_date.split('-')[0] : '';
+    const runtime= d.runtime ? d.runtime+'m' : '';
+
+    document.getElementById('mpContent').innerHTML = `
+      <div class="mp-banner" style="background-image:url('${IMG_ORIG}${d.backdrop_path}')">
+        <div class="mp-banner-content">
+          ${logoHtml}
+          <div class="mp-action-row">
+            <button class="mp-btn-play" onclick="_openMpServerForMovie()"><i class="fas fa-play"></i> Play</button>
+            ${trailerBtn}
+          </div>
+        </div>
+      </div>
+      <div class="mp-body">
+        <div class="mp-meta-row">
+          ${rating ? `<span class="mp-rating-badge">${esc(rating)}</span>` : ''}
+          ${year   ? `<span><i class="fas fa-calendar-alt"></i> ${esc(year)}</span>` : ''}
+          ${runtime? `<span><i class="fas fa-clock"></i> ${esc(runtime)}</span>` : ''}
+        </div>
+        ${genresHtml ? `<div class="mp-genres">${genresHtml}</div>` : ''}
+        <p class="mp-overview" id="mpOverview" onclick="document.getElementById('mpOverview').classList.toggle('expanded')">${esc(d.overview)}</p>
+        ${castHtml ? `<div class="mp-cast-title">Cast</div><div class="mp-cast-row">${castHtml}</div>` : ''}
+        ${recHtml  ? `<div class="mp-rec-title">More like this</div><div class="mp-rec-row">${recHtml}</div>` : ''}
+        <div class="mp-details-grid">
+          <div class="mp-detail-item"><label>Status</label><p>${esc(d.status)}</p></div>
+          <div class="mp-detail-item"><label>Original Title</label><p>${esc(d.original_title)}</p></div>
+          <div class="mp-detail-item"><label>Language</label><p>${esc((d.original_language||'').toUpperCase())}</p></div>
+          <div class="mp-detail-item"><label>Rating</label><p><span class="mp-rating-badge">${esc(rating)}</span></p></div>
+          <div class="mp-detail-item"><label>Age Rating</label><p>${ukAgeRatingHtml(d)}</p></div>
+          <div class="mp-detail-item"><label>Year</label><p>${esc(year)}</p></div>
+          <div class="mp-detail-item"><label>Runtime</label><p>${esc(runtime)}</p></div>
+          <div class="mp-detail-item"><label>Genres</label><p>${esc((d.genres||[]).slice(0,3).map(g=>g.name).join(', '))}</p></div>
+          <div class="mp-detail-item"><label>Budget</label><p>${d.budget?'$'+(d.budget/1000000).toFixed(1)+'M':'N/A'}</p></div>
+          <div class="mp-detail-item"><label>Revenue</label><p>${d.revenue?'$'+(d.revenue/1000000).toFixed(1)+'M':'N/A'}</p></div>
+        </div>
+      </div>`;
+
+    // Scroll popup back to top after render
+    const modal = document.getElementById('mpModal');
+    if(modal) modal.scrollTop = 0;
+    const overlay = document.getElementById('mediaPopupOverlay');
+    if(overlay) overlay.scrollTop = 0;
+  }
+
+  window._openMpServerForMovie = function(){
+    _pendingEp = null;
+    _openMpServer();
+  };
+
+  // ── SHOW ───────────────────────────────────────────────────────
+  async function _loadShow(id){
+    try{
+      const r = await fetch(TMDB_API+'/tv/'+id+'?api_key='+TMDB_KEY+'&append_to_response=credits,images');
+      const d = await r.json();
+      _movieData = d;
+      _showSeasons = (d.seasons||[]).filter(s=>s.season_number!==0);
+      _renderShow(d);
+    }catch(e){
+      document.getElementById('mpContent').innerHTML = '<div style="padding:40px;text-align:center;color:#ff6b6b;">Failed to load show.</div>';
+    }
+  }
+
+  function _renderShow(d){
+    const logo = (d.images&&d.images.logos||[]).find(l=>l.iso_639_1==='en')||(d.images&&d.images.logos||[])[0];
+    const logoHtml = logo
+      ? `<img src="${IMG_W500}${logo.file_path}" class="mp-logo-img" alt="${esc(d.name)}">`
+      : `<h2 class="mp-title-text">${esc(d.name)}</h2>`;
+
+    const genresHtml = (d.genres||[]).map(g=>`<span class="mp-genre-pill">${esc(g.name)}</span>`).join('');
+    const rating = (typeof d.vote_average==='number') ? d.vote_average.toFixed(1) : '';
+    const year   = d.first_air_date ? new Date(d.first_air_date).getFullYear() : '';
+
+    const castHtml = (d.credits&&d.credits.cast||[]).filter(c=>c.profile_path).slice(0,12).map(c=>`
+      <div class="mp-cast-item" onclick="window.location.href='/cast.html?${c.id}'" role="button" tabindex="0">
+        <img src="${IMG_W185}${c.profile_path}" class="mp-cast-img" alt="${esc(c.name)}" loading="lazy">
+        <div class="mp-cast-name">${esc(c.name)}</div>
+        <div class="mp-cast-char">${esc(c.character)}</div>
+      </div>`).join('');
+
+    const seasonOptions = _showSeasons.map(s=>`<option value="${s.season_number}">${esc(s.name)}</option>`).join('');
+
+    document.getElementById('mpContent').innerHTML = `
+      <div class="mp-banner" style="background-image:url('${IMG_ORIG}${d.backdrop_path||d.poster_path}')">
+        <div class="mp-banner-content">
+          ${logoHtml}
+          <div class="mp-action-row">
+            <button class="mp-btn-play" onclick="_mpWatchNowShow()"><i class="fas fa-play"></i> Play</button>
+          </div>
+        </div>
+      </div>
+      <div class="mp-body">
+        <div class="mp-meta-row">
+          ${rating ? `<span class="mp-rating-badge">${esc(rating)}</span>` : ''}
+          ${year   ? `<span><i class="fas fa-calendar-alt"></i> ${esc(year)}</span>` : ''}
+          ${d.number_of_seasons ? `<span><i class="fas fa-list"></i> ${d.number_of_seasons} Season${d.number_of_seasons!==1?'s':''}</span>` : ''}
+        </div>
+        ${genresHtml ? `<div class="mp-genres">${genresHtml}</div>` : ''}
+        <p class="mp-overview" id="mpOverview" onclick="document.getElementById('mpOverview').classList.toggle('expanded')">${esc(d.overview)}</p>
+        ${castHtml ? `<div class="mp-cast-title">Cast</div><div class="mp-cast-row">${castHtml}</div>` : ''}
+        <hr class="mp-divider">
+        <div class="mp-seasons-wrap">
+          ${seasonOptions ? `<select class="mp-season-select" id="mpSeasonSelect" onchange="_mpLoadSeason(this.value)">${seasonOptions}</select>` : ''}
+          <div class="mp-episode-list" id="mpEpisodeList"><p style="color:#555;text-align:center;padding:20px;">Loading episodes…</p></div>
+        </div>
+      </div>`;
+
+    const modal = document.getElementById('mpModal');
+    if(modal) modal.scrollTop = 0;
+    const overlay = document.getElementById('mediaPopupOverlay');
+    if(overlay) overlay.scrollTop = 0;
+
+    // Load first season
+    if(_showSeasons.length){
+      const lastSavedSeason = localStorage.getItem('last_season_'+_currentId);
+      const firstSeason = (lastSavedSeason && _showSeasons.some(s=>s.season_number==lastSavedSeason))
+        ? lastSavedSeason : _showSeasons[0].season_number;
+      const sel = document.getElementById('mpSeasonSelect');
+      if(sel) sel.value = firstSeason;
+      _mpLoadSeason(firstSeason);
+    }
+  }
+
+  window._mpWatchNowShow = function(){
+    if(!_showSeasons.length) return;
+    const sel = document.getElementById('mpSeasonSelect');
+    const s = sel ? parseInt(sel.value) : _showSeasons[0].season_number;
+    _pendingEp = { s: s, e: 1, epName: 'Episode 1' };
+    _openMpServer();
+  };
+
+  window._mpLoadSeason = async function(seasonNum){
+    const list = document.getElementById('mpEpisodeList');
+    if(!list) return;
+    list.innerHTML = '<p style="color:#555;text-align:center;padding:20px 0;">Loading…</p>';
+    localStorage.setItem('last_season_'+_currentId, seasonNum);
+    try{
+      const r = await fetch(TMDB_API+'/tv/'+_currentId+'/season/'+seasonNum+'?api_key='+TMDB_KEY);
+      const d = await r.json();
+      const eps = d.episodes||[];
+      if(!eps.length){ list.innerHTML='<p style="color:#555;text-align:center;padding:20px 0;">No episodes found.</p>'; return; }
+      list.innerHTML = eps.map(ep=>{
+        const thumb = ep.still_path ? `${IMG_W342}${ep.still_path}` : 'https://via.placeholder.com/120x68?text=Ep+'+ep.episode_number;
+        const rawName = ep.name || ('Episode ' + ep.episode_number);
+        const name  = esc(rawName);
+        const jsName = rawName.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        const desc  = esc(ep.overview||'');
+        return `<div class="mp-episode-item" onclick="_mpOpenEpisode(${ep.season_number},${ep.episode_number},'${jsName}')">
+          <div class="mp-ep-thumb-wrap">
+            <span class="mp-ep-num-badge">${ep.episode_number}</span>
+            <img src="${thumb}" alt="Ep ${ep.episode_number}" loading="lazy">
+          </div>
+          <div class="mp-ep-info">
+            <div class="mp-ep-title">${name}</div>
+            ${desc ? `<div class="mp-ep-desc">${desc}</div>` : ''}
+          </div>
+          <i class="fas fa-play mp-ep-play-icon"></i>
+        </div>`;
+      }).join('');
+    }catch(e){
+      list.innerHTML='<p style="color:#ff6b6b;text-align:center;padding:20px 0;">Failed to load episodes.</p>';
+    }
+  };
+
+  window._mpOpenEpisode = function(s, e, epName){
+    _pendingEp = { s, e, epName };
+    _openMpServer();
+  };
+
+  // ── Server picker ──────────────────────────────────────────────
+  function _openMpServer(){
+    const label = document.getElementById('mpServerLabel');
+    const grid  = document.getElementById('mpServerGrid');
+    if(!grid) return;
+    grid.innerHTML = '';
+
+    if(label){
+      label.textContent = _pendingEp
+        ? `S${_pendingEp.s} E${_pendingEp.e}: ${_pendingEp.epName}`
+        : (_movieData ? (_movieData.title||_movieData.name||'') : '');
+    }
+
+    // Thirai exclusive server for certain languages (movies only)
+    if(_currentType==='movie' && _movieData){
+      const origLang = _movieData.original_language;
+      if(LANG_MAP[origLang]){
+        const langWord = LANG_MAP[origLang];
+        const thiraiDiv = document.createElement('div');
+        thiraiDiv.className = 'mp-server-option mp-thirai-exclusive';
+        thiraiDiv.innerHTML = '<span class="mp-server-status">SECURE</span><img src="/static/thiraiwhite.png" alt="Thirai">';
+        thiraiDiv.onclick = ()=>{
+          window.location.href = `https://thirai.me/language?lang=${langWord}&q=${encodeURIComponent(_movieData.title||'')}`;
+        };
+        grid.appendChild(thiraiDiv);
+      }
+    }
+
+    SERVERS.forEach(srv=>{
+      const el = document.createElement('div');
+      el.className = 'mp-server-option'+(srv.recommended?' mp-recommended':'');
+      el.innerHTML = `<span class="mp-server-status">${esc(srv.status)}</span><i class="fas ${srv.icon}"></i><span>${esc(srv.name)}</span>`;
+      el.onclick = ()=>{
+        if(_currentType==='movie'){
+          window.location.href = `https://thirai.me/player.html?server=${encodeURIComponent(srv.slug)}&movie=${_currentId}`;
+        } else {
+          const ep = _pendingEp || {s:1, e:1};
+          window.location.href = `https://thirai.me/player.html?server=${encodeURIComponent(srv.slug)}&tv=${_currentId}/${ep.s}/${ep.e}`;
+        }
+      };
+      grid.appendChild(el);
+    });
+
+    document.getElementById('mpServerOverlay').classList.add('active');
+  }
+
+  window.closeMpServerOverlay = function(){
+    document.getElementById('mpServerOverlay').classList.remove('active');
+  };
+
+  document.getElementById('mpServerOverlay').addEventListener('click', function(e){
+    if(e.target === this) closeMpServerOverlay();
+  });
+
+  // ── Intercept all TMDB navigation in index.html ───────────────
+// Patch createTmdbSearchCard (search results)
+  window.createTmdbSearchCard = function(searchType, item){
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = '<img src="'+IMG_W342+item.poster_path+'" loading="lazy" alt="'+esc(item.title||item.name||'')+'">';
+    div.onclick = ()=> window.openMediaPopup(searchType==='movie'?'movie':'tv', item.id);
+    return div;
+  };
+})();
+</script>
+
+
+<div id="view-lang-category" class="visually-hidden view-padded">
         <div class="section-title" id="lang-category-title" style="margin-top: 0;">Recent</div>
 
         <div style="display:flex; gap:10px; padding: 0 var(--page-pad); margin-bottom: 12px;">
@@ -8977,6 +10134,5 @@ function initDiscoverView(){
         <div class="grid-layout" id="lang-category-grid"></div>
         <button class="load-more-btn visually-hidden" id="load-more-lang-category" onclick="loadNextLanguageCategoryPage()" aria-label="Load more"><i class="fas fa-arrow-rotate-right" aria-hidden="true"></i></button>
     </div>
-
-
-
+</body>
+</html>
