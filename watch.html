@@ -416,6 +416,18 @@
         .party-screen { display: none; }
         .party-screen.active { display: block; }
 
+        /* ===== FULLSCREEN: keep modal & toast inside the fullscreen element ===== */
+        #videoPlayerWrapper:fullscreen .party-modal-backdrop,
+        #videoPlayerWrapper:-webkit-full-screen .party-modal-backdrop {
+            position: absolute;
+            z-index: 9000;
+        }
+        #videoPlayerWrapper:fullscreen #partyToast,
+        #videoPlayerWrapper:-webkit-full-screen #partyToast {
+            position: absolute;
+            z-index: 10000;
+        }
+
         /* Viewer controls lock */
         .controls-locked .center-controls { opacity: 0.25; pointer-events: none; }
         .controls-locked .progress-bar-container { pointer-events: none; }
@@ -482,7 +494,6 @@
                 </button>
             </div>
         </div>
-    </div>
 
     <!-- Toast -->
     <div id="partyToast"></div>
@@ -623,6 +634,7 @@
 
         </div>
     </div>
+    </div><!-- end .video-player-wrapper -->
 
     <script>
         // ===================== ORIGINAL PLAYER CODE =====================
