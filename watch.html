@@ -50,7 +50,7 @@
 
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script>window.drawQRToCanvas=function(text,canvas){var size=canvas.width,ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);var img=new Image();img.crossOrigin='anonymous';img.onload=function(){ctx.drawImage(img,0,0,size,size);};img.onerror=function(){ctx.fillStyle='#333';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('QR load failed',size/2,size/2);};img.src='https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&data='+encodeURIComponent(text)+'&bgcolor=ffffff&color=000000&format=png&margin=2';};</script>
 
     <meta name="screen-orientation" content="landscape">
     <link rel="manifest" href="/manifest.json">
@@ -116,6 +116,11 @@
             color: white; font-size: 1.2rem; font-weight: bold; text-align: center;
             flex-grow: 1; margin: 0 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             line-height: 1; display: flex; align-items: center; justify-content: center; height: 1.5rem;
+            min-width: 0;
+        }
+        /* Hide title when there isn't enough room — it collapses to 0 via flex */
+        @media (max-width: 480px) {
+            .movie-title-display { display: none; }
         }
 
         .center-controls { display: flex; align-items: center; gap: 2rem; }
@@ -151,6 +156,31 @@
 
         .time-display { color: white; font-size: 1rem; white-space: nowrap; order: 2; }
         .progress-bar-container { order: 1; }
+
+        /* ===== MOBILE PORTRAIT: progress bar above buttons ===== */
+        @media (max-width: 600px) and (orientation: portrait) {
+            .bottom-controls {
+                flex-wrap: wrap;
+                padding: 0.5rem 1rem 1.5rem;
+                gap: 0.5rem;
+            }
+            /* Full-width progress bar on its own row */
+            .progress-bar-container {
+                order: 0;
+                width: 100%;
+                flex-grow: 0;
+                margin: 0 0 2px;
+                height: 10px;
+            }
+            .progress-bar-container:hover .progress-bar-handle,
+            .progress-bar-container.dragging .progress-bar-handle {
+                width: 22px; height: 22px;
+            }
+            /* Time + volume + fullscreen on the row below */
+            .time-display { order: 1; font-size: 0.85rem; }
+            .volume-container { order: 2; }
+            #fullscreenButton { order: 3; margin-left: auto; }
+        }
 
         .spinner-border {
             width: 2rem; height: 2rem; color: white; border-width: 0.25em; vertical-align: middle;
@@ -1650,28 +1680,12 @@
 
         function generateQR(text, container) {
             container.innerHTML = '';
-            const size = 180;
+            const size = 200;
             const canvas = document.createElement('canvas');
             canvas.width = size; canvas.height = size;
+            canvas.style.borderRadius = '8px';
             container.appendChild(canvas);
-
-            // Use qrcode-generator lib loaded below
-            const qr = qrcode(0, 'M');
-            qr.addData(text);
-            qr.generate();
-            const moduleCount = qr.getModuleCount();
-            const ctx = canvas.getContext('2d');
-            const cell = size / moduleCount;
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, size, size);
-            ctx.fillStyle = '#000000';
-            for (let r = 0; r < moduleCount; r++) {
-                for (let c = 0; c < moduleCount; c++) {
-                    if (qr.isDark(r, c)) {
-                        ctx.fillRect(Math.floor(c * cell), Math.floor(r * cell), Math.ceil(cell), Math.ceil(cell));
-                    }
-                }
-            }
+            window.drawQRToCanvas(text, canvas);
         }
 
         btnShowQr.addEventListener('click', () => {
