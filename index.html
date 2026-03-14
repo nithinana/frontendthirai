@@ -2617,6 +2617,10 @@
 <button class="side-item" id="desk-filter" onclick="toggleFilterPopup()" aria-label="Filter" title="Filter">
     <i class="fas fa-sliders"></i>
   </button>
+
+  <button class="side-item" id="desk-watchparty" onclick="openWatchPartyPopup()" aria-label="Watch Party" title="Watch Party" style="display:none">
+    <i class="fas fa-user-friends"></i>
+  </button>
 <button class="side-item" id="desk-discover" onclick="switchTab('discover')" aria-label="Discover" title="Discover">
     <i class="fas fa-compass"></i>
   </button>
@@ -2755,6 +2759,10 @@
         </div>
         <div class="nav-item" onclick="switchTab('collections')" id="btm-collections">
             <i class="fas fa-layer-group"></i> <span>Collections</span>
+        </div>
+
+        <div class="nav-item visually-hidden" onclick="openWatchPartyPopup()" id="btm-watchparty">
+            <i class="fas fa-user-friends"></i> <span>Watch Party</span>
         </div>
 
 <div class="nav-item" onclick="toggleFilterPopup()" id="btm-filter">
@@ -7628,15 +7636,17 @@ function wireWatchPartySocket(){
     const list = document.getElementById('wpUserList');
     if(!list) return;
     const realUsers = (users || []).filter(u => u && u.name !== "Preview_User");
-    if(realUsers.length === 0){
-      list.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.55); font-size:0.82rem; padding:8px 0;">Waiting for others…</div>';
+    // Only show the host (first user)
+    const host = realUsers[0];
+    if(!host){
+      list.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.55); font-size:0.82rem; padding:8px 0;">Waiting for host…</div>';
     }else{
-      list.innerHTML = realUsers.map(u => `
+      list.innerHTML = `
         <div class="wp-user">
           <i class="fas fa-user-circle" aria-hidden="true"></i>
-          <span>${escapeHtml(u.name)} ${u.isHost ? '<b style="color:#ffd86b; font-size:0.72rem; margin-left:4px;">HOST</b>' : ''}</span>
+          <span>${escapeHtml(host.name)} <b style="color:#ffd86b; font-size:0.72rem; margin-left:4px;">HOST</b></span>
         </div>
-      `).join('');
+      `;
     }
   });
 }
@@ -7695,7 +7705,7 @@ function escapeHtml(str){
       const name = encodeURIComponent(nickname.value.trim());
       // ensure socket closes before redirect
       try{ if(wpSocket){ wpSocket.disconnect(); wpSocket = null; } }catch(e){}
-      window.location.href = `gurcher.html?join=${encodeURIComponent(wpCurrentRoomId)}&name=${name}`;
+      window.location.href = `watch.html?party=${encodeURIComponent(wpCurrentRoomId)}&name=${name}`;
     });
   }
 })();
@@ -8649,6 +8659,29 @@ function initDiscoverView(){
     /* Run immediately in case DOM is already ready */
     if(document.readyState!=='loading') updateSearchOptions();
 
+})();
+
+/* Watch Party visibility: show tab only when backend returns "Not Found" */
+(function(){
+  async function checkWatchPartyBackend(){
+    try {
+      const res = await fetch('https://watchpartybackend-b5a2.onrender.com/', { method: 'GET', cache: 'no-store' });
+      const text = await res.text();
+      if(text && text.trim() === 'Not Found'){
+        const btm = document.getElementById('btm-watchparty');
+        if(btm) btm.classList.remove('visually-hidden');
+        const desk = document.getElementById('desk-watchparty');
+        if(desk) desk.style.display = '';
+      }
+    } catch(e) {
+      /* Network error or CORS block — keep tab hidden */
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', checkWatchPartyBackend);
+  } else {
+    checkWatchPartyBackend();
+  }
 })();
 
 /* doSearch — handle 'anime' */
