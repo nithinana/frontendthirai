@@ -509,8 +509,9 @@
             .ls-name {
                 grid-column: 1; grid-row: 2; display: block;
             }
+            .ls-name .party-input { margin-bottom: 0 !important; }
             .ls-create {
-                grid-column: 1; grid-row: 3; display: block;
+                grid-column: 1; grid-row: 3; display: block; padding-top: 8px;
             }
 
             /* Right column: divider + code + join + cancel */
@@ -815,18 +816,21 @@
             </div>
 
             <!-- SCREEN 3: ACTIVE PARTY -->
-            <div class="party-screen" id="screenParty">
+            <div class="party-screen" id="screenParty" style="position:relative;">
+
+                <!-- Done button — always top-right of the card -->
+                <button class="party-copy-btn" id="btnCloseParty"
+                    style="position:absolute;top:0;right:0;border-radius:8px;padding:5px 12px;font-size:0.78rem;z-index:2;">Done</button>
 
                 <!-- LEFT COLUMN -->
                 <div class="ap-left">
                     <!-- Header row -->
-                    <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div style="display:flex;align-items:center;gap:6px;padding-right:52px;">
                         <div style="font-size:1.05rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px">
                             <i class="bi bi-people-fill" style="color:rgba(255,255,255,0.7)"></i>
                             Watch Party
                             <span class="party-role-pill" id="partyRoleLabel">Host</span>
                         </div>
-                        <button class="party-copy-btn ap-done-btn" id="btnCloseParty" style="border-radius:8px;padding:6px 12px;font-size:0.8rem">Done</button>
                     </div>
 
                     <!-- Live movie card -->
@@ -876,21 +880,23 @@
 
     <!-- QR Code overlay -->
     <div id="qrOverlay" style="display:none;position:absolute;inset:0;z-index:9500;
-        background:rgba(0,0,0,0.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
-        align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;box-sizing:border-box;">
-        <div style="background:rgba(255,255,255,0.06);border:1px solid #333;border-radius:20px;padding:24px 22px;
-            max-width:300px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
-            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Watch Party</div>
-            <div id="qrMovieTitle" style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-            <div id="qrRoomCode" style="font-family:monospace;font-size:1.6rem;font-weight:900;letter-spacing:0.18em;color:#fff;margin-bottom:16px;"></div>
-            <div id="qrCanvas" style="background:#fff;border-radius:12px;padding:10px;display:inline-block;line-height:0;margin-bottom:14px;"></div>
-            <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);line-height:1.4;">Scan to join on another device</div>
+        background:rgba(0,0,0,0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+        align-items:center;justify-content:center;padding:12px;box-sizing:border-box;overflow:auto;">
+        <div style="background:rgba(26,26,26,0.97);border:1px solid #333;border-radius:18px;
+            padding:18px 20px 16px;width:100%;max-width:260px;text-align:center;
+            box-shadow:0 20px 60px rgba(0,0,0,0.7);flex-shrink:0;position:relative;">
+            <!-- Close X in top-right -->
+            <button id="btnCloseQr" onclick="this.closest('#qrOverlay').style.display='none'"
+                style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.08);
+                border:1px solid #444;border-radius:8px;color:rgba(255,255,255,0.6);
+                font-size:0.75rem;font-weight:700;padding:3px 9px;cursor:pointer;
+                font-family:'Inter',sans-serif;letter-spacing:0.02em;line-height:1.4;">✕</button>
+            <div style="font-size:0.65rem;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Watch Party</div>
+            <div id="qrMovieTitle" style="font-size:0.88rem;font-weight:800;color:#fff;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+            <div id="qrRoomCode" style="font-family:monospace;font-size:1.4rem;font-weight:900;letter-spacing:0.2em;color:#fff;margin-bottom:12px;"></div>
+            <div id="qrCanvas" style="background:#fff;border-radius:10px;padding:8px;display:inline-block;line-height:0;margin-bottom:10px;max-width:100%;"></div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);line-height:1.4;">Scan to join on another device</div>
         </div>
-        <button id="btnCloseQr" style="background:rgba(255,255,255,0.08);border:1px solid #444;border-radius:12px;
-            color:rgba(255,255,255,0.7);font-size:0.9rem;font-weight:600;padding:10px 28px;cursor:pointer;
-            font-family:'Inter',sans-serif;transition:background 0.15s;">
-            Close
-        </button>
     </div>
 
     </div><!-- end .video-player-wrapper -->
@@ -1847,14 +1853,14 @@
         // ---- QR Code ----
         const qrOverlay = document.getElementById('qrOverlay');
         const btnShowQr = document.getElementById('btnShowQr');
-        const btnCloseQr = document.getElementById('btnCloseQr');
 
         function generateQR(text, container) {
             container.innerHTML = '';
-            const size = 200;
+            const size = 160;
             const canvas = document.createElement('canvas');
             canvas.width = size; canvas.height = size;
-            canvas.style.borderRadius = '8px';
+            canvas.style.borderRadius = '6px';
+            canvas.style.maxWidth = '100%';
             container.appendChild(canvas);
             window.drawQRToCanvas(text, canvas);
         }
@@ -1868,7 +1874,6 @@
             qrOverlay.style.display = 'flex';
         });
 
-        btnCloseQr.addEventListener('click', () => { qrOverlay.style.display = 'none'; });
         qrOverlay.addEventListener('click', (e) => { if (e.target === qrOverlay) qrOverlay.style.display = 'none'; });
 
         partyModalBackdrop.addEventListener('click', (e) => {
