@@ -108,8 +108,11 @@
         .custom-controls-overlay.visible { opacity: 1; pointer-events: auto; }
 
         .top-controls {
-            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            width: 100%; display: flex; align-items: center;
             padding: 1.5rem 1.5rem 1rem; box-sizing: border-box;
+        }
+        .top-controls-right {
+            display: flex; align-items: center; gap: 0; margin-left: auto;
         }
 
         .movie-title-display {
@@ -154,7 +157,15 @@
         .progress-bar-container:hover .progress-bar-handle,
         .progress-bar-container.dragging .progress-bar-handle { display: block; transform: translate(-50%,-50%) scale(1.1); }
 
-        .time-display { color: white; font-size: 1rem; white-space: nowrap; order: 2; }
+        .time-display {
+            color: white; font-size: 1rem; white-space: nowrap; order: 2;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+            user-select: none; -webkit-user-select: none;
+            padding: 4px 6px; border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .time-display:hover { background: rgba(255,255,255,0.1); }
+        .time-display:active { background: rgba(255,255,255,0.2); }
         .progress-bar-container { order: 1; }
 
         /* ===== MOBILE PORTRAIT: progress bar above buttons ===== */
@@ -563,20 +574,22 @@
                     <i class="bi bi-arrow-left"></i>
                 </button>
                 <div class="movie-title-display" id="movieTitleDisplay">Thirai</div>
-                <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button" style="display: none;">
-                    <i class="bi bi-download"></i>
-                </a>
-                <button id="magnificationButton" class="top-button">
-                    <i class="bi bi-zoom-in"></i>
-                </button>
-                <!-- Watch Party Button -->
-                <button id="partyButton" class="top-button" title="Watch Party">
-                    <i class="bi bi-people-fill"></i>
-                    <span id="partyBadge"></span>
-                </button>
-                <button id="castButton" class="top-button" style="display: none;">
-                    <i class="bi bi-cast"></i>
-                </button>
+                <div class="top-controls-right">
+                    <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button" style="display: none;">
+                        <i class="bi bi-download"></i>
+                    </a>
+                    <button id="magnificationButton" class="top-button">
+                        <i class="bi bi-zoom-in"></i>
+                    </button>
+                    <!-- Watch Party Button -->
+                    <button id="partyButton" class="top-button" title="Watch Party">
+                        <i class="bi bi-people-fill"></i>
+                        <span id="partyBadge"></span>
+                    </button>
+                    <button id="castButton" class="top-button" style="display: none;">
+                        <i class="bi bi-cast"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="center-controls">
@@ -599,13 +612,17 @@
                     <div class="progress-bar" id="progressBar"></div>
                     <div class="progress-bar-handle" id="progressBarHandle"></div>
                 </div>
-                <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+                <span class="time-display" id="timeDisplay" title="Tap to change format">00:00 / 00:00</span>
                 <div class="volume-container">
                     <button id="volumeButton">
                         <i class="bi bi-volume-up-fill"></i>
                     </button>
                     <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1">
                 </div>
+                <!-- zoom moved here on portrait mobile -->
+                <button id="magnificationButtonBottom" class="control-button" style="display:none;" title="Zoom">
+                    <i class="bi bi-zoom-in"></i>
+                </button>
                 <button id="fullscreenButton" class="control-button">
                     <i class="bi bi-arrows-fullscreen"></i>
                 </button>
@@ -819,16 +836,46 @@
             localStorage.setItem(CACHE_KEY, JSON.stringify(history));
         }
 
+        // ── Time display format cycling ──────────────────────────────────────
+        // Modes: 0 = elapsed / total  1 = remaining  2 = elapsed only
+        let timeFormatMode = 0;
+
         function formatTime(seconds) {
             if (isNaN(seconds) || seconds < 0) return "00:00";
             seconds = Math.floor(seconds);
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
-            const remainingSeconds = seconds % 60;
-            const pad = (num) => String(num).padStart(2, '0');
-            if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
-            return `${pad(minutes)}:${pad(remainingSeconds)}`;
+            const secs = seconds % 60;
+            const pad = (n) => String(n).padStart(2, '0');
+            if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+            return `${pad(minutes)}:${pad(secs)}`;
         }
+
+        function formatTimeDisplay(current, duration) {
+            const isValid = !isNaN(duration) && duration > 0;
+            switch (timeFormatMode) {
+                case 0: // elapsed / total
+                    return `${formatTime(current)} / ${formatTime(isValid ? duration : 0)}`;
+                case 1: { // -remaining
+                    const rem = isValid ? Math.max(0, duration - current) : 0;
+                    return `-${formatTime(rem)}`;
+                }
+                case 2: // elapsed only
+                    return formatTime(current);
+                default:
+                    return formatTime(current);
+            }
+        }
+
+        timeDisplay.addEventListener('click', () => {
+            timeFormatMode = (timeFormatMode + 1) % 3;
+            updateProgressBar();
+        });
+        timeDisplay.addEventListener('touchend', (e) => {
+            e.preventDefault(); // stop the click from double-firing on mobile
+            timeFormatMode = (timeFormatMode + 1) % 3;
+            updateProgressBar();
+        });
 
         function showControls() {
             customControlsOverlay.classList.add('visible');
@@ -1012,7 +1059,7 @@
                 progressBar.style.width = `${progress}%`;
                 progressBarHandle.style.left = `${progress}%`;
             }
-            timeDisplay.textContent = `${formatTime(moviePlayer.currentTime)} / ${formatTime(moviePlayer.duration)}`;
+            timeDisplay.textContent = formatTimeDisplay(moviePlayer.currentTime, moviePlayer.duration);
         }
 
         progressBarContainer.addEventListener('mousedown', (e) => {
@@ -1064,23 +1111,30 @@
             }
         });
 
-        magnificationButton.addEventListener('click', () => {
+        const magnificationButtonBottom = document.getElementById('magnificationButtonBottom');
+
+        function cycleZoom() {
+            const topIcon = magnificationButton.querySelector('i');
+            const botIcon = magnificationButtonBottom ? magnificationButtonBottom.querySelector('i') : null;
             switch (zoomLevel) {
                 case 1:
                     moviePlayer.style.transform = 'scale(0.9)';
-                    magnificationIcon.classList.remove('bi-zoom-in', 'bi-search'); magnificationIcon.classList.add('bi-zoom-out');
+                    [topIcon, botIcon].forEach(ic => { if(ic) { ic.classList.remove('bi-zoom-in','bi-search'); ic.classList.add('bi-zoom-out'); }});
                     zoomLevel = 0; break;
                 case 0:
                     moviePlayer.style.transform = 'scale(1.2)';
-                    magnificationIcon.classList.remove('bi-zoom-out'); magnificationIcon.classList.add('bi-search');
+                    [topIcon, botIcon].forEach(ic => { if(ic) { ic.classList.remove('bi-zoom-out'); ic.classList.add('bi-search'); }});
                     zoomLevel = 2; break;
                 case 2:
                     moviePlayer.style.transform = 'scale(1)';
-                    magnificationIcon.classList.remove('bi-search'); magnificationIcon.classList.add('bi-zoom-in');
+                    [topIcon, botIcon].forEach(ic => { if(ic) { ic.classList.remove('bi-search'); ic.classList.add('bi-zoom-in'); }});
                     zoomLevel = 1; break;
             }
             showControls();
-        });
+        }
+
+        magnificationButton.addEventListener('click', cycleZoom);
+        if (magnificationButtonBottom) magnificationButtonBottom.addEventListener('click', cycleZoom);
 
         if (window.WebKitPlaybackTargetAvailabilityEvent) {
             moviePlayer.addEventListener('webkitplaybacktargetavailabilitychanged', function(event) {
