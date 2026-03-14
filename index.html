@@ -2618,7 +2618,7 @@
     <i class="fas fa-sliders"></i>
   </button>
 
-  <button class="side-item" id="desk-watchparty" onclick="openWatchPartyPopup()" aria-label="Watch Party" title="Watch Party" style="display:none">
+  <button class="side-item" id="desk-watchparty" onclick="openWatchPartyPopup()" aria-label="Watch Party" title="Watch Party">
     <i class="fas fa-user-friends"></i>
   </button>
 <button class="side-item" id="desk-discover" onclick="switchTab('discover')" aria-label="Discover" title="Discover">
@@ -2761,7 +2761,7 @@
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
 
-        <div class="nav-item visually-hidden" onclick="openWatchPartyPopup()" id="btm-watchparty">
+        <div class="nav-item" onclick="openWatchPartyPopup()" id="btm-watchparty">
             <i class="fas fa-user-friends"></i> <span>Watch Party</span>
         </div>
 
@@ -2886,7 +2886,7 @@
           </div>
 
           <button class="wp-primary" id="wpCheckBtn" disabled>Search</button>
-          <div class="wp-note">Currently in development. Requires stable internet.</div>
+          <div class="wp-note">Note: Feature not publicly available yet. DM for more info.</div>
           <div class="wp-error" id="wpError">Invalid or expired room code.</div>
         </div>
 
@@ -8659,29 +8659,6 @@ function initDiscoverView(){
     /* Run immediately in case DOM is already ready */
     if(document.readyState!=='loading') updateSearchOptions();
 
-})();
-
-/* Watch Party visibility: show tab only when backend returns "Not Found" */
-(function(){
-  async function checkWatchPartyBackend(){
-    try {
-      const res = await fetch('https://watchpartybackend-b5a2.onrender.com/', { method: 'GET', cache: 'no-store' });
-      const text = await res.text();
-      if(text && text.trim() === 'Not Found'){
-        const btm = document.getElementById('btm-watchparty');
-        if(btm) btm.classList.remove('visually-hidden');
-        const desk = document.getElementById('desk-watchparty');
-        if(desk) desk.style.display = '';
-      }
-    } catch(e) {
-      /* Network error or CORS block — keep tab hidden */
-    }
-  }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', checkWatchPartyBackend);
-  } else {
-    checkWatchPartyBackend();
-  }
 })();
 
 /* doSearch — handle 'anime' */
