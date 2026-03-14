@@ -432,24 +432,49 @@
 }
 .lang-select {
     flex: 1;
-    max-width: 90px; /* Limits language box width */
-    background: #1c1c1c; 
-    border: none; 
-    color: white; 
-    padding: 10px 5px;
-    border-radius: 8px; 
-    font-size: 0.85rem; 
-    text-align: center;
+    max-width: 110px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: #fff;
+    padding: 13px 10px 13px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.45)' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+.lang-select:focus {
+    border-color: rgba(255,255,255,0.22);
+    background-color: rgba(255,255,255,0.09);
+    outline: none;
+}
+.lang-select option {
+    background: #1c1c1c;
+    color: #fff;
 }
 
 .btn-search-trigger {
-    flex-shrink: 0; /* IMPORTANT: Prevents the button from shrinking/hiding */
-    background: var(--accent); 
-    color: white; 
-    border: none; 
-    border-radius: 8px;
-    padding: 12px 15px; 
-    font-size: 1rem; 
+    flex-shrink: 0;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 17px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 140ms ease, transform 100ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.btn-search-trigger:active {
+    transform: scale(0.96);
+    background: #c8070f;
 }
         
 
@@ -590,6 +615,33 @@
             margin-bottom: 10px;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* ── Filter Language Pills ── */
+        .lang-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 4px;
+        }
+        .lang-pill {
+            padding: 6px 13px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.65);
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease, transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .lang-pill:active { transform: scale(0.96); }
+        .lang-pill.active {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.28);
+            color: #fff;
         }
 
         .genre-grid{
@@ -2891,10 +2943,9 @@
                     <option value="marathi">Marathi</option>
                     <option value="punjabi">Punjabi</option>
                     <option value="anime">Anime</option>
-                    <option value="tmdb_movies">TMDB Movies</option>
-                    <option value="tmdb_tv">TMDB TV Shows</option>
-
-</select>
+                    <option value="tmdb_movies">TMDB Films</option>
+                    <option value="tmdb_tv">TMDB TV</option>
+                </select>
                 <button class="btn-search-trigger" onclick="doSearch(1, true)">
                     <i class="fas fa-search"></i>
                 </button>
@@ -3107,16 +3158,17 @@
 
             <div class="top-controls">
                 <span class="filter-section-title">Language</span>
-                <select id="filter-ln">
-                    <option value="tamil" selected>Tamil</option>
-                    <option value="hindi">Hindi</option>
-                    <option value="telugu">Telugu</option>
-                    <option value="malayalam">Malayalam</option>
-                    <option value="kannada">Kannada</option>
-                    <option value="bengali">Bengali</option>
-                    <option value="marathi">Marathi</option>
-                    <option value="punjabi">Punjabi</option>
-                </select>
+                <input type="hidden" id="filter-ln" value="tamil">
+                <div class="lang-pills" id="filter-lang-pills">
+                    <button class="lang-pill active" data-val="tamil"   onclick="selectFilterLang(this)">Tamil</button>
+                    <button class="lang-pill"         data-val="hindi"    onclick="selectFilterLang(this)">Hindi</button>
+                    <button class="lang-pill"         data-val="telugu"   onclick="selectFilterLang(this)">Telugu</button>
+                    <button class="lang-pill"         data-val="malayalam" onclick="selectFilterLang(this)">Malayalam</button>
+                    <button class="lang-pill"         data-val="kannada"  onclick="selectFilterLang(this)">Kannada</button>
+                    <button class="lang-pill"         data-val="bengali"  onclick="selectFilterLang(this)">Bengali</button>
+                    <button class="lang-pill"         data-val="marathi"  onclick="selectFilterLang(this)">Marathi</button>
+                    <button class="lang-pill"         data-val="punjabi"  onclick="selectFilterLang(this)">Punjabi</button>
+                </div>
             </div>
 
             <span class="filter-section-title">Quick Genres</span>
@@ -3284,6 +3336,12 @@
             } else if (action === 'discover') {
                 setTimeout(() => switchTab('discover'), 60);
             }
+        }
+
+        function selectFilterLang(btn) {
+            document.querySelectorAll('#filter-lang-pills .lang-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('filter-ln').value = btn.dataset.val;
         }
 
         function toggleFilterPopup() {
