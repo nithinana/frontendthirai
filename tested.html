@@ -778,6 +778,9 @@
             display: flex; justify-content: space-around; align-items: center;
             background-color: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255,255,255,0.05); z-index: 200;
+            transform: translateZ(0);
+            will-change: transform;
+            -webkit-backface-visibility: hidden;
         }
 .bottom-nav .nav-item {
     display: flex;
@@ -869,14 +872,14 @@
     text-transform: uppercase;
     letter-spacing: 1.4px;
     color: rgba(255, 255, 255, 0.38);
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 /* 3-icon row */
 .more-menu-icon-grid {
     display: flex;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 24px;
 }
 
 .more-menu-icon-btn {
@@ -2923,7 +2926,7 @@
             <i class="fas fa-search"></i> <span>Search</span>
         </div>
         <div class="nav-item" onclick="toggleMoreMenu()" id="btm-more">
-            <i class="fas fa-grid-2" id="btm-more-icon"></i> <span>More</span>
+            <i class="fas fa-border-all" id="btm-more-icon"></i> <span>More</span>
         </div>
         <div class="nav-item visually-hidden" id="btm-install">
             <i class="fas fa-download"></i> <span>Install</span>
@@ -2961,6 +2964,7 @@
             </div>
 
             <!-- Discover Content wide button -->
+            <div class="more-menu-section-label" style="margin-top: 4px;">Explore</div>
             <div class="more-menu-discover-btn" onclick="moreMenuAction('discover')">
                 <i class="fas fa-compass"></i>
                 <span>Discover Content</span>
@@ -3258,12 +3262,14 @@
             moreMenuOpen = true;
             document.getElementById('moreMenuOverlay').classList.add('active');
             document.getElementById('btm-more').classList.add('menu-open');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeMoreMenu() {
             moreMenuOpen = false;
             document.getElementById('moreMenuOverlay').classList.remove('active');
             document.getElementById('btm-more').classList.remove('menu-open');
+            document.body.style.overflow = '';
         }
 
         function closeMoreMenuOnOutside(event) {
