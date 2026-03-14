@@ -50,6 +50,7 @@
 
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
     <meta name="screen-orientation" content="landscape">
     <link rel="manifest" href="/manifest.json">
@@ -416,6 +417,37 @@
         .party-screen { display: none; }
         .party-screen.active { display: block; }
 
+        /* ===== MOBILE LANDSCAPE: compact scrollable centered card ===== */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .party-modal-backdrop {
+                align-items: center;
+                padding: 8px 16px;
+            }
+            .party-modal {
+                width: 100%;
+                max-width: 420px;
+                max-height: 92vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 14px 16px 18px;
+                border-radius: 16px;
+                transform: translateY(10px);
+            }
+            .party-modal-backdrop.open .party-modal { transform: translateY(0); }
+
+            .party-modal-icon { display: none; }
+            .party-modal h2 { font-size: 0.95rem; margin-bottom: 2px; }
+            .party-modal .party-subtitle { font-size: 0.75rem; margin-bottom: 10px; }
+            .party-label { font-size: 0.7rem; margin-bottom: 4px; }
+            .party-input { padding: 9px 11px; font-size: 0.85rem; border-radius: 10px; }
+            .party-btn { padding: 10px; font-size: 0.85rem; border-radius: 10px; }
+            .party-divider { margin: 8px 0; }
+            .party-users-list { max-height: 70px; }
+            .party-movie-card { padding: 7px 9px; margin-bottom: 10px; gap: 9px; }
+            .party-movie-poster { width: 32px; height: 44px; }
+            .party-share-row { margin-bottom: 10px !important; }
+        }
+
         /* ===== MOBILE PORTRAIT: bottom-sheet modal ===== */
         @media (max-width: 600px) and (orientation: portrait) {
 
@@ -679,6 +711,7 @@
                 <div class="party-share-row" style="margin-bottom:16px">
                     <input class="party-share-input" id="partyShareLink" readonly>
                     <button class="party-copy-btn" id="btnCopyLink"><i class="bi bi-clipboard"></i> Copy</button>
+                    <button class="party-copy-btn" id="btnShowQr" title="Show QR code" style="padding:10px 12px;"><i class="bi bi-qr-code"></i></button>
                 </div>
 
                 <button class="party-btn party-btn-danger" id="btnLeaveParty">
@@ -689,6 +722,26 @@
 
         </div>
     </div>
+
+    <!-- QR Code overlay -->
+    <div id="qrOverlay" style="display:none;position:absolute;inset:0;z-index:9500;
+        background:rgba(0,0,0,0.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+        align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;box-sizing:border-box;">
+        <div style="background:rgba(255,255,255,0.06);border:1px solid #333;border-radius:20px;padding:24px 22px;
+            max-width:300px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Watch Party</div>
+            <div id="qrMovieTitle" style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+            <div id="qrRoomCode" style="font-family:monospace;font-size:1.6rem;font-weight:900;letter-spacing:0.18em;color:#fff;margin-bottom:16px;"></div>
+            <div id="qrCanvas" style="background:#fff;border-radius:12px;padding:10px;display:inline-block;line-height:0;margin-bottom:14px;"></div>
+            <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);line-height:1.4;">Scan to join on another device</div>
+        </div>
+        <button id="btnCloseQr" style="background:rgba(255,255,255,0.08);border:1px solid #444;border-radius:12px;
+            color:rgba(255,255,255,0.7);font-size:0.9rem;font-weight:600;padding:10px 28px;cursor:pointer;
+            font-family:'Inter',sans-serif;transition:background 0.15s;">
+            Close
+        </button>
+    </div>
+
     </div><!-- end .video-player-wrapper -->
 
     <script>
@@ -1590,10 +1643,53 @@
             }
         });
 
+        // ---- QR Code ----
+        const qrOverlay = document.getElementById('qrOverlay');
+        const btnShowQr = document.getElementById('btnShowQr');
+        const btnCloseQr = document.getElementById('btnCloseQr');
+
+        function generateQR(text, container) {
+            container.innerHTML = '';
+            const size = 180;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            container.appendChild(canvas);
+
+            // Use qrcode-generator lib loaded below
+            const qr = qrcode(0, 'M');
+            qr.addData(text);
+            qr.generate();
+            const moduleCount = qr.getModuleCount();
+            const ctx = canvas.getContext('2d');
+            const cell = size / moduleCount;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#000000';
+            for (let r = 0; r < moduleCount; r++) {
+                for (let c = 0; c < moduleCount; c++) {
+                    if (qr.isDark(r, c)) {
+                        ctx.fillRect(Math.floor(c * cell), Math.floor(r * cell), Math.ceil(cell), Math.ceil(cell));
+                    }
+                }
+            }
+        }
+
+        btnShowQr.addEventListener('click', () => {
+            const link = partyShareLink.value;
+            if (!link) return;
+            document.getElementById('qrMovieTitle').textContent = movieTitleDisplay.textContent || 'Watch Party';
+            document.getElementById('qrRoomCode').textContent = party.roomId || '';
+            generateQR(link, document.getElementById('qrCanvas'));
+            qrOverlay.style.display = 'flex';
+        });
+
+        btnCloseQr.addEventListener('click', () => { qrOverlay.style.display = 'none'; });
+        qrOverlay.addEventListener('click', (e) => { if (e.target === qrOverlay) qrOverlay.style.display = 'none'; });
+
         partyModalBackdrop.addEventListener('click', (e) => {
             if (e.target !== partyModalBackdrop) return;
-            if (party.roomId) { showScreen('party'); refreshCardOnOpen(); }
-            else { moviePlayer.play().catch(()=>{}); closeModal(); }
+            moviePlayer.play().catch(()=>{});
+            closeModal();
         });
 
         // Enter key shortcuts
