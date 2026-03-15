@@ -19,6 +19,24 @@
 </script>
 	
     <meta charset="UTF-8">
+<script>
+  // Screen Wake Lock — keeps the screen on while the page is visible
+  (function () {
+    let wakeLock = null;
+    async function requestWakeLock() {
+      if (!('wakeLock' in navigator)) return;
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', requestWakeLock);
+    } else {
+      requestWakeLock();
+    }
+  })();
+</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<meta name="google" content="notranslate">
     <title>Thirai</title>
@@ -10871,9 +10889,6 @@ async function renderDownloadsView(){
         <div class="dl-empty-icon"><i class="fas fa-arrow-down-to-line"></i></div>
         <div class="dl-empty-title">Films you download appear here</div>
         <div class="dl-empty-sub">Save films to watch offline — no internet needed.</div>
-        <button class="dl-find-btn" onclick="openDlFind()">
-          <i class="fas fa-search"></i> Find Something to Download
-        </button>
       </div>`;
     return;
   }
@@ -10884,9 +10899,6 @@ async function renderDownloadsView(){
     <div class="dl-list" id="dlCardList">`;
   allMeta.forEach(meta=>{html+=buildCardHtml(meta);});
   html+=`</div>
-    <button class="dl-find-btn" onclick="openDlFind()" style="margin:0 0 16px;">
-      <i class="fas fa-search"></i> Find Something to Download
-    </button>
   </div>`;
   view.innerHTML=html;
 
