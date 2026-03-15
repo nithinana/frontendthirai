@@ -2496,6 +2496,10 @@
                 refreshBadge();
                 renderStatusItem(id, meta);
 
+                // Write to IDB immediately so if the tab closes mid-download,
+                // index.html will find it as 'interrupted' and offer to resume.
+                try { if (!_db) await openDB(); await dbPut(S_META, { ...meta, status: 'downloading' }); } catch(e) {}
+
                 try {
                     const proxyUrl = `${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
                     const resp = await fetch(proxyUrl, { signal: ctrl.signal });
