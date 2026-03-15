@@ -10996,129 +10996,28 @@ function initDiscoverView(){
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Rich Offline Player ── */
+/* Offline player */
 #dlPlayerBackdrop {
   position: fixed; inset: 0; z-index: 5000; background: #000;
-  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
 }
 #dlPlayerBackdrop.open { opacity: 1; pointer-events: auto; }
-
-/* Internal player wrapper fills the backdrop */
-#dlPlayerBackdrop .off-video-wrapper {
-  position: relative; width: 100%; height: 100%;
-  display: flex; justify-content: center; align-items: center; background: #000;
-  overflow: hidden;
+#dlOfflineVideo { width: 100%; max-width: 920px; max-height: 86vh; border-radius: 12px; background: #000; outline: none; }
+.dl-player-title {
+  margin-top: 12px; font-size: 0.88rem; font-weight: 700; color: rgba(255,255,255,0.6);
+  text-align: center; max-width: 920px; width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-#offMoviePlayer {
-  transform: scale(1); transform-origin: center center;
-  transition: transform 0.3s ease-in-out;
-  position: relative; width: 100%; height: 100%; object-fit: contain; display: block;
-}
-#dlPlayerBackdrop .off-video-wrapper video { width: 100%; height: 100%; object-fit: cover; display: block; }
-#offMoviePlayer::-webkit-media-controls { display: none !important; }
-#offMoviePlayer::-webkit-media-controls-enclosure { display: none !important; }
-
-.off-controls-overlay {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-  background: rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.3s ease; z-index: 10; pointer-events: none;
-}
-.off-controls-overlay.visible { opacity: 1; pointer-events: auto; }
-
-.off-top-controls {
-  width: 100%; display: flex; align-items: center;
-  padding: 1.5rem 1.5rem 1rem; box-sizing: border-box;
-}
-.off-top-controls-right { display: flex; align-items: center; gap: 0; margin-left: auto; }
-
-.off-movie-title {
-  color: white; font-size: 1.2rem; font-weight: bold; text-align: center;
-  flex-grow: 1; margin: 0 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  line-height: 1; display: flex; align-items: center; justify-content: center; height: 1.5rem; min-width: 0;
-}
-@media (max-width: 480px) { .off-movie-title { display: none; } }
-
-.off-center-controls { display: flex; align-items: center; gap: 2rem; }
-
-.off-bottom-controls {
-  width: 100%; padding: 1rem 1.5rem 2rem; box-sizing: border-box;
-  display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 1rem;
-}
-
-.off-ctrl-btn {
-  background: rgba(255,255,255,0.2); border: none; color: white; font-size: 2.2rem;
-  cursor: pointer; padding: 0.8rem; border-radius: 50%;
+.dl-player-close {
+  position: fixed; top: 16px; left: 16px;
+  background: rgba(255,255,255,0.1); border: none; color: #fff;
+  width: 42px; height: 42px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3); -webkit-tap-highlight-color: transparent;
-}
-.off-ctrl-btn:hover:not(:disabled) { background: rgba(255,255,255,0.3); transform: scale(1.05); }
-.off-ctrl-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-#offPlayPauseBtn { font-size: 3.5rem; padding: 1.2rem; }
-
-.off-top-btn {
-  background: transparent; border: none; color: white; font-size: 1.5rem;
-  padding: 0.7rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: background 0.3s ease;
-  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-size: 1.2rem; cursor: pointer; transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.off-top-btn:hover { background: rgba(255,255,255,0.1); }
-
-.off-progress-wrap {
-  flex-grow: 1; height: 8px; background-color: rgba(255,255,255,0.3);
-  border-radius: 10px; cursor: grab; position: relative; margin: 0 1rem; order: 1;
-}
-.off-progress-bar { height: 100%; width: 0%; background-color: #0d6efd; border-radius: 10px; transition: width 0.1s linear; }
-.off-progress-handle {
-  position: absolute; top: 50%; left: 0%; transform: translate(-50%,-50%);
-  width: 20px; height: 20px; background-color: white; border-radius: 50%;
-  display: none; box-shadow: 0 0 8px rgba(0,0,0,0.6); transition: transform 0.1s ease;
-}
-.off-progress-wrap:hover .off-progress-handle,
-.off-progress-wrap.dragging .off-progress-handle { display: block; transform: translate(-50%,-50%) scale(1.1); }
-
-.off-time-display {
-  color: white; font-size: 1rem; white-space: nowrap; order: 2;
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  user-select: none; -webkit-user-select: none;
-  padding: 4px 6px; border-radius: 6px; transition: background 0.15s;
-}
-.off-time-display:hover { background: rgba(255,255,255,0.1); }
-.off-time-display:active { background: rgba(255,255,255,0.2); }
-
-.off-vol-container { display: flex; align-items: center; order: 4; position: relative; }
-#offVolumeBtn {
-  background: transparent; box-shadow: none; padding: 0.5rem; font-size: 1.8rem;
-  color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%;
-}
-#offVolumeBtn:hover { background: rgba(255,255,255,0.1); transform: scale(1.1); }
-.off-vol-slider {
-  -webkit-appearance: none; appearance: none; width: 0px; height: 4px;
-  background: rgba(255,255,255,0.3); border-radius: 2px; outline: none;
-  opacity: 0; transition: width 0.3s ease, opacity 0.3s ease; cursor: pointer; margin-left: 0.5rem;
-}
-.off-vol-container:hover .off-vol-slider, .off-vol-slider:active, .off-vol-slider:focus { width: 70px; opacity: 1; }
-.off-vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; cursor: pointer; }
-.off-vol-slider::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: white; cursor: pointer; border: none; }
-
-#offFullscreenBtn { background: transparent; box-shadow: none; padding: 0.5rem; font-size: 1.8rem; order: 10; }
-#offFullscreenBtn:hover:not(:disabled) { background: rgba(255,255,255,0.1); transform: scale(1.1); }
-
-.off-spinner {
-  width: 2rem; height: 2rem; color: white; border-width: 0.25em; vertical-align: middle;
-  border-radius: 50%; animation: off-spin .75s linear infinite;
-  border: 0.25em solid white; border-right-color: transparent; display: inline-block;
-}
-@keyframes off-spin { to { transform: rotate(360deg); } }
-
-/* Mobile portrait: progress bar on own row */
-@media (max-width: 600px) and (orientation: portrait) {
-  .off-bottom-controls { flex-wrap: wrap; padding: 0.5rem 1rem 1.5rem; gap: 0.5rem; }
-  .off-progress-wrap { order: 0; width: 100%; flex-grow: 0; margin: 0 0 2px; height: 10px; }
-  .off-time-display { order: 1; font-size: 0.85rem; }
-  .off-vol-container { order: 2; }
-  #offFullscreenBtn { order: 3; margin-left: auto; }
-}
+.dl-player-close:hover { background: rgba(255,255,255,0.18); }
 
 /* Toast */
 #dlToast {
@@ -11161,61 +11060,12 @@ function initDiscoverView(){
   </div>
 </div>
 
-<!-- ══════════ RICH OFFLINE PLAYER ══════════ -->
+<!-- Offline player -->
 <div id="dlPlayerBackdrop">
-  <div class="off-video-wrapper" id="offVideoWrapper">
-    <video id="offMoviePlayer" playsinline webkit-playsinline preload="auto"></video>
-
-    <div class="off-controls-overlay" id="offControlsOverlay">
-
-      <!-- Top bar -->
-      <div class="off-top-controls">
-        <button id="offBackBtn" class="off-top-btn" title="Close">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="off-movie-title" id="offMovieTitle">Thirai</div>
-        <div class="off-top-controls-right">
-          <button id="offZoomBtn" class="off-top-btn" title="Zoom">
-            <i class="fas fa-search-plus" id="offZoomIcon"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Center controls -->
-      <div class="off-center-controls">
-        <button id="offRewindBtn" class="off-ctrl-btn" title="Rewind 10s">
-          <i class="fas fa-rotate-left"></i>
-        </button>
-        <button id="offPlayPauseBtn" class="off-ctrl-btn" title="Play/Pause">
-          <i class="fas fa-play" id="offPlayIcon"></i>
-          <div class="off-spinner" style="display:none;" id="offSpinner"></div>
-        </button>
-        <button id="offForwardBtn" class="off-ctrl-btn" title="Forward 10s">
-          <i class="fas fa-rotate-right"></i>
-        </button>
-      </div>
-
-      <!-- Bottom bar -->
-      <div class="off-bottom-controls">
-        <div class="off-progress-wrap" id="offProgressWrap">
-          <div class="off-progress-bar" id="offProgressBar"></div>
-          <div class="off-progress-handle" id="offProgressHandle"></div>
-        </div>
-        <span class="off-time-display" id="offTimeDisplay" title="Tap to change format">00:00 / 00:00</span>
-        <div class="off-vol-container">
-          <button id="offVolumeBtn">
-            <i class="fas fa-volume-up" id="offVolIcon"></i>
-          </button>
-          <input type="range" id="offVolSlider" class="off-vol-slider" min="0" max="1" step="0.05" value="1">
-        </div>
-        <button id="offFullscreenBtn" class="off-ctrl-btn" title="Fullscreen">
-          <i class="fas fa-expand" id="offFsIcon"></i>
-        </button>
-      </div>
-
-    </div><!-- /off-controls-overlay -->
-  </div><!-- /off-video-wrapper -->
-</div><!-- /dlPlayerBackdrop -->
+  <button class="dl-player-close" onclick="closeDlPlayer()"><i class="fas fa-times"></i></button>
+  <video id="dlOfflineVideo" controls playsinline></video>
+  <div class="dl-player-title" id="dlPlayerTitle"></div>
+</div>
 
 <!-- Toast -->
 <div id="dlToast"></div>
@@ -11513,16 +11363,19 @@ window.dlPlay=async function(id){
   if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
   const url=URL.createObjectURL(blobRec.blob);
   blobUrls[id]=url;
-  // Wire into rich offline player
-  if(typeof window._offPlayerLoad === 'function'){
-    window._offPlayerLoad(url, meta?.title||'');
-  }
+  const vid=document.getElementById('dlOfflineVideo');
+  const titleEl=document.getElementById('dlPlayerTitle');
+  if(titleEl) titleEl.textContent=meta?.title||'';
+  vid.src=url;
+  vid.load();
+  vid.play().catch(()=>{});
   document.getElementById('dlPlayerBackdrop').classList.add('open');
   document.body.style.overflow='hidden';
 };
 
 window.closeDlPlayer=function(){
-  if(typeof window._offPlayerStop === 'function') window._offPlayerStop();
+  const vid=document.getElementById('dlOfflineVideo');
+  vid.pause(); vid.src='';
   document.getElementById('dlPlayerBackdrop').classList.remove('open');
   document.body.style.overflow='';
 };
@@ -11713,254 +11566,6 @@ window.dlRetry = async function(id) {
     });
   }
 })();
-
-})();
-</script>
-
-<!-- ══════════ RICH OFFLINE PLAYER LOGIC ══════════ -->
-<script>
-(function(){
-  'use strict';
-
-  const vid        = document.getElementById('offMoviePlayer');
-  const overlay    = document.getElementById('offControlsOverlay');
-  const playBtn    = document.getElementById('offPlayPauseBtn');
-  const playIcon   = document.getElementById('offPlayIcon');
-  const spinner    = document.getElementById('offSpinner');
-  const rewindBtn  = document.getElementById('offRewindBtn');
-  const fwdBtn     = document.getElementById('offForwardBtn');
-  const progressWrap   = document.getElementById('offProgressWrap');
-  const progressBar    = document.getElementById('offProgressBar');
-  const progressHandle = document.getElementById('offProgressHandle');
-  const timeEl     = document.getElementById('offTimeDisplay');
-  const backBtn    = document.getElementById('offBackBtn');
-  const fsBtn      = document.getElementById('offFullscreenBtn');
-  const fsIcon     = document.getElementById('offFsIcon');
-  const volBtn     = document.getElementById('offVolumeBtn');
-  const volIcon    = document.getElementById('offVolIcon');
-  const volSlider  = document.getElementById('offVolSlider');
-  const titleEl    = document.getElementById('offMovieTitle');
-  const zoomBtn    = document.getElementById('offZoomBtn');
-  const zoomIcon   = document.getElementById('offZoomIcon');
-  const wrapper    = document.getElementById('offVideoWrapper');
-
-  if (!vid) return; // safety guard
-
-  let isDragging = false;
-  let controlsTimer = null;
-  let lastTap = 0;
-  let timeMode = 0; // 0=elapsed/total  1=remaining  2=elapsed
-  let zoomLevel = 1;
-  let lastVol = 1;
-  const SEEK = 10;
-  const FADE = 7000;
-
-  // ── Exposed API so dlPlay/closeDlPlayer can call us ──────────
-  window._offPlayerLoad = function(src, title) {
-    vid.src = src;
-    vid.load();
-    titleEl.textContent = title || '';
-    setSpinner(true);
-    vid.play().catch(() => {});
-    showControls();
-  };
-
-  window._offPlayerStop = function() {
-    vid.pause();
-    vid.src = '';
-    clearTimeout(controlsTimer);
-    overlay.classList.remove('visible');
-  };
-
-  // ── Controls visibility ───────────────────────────────────────
-  function showControls() {
-    overlay.classList.add('visible');
-    clearTimeout(controlsTimer);
-    if (!vid.paused && !vid.ended) {
-      controlsTimer = setTimeout(() => overlay.classList.remove('visible'), FADE);
-    }
-  }
-  function hideControls() {
-    overlay.classList.remove('visible');
-    clearTimeout(controlsTimer);
-  }
-  function toggleControls() {
-    overlay.classList.contains('visible') ? hideControls() : showControls();
-  }
-
-  // ── Spinner / button state ────────────────────────────────────
-  function setSpinner(on) {
-    spinner.style.display    = on ? 'block' : 'none';
-    playIcon.style.display   = on ? 'none'  : 'block';
-    playBtn.disabled    = on;
-    rewindBtn.disabled  = on;
-    fwdBtn.disabled     = on;
-  }
-
-  function syncPlayIcon() {
-    playIcon.className = vid.paused || vid.ended ? 'fas fa-play' : 'fas fa-pause';
-  }
-
-  // ── Time helpers ──────────────────────────────────────────────
-  function fmt(s) {
-    if (isNaN(s) || s < 0) return '00:00';
-    s = Math.floor(s);
-    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
-    const p = n => String(n).padStart(2,'0');
-    return h > 0 ? `${p(h)}:${p(m)}:${p(ss)}` : `${p(m)}:${p(ss)}`;
-  }
-
-  function fmtDisplay(cur, dur) {
-    const ok = !isNaN(dur) && dur > 0;
-    if (timeMode === 1) return `-${fmt(ok ? Math.max(0, dur - cur) : 0)}`;
-    if (timeMode === 2) return fmt(cur);
-    return `${fmt(cur)} / ${fmt(ok ? dur : 0)}`;
-  }
-
-  function updateProgress() {
-    if (!isNaN(vid.duration) && vid.duration > 0) {
-      const pct = (vid.currentTime / vid.duration) * 100;
-      progressBar.style.width = pct + '%';
-      progressHandle.style.left = pct + '%';
-    }
-    timeEl.textContent = fmtDisplay(vid.currentTime, vid.duration);
-  }
-
-  // ── Volume icon ───────────────────────────────────────────────
-  function syncVolIcon() {
-    const v = vid.volume;
-    volIcon.className = (vid.muted || v === 0) ? 'fas fa-volume-mute'
-      : v < 0.5 ? 'fas fa-volume-down' : 'fas fa-volume-up';
-  }
-
-  // ── Video events ──────────────────────────────────────────────
-  vid.addEventListener('waiting',        () => { setSpinner(true);  showControls(); });
-  vid.addEventListener('canplay',        () => { setSpinner(false); updateProgress(); });
-  vid.addEventListener('canplaythrough', () => { setSpinner(false); });
-  vid.addEventListener('playing',        () => { setSpinner(false); syncPlayIcon(); showControls(); });
-  vid.addEventListener('play',           () => { syncPlayIcon(); spinner.style.display = 'none'; playIcon.style.display = 'block'; showControls(); });
-  vid.addEventListener('pause',          () => { syncPlayIcon(); showControls(); });
-  vid.addEventListener('ended',          () => { syncPlayIcon(); showControls(); });
-  vid.addEventListener('timeupdate',     () => { updateProgress(); });
-  vid.addEventListener('loadedmetadata', () => { updateProgress(); showControls(); });
-
-  // ── Play/Pause ────────────────────────────────────────────────
-  playBtn.addEventListener('click', () => {
-    vid.paused || vid.ended ? vid.play() : vid.pause();
-    showControls();
-  });
-
-  // ── Seek ──────────────────────────────────────────────────────
-  rewindBtn.addEventListener('click', () => { vid.currentTime = Math.max(0, vid.currentTime - SEEK); showControls(); });
-  fwdBtn.addEventListener('click',    () => { vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + SEEK); showControls(); });
-
-  // ── Time format cycling ───────────────────────────────────────
-  timeEl.addEventListener('click',    () => { timeMode = (timeMode + 1) % 3; updateProgress(); });
-  timeEl.addEventListener('touchend', (e) => { e.preventDefault(); timeMode = (timeMode + 1) % 3; updateProgress(); });
-
-  // ── Progress bar drag ─────────────────────────────────────────
-  function seekTo(e) {
-    const rect = progressWrap.getBoundingClientRect();
-    let x = Math.max(rect.left, Math.min((e.clientX || e.pageX), rect.right));
-    if (!isNaN(vid.duration)) vid.currentTime = vid.duration * ((x - rect.left) / rect.width);
-    updateProgress();
-  }
-  progressWrap.addEventListener('mousedown',  (e) => { if (vid.readyState >= 2) { isDragging = true; progressWrap.classList.add('dragging'); seekTo(e); showControls(); } });
-  progressWrap.addEventListener('touchstart', (e) => { if (vid.readyState >= 2) { isDragging = true; progressWrap.classList.add('dragging'); seekTo(e.touches[0]); showControls(); } }, {passive:true});
-  document.addEventListener('mousemove',  (e) => { if (isDragging) seekTo(e); });
-  document.addEventListener('touchmove',  (e) => { if (isDragging) seekTo(e.touches[0]); }, {passive:true});
-  document.addEventListener('mouseup',    ()  => { if (isDragging) { isDragging = false; progressWrap.classList.remove('dragging'); showControls(); } });
-  document.addEventListener('touchend',   ()  => { if (isDragging) { isDragging = false; progressWrap.classList.remove('dragging'); showControls(); } });
-
-  // ── Tap to show/hide, double-tap to seek ─────────────────────
-  wrapper.addEventListener('click', (e) => {
-    if (e.target.closest('.off-ctrl-btn') || e.target.closest('.off-top-btn') ||
-        e.target.closest('.off-progress-wrap') || e.target.closest('.off-movie-title') ||
-        e.target.closest('.off-vol-container')) return;
-    const now = Date.now();
-    if (now - lastTap > 300) toggleControls();
-    lastTap = now;
-  });
-
-  wrapper.addEventListener('touchend', (e) => {
-    if (e.target.closest('.off-ctrl-btn') || e.target.closest('.off-top-btn') ||
-        e.target.closest('.off-progress-wrap') || e.target.closest('.off-movie-title') ||
-        e.target.closest('.off-vol-container')) return;
-    const now = Date.now();
-    const tapX = e.changedTouches[0].clientX;
-    if (now - lastTap < 300) {
-      const half = wrapper.offsetWidth / 2;
-      vid.currentTime = tapX < half
-        ? Math.max(0, vid.currentTime - SEEK)
-        : Math.min(vid.duration || 0, vid.currentTime + SEEK);
-      lastTap = 0; showControls();
-    } else {
-      lastTap = now; toggleControls();
-    }
-  });
-
-  // ── Volume ────────────────────────────────────────────────────
-  volSlider.addEventListener('input', (e) => {
-    const v = parseFloat(e.target.value);
-    vid.volume = v; vid.muted = v === 0;
-    syncVolIcon(); showControls();
-  });
-  volBtn.addEventListener('click', () => {
-    if (vid.muted || vid.volume === 0) {
-      vid.muted = false; vid.volume = lastVol || 1; volSlider.value = lastVol || 1;
-    } else {
-      lastVol = vid.volume; vid.muted = true; vid.volume = 0; volSlider.value = 0;
-    }
-    syncVolIcon(); showControls();
-  });
-
-  // ── Zoom ──────────────────────────────────────────────────────
-  zoomBtn.addEventListener('click', () => {
-    switch (zoomLevel) {
-      case 1: vid.style.transform = 'scale(0.9)';  zoomIcon.className = 'fas fa-search-minus'; zoomLevel = 0; break;
-      case 0: vid.style.transform = 'scale(1.2)';  zoomIcon.className = 'fas fa-search';       zoomLevel = 2; break;
-      case 2: vid.style.transform = 'scale(1)';    zoomIcon.className = 'fas fa-search-plus';  zoomLevel = 1; break;
-    }
-    showControls();
-  });
-
-  // ── Fullscreen ────────────────────────────────────────────────
-  fsBtn.addEventListener('click', () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      const el = wrapper;
-      (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen).call(el);
-    }
-    showControls();
-  });
-  document.addEventListener('fullscreenchange', () => {
-    if (document.fullscreenElement) {
-      fsIcon.className = 'fas fa-compress';
-      if (!vid.paused) hideControls();
-    } else {
-      fsIcon.className = 'fas fa-expand';
-      showControls();
-    }
-  });
-
-  // ── Back/close button ─────────────────────────────────────────
-  backBtn.addEventListener('click', () => { if (typeof window.closeDlPlayer === 'function') window.closeDlPlayer(); });
-
-  // ── Keyboard shortcuts (only when player is open) ─────────────
-  document.addEventListener('keydown', (e) => {
-    const backdrop = document.getElementById('dlPlayerBackdrop');
-    if (!backdrop || !backdrop.classList.contains('open')) return;
-    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
-    switch (e.key) {
-      case ' ': e.preventDefault(); playBtn.click(); break;
-      case 'ArrowLeft':  e.preventDefault(); rewindBtn.click(); break;
-      case 'ArrowRight': e.preventDefault(); fwdBtn.click();    break;
-      case 'f': case 'F': e.preventDefault(); fsBtn.click();   break;
-      case 'm': case 'M': e.preventDefault(); volBtn.click();  break;
-      case 'Escape': e.preventDefault(); if (typeof window.closeDlPlayer === 'function') window.closeDlPlayer(); break;
-    }
-  });
 
 })();
 </script>
