@@ -2452,7 +2452,7 @@
 
         // ===================== INTERRUPTED DOWNLOADS & BG DOWNLOAD MANAGER =====================
         (function () {
-            const DB_NAME = 'ThiraiDownloads', DB_VER = 1, S_META = 'meta', S_BLOB = 'blobs';
+            const DB_NAME = 'ThiraiDownloads', DB_VER = 2, S_META = 'meta', S_BLOB = 'blobs', S_CHUNKS = 'chunks';
             const API = 'https://api.thirai.me';
             let _db;
             const bgDownloads = {}; // id -> { ctrl, meta, startTime, startBytes }
@@ -2465,6 +2465,8 @@
                         const d = e.target.result;
                         if (!d.objectStoreNames.contains(S_META)) d.createObjectStore(S_META, { keyPath: 'id' });
                         if (!d.objectStoreNames.contains(S_BLOB)) d.createObjectStore(S_BLOB, { keyPath: 'id' });
+                        // Streaming chunk store — avoids holding the whole film in RAM
+                        if (!d.objectStoreNames.contains(S_CHUNKS)) d.createObjectStore(S_CHUNKS, { keyPath: 'key' });
                     };
                     r.onsuccess = e => { _db = e.target.result; res(_db); };
                     r.onerror = e => rej(e.target.error);
@@ -2474,6 +2476,39 @@
             function dbGet(s, k) { return new Promise((res, rej) => { const t = _db.transaction(s, 'readonly'), r = t.objectStore(s).get(k); r.onsuccess = e => res(e.target.result); r.onerror = e => rej(e.target.error); }); }
             function dbGetAll(s) { return new Promise((res, rej) => { const t = _db.transaction(s, 'readonly'), r = t.objectStore(s).getAll(); r.onsuccess = e => res(e.target.result); r.onerror = e => rej(e.target.error); }); }
             function dbDel(s, k) { return new Promise((res, rej) => { const t = _db.transaction(s, 'readwrite'); t.objectStore(s).delete(k).onsuccess = () => res(); t.onerror = e => rej(e.target.error); }); }
+            // Write a single flushed chunk into the chunks store
+            function dbPutChunk(id, index, data) {
+                return new Promise((res, rej) => {
+                    const t = _db.transaction(S_CHUNKS, 'readwrite');
+                    t.objectStore(S_CHUNKS).put({ key: id + '_' + index, id, index, data }).onsuccess = () => res();
+                    t.onerror = e => rej(e.target.error);
+                });
+            }
+            // Assemble all stored chunks for an id into a single Blob
+            async function dbAssembleBlob(id) {
+                const all = await new Promise((res, rej) => {
+                    const t = _db.transaction(S_CHUNKS, 'readonly');
+                    const req = t.objectStore(S_CHUNKS).getAll();
+                    req.onsuccess = e => res(e.target.result);
+                    req.onerror = e => rej(e.target.error);
+                });
+                const mine = all.filter(c => c.id === id).sort((a, b) => a.index - b.index);
+                return new Blob(mine.map(c => c.data), { type: 'video/mp4' });
+            }
+            // Delete all chunks belonging to an id
+            function dbDeleteChunks(id) {
+                return new Promise((res, rej) => {
+                    const t = _db.transaction(S_CHUNKS, 'readwrite');
+                    const store = t.objectStore(S_CHUNKS);
+                    const req = store.getAll();
+                    req.onsuccess = e => {
+                        e.target.result.filter(c => c.id === id).forEach(c => store.delete(c.key));
+                        t.oncomplete = () => res();
+                        t.onerror = ev => rej(ev.target.error);
+                    };
+                    req.onerror = e => rej(e.target.error);
+                });
+            }
             function fmtBytes(b) { if (!b) return ''; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB'; return (b / 1073741824).toFixed(2) + ' GB'; }
             function fmtEta(secs) {
                 if (!secs || !isFinite(secs) || secs <= 0) return '';
@@ -2504,41 +2539,68 @@
                 // index.html will find it as 'interrupted' and offer to resume.
                 try { if (!_db) await openDB(); await dbPut(S_META, { ...meta, status: 'downloading' }); } catch(e) {}
 
+                // Flush chunks to IDB every 32 MB to avoid holding
+                // the whole film in RAM (which crashes mobile with "Aw, Snap!").
+                const FLUSH_EVERY = 32 * 1024 * 1024;
+
                 try {
                     const proxyUrl = `${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
                     const resp = await fetch(proxyUrl, { signal: ctrl.signal });
                     if (!resp.ok) throw new Error('Fetch ' + resp.status);
                     const total = parseInt(resp.headers.get('Content-Length') || '0', 10);
                     const reader = resp.body.getReader();
-                    const chunks = [];
-                    let received = 0;
+
+                    // Clean up any leftover chunks from a previous attempt
+                    await dbDeleteChunks(id).catch(() => {});
+
+                    let received = 0, chunkIndex = 0;
+                    let buffer = [], bufferSize = 0;
+
+                    async function flushBuffer() {
+                        if (!buffer.length) return;
+                        const flushed = new Blob(buffer, { type: 'video/mp4' });
+                        await dbPutChunk(id, chunkIndex++, flushed);
+                        buffer = [];
+                        bufferSize = 0;
+                    }
+
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
                         if (ctrl.signal.aborted) break;
-                        chunks.push(value);
+                        buffer.push(value);
+                        bufferSize += value.length;
                         received += value.length;
+
+                        // Flush to IDB once the in-memory buffer hits the threshold
+                        if (bufferSize >= FLUSH_EVERY) await flushBuffer();
+
                         const pct = total ? (received / total) * 100 : 0;
-                        // ETA calc
                         const entry = bgDownloads[id];
                         let eta = '';
                         if (entry && total > 0 && received > 0) {
                             const elapsed = (Date.now() - entry.startTime) / 1000;
-                            const rate = received / elapsed; // bytes/sec
+                            const rate = received / elapsed;
                             const remaining = total - received;
                             eta = rate > 0 ? fmtEta(remaining / rate) : '';
                         }
                         updateItemProgress(id, pct, received, total, eta);
                     }
-                    if (ctrl.signal.aborted) return;
-                    const blob = new Blob(chunks, { type: 'video/mp4' });
+
+                    if (ctrl.signal.aborted) { await dbDeleteChunks(id).catch(() => {}); return; }
+
+                    // Flush any remaining buffered bytes, then assemble final Blob
+                    await flushBuffer();
+                    const blob = await dbAssembleBlob(id);
                     await dbPut(S_BLOB, { id, blob });
+                    await dbDeleteChunks(id).catch(() => {});
                     await dbPut(S_META, { ...meta, status: 'done', size: blob.size });
                     delete bgDownloads[id];
                     refreshBadge();
                     markItemDone(id, meta.title);
                 } catch (e) {
-                    if (e.name === 'AbortError') return;
+                    if (e.name === 'AbortError') { await dbDeleteChunks(id).catch(() => {}); return; }
+                    await dbDeleteChunks(id).catch(() => {});
                     await dbPut(S_META, { ...meta, status: 'error' });
                     delete bgDownloads[id];
                     refreshBadge();
