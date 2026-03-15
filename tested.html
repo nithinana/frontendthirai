@@ -10775,7 +10775,7 @@ function initDiscoverView(){
 }
 .dl-player-close:hover { background: rgba(255,255,255,0.18); }
 
-/* Toast */
+/* Simple Toast (for non-download messages) */
 #dlToast {
   position: fixed; bottom: 80px; left: 50%;
   transform: translateX(-50%) translateY(14px);
@@ -10787,6 +10787,123 @@ function initDiscoverView(){
   box-shadow: 0 6px 24px rgba(0,0,0,0.5);
 }
 #dlToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Rich Download Notification */
+#dlNotification {
+  position: fixed;
+  bottom: 88px;
+  right: 16px;
+  width: 310px;
+  max-width: calc(100vw - 32px);
+  background: rgba(18,18,18,0.97);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.4);
+  z-index: 6100;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px) scale(0.96);
+  transition: opacity 0.3s cubic-bezier(0.22,1,0.36,1), transform 0.3s cubic-bezier(0.22,1,0.36,1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+#dlNotification.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.dl-notif-inner {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px 10px;
+}
+.dl-notif-poster {
+  width: 44px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #2a2a2a;
+  flex-shrink: 0;
+  display: block;
+}
+.dl-notif-poster-ph {
+  width: 44px;
+  height: 64px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.25);
+  font-size: 1.1rem;
+}
+.dl-notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.dl-notif-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 3px;
+}
+.dl-notif-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+.dl-notif-prog-track {
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.dl-notif-prog-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+  transition: width 0.4s ease;
+}
+.dl-notif-prog-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+}
+.dl-notif-status {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 4px 0 10px;
+  color: rgba(255,255,255,0.55);
+}
+.dl-notif-status.success { color: #22c55e; }
+.dl-notif-status.error   { color: #ff6666; }
+.dl-notif-close {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.dl-notif-close:hover { color: rgba(255,255,255,0.7); }
 
 #btm-downloads.active { color: white; }
 #desk-downloads.active { color: #fff; background: rgba(255,255,255,0.08); }
@@ -10812,8 +10929,29 @@ function initDiscoverView(){
   <div class="dl-player-title" id="dlPlayerTitle"></div>
 </div>
 
-<!-- Toast -->
+<!-- Toast (for non-download messages) -->
 <div id="dlToast"></div>
+
+<!-- Rich Download Notification -->
+<div id="dlNotification">
+  <button class="dl-notif-close" onclick="hideDlNotification()" aria-label="Dismiss"><i class="fas fa-times"></i></button>
+  <div class="dl-notif-inner">
+    <img class="dl-notif-poster" id="dlNotifPoster" src="" alt="" onerror="this.style.display='none';document.getElementById('dlNotifPosterPh').style.display='flex'">
+    <div class="dl-notif-poster-ph" id="dlNotifPosterPh" style="display:none"><i class="fas fa-film"></i></div>
+    <div class="dl-notif-body">
+      <div class="dl-notif-label" id="dlNotifLabel">Downloading</div>
+      <div class="dl-notif-title" id="dlNotifTitle">…</div>
+      <div class="dl-notif-prog-track">
+        <div class="dl-notif-prog-fill" id="dlNotifFill"></div>
+      </div>
+      <div class="dl-notif-prog-label">
+        <span id="dlNotifPct">Connecting…</span>
+        <span id="dlNotifSize"></span>
+      </div>
+    </div>
+  </div>
+  <div class="dl-notif-status" id="dlNotifStatus" style="display:none"></div>
+</div>
 
 <script id="downloads-script">
 (function(){
@@ -10850,6 +10988,71 @@ function dlToast(msg,dur=3000){
   el.textContent=msg; el.classList.add('show');
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
 }
+
+/* ── Rich Download Notification helpers ── */
+let _dlNotifHideTimer=null;
+
+function showDlNotification(meta){
+  clearTimeout(_dlNotifHideTimer);
+  const notif=document.getElementById('dlNotification');
+  const posterEl=document.getElementById('dlNotifPoster');
+  const posterPh=document.getElementById('dlNotifPosterPh');
+  const titleEl=document.getElementById('dlNotifTitle');
+  const labelEl=document.getElementById('dlNotifLabel');
+  const fillEl=document.getElementById('dlNotifFill');
+  const pctEl=document.getElementById('dlNotifPct');
+  const sizeEl=document.getElementById('dlNotifSize');
+  const statusEl=document.getElementById('dlNotifStatus');
+  if(meta.imgUrl){
+    posterEl.src=meta.imgUrl; posterEl.style.display='block'; posterPh.style.display='none';
+  } else {
+    posterEl.style.display='none'; posterPh.style.display='flex';
+  }
+  titleEl.textContent=meta.title||'Unknown';
+  labelEl.textContent='Downloading'; labelEl.style.color='';
+  fillEl.style.width='0%';
+  fillEl.style.background='linear-gradient(90deg,#fff 0%,rgba(255,255,255,0.7) 100%)';
+  pctEl.textContent='Connecting…'; sizeEl.textContent='';
+  statusEl.style.display='none'; statusEl.className='dl-notif-status';
+  notif.classList.add('show');
+}
+
+function updateDlNotification(pct,recv,total){
+  const fillEl=document.getElementById('dlNotifFill');
+  const pctEl=document.getElementById('dlNotifPct');
+  const sizeEl=document.getElementById('dlNotifSize');
+  if(!fillEl) return;
+  fillEl.style.width=pct+'%';
+  pctEl.textContent=pct<1?'Connecting…':Math.round(pct)+'%';
+  sizeEl.textContent=total?fmtBytes(recv)+' / '+fmtBytes(total):fmtBytes(recv);
+}
+
+function finishDlNotification(success,title){
+  const fillEl=document.getElementById('dlNotifFill');
+  const labelEl=document.getElementById('dlNotifLabel');
+  const pctEl=document.getElementById('dlNotifPct');
+  const sizeEl=document.getElementById('dlNotifSize');
+  const statusEl=document.getElementById('dlNotifStatus');
+  if(success){
+    if(fillEl){fillEl.style.width='100%';fillEl.style.background='#22c55e';}
+    if(labelEl){labelEl.textContent='Download Complete';labelEl.style.color='#22c55e';}
+    if(pctEl) pctEl.textContent='100%';
+    if(sizeEl) sizeEl.textContent='';
+    if(statusEl){statusEl.textContent='✅ '+(title||'Film')+' saved — ready to watch offline';statusEl.className='dl-notif-status success';statusEl.style.display='block';}
+  } else {
+    if(fillEl){fillEl.style.background='#ff6666';}
+    if(labelEl){labelEl.textContent='Download Failed';labelEl.style.color='#ff6666';}
+    if(statusEl){statusEl.textContent='❌ Something went wrong. Tap to retry.';statusEl.className='dl-notif-status error';statusEl.style.display='block';}
+  }
+  clearTimeout(_dlNotifHideTimer);
+  _dlNotifHideTimer=setTimeout(()=>hideDlNotification(),4500);
+}
+
+window.hideDlNotification=function(){
+  const notif=document.getElementById('dlNotification');
+  if(notif) notif.classList.remove('show');
+  clearTimeout(_dlNotifHideTimer);
+};
 
 async function renderDownloadsView(){
   const view=document.getElementById('view-downloads');
@@ -10971,6 +11174,7 @@ async function startDownload(pageUrl,titleHint,imgHint){
 async function doDownload(id,meta){
   const prog=document.getElementById('dlprog-'+id);
   if(prog) prog.classList.add('show');
+  showDlNotification(meta);
   const ctrl=new AbortController();
   activeDownloads[id]={ctrl};
   try{
@@ -10988,19 +11192,20 @@ async function doDownload(id,meta){
       chunks.push(value); received+=value.length;
       const pct=total?(received/total)*100:0;
       updateProgress(id,pct,received,total);
+      updateDlNotification(pct,received,total);
     }
     if(ctrl.signal.aborted) return;
     const blob=new Blob(chunks,{type:'video/mp4'});
     await dbPut(S_BLOB,{id,blob});
     await dbPut(S_META,{...meta,status:'done',size:blob.size});
     delete activeDownloads[id];
-    dlToast('✅ '+meta.title+' saved!');
+    finishDlNotification(true,meta.title);
     await renderDownloadsView();
   }catch(e){
     if(e.name==='AbortError') return;
     await dbPut(S_META,{...meta,status:'error'});
     delete activeDownloads[id];
-    dlToast('❌ Download failed');
+    finishDlNotification(false,meta.title);
     await renderDownloadsView();
   }
 }
@@ -11043,7 +11248,7 @@ window.dlPlay=async function(id){
     sessionStorage.setItem('offlinePlay_title',meta?.title||'');
     sessionStorage.setItem('offlinePlay_id',id);
   }catch(e){}
-  window.location.href='offline.html?offline=1&id='+encodeURIComponent(id);
+  window.location.href='offline?offline=1&id='+encodeURIComponent(id);
 };
 
 window.closeDlPlayer=function(){
