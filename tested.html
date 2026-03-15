@@ -3555,7 +3555,7 @@
   </button>
 
   <button class="side-item" id="desk-downloads" onclick="switchTab('downloads')" aria-label="Downloads" title="Downloads">
-    <i class="fas fa-download"></i>
+    <i class="fas fa-arrow-down-to-line"></i>
   </button>
 
 </aside>
@@ -3700,7 +3700,7 @@
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
         <div class="nav-item" onclick="switchTab('downloads')" id="btm-downloads">
-            <i class="fas fa-download"></i> <span>Downloads</span>
+            <i class="fas fa-arrow-down-to-line"></i> <span>Downloads</span>
         </div>
         <div class="nav-item" onclick="toggleMoreMenu()" id="btm-more">
             <i class="fas fa-border-all" id="btm-more-icon"></i> <span>More</span>
@@ -3740,7 +3740,7 @@
                 </div>
                 <div class="more-menu-icon-btn" onclick="moreMenuAction('downloads')">
                     <div class="more-menu-icon-wrap">
-                        <i class="fas fa-download"></i>
+                        <i class="fas fa-arrow-down-to-line"></i>
                     </div>
                     <span>Downloads</span>
                 </div>
@@ -10771,39 +10771,6 @@ function initDiscoverView(){
   background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.1rem;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.dlf-search-wrap {
-  padding: 10px 14px 8px; flex-shrink: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-}
-.dlf-search-row { display: flex; gap: 8px; align-items: center; }
-.dlf-search-input {
-  flex: 1; min-width: 0;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 11px; color: #fff; font-size: 0.9rem; font-family: 'Inter', sans-serif;
-  padding: 10px 13px; outline: none; transition: border-color 0.15s;
-}
-.dlf-search-input:focus { border-color: rgba(255,255,255,0.25); }
-.dlf-search-input::placeholder { color: rgba(255,255,255,0.3); }
-.dlf-lang-select {
-  flex-shrink: 0; width: 100px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 11px; color: #fff; font-size: 0.82rem; font-family: 'Inter', sans-serif;
-  padding: 10px 8px; outline: none; cursor: pointer;
-  appearance: none; -webkit-appearance: none;
-}
-.dlf-lang-select option { background: #1c1c1c; color: #fff; }
-.dlf-search-btn {
-  flex-shrink: 0; background: #fff; color: #000; border: none; border-radius: 11px;
-  padding: 10px 14px; font-size: 0.95rem; cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent;
-}
-.dlf-search-btn:hover { opacity: 0.88; }
-.dlf-search-btn:active { transform: scale(0.96); }
-.dlf-search-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.dlf-grid-label {
-  padding: 10px 16px 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 0.08em; color: rgba(255,255,255,0.3); flex-shrink: 0;
-}
 
 /* Offline player */
 #dlPlayerBackdrop {
@@ -10852,23 +10819,8 @@ function initDiscoverView(){
     <div class="dlf-header">
       Find something to download
       <button class="dlf-close-btn" onclick="closeDlFind()"><i class="fas fa-times"></i></button>
+      <span>Popular films</span>
     </div>
-    <div class="dlf-search-wrap">
-      <div class="dlf-search-row">
-        <input type="text" id="dlfSearchInput" class="dlf-search-input" placeholder="Search by title…" autocomplete="off" autocapitalize="none" spellcheck="false">
-        <select id="dlfLangSelect" class="dlf-lang-select">
-          <option value="tamil">Tamil</option>
-          <option value="malayalam">Malayalam</option>
-          <option value="hindi">Hindi</option>
-          <option value="telugu">Telugu</option>
-          <option value="kannada">Kannada</option>
-          <option value="marathi">Marathi</option>
-          <option value="punjabi">Punjabi</option>
-        </select>
-        <button class="dlf-search-btn" onclick="dlfDoSearch()"><i class="fas fa-search"></i></button>
-      </div>
-    </div>
-    <div class="dlf-grid-label" id="dlfGridLabel">Popular</div>
     <div class="dlf-grid" id="dlfGrid"></div>
   </div>
 </div>
@@ -10928,7 +10880,7 @@ async function renderDownloadsView(){
   if(!allMeta.length){
     view.innerHTML=`
       <div class="dl-empty-state">
-        <div class="dl-empty-icon"><i class="fas fa-download"></i></div>
+        <div class="dl-empty-icon"><i class="fas fa-arrow-down-to-line"></i></div>
         <div class="dl-empty-title">Films you download appear here</div>
         <div class="dl-empty-sub">Save films to watch offline — no internet needed.</div>
         <button class="dl-find-btn" onclick="openDlFind()">
@@ -11079,11 +11031,13 @@ window.dlPlay=async function(id){
   if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
   const url=URL.createObjectURL(blobRec.blob);
   blobUrls[id]=url;
-  const vid=document.getElementById('dlOfflineVideo');
-  vid.src=url; vid.load(); vid.play().catch(()=>{});
-  document.getElementById('dlPlayerTitle').textContent=meta?.title||'';
-  document.getElementById('dlPlayerBackdrop').classList.add('open');
-  document.body.style.overflow='hidden';
+  // Store blob URL + metadata in sessionStorage so offline.html can pick it up
+  try{
+    sessionStorage.setItem('offlinePlay_url',url);
+    sessionStorage.setItem('offlinePlay_title',meta?.title||'');
+    sessionStorage.setItem('offlinePlay_id',id);
+  }catch(e){}
+  window.open('offline.html?offline=1&id='+encodeURIComponent(id),'_blank');
 };
 
 window.closeDlPlayer=function(){
@@ -11117,71 +11071,35 @@ const POPULAR_MOVIES=[
 
 const _queuedUrls=new Set();
 
-function dlfAppendCard(grid,movie){
-  const card=document.createElement('div');
-  card.className='dlf-card';
-  card.innerHTML=`
-    <img src="${esc(movie.img)}" alt="${esc(movie.title)}" loading="lazy">
-    <div class="dlf-card-overlay">
-      <button class="dlf-dl-btn${_queuedUrls.has(movie.url)?' queued':''}" title="Download ${esc(movie.title)}">
-        <i class="fas ${_queuedUrls.has(movie.url)?'fa-check':'fa-arrow-down'}"></i>
-      </button>
-    </div>`;
-  const btn=card.querySelector('.dlf-dl-btn');
-  btn.addEventListener('click',async(e)=>{
-    e.stopPropagation();
-    if(_queuedUrls.has(movie.url)){dlToast('ℹ Already queued');return;}
-    _queuedUrls.add(movie.url);
-    btn.classList.add('queued'); btn.innerHTML='<i class="fas fa-check"></i>';
-    dlToast('⏳ Starting: '+movie.title);
-    closeDlFind();
-    await startDownload(movie.url,movie.title,movie.img);
-  });
-  grid.appendChild(card);
-}
-
-window.dlfDoSearch=async function(){
-  const q=document.getElementById('dlfSearchInput').value.trim();
-  if(!q) return;
-  const lang=document.getElementById('dlfLangSelect').value;
-  const grid=document.getElementById('dlfGrid');
-  const label=document.getElementById('dlfGridLabel');
-  const btn=document.querySelector('.dlf-search-btn');
-  grid.innerHTML='<div style="padding:30px;text-align:center;color:rgba(255,255,255,0.35);font-size:0.88rem;">Searching…</div>';
-  if(label) label.textContent='Results';
-  if(btn) btn.disabled=true;
-  try{
-    const r=await fetch(`${API}/search/${encodeURIComponent(lang)}?q=${encodeURIComponent(q)}`);
-    if(!r.ok) throw new Error('API '+r.status);
-    const d=await r.json();
-    const movies=(d.movies||[]).slice(0,24);
-    grid.innerHTML='';
-    if(!movies.length){
-      grid.innerHTML='<div style="padding:30px;text-align:center;color:rgba(255,255,255,0.35);font-size:0.88rem;">No results found.</div>';
-      return;
-    }
-    movies.forEach(movie=>dlfAppendCard(grid,{title:movie.title,img:movie.img_url,url:movie.page_url}));
-  }catch(e){
-    grid.innerHTML='<div style="padding:30px;text-align:center;color:#ff6666;font-size:0.88rem;">Search failed. Try again.</div>';
-  }finally{
-    if(btn) btn.disabled=false;
-  }
-};
-
 window.openDlFind=async function(){
   const overlay=document.getElementById('dlFindOverlay');
   const grid=document.getElementById('dlfGrid');
   if(!overlay||!grid) return;
   grid.innerHTML='';
-  const label=document.getElementById('dlfGridLabel');
-  if(label) label.textContent='Popular';
-  const inp=document.getElementById('dlfSearchInput');
-  if(inp) inp.value='';
-  POPULAR_MOVIES.forEach(movie=>dlfAppendCard(grid,movie));
+  POPULAR_MOVIES.forEach(movie=>{
+    const card=document.createElement('div');
+    card.className='dlf-card';
+    card.innerHTML=`
+      <img src="${esc(movie.img)}" alt="${esc(movie.title)}" loading="lazy">
+      <div class="dlf-card-overlay">
+        <button class="dlf-dl-btn${_queuedUrls.has(movie.url)?' queued':''}" title="Download ${esc(movie.title)}">
+          <i class="fas ${_queuedUrls.has(movie.url)?'fa-check':'fa-arrow-down'}"></i>
+        </button>
+      </div>`;
+    const btn=card.querySelector('.dlf-dl-btn');
+    btn.addEventListener('click',async(e)=>{
+      e.stopPropagation();
+      if(_queuedUrls.has(movie.url)){dlToast('ℹ Already queued');return;}
+      _queuedUrls.add(movie.url);
+      btn.classList.add('queued'); btn.innerHTML='<i class="fas fa-check"></i>';
+      dlToast('⏳ Starting: '+movie.title);
+      closeDlFind();
+      await startDownload(movie.url,movie.title,movie.img);
+    });
+    grid.appendChild(card);
+  });
   overlay.classList.add('active');
   document.body.style.overflow='hidden';
-  setTimeout(()=>{ if(inp) inp.focus(); },320);
-};
 };
 
 window.closeDlFind=function(){
@@ -11189,11 +11107,6 @@ window.closeDlFind=function(){
   document.body.style.overflow='';
 };
 document.getElementById('dlFindOverlay').addEventListener('click',function(e){if(e.target===this)window.closeDlFind();});
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&document.getElementById('dlFindOverlay').classList.contains('active')){
-    window.dlfDoSearch();
-  }
-});
 
 // Hook switchTab
 (function(){
