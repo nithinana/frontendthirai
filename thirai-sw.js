@@ -1,8 +1,3 @@
-/* thirai-sw.js — background download service worker
-   Deploy this file at the ROOT of your site (same level as index / tested.html)
-   so it can be served from /thirai-sw.js
-*/
-
 const DB_NAME = 'ThiraiDownloads';
 const DB_VER  = 1;
 const S_META  = 'meta';
