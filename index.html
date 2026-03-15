@@ -11182,8 +11182,10 @@ async function renderDownloadsView(){
 
   allMeta.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
 
-  // Install banner helpers
-  const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  // Install banner helpers — never show when already running as installed PWA
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                      window.matchMedia('(display-mode: fullscreen)').matches ||
+                      window.navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
   const installBannerHtml = isInstalled ? '' : `
     <div class="dl-install-banner" id="dlInstallBanner">
@@ -11496,17 +11498,8 @@ window.dlPlay=async function(id){
     }
     return;
   }
-  if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
-  const url=URL.createObjectURL(blobRec.blob);
-  blobUrls[id]=url;
-  const vid=document.getElementById('dlOfflineVideo');
-  const titleEl=document.getElementById('dlPlayerTitle');
-  if(titleEl) titleEl.textContent=meta?.title||'';
-  vid.src=url;
-  vid.load();
-  vid.play().catch(()=>{});
-  document.getElementById('dlPlayerBackdrop').classList.add('open');
-  document.body.style.overflow='hidden';
+  // Navigate to the full offline player — it reads the blob directly from IndexedDB
+  window.location.href = '/offline.html?offline=1&id=' + encodeURIComponent(id);
 };
 
 window.closeDlPlayer=function(){
