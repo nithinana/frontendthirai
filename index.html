@@ -10889,16 +10889,6 @@ function initDiscoverView(){
 .dl-card-title {
   font-size: 0.92rem; font-weight: 700; color: #f0f0f0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px;
-  display: flex; align-items: center; gap: 6px;
-}
-/* Language pill shown inline next to the title */
-.dl-lang-badge {
-  flex-shrink: 0;
-  font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
-  padding: 2px 7px; border-radius: 20px;
-  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
-  border: 1px solid rgba(255,255,255,0.1);
-  white-space: nowrap;
 }
 .dl-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.72rem; color: rgba(255,255,255,0.38); }
 .dl-badge {
@@ -11237,8 +11227,6 @@ async function renderDownloadsView(){
   });
   updateDownloadDot();
   _wireInstallBtn(isIOS);
-  // After rendering, fill in missing language tags in the background
-  resolveLanguages(allMeta).catch(()=>{});
 }
 
 function _wireInstallBtn(isIOS){
@@ -11258,85 +11246,23 @@ function _wireInstallBtn(isIOS){
   });
 }
 
-// ── Language helpers ──────────────────────────────────────────────────────
-function capLang(s){ return s?s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():''; }
-
-function langFromUrl(url){
-  if(!url) return null;
-  try{
-    const u=new URL(url,window.location.href);
-    const l=u.searchParams.get('lang');
-    if(l) return l.toLowerCase();
-  }catch(e){}
-  const m=url.match(/[?&]lang=([a-zA-Z]+)/);
-  return m?m[1].toLowerCase():null;
-}
-
-const KNOWN_LANGS=['tamil','malayalam','hindi','telugu','punjabi','marathi','kannada','bengali',
-                   'gujarati','sinhala','nepali','english'];
-
-function langFromVideoUrl(url){
-  if(!url) return null;
-  const lower=url.toLowerCase();
-  for(const l of KNOWN_LANGS){ if(lower.includes('/'+l+'/')||lower.includes('-'+l+'-')) return l; }
-  return null;
-}
-
-// Background job: enrich any stored download that has no lang field.
-// Tries URL parsing first (free/offline), then hits the API when online.
-const _langResolveLock=new Set();
-async function resolveLanguages(allMeta){
-  const missing=allMeta.filter(m=>!m.lang);
-  if(!missing.length) return;
-  for(const m of missing){
-    if(_langResolveLock.has(m.id)) continue;
-    let lang=langFromUrl(m.pageUrl)||langFromVideoUrl(m.videoUrl);
-    if(!lang && m.pageUrl && navigator.onLine){
-      _langResolveLock.add(m.id);
-      try{
-        const r=await fetch(`${API}/watch?url=${encodeURIComponent(m.pageUrl)}`);
-        if(r.ok){
-          const d=await r.json();
-          lang=d.lang||d.language||langFromUrl(d.page_url)||langFromUrl(m.pageUrl)||null;
-        }
-      }catch(e){}
-      _langResolveLock.delete(m.id);
-    }
-    if(lang){
-      await dbPut(S_META,{...m,lang:lang.toLowerCase()});
-      // Patch the visible card without a full re-render
-      const titleEl=document.querySelector(`#dlcard-${m.id} .dl-card-title`);
-      if(titleEl){
-        const langSpan=titleEl.querySelector('.dl-lang-badge');
-        if(!langSpan){
-          const sp=document.createElement('span');
-          sp.className='dl-lang-badge';
-          sp.textContent=capLang(lang);
-          titleEl.appendChild(sp);
-        }
-      }
-    }
-  }
-}
-
 function buildCardHtml(meta){
-  const {id,title,imgUrl,size,status,lang}=meta;
+  const {id,title,imgUrl,size,status,videoUrl}=meta;
   const done=status==='done', err=status==='error', interrupted=status==='interrupted', paused=status==='paused', going=!!activeDownloads[id];
-  const badge=done?'<span class="dl-badge dl-badge-done">\u2713 Ready</span>'
-    :err?'<span class="dl-badge dl-badge-err">\u2717 Error</span>'
-    :interrupted?'<span class="dl-badge dl-badge-err">\u26a0 Interrupted</span>'
-    :paused?'<span class="dl-badge dl-badge-dl" style="opacity:0.7">\u23f8 Paused</span>'
-    :'<span class="dl-badge dl-badge-dl">\u2193 Downloading</span>';
+  const badge=done?'<span class="dl-badge dl-badge-done">✓ Ready</span>'
+    :err?'<span class="dl-badge dl-badge-err">✗ Error</span>'
+    :interrupted?'<span class="dl-badge dl-badge-err">⚠ Interrupted</span>'
+    :paused?'<span class="dl-badge dl-badge-dl" style="opacity:0.7">⏸ Paused</span>'
+    :'<span class="dl-badge dl-badge-dl">↓ Downloading</span>';
   const szStr=size?fmtBytes(size):'';
   const dateStr=meta.addedAt?new Date(meta.addedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
   const canRetry=interrupted||err||paused;
-  const langBadge=lang?`<span class="dl-lang-badge">${esc(capLang(lang))}</span>`:'';
   return `<div class="dl-card" id="dlcard-${id}">
     <div class="dl-card-main">
       ${imgUrl?`<img class="dl-card-poster" src="${esc(imgUrl)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:'' }
       <div class="dl-card-poster-ph" ${imgUrl?'style="display:none"':''}><i class="fas fa-film"></i></div>
       <div class="dl-card-info">
-        <div class="dl-card-title" title="${esc(title||'')}">${esc(title||'Unknown')}${langBadge}</div>
+        <div class="dl-card-title" title="${esc(title||'')}">${esc(title||'Unknown')}</div>
         <div class="dl-card-meta">
           ${badge}
           ${szStr?`<span>${szStr}</span>`:''}
@@ -11353,7 +11279,7 @@ function buildCardHtml(meta){
     </div>
     <div class="dl-prog-wrap ${going?'show':''}" id="dlprog-${id}">
       <div class="dl-prog-track"><div class="dl-prog-fill" id="dlfill-${id}"></div></div>
-      <div class="dl-prog-label"><span id="dlpct-${id}">Connecting\u2026</span><span id="dlrecv-${id}"></span></div>
+      <div class="dl-prog-label"><span id="dlpct-${id}">Connecting…</span><span id="dlrecv-${id}"></span></div>
     </div>
   </div>`;
 }
@@ -11400,8 +11326,7 @@ async function startDownload(pageUrl,titleHint,imgHint){
   if(dupe){ dlToast('ℹ Already downloaded: '+(dupe.title||'film')); return; }
 
   const id=genId();
-  const lang=langFromUrl(pageUrl)||langFromVideoUrl(videoUrl)||null;
-  const meta={id,title,imgUrl,videoUrl,pageUrl,lang,status:'downloading',size:0,addedAt:Date.now()};
+  const meta={id,title,imgUrl,videoUrl,status:'downloading',size:0,addedAt:Date.now()};
   await dbPut(S_META,meta);
   activeDownloads[id]={ctrl:{abort:()=>{}}};  // placeholder so renderDownloadsView sees it as active
   await renderDownloadsView();
@@ -11714,8 +11639,7 @@ async function startDownloadDirect(pageUrl, titleHint, imgHint) {
 
   const id   = genId();
   // Store pageUrl so retries can re-fetch a fresh video link
-  const lang = langFromUrl(pageUrl)||langFromVideoUrl(videoUrl)||null;
-  const meta = { id, title, imgUrl, videoUrl, pageUrl, lang, status: 'downloading', size: 0, addedAt: Date.now() };
+  const meta = { id, title, imgUrl, videoUrl, pageUrl, status: 'downloading', size: 0, addedAt: Date.now() };
   await dbPut(S_META, meta);
   activeDownloads[id] = { ctrl: { abort: () => {} } };
   await renderDownloadsView();
