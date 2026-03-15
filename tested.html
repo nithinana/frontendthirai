@@ -528,7 +528,36 @@
         }
         .dls-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
 
-        .dls-list { flex: 1; overflow-y: auto; padding: 10px 16px; }
+        /* Download option buttons inside status overlay */
+        .dls-options { padding: 12px 16px 4px; flex-shrink: 0; }
+        .dls-opt-btn {
+            width: 100%; padding: 12px 14px; border-radius: 13px; border: 1px solid #2e2e2e;
+            background: rgba(255,255,255,0.04); color: #fff;
+            font-size: 0.92rem; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            display: flex; align-items: center; gap: 11px; text-align: left;
+            margin-bottom: 8px; -webkit-tap-highlight-color: transparent;
+        }
+        .dls-opt-btn:last-child { margin-bottom: 0; }
+        .dls-opt-btn:hover { background: rgba(255,255,255,0.09); border-color: #444; }
+        .dls-opt-btn:active { transform: scale(0.98); }
+        .dls-opt-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: rgba(255,255,255,0.07); border: 1px solid #333;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; flex-shrink: 0;
+        }
+        .dls-opt-text { display: flex; flex-direction: column; gap: 2px; }
+        .dls-opt-label { font-size: 0.88rem; font-weight: 700; }
+        .dls-opt-desc { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 400; }
+
+        .dls-active-section { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+        .dls-section-label {
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.3); padding: 12px 16px 6px; flex-shrink: 0;
+        }
+
+        .dls-list { flex: 1; overflow-y: auto; padding: 0 16px 8px; }
         .dls-list::-webkit-scrollbar { width: 0; }
 
         .dls-item {
@@ -557,6 +586,7 @@
         }
         .dls-prog-fill { height: 100%; width: 0%; background: #fff; border-radius: 10px; transition: width 0.3s ease; }
         .dls-prog-row { display: flex; justify-content: space-between; font-size: 0.68rem; color: rgba(255,255,255,0.35); }
+        .dls-eta { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin-top: 2px; }
         .dls-status-done { font-size: 0.72rem; font-weight: 600; color: #22c55e; }
         .dls-status-err { font-size: 0.72rem; font-weight: 600; color: #ff6666; }
         .dls-cancel-btn {
@@ -1266,12 +1296,33 @@
             <div class="dls-handle"></div>
             <div class="dls-header">
                 <div class="dls-title">
-                    <i class="bi bi-arrow-down-circle-fill" style="font-size:1.1rem;color:rgba(255,255,255,0.7)"></i>
-                    Background Downloads
+                    <i class="bi bi-download" style="font-size:1.05rem;color:rgba(255,255,255,0.7)"></i>
+                    Download
                 </div>
                 <button class="dls-close" id="dlStatusClose"><i class="bi bi-x"></i></button>
             </div>
-            <div class="dls-list" id="dlStatusList"></div>
+            <!-- Download options (always shown) -->
+            <div class="dls-options" id="dlsOptions">
+                <button class="dls-opt-btn" id="dlsOptApp">
+                    <span class="dls-opt-icon"><i class="bi bi-arrow-down-circle-fill"></i></span>
+                    <span class="dls-opt-text">
+                        <span class="dls-opt-label">Download in App</span>
+                        <span class="dls-opt-desc">Opens the download manager</span>
+                    </span>
+                </button>
+                <button class="dls-opt-btn" id="dlsOptUrl">
+                    <span class="dls-opt-icon"><i class="bi bi-link-45deg"></i></span>
+                    <span class="dls-opt-text">
+                        <span class="dls-opt-label">Get URL</span>
+                        <span class="dls-opt-desc">Copy the direct video link</span>
+                    </span>
+                </button>
+            </div>
+            <!-- Active downloads section (shown only when downloads exist) -->
+            <div class="dls-active-section" id="dlsActiveSection" style="display:none">
+                <div class="dls-section-label">Active Downloads</div>
+                <div class="dls-list" id="dlStatusList"></div>
+            </div>
         </div>
     </div>
     <!-- ===== END DOWNLOAD STATUS OVERLAY ===== -->
@@ -2394,7 +2445,7 @@
             const DB_NAME = 'ThiraiDownloads', DB_VER = 1, S_META = 'meta', S_BLOB = 'blobs';
             const API = 'https://api.thirai.me';
             let _db;
-            const bgDownloads = {}; // id -> { ctrl, meta }
+            const bgDownloads = {}; // id -> { ctrl, meta, startTime, startBytes }
 
             // ── IndexedDB helpers ──────────────────────────────────────────────────────
             function openDB() {
@@ -2414,23 +2465,30 @@
             function dbGetAll(s) { return new Promise((res, rej) => { const t = _db.transaction(s, 'readonly'), r = t.objectStore(s).getAll(); r.onsuccess = e => res(e.target.result); r.onerror = e => rej(e.target.error); }); }
             function dbDel(s, k) { return new Promise((res, rej) => { const t = _db.transaction(s, 'readwrite'); t.objectStore(s).delete(k).onsuccess = () => res(); t.onerror = e => rej(e.target.error); }); }
             function fmtBytes(b) { if (!b) return ''; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB'; return (b / 1073741824).toFixed(2) + ' GB'; }
+            function fmtEta(secs) {
+                if (!secs || !isFinite(secs) || secs <= 0) return '';
+                if (secs < 60) return Math.ceil(secs) + 's left';
+                if (secs < 3600) return Math.ceil(secs / 60) + 'm left';
+                return (secs / 3600).toFixed(1) + 'h left';
+            }
 
             // ── Badge helpers ──────────────────────────────────────────────────────────
             const dlActiveBadge = document.getElementById('dlActiveBadge');
             function refreshBadge() {
                 const count = Object.keys(bgDownloads).length;
-                if (dlActiveBadge) {
-                    dlActiveBadge.classList.toggle('show', count > 0);
-                }
+                if (dlActiveBadge) dlActiveBadge.classList.toggle('show', count > 0);
+                // Show/hide the active section in status overlay
+                const sec = document.getElementById('dlsActiveSection');
+                if (sec) sec.style.display = count > 0 ? 'flex' : 'none';
             }
 
             // ── Background download engine ─────────────────────────────────────────────
             async function doBgDownload(meta) {
                 const { id } = meta;
                 const ctrl = new AbortController();
-                bgDownloads[id] = { ctrl, meta };
+                bgDownloads[id] = { ctrl, meta, startTime: Date.now(), startBytes: 0 };
                 refreshBadge();
-                updateStatusOverlay();
+                renderStatusItem(id, meta);
 
                 try {
                     const proxyUrl = `${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
@@ -2447,7 +2505,16 @@
                         chunks.push(value);
                         received += value.length;
                         const pct = total ? (received / total) * 100 : 0;
-                        updateItemProgress(id, pct, received, total);
+                        // ETA calc
+                        const entry = bgDownloads[id];
+                        let eta = '';
+                        if (entry && total > 0 && received > 0) {
+                            const elapsed = (Date.now() - entry.startTime) / 1000;
+                            const rate = received / elapsed; // bytes/sec
+                            const remaining = total - received;
+                            eta = rate > 0 ? fmtEta(remaining / rate) : '';
+                        }
+                        updateItemProgress(id, pct, received, total, eta);
                     }
                     if (ctrl.signal.aborted) return;
                     const blob = new Blob(chunks, { type: 'video/mp4' });
@@ -2456,51 +2523,52 @@
                     delete bgDownloads[id];
                     refreshBadge();
                     markItemDone(id, meta.title);
-                    updateStatusOverlay();
                 } catch (e) {
                     if (e.name === 'AbortError') return;
                     await dbPut(S_META, { ...meta, status: 'error' });
                     delete bgDownloads[id];
                     refreshBadge();
                     markItemError(id);
-                    updateStatusOverlay();
                 }
             }
 
-            function updateItemProgress(id, pct, recv, total) {
+            function updateItemProgress(id, pct, recv, total, eta) {
                 // Status overlay
                 const fill = document.getElementById('dls-fill-' + id);
                 const pctEl = document.getElementById('dls-pct-' + id);
                 const recvEl = document.getElementById('dls-recv-' + id);
+                const etaEl = document.getElementById('dls-eta-' + id);
                 if (fill) fill.style.width = pct + '%';
                 if (pctEl) pctEl.textContent = pct < 1 ? 'Connecting…' : Math.round(pct) + '%';
                 if (recvEl) recvEl.textContent = total ? fmtBytes(recv) + ' / ' + fmtBytes(total) : fmtBytes(recv);
-                // Interrupted popup item (if still open)
+                if (etaEl) etaEl.textContent = eta || '';
+                // Interrupted popup item mini bar
                 const idtFill = document.getElementById('idt-fill-' + id);
                 const idtLabel = document.getElementById('idt-prog-label-' + id);
                 const idtProg = document.getElementById('idt-prog-' + id);
                 if (idtProg) idtProg.classList.add('show');
                 if (idtFill) idtFill.style.width = pct + '%';
-                if (idtLabel) idtLabel.textContent = pct < 1 ? 'Connecting…' : Math.round(pct) + '% — ' + fmtBytes(recv);
+                if (idtLabel) {
+                    const pctStr = pct < 1 ? 'Connecting…' : Math.round(pct) + '%';
+                    idtLabel.textContent = eta ? `${pctStr} · ${eta}` : pctStr + (recv ? ' — ' + fmtBytes(recv) : '');
+                }
             }
 
             function markItemDone(id, title) {
-                // Status overlay item
                 const item = document.getElementById('dls-item-' + id);
                 if (item) {
                     const infoEl = item.querySelector('.dls-info');
                     if (infoEl) {
                         infoEl.innerHTML = `<div class="dls-item-title">${title || 'Film'}</div>
-                        <div class="dls-status-done"><i class="bi bi-check-circle-fill"></i> Saved & ready</div>`;
+                        <div class="dls-status-done"><i class="bi bi-check-circle-fill"></i> Saved &amp; ready to watch</div>`;
                     }
                     const cancelBtn = item.querySelector('.dls-cancel-btn');
                     if (cancelBtn) cancelBtn.remove();
                 }
-                // Interrupted popup item
                 const idtItem = document.getElementById('idt-item-' + id);
                 if (idtItem) {
                     const btn = idtItem.querySelector('.idt-resume-btn');
-                    if (btn) { btn.textContent = '✓ Done'; btn.disabled = true; btn.style.background = 'rgba(34,197,94,0.15)'; btn.style.color = '#22c55e'; btn.style.border = '1px solid rgba(34,197,94,0.2)'; }
+                    if (btn) { btn.innerHTML = '✓ Done'; btn.disabled = true; btn.style.cssText = 'background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.2);'; }
                 }
             }
 
@@ -2511,7 +2579,34 @@
                     if (prog) prog.remove();
                     const row = item.querySelector('.dls-prog-row');
                     if (row) row.innerHTML = '<span class="dls-status-err"><i class="bi bi-x-circle-fill"></i> Failed</span>';
+                    const etaEl = document.getElementById('dls-eta-' + id);
+                    if (etaEl) etaEl.remove();
                 }
+            }
+
+            // ── Render a new status item row ───────────────────────────────────────────
+            function renderStatusItem(id, meta) {
+                const list = document.getElementById('dlStatusList');
+                if (!list || document.getElementById('dls-item-' + id)) return;
+                const el = document.createElement('div');
+                el.className = 'dls-item';
+                el.id = 'dls-item-' + id;
+                el.innerHTML = `
+                    ${meta.imgUrl ? `<img class="dls-poster" src="${meta.imgUrl}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+                    <div class="dls-poster-ph" ${meta.imgUrl ? 'style="display:none"' : ''}><i class="bi bi-film"></i></div>
+                    <div class="dls-info">
+                        <div class="dls-item-title">${meta.title || 'Downloading…'}</div>
+                        <div class="dls-prog-track"><div class="dls-prog-fill" id="dls-fill-${id}"></div></div>
+                        <div class="dls-prog-row">
+                            <span id="dls-pct-${id}">Connecting…</span>
+                            <span id="dls-recv-${id}"></span>
+                        </div>
+                        <div class="dls-eta" id="dls-eta-${id}"></div>
+                    </div>
+                    <button class="dls-cancel-btn" onclick="cancelBgDownload('${id}')" title="Cancel">
+                        <i class="bi bi-x"></i>
+                    </button>`;
+                list.appendChild(el);
             }
 
             // ── Cancel a bg download ───────────────────────────────────────────────────
@@ -2521,50 +2616,19 @@
                 await dbDel(S_META, id);
                 await dbDel(S_BLOB, id);
                 refreshBadge();
-                updateStatusOverlay();
+                const item = document.getElementById('dls-item-' + id);
+                if (item) item.remove();
             };
 
-            // ── Status Overlay ─────────────────────────────────────────────────────────
-            function updateStatusOverlay() {
-                const list = document.getElementById('dlStatusList');
-                if (!list) return;
-                const ids = Object.keys(bgDownloads);
-                if (!ids.length) {
-                    list.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.85rem;padding:30px 0;">No active downloads</div>';
-                    return;
-                }
-                // Build/refresh items
-                ids.forEach(id => {
-                    if (document.getElementById('dls-item-' + id)) return; // already rendered
-                    const { meta } = bgDownloads[id];
-                    const el = document.createElement('div');
-                    el.className = 'dls-item';
-                    el.id = 'dls-item-' + id;
-                    el.innerHTML = `
-                        ${meta.imgUrl
-                            ? `<img class="dls-poster" src="${meta.imgUrl}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-                            : ''}
-                        <div class="dls-poster-ph" ${meta.imgUrl ? 'style="display:none"' : ''}><i class="bi bi-film"></i></div>
-                        <div class="dls-info" id="dls-info-${id}">
-                            <div class="dls-item-title">${meta.title || 'Downloading…'}</div>
-                            <div class="dls-prog-track"><div class="dls-prog-fill" id="dls-fill-${id}"></div></div>
-                            <div class="dls-prog-row">
-                                <span id="dls-pct-${id}">Connecting…</span>
-                                <span id="dls-recv-${id}"></span>
-                            </div>
-                        </div>
-                        <button class="dls-cancel-btn" onclick="cancelBgDownload('${id}')" title="Cancel">
-                            <i class="bi bi-x"></i>
-                        </button>`;
-                    list.appendChild(el);
-                });
-            }
-
+            // ── Status Overlay open/close ──────────────────────────────────────────────
             const dlStatusOverlay = document.getElementById('dlStatusOverlay');
             const dlStatusClose = document.getElementById('dlStatusClose');
 
             function openStatusOverlay() {
-                updateStatusOverlay();
+                // Refresh active section visibility
+                const count = Object.keys(bgDownloads).length;
+                const sec = document.getElementById('dlsActiveSection');
+                if (sec) sec.style.display = count > 0 ? 'flex' : 'none';
                 dlStatusOverlay.classList.add('open');
             }
             function closeStatusOverlay() {
@@ -2574,16 +2638,48 @@
             if (dlStatusClose) dlStatusClose.addEventListener('click', closeStatusOverlay);
             if (dlStatusOverlay) dlStatusOverlay.addEventListener('click', e => { if (e.target === dlStatusOverlay) closeStatusOverlay(); });
 
-            // Override download button: if bg downloads active, show status; else show original modal
+            // Wire up the option buttons inside the status overlay to the original DL modal logic
+            document.addEventListener('DOMContentLoaded', () => {
+                const dlsOptApp = document.getElementById('dlsOptApp');
+                const dlsOptUrl = document.getElementById('dlsOptUrl');
+                const origDlBtn = document.getElementById('downloadButton');
+
+                if (dlsOptApp) {
+                    dlsOptApp.addEventListener('click', () => {
+                        closeStatusOverlay();
+                        // Trigger the same action as the original "Download in App" button
+                        const pageUrl = origDlBtn ? (origDlBtn.dataset.pageUrl || '') : '';
+                        const title   = origDlBtn ? (origDlBtn.dataset.title   || '') : '';
+                        const imgUrl  = origDlBtn ? (origDlBtn.dataset.imgUrl  || '') : '';
+                        const dest = '/'
+                            + '?dlurl='   + encodeURIComponent(pageUrl)
+                            + '&dltitle=' + encodeURIComponent(title)
+                            + '&dlimg='   + encodeURIComponent(imgUrl);
+                        window.location.href = dest;
+                    });
+                }
+
+                if (dlsOptUrl) {
+                    dlsOptUrl.addEventListener('click', () => {
+                        closeStatusOverlay();
+                        // Show the URL screen inside the original download modal
+                        const url = origDlBtn ? (origDlBtn.dataset.videoUrl || '') : '';
+                        if (!url) return;
+                        document.getElementById('dlModalUrl').textContent = url;
+                        document.getElementById('dlChoiceScreen').style.display = 'none';
+                        document.getElementById('dlUrlScreen').style.display = 'block';
+                        document.getElementById('dlModalBackdrop').classList.add('open');
+                    });
+                }
+            });
+
+            // Override download button: ALWAYS open status overlay (which now also shows DL options)
             const origDlBtn = document.getElementById('downloadButton');
             if (origDlBtn) {
                 origDlBtn.addEventListener('click', function (e) {
-                    if (Object.keys(bgDownloads).length > 0) {
-                        e.stopImmediatePropagation();
-                        openStatusOverlay();
-                    }
-                    // otherwise original dl modal handler fires
-                }, true /* capture so it runs before existing listener */);
+                    e.stopImmediatePropagation();
+                    openStatusOverlay();
+                }, true /* capture — runs before original modal listener */);
             }
 
             // ── Interrupted Downloads Popup ────────────────────────────────────────────
@@ -2595,6 +2691,15 @@
 
             let _interruptedItems = []; // meta records
 
+            // Track how many items have been individually resumed (to manage Resume All visibility)
+            function refreshResumeAllBtn() {
+                if (!intDlResumeAll) return;
+                // Count items that are NOT yet active (still resumable)
+                const pending = _interruptedItems.filter(m => !bgDownloads[m.id]);
+                // Hide Resume All if 0 or 1 pending (single item has its own button; 0 means nothing left)
+                intDlResumeAll.style.display = pending.length > 1 ? 'flex' : 'none';
+            }
+
             function openIntDlPopup(items) {
                 _interruptedItems = items;
                 intDlList.innerHTML = '';
@@ -2604,9 +2709,7 @@
                     el.id = 'idt-item-' + meta.id;
                     const dateStr = meta.addedAt ? new Date(meta.addedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
                     el.innerHTML = `
-                        ${meta.imgUrl
-                            ? `<img class="idt-poster" src="${meta.imgUrl}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-                            : ''}
+                        ${meta.imgUrl ? `<img class="idt-poster" src="${meta.imgUrl}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
                         <div class="idt-poster-ph" ${meta.imgUrl ? 'style="display:none"' : ''}><i class="bi bi-film"></i></div>
                         <div class="idt-info">
                             <div class="idt-movie-title">${meta.title || 'Unknown Film'}</div>
@@ -2624,6 +2727,7 @@
                         </button>`;
                     intDlList.appendChild(el);
                 });
+                refreshResumeAllBtn();
                 intDlBackdrop.classList.add('open');
             }
 
@@ -2638,42 +2742,46 @@
             window.resumeSingleDownload = async function (id) {
                 const meta = await dbGet(S_META, id);
                 if (!meta || !meta.videoUrl) return;
-                // Mark as downloading
                 const updated = { ...meta, status: 'downloading', size: 0 };
                 await dbPut(S_META, updated);
-                // Update button
+
+                // Update resume button → cancel button
                 const btn = document.getElementById('idt-btn-' + id);
                 if (btn) {
                     btn.innerHTML = '<i class="bi bi-x"></i>';
                     btn.className = 'idt-resume-btn cancel-mode';
                     btn.onclick = async () => {
                         await cancelBgDownload(id);
+                        // Reset button back to Resume
                         btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resume';
                         btn.className = 'idt-resume-btn';
                         btn.onclick = () => window.resumeSingleDownload(id);
                         const badge = document.getElementById('idt-badge-' + id);
                         if (badge) { badge.textContent = '⚠ Interrupted'; badge.className = 'idt-status-badge'; }
+                        const prog = document.getElementById('idt-prog-' + id);
+                        if (prog) prog.classList.remove('show');
+                        refreshResumeAllBtn();
                     };
                 }
-                // Update badge
+                // Update status badge
                 const badge = document.getElementById('idt-badge-' + id);
                 if (badge) { badge.textContent = '↓ Downloading'; badge.className = 'idt-status-badge downloading'; }
-                // Mark item visually
+                // Highlight item
                 const item = document.getElementById('idt-item-' + id);
                 if (item) item.classList.add('resuming');
+
                 doBgDownload(updated);
+                refreshResumeAllBtn(); // re-evaluate after this item starts
             };
 
             intDlResumeAll.addEventListener('click', async () => {
-                for (const meta of _interruptedItems) {
-                    // only resume those not already active
-                    if (!bgDownloads[meta.id]) {
-                        await window.resumeSingleDownload(meta.id);
-                    }
+                const pending = _interruptedItems.filter(m => !bgDownloads[m.id]);
+                for (const meta of pending) {
+                    await window.resumeSingleDownload(meta.id);
                 }
-                intDlResumeAll.textContent = 'Resuming…';
+                intDlResumeAll.style.display = 'none';
                 intDlResumeAll.disabled = true;
-                setTimeout(closeIntDlPopup, 1200);
+                setTimeout(closeIntDlPopup, 1000);
             });
 
             // ── Init: check for interrupted downloads after page loads ─────────────────
@@ -2681,7 +2789,6 @@
                 try {
                     await openDB();
                     const allMeta = await dbGetAll(S_META);
-                    // Mark any stuck "downloading" entries as interrupted
                     const interrupted = [];
                     for (const m of allMeta) {
                         if (m.status === 'downloading' || m.status === 'interrupted') {
@@ -2691,11 +2798,10 @@
                         }
                     }
                     if (interrupted.length > 0) {
-                        // Small delay so player loads first
                         setTimeout(() => openIntDlPopup(interrupted), 2000);
                     }
                 } catch (e) {
-                    // IndexedDB not available or empty — silently ignore
+                    // IndexedDB unavailable — silently ignore
                 }
             }
 
