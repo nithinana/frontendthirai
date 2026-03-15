@@ -1329,7 +1329,7 @@
             updateProgressBar();
         }
 
-        backButton.addEventListener('click', () => { window.history.back(); });
+        backButton.addEventListener('click', () => { window.location.href = '/'; });
 
         fullscreenButton.addEventListener('click', () => {
             if (document.fullscreenElement) {
@@ -2082,7 +2082,7 @@
                 const pageUrl = dlBtn.dataset.pageUrl || '';
                 const title   = dlBtn.dataset.title   || '';
                 const imgUrl  = dlBtn.dataset.imgUrl  || '';
-                const dest = 'index.html'
+                const dest = '/'
                     + '?dlurl='   + encodeURIComponent(pageUrl)
                     + '&dltitle=' + encodeURIComponent(title)
                     + '&dlimg='   + encodeURIComponent(imgUrl);
