@@ -1307,7 +1307,7 @@
                     <span class="dls-opt-icon"><i class="bi bi-arrow-down-circle-fill"></i></span>
                     <span class="dls-opt-text">
                         <span class="dls-opt-label">Download in App</span>
-                        <span class="dls-opt-desc">Opens the download manager</span>
+                        <span class="dls-opt-desc">Save in the background while you watch</span>
                     </span>
                 </button>
                 <button class="dls-opt-btn" id="dlsOptUrl">
@@ -2645,17 +2645,33 @@
                 const origDlBtn = document.getElementById('downloadButton');
 
                 if (dlsOptApp) {
-                    dlsOptApp.addEventListener('click', () => {
+                    dlsOptApp.addEventListener('click', async () => {
                         closeStatusOverlay();
-                        // Trigger the same action as the original "Download in App" button
-                        const pageUrl = origDlBtn ? (origDlBtn.dataset.pageUrl || '') : '';
-                        const title   = origDlBtn ? (origDlBtn.dataset.title   || '') : '';
-                        const imgUrl  = origDlBtn ? (origDlBtn.dataset.imgUrl  || '') : '';
-                        const dest = '/'
-                            + '?dlurl='   + encodeURIComponent(pageUrl)
-                            + '&dltitle=' + encodeURIComponent(title)
-                            + '&dlimg='   + encodeURIComponent(imgUrl);
-                        window.location.href = dest;
+                        const pageUrl  = origDlBtn ? (origDlBtn.dataset.pageUrl  || '') : '';
+                        const titleHint = origDlBtn ? (origDlBtn.dataset.title   || '') : '';
+                        const imgHint   = origDlBtn ? (origDlBtn.dataset.imgUrl  || '') : '';
+                        const videoUrl  = origDlBtn ? (origDlBtn.dataset.videoUrl || '') : '';
+                        if (!videoUrl) return;
+
+                        // Generate a unique ID and write a meta record so index.html will
+                        // see it as "interrupted" if the user leaves before it finishes.
+                        function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+                        const id = genId();
+                        const meta = {
+                            id,
+                            title:    titleHint || 'Unknown',
+                            imgUrl:   imgHint   || '',
+                            videoUrl: videoUrl,
+                            pageUrl:  pageUrl,
+                            status:   'downloading',
+                            size:     0,
+                            addedAt:  Date.now()
+                        };
+                        await dbPut(S_META, meta);
+                        // Start the background download — progress shown in the overlay
+                        doBgDownload(meta);
+                        // Re-open the overlay so the user can see it kick off
+                        openStatusOverlay();
                     });
                 }
 
