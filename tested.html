@@ -10855,6 +10855,15 @@ async function renderDownloadsView(){
   const view=document.getElementById('view-downloads');
   if(!view) return;
   const allMeta=await dbGetAll(S_META);
+
+  // Fix items stuck in 'downloading' that are no longer active (e.g. tab was closed mid-download)
+  for(const m of allMeta){
+    if(m.status==='downloading' && !activeDownloads[m.id]){
+      m.status='interrupted';
+      await dbPut(S_META,{...m,status:'interrupted'});
+    }
+  }
+
   allMeta.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
 
   if(!allMeta.length){
@@ -10889,13 +10898,15 @@ async function renderDownloadsView(){
 }
 
 function buildCardHtml(meta){
-  const {id,title,imgUrl,size,status}=meta;
-  const done=status==='done', err=status==='error', going=!!activeDownloads[id];
+  const {id,title,imgUrl,size,status,videoUrl}=meta;
+  const done=status==='done', err=status==='error', interrupted=status==='interrupted', going=!!activeDownloads[id];
   const badge=done?'<span class="dl-badge dl-badge-done">✓ Ready</span>'
     :err?'<span class="dl-badge dl-badge-err">✗ Error</span>'
+    :interrupted?'<span class="dl-badge dl-badge-err">⚠ Interrupted</span>'
     :'<span class="dl-badge dl-badge-dl">↓ Downloading</span>';
   const szStr=size?fmtBytes(size):'';
   const dateStr=meta.addedAt?new Date(meta.addedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
+  const canRetry=interrupted||err;
   return `<div class="dl-card" id="dlcard-${id}">
     <div class="dl-card-main">
       ${imgUrl?`<img class="dl-card-poster" src="${esc(imgUrl)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:'' }
@@ -10910,6 +10921,7 @@ function buildCardHtml(meta){
       </div>
       <div class="dl-card-actions">
         ${done?`<button class="dl-act-btn play-btn" onclick="dlPlay('${id}')" title="Watch offline"><i class="fas fa-play"></i></button>`:''}
+        ${canRetry?`<button class="dl-act-btn" onclick="dlRetry('${id}')" title="Retry download" style="color:#f5a623"><i class="fas fa-rotate-right"></i></button>`:''}
         ${going?`<button class="dl-act-btn" onclick="dlCancel('${id}')" title="Cancel"><i class="fas fa-xmark"></i></button>`:''}
         ${!going?`<button class="dl-act-btn del-btn" onclick="dlDelete('${id}')" title="Delete"><i class="fas fa-trash-can"></i></button>`:''}
       </div>
@@ -11110,6 +11122,17 @@ window.dlCancel=async function(id){
   await dbDel(S_META,id); await dbDel(S_BLOB,id);
   if(blobUrls[id]){URL.revokeObjectURL(blobUrls[id]);delete blobUrls[id];}
   dlToast('🗑 Download cancelled'); await renderDownloadsView();
+};
+
+window.dlRetry=async function(id){
+  const meta=await dbGet(S_META,id);
+  if(!meta||!meta.videoUrl){dlToast('❌ Cannot retry — missing info');return;}
+  await dbDel(S_BLOB,id);
+  const updated={...meta,status:'downloading',size:0};
+  await dbPut(S_META,updated);
+  await renderDownloadsView();
+  dlToast('⏳ Retrying: '+meta.title);
+  doDownload(id,updated);
 };
 
 window.dlDelete=async function(id){
