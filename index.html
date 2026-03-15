@@ -10810,6 +10810,71 @@ function initDiscoverView(){
 }
 .dl-install-btn:hover { opacity: 0.88; }
 .dl-install-btn:active { transform: scale(0.96); }
+
+/* iOS install instructions popup */
+#iosInstallOverlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 0 20px;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+}
+#iosInstallOverlay.open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transition: opacity 0.28s ease, visibility 0s;
+}
+#iosInstallSheet {
+  width: 100%; max-width: 460px;
+  background: rgba(22,22,22,0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 22px;
+  padding: 24px 22px 28px;
+  transform: translateY(30px);
+  transition: transform 0.3s cubic-bezier(0.32,1,0.46,1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+  margin: 0 12px;
+}
+#iosInstallOverlay.open #iosInstallSheet { transform: translateY(0); }
+.ios-install-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+  border-radius: 2px; margin: 0 auto 20px;
+}
+.ios-install-title {
+  font-size: 1rem; font-weight: 800; color: #fff;
+  text-align: center; margin-bottom: 6px;
+}
+.ios-install-sub {
+  font-size: 0.8rem; color: rgba(255,255,255,0.4);
+  text-align: center; margin-bottom: 22px; line-height: 1.5;
+}
+.ios-install-steps { display: flex; flex-direction: column; gap: 14px; }
+.ios-install-step {
+  display: flex; align-items: center; gap: 14px;
+}
+.ios-step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 800; color: rgba(255,255,255,0.6);
+  flex-shrink: 0;
+}
+.ios-step-text { font-size: 0.84rem; color: rgba(255,255,255,0.75); line-height: 1.4; }
+.ios-step-text strong { color: #fff; }
+.ios-step-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 5px;
+  background: rgba(255,255,255,0.1); font-size: 0.75rem;
+  vertical-align: middle; margin: 0 2px;
+}
+.ios-install-close {
+  margin-top: 22px; width: 100%;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; border-radius: 12px; padding: 13px;
+  font-size: 0.88rem; font-weight: 600; font-family: 'Inter', sans-serif;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
 .dl-section-label {
   font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
   color: rgba(255,255,255,0.35); margin-bottom: 12px; padding-left: 2px;
@@ -11002,6 +11067,30 @@ function initDiscoverView(){
 <!-- Toast -->
 <div id="dlToast"></div>
 
+<!-- iOS Install Instructions -->
+<div id="iosInstallOverlay" onclick="if(event.target===this)document.getElementById('iosInstallOverlay').classList.remove('open')">
+  <div id="iosInstallSheet">
+    <div class="ios-install-handle"></div>
+    <div class="ios-install-title">Install Thirai</div>
+    <div class="ios-install-sub">Add to your home screen for offline playback</div>
+    <div class="ios-install-steps">
+      <div class="ios-install-step">
+        <div class="ios-step-num">1</div>
+        <div class="ios-step-text">Tap the <strong>Share</strong> button <span class="ios-step-icon"><i class="fas fa-arrow-up-from-bracket"></i></span> at the bottom of Safari</div>
+      </div>
+      <div class="ios-install-step">
+        <div class="ios-step-num">2</div>
+        <div class="ios-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+      </div>
+      <div class="ios-install-step">
+        <div class="ios-step-num">3</div>
+        <div class="ios-step-text">Tap <strong>"Add"</strong> in the top right — then open Thirai from your home screen</div>
+      </div>
+    </div>
+    <button class="ios-install-close" onclick="document.getElementById('iosInstallOverlay').classList.remove('open')">Got it</button>
+  </div>
+</div>
+
 <script id="downloads-script">
 (function(){
 
@@ -11067,20 +11156,9 @@ async function renderDownloadsView(){
 
   allMeta.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
 
-  if(!allMeta.length){
-    view.innerHTML=`
-      <div class="dl-empty-state">
-        <div class="dl-empty-icon"><i class="fas fa-arrow-down-to-line"></i></div>
-        <div class="dl-empty-title">Films you download appear here</div>
-        <div class="dl-empty-sub">Save films to watch offline — no internet needed.</div>
-      </div>`;
-    return;
-  }
-
-  const doneCount=allMeta.filter(m=>m.status==='done').length;
-
-  // Install banner: show if not already installed as PWA
+  // Install banner helpers
   const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
   const installBannerHtml = isInstalled ? '' : `
     <div class="dl-install-banner" id="dlInstallBanner">
       <div class="dl-install-icon"><i class="fas fa-mobile-screen"></i></div>
@@ -11088,9 +11166,24 @@ async function renderDownloadsView(){
         <div class="dl-install-title">Install as app</div>
         <div class="dl-install-sub">Required for offline film playback</div>
       </div>
-      <button class="dl-install-btn" id="dlInstallBtn">Install</button>
+      <button class="dl-install-btn" id="dlInstallBtn">${isIOS ? 'How to' : 'Install'}</button>
     </div>`;
 
+  if(!allMeta.length){
+    view.innerHTML=`
+      <div style="padding: 0 16px; max-width: 680px; margin: 0 auto;">
+        ${installBannerHtml}
+      </div>
+      <div class="dl-empty-state">
+        <div class="dl-empty-icon"><i class="fas fa-arrow-down-to-line"></i></div>
+        <div class="dl-empty-title">Films you download appear here</div>
+        <div class="dl-empty-sub">Save films to watch offline — no internet needed.</div>
+      </div>`;
+    _wireInstallBtn(isIOS);
+    return;
+  }
+
+  const doneCount=allMeta.filter(m=>m.status==='done').length;
   let html=`<div class="dl-list-wrap">
     ${installBannerHtml}
     <div class="dl-section-label" style="margin-top:8px;">Saved Films &mdash; ${doneCount} ready</div>
@@ -11105,22 +11198,24 @@ async function renderDownloadsView(){
     if(p) p.classList.add('show');
   });
   updateDownloadDot();
+  _wireInstallBtn(isIOS);
+}
 
-  // Wire install button
+function _wireInstallBtn(isIOS){
   const installBtn = document.getElementById('dlInstallBtn');
-  if(installBtn){
-    installBtn.addEventListener('click', async function(){
-      if(window._pwaInstallPrompt){
-        window._pwaInstallPrompt.prompt();
-        const {outcome} = await window._pwaInstallPrompt.userChoice;
-        window._pwaInstallPrompt = null;
-        if(outcome === 'accepted') document.getElementById('dlInstallBanner')?.remove();
-      } else {
-        // Fallback: guide user manually
-        dlToast('Use your browser\'s "Add to Home Screen" option');
-      }
-    });
-  }
+  if(!installBtn) return;
+  installBtn.addEventListener('click', async function(){
+    if(isIOS){
+      document.getElementById('iosInstallOverlay').classList.add('open');
+    } else if(window._pwaInstallPrompt){
+      window._pwaInstallPrompt.prompt();
+      const {outcome} = await window._pwaInstallPrompt.userChoice;
+      window._pwaInstallPrompt = null;
+      if(outcome === 'accepted') document.getElementById('dlInstallBanner')?.remove();
+    } else {
+      dlToast('Use your browser\'s "Add to Home Screen" option');
+    }
+  });
 }
 
 function buildCardHtml(meta){
@@ -11258,6 +11353,7 @@ window.dlDelete=async function(id){
 };
 
 window.dlPlay=async function(id){
+  try{ await openDB(); }catch(e){}
   const meta=await dbGet(S_META,id);
   const blobRec=await dbGet(S_BLOB,id);
   if(!blobRec){dlToast('❌ File not found — try re-downloading');return;}
