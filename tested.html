@@ -2630,6 +2630,22 @@
                 if (item) item.remove();
             };
 
+            // ── Mark active downloads as interrupted when tab closes ───────────────────
+            async function markActiveAsInterrupted() {
+                const activeIds = Object.keys(bgDownloads);
+                if (!activeIds.length) return;
+                for (const id of activeIds) {
+                    const entry = bgDownloads[id];
+                    if (entry && entry.meta) {
+                        try { await dbPut(S_META, { ...entry.meta, status: 'interrupted' }); } catch(e) {}
+                    }
+                }
+            }
+            window.addEventListener('beforeunload', () => { markActiveAsInterrupted(); });
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') markActiveAsInterrupted();
+            });
+
             // ── Status Overlay open/close ──────────────────────────────────────────────
             const dlStatusOverlay = document.getElementById('dlStatusOverlay');
             const dlStatusClose = document.getElementById('dlStatusClose');
@@ -2662,6 +2678,40 @@
                         const titleHint = origDlBtn2 ? (origDlBtn2.dataset.title    || '') : '';
                         const imgHint   = origDlBtn2 ? (origDlBtn2.dataset.imgUrl   || '') : '';
                         if (!videoUrl) return;
+
+                        // ── Duplicate-download guard ───────────────────────────────────
+                        try {
+                            if (!_db) await openDB();
+                            const allMeta = await dbGetAll(S_META);
+                            const existing = allMeta.find(m => m.videoUrl === videoUrl);
+                            if (existing) {
+                                if (existing.status === 'done') {
+                                    // Already fully downloaded — show a toast and bail
+                                    const toast = document.getElementById('partyToast');
+                                    if (toast) {
+                                        toast.textContent = '✅ Already downloaded — find it in your library';
+                                        toast.classList.add('show');
+                                        clearTimeout(toast._t);
+                                        toast._t = setTimeout(() => toast.classList.remove('show'), 3000);
+                                    }
+                                    openStatusOverlay();
+                                    return;
+                                }
+                                if (existing.status === 'downloading' && bgDownloads[existing.id]) {
+                                    // Already actively downloading
+                                    const toast = document.getElementById('partyToast');
+                                    if (toast) {
+                                        toast.textContent = '⬇️ Already downloading this movie';
+                                        toast.classList.add('show');
+                                        clearTimeout(toast._t);
+                                        toast._t = setTimeout(() => toast.classList.remove('show'), 3000);
+                                    }
+                                    openStatusOverlay();
+                                    return;
+                                }
+                            }
+                        } catch(e) {}
+                        // ──────────────────────────────────────────────────────────────
 
                         function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
                         const meta = {
