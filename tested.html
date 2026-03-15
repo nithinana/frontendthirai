@@ -10968,59 +10968,13 @@ async function startDownload(pageUrl,titleHint,imgHint){
   doDownload(id,meta);
 }
 
-/* ── Background-download via Service Worker ── */
-let _swReady=false;
-(async function registerSW(){
-  if(!('serviceWorker' in navigator)) return;
-  try{
-    // thirai-sw.js must be served from the same origin (deploy it alongside this file)
-    const reg=await navigator.serviceWorker.register('/static/thirai-sw.js',{scope:'/'}).catch(()=>null);
-    if(!reg){console.warn('SW registration failed, falling back to tab download');return;}
-    // Wait until the SW is active and controlling this page
-    await navigator.serviceWorker.ready;
-    _swReady=true;
-
-    // Listen for messages from SW
-    navigator.serviceWorker.addEventListener('message',async e=>{
-      const {type,id,pct,received,total,title,size}=e.data||{};
-      if(type==='DL_PROGRESS'){
-        updateProgress(id,pct,received,total);
-      } else if(type==='DL_DONE'){
-        const meta=await dbGet(S_META,id).catch(()=>null);
-        if(meta) await dbPut(S_META,{...meta,status:'done',size}).catch(()=>{});
-        delete activeDownloads[id];
-        dlToast('✅ '+(title||'Film')+' saved!');
-        await renderDownloadsView();
-      } else if(type==='DL_ERROR'){
-        delete activeDownloads[id];
-        dlToast('❌ Download failed');
-        await renderDownloadsView();
-      }
-    });
-  }catch(err){
-    console.warn('SW setup error:',err);
-  }
-})();
-
 async function doDownload(id,meta){
   const prog=document.getElementById('dlprog-'+id);
   if(prog) prog.classList.add('show');
-
-  const proxyUrl=`${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
-
-  // ── Use Service Worker for background download if available ──
-  if(_swReady && navigator.serviceWorker.controller){
-    activeDownloads[id]={ctrl:{abort:()=>{
-      navigator.serviceWorker.controller&&navigator.serviceWorker.controller.postMessage({type:'CANCEL_DOWNLOAD',id});
-    }}};
-    navigator.serviceWorker.controller.postMessage({type:'START_DOWNLOAD',id,meta,proxyUrl});
-    return;
-  }
-
-  // ── Fallback: in-tab download (original behaviour) ──
   const ctrl=new AbortController();
   activeDownloads[id]={ctrl};
   try{
+    const proxyUrl=`${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
     const resp=await fetch(proxyUrl,{signal:ctrl.signal});
     if(!resp.ok) throw new Error('Fetch '+resp.status);
     const total=parseInt(resp.headers.get('Content-Length')||'0',10);
@@ -11056,18 +11010,6 @@ window.dlCancel=async function(id){
   await dbDel(S_META,id); await dbDel(S_BLOB,id);
   if(blobUrls[id]){URL.revokeObjectURL(blobUrls[id]);delete blobUrls[id];}
   dlToast('🗑 Download cancelled'); await renderDownloadsView();
-};
-
-window.dlPause=async function(id){
-  const a=activeDownloads[id];
-  if(a){a.ctrl.abort();delete activeDownloads[id];}
-  // Also tell SW to cancel if applicable
-  if(_swReady && navigator.serviceWorker.controller)
-    navigator.serviceWorker.controller.postMessage({type:'CANCEL_DOWNLOAD',id});
-  const meta=await dbGet(S_META,id);
-  if(meta) await dbPut(S_META,{...meta,status:'paused'});
-  dlToast('⏸ Paused: '+(meta?.title||'download'));
-  await renderDownloadsView();
 };
 
 window.dlRetry=async function(id){
