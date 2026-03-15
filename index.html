@@ -11342,6 +11342,19 @@ async function doDownload(id,meta){
   // the whole film in RAM (which crashes mobile tabs with "Aw, Snap!").
   const FLUSH_EVERY = 32 * 1024 * 1024; // 32 MB
 
+  // --- Mobile background detection ---
+  // On mobile, going to the background kills the fetch stream silently.
+  // We detect this and abort cleanly so the download saves as 'paused'
+  // (with chunks intact) rather than corrupting to a false 'done' state.
+  let _pausedByVisibility = false;
+  function _onVisibilityChange(){
+    if(document.visibilityState === 'hidden' && activeDownloads[id]){
+      _pausedByVisibility = true;
+      ctrl.abort();
+    }
+  }
+  document.addEventListener('visibilitychange', _onVisibilityChange);
+
   try{
     const proxyUrl=`${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
     const resp=await fetch(proxyUrl,{signal:ctrl.signal});
@@ -11389,20 +11402,48 @@ async function doDownload(id,meta){
       updateProgress(id,pct,received,total,avgSpeed);
     }
 
-    if(ctrl.signal.aborted){ await dbDeleteChunks(id).catch(()=>{}); return; }
+    // If aborted because app went to background: flush what we have, mark as
+    // interrupted, and auto-resume when the user comes back.
+    if(_pausedByVisibility){
+      document.removeEventListener('visibilitychange',_onVisibilityChange);
+      await flushBuffer().catch(()=>{});
+      await dbDeleteChunks(id).catch(()=>{}); // chunks can't resume mid-stream anyway
+      await dbPut(S_META,{...meta,status:'interrupted',size:received});
+      delete activeDownloads[id];
+      await renderDownloadsView();
+      dlToast('⏸ App backgrounded — tap retry to resume');
+      // Auto-resume once the user comes back to the tab
+      function _autoResume(){
+        if(document.visibilityState==='visible'){
+          document.removeEventListener('visibilitychange',_autoResume);
+          dlToast('▶️ Resuming download…');
+          setTimeout(()=>window.dlRetry(id), 500);
+        }
+      }
+      document.addEventListener('visibilitychange',_autoResume);
+      return;
+    }
+
+    if(ctrl.signal.aborted){ await dbDeleteChunks(id).catch(()=>{}); document.removeEventListener('visibilitychange',_onVisibilityChange); return; }
 
     // Flush any remaining buffered bytes
     await flushBuffer();
 
     // Assemble the final Blob from the stored chunks, then persist it
     const blob=await dbAssembleBlob(id);
+    if(!blob||blob.size===0) throw new Error('Assembled blob is empty — download may have been interrupted');
     await dbPut(S_BLOB,{id,blob});
     await dbDeleteChunks(id).catch(()=>{});
+    // Verify the blob was actually persisted before marking done
+    const verify=await dbGet(S_BLOB,id);
+    if(!verify||!verify.blob||verify.blob.size===0) throw new Error('Blob failed to persist to IndexedDB');
     await dbPut(S_META,{...meta,status:'done',size:blob.size});
     delete activeDownloads[id];
+    document.removeEventListener('visibilitychange',_onVisibilityChange);
     dlToast('✅ '+meta.title+' saved!');
     await renderDownloadsView();
   }catch(e){
+    document.removeEventListener('visibilitychange',_onVisibilityChange);
     if(e.name==='AbortError'){ await dbDeleteChunks(id).catch(()=>{}); return; }
     await dbDeleteChunks(id).catch(()=>{});
     await dbPut(S_META,{...meta,status:'error'});
@@ -11441,7 +11482,20 @@ window.dlPlay=async function(id){
   try{ await openDB(); }catch(e){}
   const meta=await dbGet(S_META,id);
   const blobRec=await dbGet(S_BLOB,id);
-  if(!blobRec){dlToast('❌ File not found — try re-downloading');return;}
+  if(!blobRec||!blobRec.blob||blobRec.blob.size===0){
+    // Blob missing or empty — likely interrupted mid-download on mobile.
+    // Reset the record so the retry button appears and kick off a fresh download.
+    dlToast('⚠️ File incomplete — restarting download…');
+    if(meta){
+      await dbDel(S_BLOB,id).catch(()=>{});
+      const updated={...meta,status:'interrupted',size:0};
+      await dbPut(S_META,updated);
+      await renderDownloadsView();
+      // Auto-kick retry so user doesn't have to tap again
+      setTimeout(()=>window.dlRetry(id),800);
+    }
+    return;
+  }
   if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
   const url=URL.createObjectURL(blobRec.blob);
   blobUrls[id]=url;
