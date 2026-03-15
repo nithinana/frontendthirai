@@ -2837,6 +2837,8 @@
                 if (btn) { btn.innerHTML = '<i class="bi bi-x"></i>'; btn.className = 'idt-resume-btn cancel-mode'; btn.onclick = () => cancelBgDownload(id); }
                 refreshResumeAllBtn();
             };
+
+            intDlResumeAll.addEventListener('click', async () => {
                 const pending = _interruptedItems.filter(m => !bgDownloads[m.id]);
                 for (const meta of pending) {
                     await window.resumeSingleDownload(meta.id);
