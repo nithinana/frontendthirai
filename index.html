@@ -11078,7 +11078,21 @@ async function renderDownloadsView(){
   }
 
   const doneCount=allMeta.filter(m=>m.status==='done').length;
+
+  // Install banner: show if not already installed as PWA
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const installBannerHtml = isInstalled ? '' : `
+    <div class="dl-install-banner" id="dlInstallBanner">
+      <div class="dl-install-icon"><i class="fas fa-mobile-screen"></i></div>
+      <div class="dl-install-text">
+        <div class="dl-install-title">Install as app</div>
+        <div class="dl-install-sub">Required for offline film playback</div>
+      </div>
+      <button class="dl-install-btn" id="dlInstallBtn">Install</button>
+    </div>`;
+
   let html=`<div class="dl-list-wrap">
+    ${installBannerHtml}
     <div class="dl-section-label" style="margin-top:8px;">Saved Films &mdash; ${doneCount} ready</div>
     <div class="dl-list" id="dlCardList">`;
   allMeta.forEach(meta=>{html+=buildCardHtml(meta);});
@@ -11091,6 +11105,22 @@ async function renderDownloadsView(){
     if(p) p.classList.add('show');
   });
   updateDownloadDot();
+
+  // Wire install button
+  const installBtn = document.getElementById('dlInstallBtn');
+  if(installBtn){
+    installBtn.addEventListener('click', async function(){
+      if(window._pwaInstallPrompt){
+        window._pwaInstallPrompt.prompt();
+        const {outcome} = await window._pwaInstallPrompt.userChoice;
+        window._pwaInstallPrompt = null;
+        if(outcome === 'accepted') document.getElementById('dlInstallBanner')?.remove();
+      } else {
+        // Fallback: guide user manually
+        dlToast('Use your browser\'s "Add to Home Screen" option');
+      }
+    });
+  }
 }
 
 function buildCardHtml(meta){
@@ -11234,12 +11264,14 @@ window.dlPlay=async function(id){
   if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
   const url=URL.createObjectURL(blobRec.blob);
   blobUrls[id]=url;
-  try{
-    sessionStorage.setItem('offlinePlay_url',url);
-    sessionStorage.setItem('offlinePlay_title',meta?.title||'');
-    sessionStorage.setItem('offlinePlay_id',id);
-  }catch(e){}
-  window.location.href='offline?offline=1&id='+encodeURIComponent(id);
+  const vid=document.getElementById('dlOfflineVideo');
+  const titleEl=document.getElementById('dlPlayerTitle');
+  if(titleEl) titleEl.textContent=meta?.title||'';
+  vid.src=url;
+  vid.load();
+  vid.play().catch(()=>{});
+  document.getElementById('dlPlayerBackdrop').classList.add('open');
+  document.body.style.overflow='hidden';
 };
 
 window.closeDlPlayer=function(){
@@ -11348,65 +11380,11 @@ document.getElementById('dlFindOverlay').addEventListener('click',function(e){if
 
 openDB().then(function(){ updateDownloadDot(); }).catch(console.error);
 
-// ── PWA Install Banner ────────────────────────────────────────
-(function(){
-  let _deferredPrompt = null;
-
-  function isInstalled(){
-    return window.matchMedia('(display-mode: standalone)').matches ||
-           window.navigator.standalone === true;
-  }
-
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    _deferredPrompt = e;
-    _injectInstallBanner();
-  });
-
-  function _injectInstallBanner(){
-    if(isInstalled()) return;
-    if(document.getElementById('dlInstallBanner')) return;
-
-    const wrap = document.getElementById('dlCardList') || document.querySelector('.dl-list-wrap');
-    if(!wrap) return;
-
-    const banner = document.createElement('div');
-    banner.id = 'dlInstallBanner';
-    banner.className = 'dl-install-banner';
-    banner.innerHTML =
-      '<div class="dl-install-icon"><i class="fas fa-mobile-screen"></i></div>' +
-      '<div class="dl-install-text">' +
-        '<div class="dl-install-title">Install Thirai</div>' +
-        '<div class="dl-install-sub">Required for offline film playback</div>' +
-      '</div>' +
-      '<button class="dl-install-btn" id="dlInstallBtn">Install</button>';
-
-    // Insert before the list, inside .dl-list-wrap
-    const listWrap = document.querySelector('.dl-list-wrap');
-    if(listWrap) listWrap.insertBefore(banner, listWrap.firstChild);
-
-    document.getElementById('dlInstallBtn').addEventListener('click', async function(){
-      if(!_deferredPrompt) return;
-      _deferredPrompt.prompt();
-      const { outcome } = await _deferredPrompt.userChoice;
-      _deferredPrompt = null;
-      if(outcome === 'accepted'){
-        banner.remove();
-      }
-    });
-  }
-
-  // Hook renderDownloadsView to inject banner after each render
-  window.addEventListener('load', function(){
-    const origRDV = window.renderDownloadsView;
-    if(typeof origRDV === 'function'){
-      window.renderDownloadsView = async function(){
-        await origRDV.apply(this, arguments);
-        if(_deferredPrompt && !isInstalled()) _injectInstallBanner();
-      };
-    }
-  });
-})();
+// Capture beforeinstallprompt globally so the install button can use it
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  window._pwaInstallPrompt = e;
+});
 
 // ---- Direct download triggered from watch.html via ?dlurl= ----
 async function startDownloadDirect(pageUrl, titleHint, imgHint) {
