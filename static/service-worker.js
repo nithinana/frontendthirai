@@ -1,72 +1,66 @@
-// static/service-worker.js
-const CACHE_NAME = 'thirai-cache-v1';
-const urlsToCache = [
-    '/', // Your root URL
-    '/index.html', // This might need to be '/templates/index.html' if your Flask app serves it that way, or rely on Flask's routing for root. For PWA, the browser sees the rendered HTML as the root.
-    '/static/manifest.json', // Now in static folder
-    '/oldindex.html',
-    '/mobile/index.html',
-    '/mobile/',
-    '/static/ios/icon-72x72.png',
-    '/static/ios/icon-96x96.png',
-    '/static/ios/icon-128x128.png',
-    '/static/ios/icon-144x144.png',
-    '/static/ios/icon-152x152.png',
-    '/static/ios/icon-192x192.png',
-    '/static/ios/icon-384x384.png',
-    '/static/ios/icon-512x512.png',
-    '/static/thiraiblack.png',
-    '/static/thiraiwhite.png',
-    '/static/favicon.png',
-    '/static/splash/launch-750x1334.png',
-    '/static/splash/launch-1242x2208.png',
-    '/static/splash/launch-1125x2436.png',
-    '/static/splash/launch-828x1792.png',
-    '/static/splash/launch-1242x2688.png',
-    '/static/splash/launch-1080x2340.png',
-    '/static/splash/launch-1170x2532.png',
-    '/static/splash/launch-1284x2778.png',
-    'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
-    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'
-    // Ensure all other static assets (CSS, JS, images, etc. that your app uses)
-    // are listed here with their correct /static/ paths
+const CACHE_NAME = 'thirai-v1';
+
+// Files to cache immediately on install
+const PRECACHE_URLS = [
+  '/',
+  '/index.html',
+  '/static/manifest.json',
+  '/static/ios/icon-96x96.png',
+  '/static/ios/icon-192x192.png',
+  '/static/ios/icon-152x152.png',
 ];
 
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('Opened cache');
-                // Ensure all cache paths are relative to the domain root
-                return cache.addAll(urlsToCache);
-            })
-    );
+// Install: pre-cache the shell
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS))
+  );
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                // Cache hit - return response
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
-    );
+// Activate: clean up old caches
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
 });
 
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Deleting old cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
+// Fetch: serve from cache when offline, otherwise go to network and cache the response
+self.addEventListener('fetch', event => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
+  // Skip cross-origin requests (API calls, TMDB, etc.)
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  event.respondWith(
+    caches.open(CACHE_NAME).then(async cache => {
+      try {
+        // Try network first
+        const networkResponse = await fetch(event.request);
+        // Cache successful responses for same-origin pages/assets
+        if (networkResponse.ok) {
+          cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      } catch (err) {
+        // Offline: serve from cache
+        const cached = await cache.match(event.request);
+        if (cached) return cached;
+
+        // For navigation requests (loading the page), serve index.html
+        if (event.request.mode === 'navigate') {
+          const index = await cache.match('/') || await cache.match('/index.html');
+          if (index) return index;
+        }
+
+        // Nothing available
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+      }
+    })
+  );
 });
