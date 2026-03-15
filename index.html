@@ -7924,55 +7924,30 @@ if ('serviceWorker' in navigator) {
   function activateOfflineMode(){
     window._isOffline = true;
 
-    document.querySelectorAll(
-      '#view-home,#view-collections,#view-search,#view-actor-details,' +
-      '#view-filter-results,#view-lang-category,#view-discover,' +
-      '#view-anime,#view-tmdb'
-    ).forEach(el => el.classList.add('visually-hidden'));
-
     // Suppress the service-status overlay
     const sso = document.getElementById('serviceStatusOverlay');
     if(sso){ sso.setAttribute('aria-hidden','true'); sso.style.display='none'; }
 
-    // Show downloads view
-    const dv = document.getElementById('view-downloads');
-    if(dv) dv.classList.remove('visually-hidden');
-
-    // Update nav
-    document.querySelectorAll('.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
-    const bd = document.getElementById('btm-downloads');
-    if(bd){ bd.classList.add('active'); } // keep display:none — icon stays in menu tab only
-
     const bb = document.getElementById('back-button');
     if(bb) bb.classList.add('visually-hidden');
 
-    // Add offline banner only if there are no downloads
-    if(dv && !document.getElementById('offlineBanner')){
-      if(typeof openDB==='function' && typeof dbGetAll==='function'){
-        openDB().then(function(){
-          return dbGetAll(typeof S_META !== 'undefined' ? S_META : 'meta');
-        }).then(function(items){
-          if(!items || items.length === 0){
-            var existing = document.getElementById('offlineBanner');
-            if(!existing){
-              const banner = document.createElement('div');
-              banner.id = 'offlineBanner';
-              banner.innerHTML =
-                '<div style="text-align:center;padding:80px 20px 20px;">' +
-                '<p style="margin:0 0 6px;font-size:1rem;font-weight:700;color:#ffffff;">You\'re offline</p>' +
-                '<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.4);">Films you download appear here</p>' +
-                '</div>';
-              dv.prepend(banner);
-            }
-          }
-        }).catch(function(){});
-      }
-    }
-
-    window.scrollTo({top:0,behavior:'instant'});
-
-    if(typeof openDB==='function'){
-      openDB().then(function(){ if(typeof renderDownloadsView==='function') renderDownloadsView(); }).catch(function(){});
+    // switchTab('downloads') already hides other views, updates nav, and calls renderDownloadsView.
+    // If the load-time patch has already run, use it. Otherwise do it manually (initial page load offline case).
+    if(typeof window.switchTab === 'function'){
+      window.switchTab('downloads');
+    } else {
+      document.querySelectorAll(
+        '#view-home,#view-collections,#view-search,#view-actor-details,' +
+        '#view-filter-results,#view-lang-category,#view-discover,' +
+        '#view-anime,#view-tmdb'
+      ).forEach(el => el.classList.add('visually-hidden'));
+      const dv = document.getElementById('view-downloads');
+      if(dv) dv.classList.remove('visually-hidden');
+      document.querySelectorAll('.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
+      const bd = document.getElementById('btm-downloads');
+      if(bd) bd.classList.add('active');
+      window.scrollTo({top:0,behavior:'instant'});
+      if(typeof renderDownloadsView==='function') renderDownloadsView();
     }
   }
 
