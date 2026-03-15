@@ -11185,9 +11185,13 @@ async function renderDownloadsView(){
   // Install banner helpers — never show when already running as installed PWA
   const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
                       window.matchMedia('(display-mode: fullscreen)').matches ||
-                      window.navigator.standalone === true;
+                      window.matchMedia('(display-mode: minimal-ui)').matches ||
+                      window.navigator.standalone === true ||
+                      document.referrer.startsWith('android-app://');
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  const installBannerHtml = isInstalled ? '' : `
+  // On iOS, if already installed (standalone), never show the banner
+  const showBanner = !isInstalled && !(isIOS && window.navigator.standalone === true);
+  const installBannerHtml = showBanner ? `
     <div class="dl-install-banner" id="dlInstallBanner">
       <div class="dl-install-icon"><i class="fas fa-mobile-screen"></i></div>
       <div class="dl-install-text">
@@ -11195,7 +11199,7 @@ async function renderDownloadsView(){
         <div class="dl-install-sub">Required for offline film playback</div>
       </div>
       <button class="dl-install-btn" id="dlInstallBtn">${isIOS ? 'How to' : 'Install'}</button>
-    </div>`;
+    </div>` : '';
 
   if(!allMeta.length){
     view.innerHTML=`
@@ -11232,6 +11236,13 @@ async function renderDownloadsView(){
 function _wireInstallBtn(isIOS){
   const installBtn = document.getElementById('dlInstallBtn');
   if(!installBtn) return;
+  // If somehow the button exists but we're already installed, remove it
+  const alreadyInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                           window.matchMedia('(display-mode: fullscreen)').matches ||
+                           window.matchMedia('(display-mode: minimal-ui)').matches ||
+                           window.navigator.standalone === true ||
+                           document.referrer.startsWith('android-app://');
+  if(alreadyInstalled){ installBtn.closest('.dl-install-banner')?.remove(); return; }
   installBtn.addEventListener('click', async function(){
     if(isIOS){
       document.getElementById('iosInstallOverlay').classList.add('open');
@@ -11612,6 +11623,12 @@ openDB().then(function(){ updateDownloadDot(); }).catch(console.error);
 window.addEventListener('beforeinstallprompt', function(e){
   e.preventDefault();
   window._pwaInstallPrompt = e;
+});
+
+// When the PWA is successfully installed (Android/Chrome), hide the banner immediately
+window.addEventListener('appinstalled', function(){
+  window._pwaInstallPrompt = null;
+  document.getElementById('dlInstallBanner')?.remove();
 });
 
 // ---- Direct download triggered from watch.html via ?dlurl= ----
