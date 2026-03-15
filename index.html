@@ -11245,14 +11245,30 @@ function buildCardHtml(meta){
   </div>`;
 }
 
-function updateProgress(id,pct,recv,total){
+function fmtEta(secs){
+  if(!isFinite(secs)||secs<=0) return '';
+  if(secs<60) return Math.round(secs)+'s left';
+  if(secs<3600) return Math.round(secs/60)+'m left';
+  return Math.floor(secs/3600)+'h '+Math.round((secs%3600)/60)+'m left';
+}
+function updateProgress(id,pct,recv,total,speed){
   const fill=document.getElementById('dlfill-'+id);
   const pctEl=document.getElementById('dlpct-'+id);
   const recvEl=document.getElementById('dlrecv-'+id);
   if(!fill) return;
   fill.style.width=pct+'%';
   pctEl.textContent=pct<1?'Connecting…':Math.round(pct)+'%';
-  recvEl.textContent=total?fmtBytes(recv)+' / '+fmtBytes(total):fmtBytes(recv);
+  let right='';
+  if(total){
+    right=fmtBytes(recv)+' / '+fmtBytes(total);
+    if(speed>0){
+      const eta=fmtEta((total-recv)/speed);
+      if(eta) right+=' · '+eta;
+    }
+  } else {
+    right=fmtBytes(recv);
+  }
+  recvEl.textContent=right;
 }
 
 async function startDownload(pageUrl,titleHint,imgHint){
@@ -11292,13 +11308,26 @@ async function doDownload(id,meta){
     const reader=resp.body.getReader();
     const chunks=[];
     let received=0;
+    const dlStart=Date.now();
+    let speedSamples=[];
+    let lastSampleTime=dlStart;
+    let lastSampleRecv=0;
     while(true){
       const {done,value}=await reader.read();
       if(done) break;
       if(ctrl.signal.aborted) break;
       chunks.push(value); received+=value.length;
       const pct=total?(received/total)*100:0;
-      updateProgress(id,pct,received,total);
+      // Compute a rolling speed sample every ~500ms
+      const now=Date.now();
+      if(now-lastSampleTime>=500){
+        const sampleSpeed=(received-lastSampleRecv)/((now-lastSampleTime)/1000);
+        speedSamples.push(sampleSpeed);
+        if(speedSamples.length>6) speedSamples.shift(); // keep last 6 samples (~3s)
+        lastSampleTime=now; lastSampleRecv=received;
+      }
+      const avgSpeed=speedSamples.length?speedSamples.reduce((a,b)=>a+b,0)/speedSamples.length:0;
+      updateProgress(id,pct,received,total,avgSpeed);
     }
     if(ctrl.signal.aborted) return;
     const blob=new Blob(chunks,{type:'video/mp4'});
