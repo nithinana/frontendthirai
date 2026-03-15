@@ -10974,79 +10974,11 @@ let _swReady=false;
 (async function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   try{
-    // Inline SW as a Blob so we don't need a separate file
-    const swCode=`
-const DB_NAME='ThiraiDownloads', S_META='meta', S_BLOB='blobs';
-let _db;
-function openDB(){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(DB_NAME,1);
-    r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(S_META))d.createObjectStore(S_META,{keyPath:'id'});if(!d.objectStoreNames.contains(S_BLOB))d.createObjectStore(S_BLOB,{keyPath:'id'});};
-    r.onsuccess=e=>{_db=e.target.result;res(_db);};
-    r.onerror=e=>rej(e.target.error);
-  });
-}
-function dbPut(s,o){return new Promise((res,rej)=>{const t=_db.transaction(s,'readwrite');t.objectStore(s).put(o).onsuccess=()=>res();t.onerror=e=>rej(e.target.error);});}
-function dbGet(s,k){return new Promise((res,rej)=>{const t=_db.transaction(s,'readonly'),r=t.objectStore(s).get(k);r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
-
-const active={};
-
-self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-
-self.addEventListener('message',e=>{
-  if(e.data&&e.data.type==='START_DOWNLOAD'){
-    const {id,meta,proxyUrl}=e.data;
-    e.waitUntil(runDownload(id,meta,proxyUrl));
-  }
-  if(e.data&&e.data.type==='CANCEL_DOWNLOAD'){
-    const a=active[e.data.id];
-    if(a){a.abort();delete active[e.data.id];}
-  }
-});
-
-async function notify(type,payload){
-  const cs=await self.clients.matchAll({includeUncontrolled:true,type:'window'});
-  cs.forEach(c=>c.postMessage({type,...payload}));
-}
-
-async function runDownload(id,meta,proxyUrl){
-  await openDB();
-  const ctrl=new AbortController();
-  active[id]=ctrl;
-  try{
-    const resp=await fetch(proxyUrl,{signal:ctrl.signal});
-    if(!resp.ok) throw new Error('Fetch '+resp.status);
-    const total=parseInt(resp.headers.get('Content-Length')||'0',10);
-    const reader=resp.body.getReader();
-    const chunks=[];
-    let received=0;
-    while(true){
-      const {done,value}=await reader.read();
-      if(done) break;
-      if(ctrl.signal.aborted) break;
-      chunks.push(value); received+=value.length;
-      const pct=total?(received/total)*100:0;
-      await notify('DL_PROGRESS',{id,pct,received,total});
-    }
-    if(ctrl.signal.aborted){delete active[id];return;}
-    const blob=new Blob(chunks,{type:'video/mp4'});
-    await dbPut(S_BLOB,{id,blob});
-    await dbPut(S_META,{...meta,status:'done',size:blob.size});
-    delete active[id];
-    await notify('DL_DONE',{id,title:meta.title,size:blob.size});
-  }catch(er){
-    if(er.name==='AbortError'){delete active[id];return;}
-    try{await dbPut(S_META,{...meta,status:'error'});}catch(_){}
-    delete active[id];
-    await notify('DL_ERROR',{id});
-  }
-}
-`;
-    const blob=new Blob([swCode],{type:'application/javascript'});
-    const swUrl=URL.createObjectURL(blob);
-    const reg=await navigator.serviceWorker.register(swUrl,{scope:'./'}).catch(()=>null);
+    // thirai-sw.js must be served from the same origin (deploy it alongside this file)
+    const reg=await navigator.serviceWorker.register('/static/thirai-sw.js',{scope:'/'}).catch(()=>null);
     if(!reg){console.warn('SW registration failed, falling back to tab download');return;}
+    // Wait until the SW is active and controlling this page
+    await navigator.serviceWorker.ready;
     _swReady=true;
 
     // Listen for messages from SW
