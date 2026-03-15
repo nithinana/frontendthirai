@@ -2,10 +2,25 @@
 <html lang="en">
 <head>
 
-<!-- offline.html — plays downloaded videos from IndexedDB / sessionStorage blob URL -->
+<!-- offline.html — plays downloaded videos from IndexedDB -->
 
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Cast SDK and Socket.io are loaded async and gracefully skipped when offline -->
+    <script>
+      // Wrap CDN scripts so failures don't break the page
+      function _loadScript(src, cb) {
+        var s = document.createElement('script');
+        s.src = src; s.async = true;
+        s.onerror = function() { if(cb) cb(new Error('Failed: ' + src)); };
+        s.onload = function() { if(cb) cb(null); };
+        document.head.appendChild(s);
+      }
+      window.addEventListener('load', function() {
+        _loadScript('https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1');
+        _loadScript('https://cdn.socket.io/4.7.2/socket.io.min.js', function(err) {
+          if (err) window.io = function(){ return { on:function(){}, emit:function(){}, disconnect:function(){} }; };
+        });
+      });
+    </script>
     <script>window.drawQRToCanvas=function(text,canvas){var size=canvas.width,ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);var img=new Image();img.crossOrigin='anonymous';img.onload=function(){ctx.drawImage(img,0,0,size,size);};img.onerror=function(){ctx.fillStyle='#333';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('QR load failed',size/2,size/2);};img.src='https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&data='+encodeURIComponent(text)+'&bgcolor=ffffff&color=000000&format=png&margin=2';};</script>
 
     <meta name="screen-orientation" content="landscape">
@@ -29,8 +44,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Thirai</title>
     <link rel="icon" type="image/png" href="/static/favicon.png"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Fonts: try network, silently fall back to system sans-serif when offline -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+    <!-- Bootstrap Icons: served from SW cache when offline, CDN when online -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+
+    <!-- Inline fallback: if BI font fails offline, these map common icons to unicode symbols -->
+    <style>
+      /* System font fallback so UI doesn't break without Inter */
+      :root { --font-ui: 'Inter', system-ui, -apple-system, sans-serif; }
+      body { font-family: var(--font-ui); }
+    </style>
     <style>
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -1148,7 +1175,14 @@
             updateProgressBar();
         }
 
-        backButton.addEventListener('click', () => { window.history.back(); });
+        backButton.addEventListener('click', () => {
+            // If we have history, go back; otherwise navigate home to downloads tab
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/?tab=downloads';
+            }
+        });
 
         fullscreenButton.addEventListener('click', () => {
             if (document.fullscreenElement) {
@@ -1277,7 +1311,14 @@
                     if (id) {
                         try {
                             blobUrl = await new Promise((resolve, reject) => {
-                                const req = indexedDB.open('ThiraiDownloads', 1);
+                                const req = indexedDB.open('ThiraiDownloads', 2);
+                                req.onupgradeneeded = function(e) {
+                                    // Ensure stores exist if this somehow opens fresh
+                                    const db = e.target.result;
+                                    if (!db.objectStoreNames.contains('meta'))  db.createObjectStore('meta',  {keyPath:'id'});
+                                    if (!db.objectStoreNames.contains('blobs')) db.createObjectStore('blobs', {keyPath:'id'});
+                                    if (!db.objectStoreNames.contains('chunks'))db.createObjectStore('chunks',{keyPath:'key'});
+                                };
                                 req.onerror = () => reject(req.error);
                                 req.onsuccess = () => {
                                     const db = req.result;
@@ -1298,7 +1339,8 @@
                             if (!blobUrl) {
                                 // Also try meta store for the title
                                 title = await new Promise((resolve) => {
-                                    const req2 = indexedDB.open('ThiraiDownloads', 1);
+                                    const req2 = indexedDB.open('ThiraiDownloads', 2);
+                                    req2.onupgradeneeded = function(){};
                                     req2.onsuccess = () => {
                                         const db = req2.result;
                                         const storeName = 'meta';
