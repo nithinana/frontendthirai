@@ -228,7 +228,105 @@
         .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; cursor: pointer; }
         .volume-slider::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: white; cursor: pointer; border: none; }
 
-        /* ===== WATCH PARTY STYLES ===== */
+        /* ===== DOWNLOAD MODAL ===== */
+        .dl-modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 9100; display: flex; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+        }
+        .dl-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+        .dl-modal {
+            width: 100%; max-width: 340px;
+            background: rgba(18,18,18,0.97);
+            border: 1px solid #2a2a2a;
+            border-radius: 22px;
+            padding: 28px 22px 22px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            transform: translateY(16px); transition: transform 0.25s ease;
+            position: relative;
+        }
+        .dl-modal-backdrop.open .dl-modal { transform: translateY(0); }
+
+        .dl-modal-close {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255,255,255,0.07); border: 1px solid #333;
+            color: rgba(255,255,255,0.6); font-size: 1rem;
+            width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .dl-modal-close:hover { background: rgba(255,255,255,0.13); color: #fff; }
+
+        .dl-modal-icon {
+            width: 54px; height: 54px; border-radius: 50%;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px; font-size: 1.5rem; color: rgba(255,255,255,0.8);
+        }
+        .dl-modal h2 {
+            margin: 0 0 4px; font-size: 1.1rem; font-weight: 800; text-align: center; color: #fff;
+        }
+        .dl-modal-subtitle {
+            text-align: center; color: rgba(255,255,255,0.4); font-size: 0.83rem; margin: 0 0 22px;
+        }
+
+        .dl-opt-btn {
+            width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid #2e2e2e;
+            background: rgba(255,255,255,0.04); color: #fff;
+            font-size: 0.95rem; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            display: flex; align-items: center; gap: 12px; text-align: left;
+            margin-bottom: 10px;
+        }
+        .dl-opt-btn:last-child { margin-bottom: 0; }
+        .dl-opt-btn:hover { background: rgba(255,255,255,0.09); border-color: #444; }
+        .dl-opt-btn:active { transform: scale(0.98); }
+        .dl-opt-btn .dl-opt-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(255,255,255,0.07); border: 1px solid #333;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .dl-opt-btn .dl-opt-text { display: flex; flex-direction: column; gap: 2px; }
+        .dl-opt-btn .dl-opt-label { font-size: 0.9rem; font-weight: 700; }
+        .dl-opt-btn .dl-opt-desc { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 400; }
+
+        /* URL screen */
+        .dl-url-box {
+            background: rgba(255,255,255,0.04); border: 1px solid #2e2e2e;
+            border-radius: 12px; padding: 12px 14px;
+            font-size: 0.78rem; font-family: monospace;
+            color: rgba(255,255,255,0.6); word-break: break-all;
+            margin-bottom: 12px; max-height: 80px; overflow-y: auto;
+            line-height: 1.5;
+        }
+        .dl-url-box::-webkit-scrollbar { width: 3px; }
+        .dl-url-box::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        .dl-copy-btn {
+            width: 100%; padding: 13px; border-radius: 13px; border: none;
+            background: #fff; color: #000;
+            font-size: 0.95rem; font-weight: 700; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: background 0.15s, transform 0.1s;
+            margin-bottom: 8px;
+        }
+        .dl-copy-btn:hover { background: #e0e0e0; }
+        .dl-copy-btn:active { transform: scale(0.98); }
+
+        .dl-back-btn {
+            width: 100%; padding: 11px; border-radius: 13px;
+            border: 1px solid #333; background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.6); font-size: 0.88rem; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.15s;
+        }
+        .dl-back-btn:hover { background: rgba(255,255,255,0.08); }
+
+        /* ===== END DOWNLOAD MODAL ===== */
 
         /* Party button in top controls */
         #partyButton { position: relative; }
@@ -656,9 +754,9 @@
                 </button>
                 <div class="movie-title-display" id="movieTitleDisplay">Thirai</div>
                 <div class="top-controls-right">
-                    <a href="#" id="downloadButton" download="Thirai.mp4" class="top-button" style="display: none;">
+                    <button id="downloadButton" class="top-button" style="display: none;">
                         <i class="bi bi-download"></i>
-                    </a>
+                    </button>
                     <button id="magnificationButton" class="top-button">
                         <i class="bi bi-zoom-in"></i>
                     </button>
@@ -894,6 +992,45 @@
     </div>
 
     </div><!-- end .video-player-wrapper -->
+
+        <!-- ===== DOWNLOAD MODAL ===== -->
+        <div class="dl-modal-backdrop" id="dlModalBackdrop">
+            <div class="dl-modal">
+                <button class="dl-modal-close" id="dlModalClose"><i class="bi bi-x"></i></button>
+
+                <!-- Choice screen -->
+                <div id="dlChoiceScreen">
+                    <div class="dl-modal-icon"><i class="bi bi-download"></i></div>
+                    <h2>Download</h2>
+                    <p class="dl-modal-subtitle">How would you like to download?</p>
+                    <button class="dl-opt-btn" id="dlOptApp">
+                        <span class="dl-opt-icon"><i class="bi bi-arrow-down-circle-fill"></i></span>
+                        <span class="dl-opt-text">
+                            <span class="dl-opt-label">Download in App</span>
+                            <span class="dl-opt-desc">Opens the download manager</span>
+                        </span>
+                    </button>
+                    <button class="dl-opt-btn" id="dlOptUrl">
+                        <span class="dl-opt-icon"><i class="bi bi-link-45deg"></i></span>
+                        <span class="dl-opt-text">
+                            <span class="dl-opt-label">Get URL</span>
+                            <span class="dl-opt-desc">Copy the direct video link</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- URL screen -->
+                <div id="dlUrlScreen" style="display:none;">
+                    <div class="dl-modal-icon"><i class="bi bi-link-45deg"></i></div>
+                    <h2>Video URL</h2>
+                    <p class="dl-modal-subtitle">Copy the direct link below</p>
+                    <div class="dl-url-box" id="dlModalUrl"></div>
+                    <button class="dl-copy-btn" id="dlCopyUrl">Copy URL</button>
+                    <button class="dl-back-btn" id="dlUrlBack">← Back</button>
+                </div>
+            </div>
+        </div>
+        <!-- ===== END DOWNLOAD MODAL ===== -->
 
     <script>
         // ===================== ORIGINAL PLAYER CODE =====================
@@ -1315,7 +1452,7 @@
                     if (data && data.video_url) {
                         moviePlayer.src = data.video_url;
                         moviePlayer.load();
-                        downloadButton.href = data.video_url;
+                        downloadButton.dataset.videoUrl = data.video_url;
                         downloadButton.style.display = 'flex';
                         movieTitleDisplay.textContent = data.title;
                         document.title = data.title;
@@ -1896,6 +2033,68 @@
                 });
             }
         });
+
+        // ---- Download Modal ----
+        (function() {
+            const dlBtn = document.getElementById('downloadButton');
+
+            function getVideoUrl() {
+                return dlBtn.dataset.videoUrl || '';
+            }
+
+            dlBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = getVideoUrl();
+                if (!url) return;
+                document.getElementById('dlModalUrl').textContent = url;
+                document.getElementById('dlModalBackdrop').classList.add('open');
+                moviePlayer.pause && moviePlayer.pause();
+            });
+
+            document.getElementById('dlOptUrl').addEventListener('click', function() {
+                document.getElementById('dlChoiceScreen').style.display = 'none';
+                document.getElementById('dlUrlScreen').style.display = 'block';
+            });
+
+            document.getElementById('dlCopyUrl').addEventListener('click', function() {
+                const url = getVideoUrl();
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        this.textContent = 'Copied!';
+                        setTimeout(() => { this.textContent = 'Copy URL'; }, 1500);
+                    });
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = url;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    this.textContent = 'Copied!';
+                    setTimeout(() => { this.textContent = 'Copy URL'; }, 1500);
+                }
+            });
+
+            document.getElementById('dlOptApp').addEventListener('click', function() {
+                window.location.href = 'tested.html?dlurl=' + encodeURIComponent(getVideoUrl());
+            });
+
+            document.getElementById('dlModalClose').addEventListener('click', closeDlModal);
+            document.getElementById('dlUrlBack').addEventListener('click', function() {
+                document.getElementById('dlChoiceScreen').style.display = 'block';
+                document.getElementById('dlUrlScreen').style.display = 'none';
+            });
+            document.getElementById('dlModalBackdrop').addEventListener('click', function(e) {
+                if (e.target === this) closeDlModal();
+            });
+
+            function closeDlModal() {
+                document.getElementById('dlModalBackdrop').classList.remove('open');
+                document.getElementById('dlChoiceScreen').style.display = 'block';
+                document.getElementById('dlUrlScreen').style.display = 'none';
+                moviePlayer.play && moviePlayer.play().catch(() => {});
+            }
+        })();
 
         // Auto-join from URL ?party=CODE&name=NAME
         function _autoJoinParty(code, nameFromUrl) {
