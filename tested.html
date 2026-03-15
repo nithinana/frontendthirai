@@ -11037,7 +11037,7 @@ window.dlPlay=async function(id){
     sessionStorage.setItem('offlinePlay_title',meta?.title||'');
     sessionStorage.setItem('offlinePlay_id',id);
   }catch(e){}
-  window.open('offline.html?offline=1&id='+encodeURIComponent(id),'_blank');
+  window.location.href='offline.html?offline=1&id='+encodeURIComponent(id);
 };
 
 window.closeDlPlayer=function(){
