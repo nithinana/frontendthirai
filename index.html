@@ -7865,6 +7865,69 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/static/service-worker.js');
   });
 }
+
+// ── OFFLINE MODE ─────────────────────────────────────────────
+(function(){
+  function activateOfflineMode(){
+    document.querySelectorAll(
+      '#view-home,#view-collections,#view-search,#view-actor-details,' +
+      '#view-filter-results,#view-lang-category,#view-discover,' +
+      '#view-anime,#view-tmdb'
+    ).forEach(el => el.classList.add('visually-hidden'));
+
+    // Suppress the service-status overlay
+    const sso = document.getElementById('serviceStatusOverlay');
+    if(sso){ sso.setAttribute('aria-hidden','true'); sso.style.display='none'; }
+
+    // Show downloads view
+    const dv = document.getElementById('view-downloads');
+    if(dv) dv.classList.remove('visually-hidden');
+
+    // Update nav
+    document.querySelectorAll('.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
+    const bd = document.getElementById('btm-downloads');
+    if(bd){ bd.style.display=''; bd.classList.add('active'); }
+
+    const bb = document.getElementById('back-button');
+    if(bb) bb.classList.add('visually-hidden');
+
+    // Add offline banner
+    if(dv && !document.getElementById('offlineBanner')){
+      const banner = document.createElement('div');
+      banner.id = 'offlineBanner';
+      banner.innerHTML =
+        '<div style="display:flex;align-items:center;gap:10px;' +
+        'background:rgba(229,9,20,0.12);border:1px solid rgba(229,9,20,0.35);' +
+        'border-radius:10px;padding:12px 16px;margin:74px 16px 0;' +
+        'font-size:0.85rem;color:#f5a3a3;">' +
+        '<i class="fas fa-wifi-slash" style="font-size:1.1rem;color:#e50914;flex-shrink:0"></i>' +
+        '<span>You\'re offline \u2014 only your downloaded films are available.</span>' +
+        '</div>';
+      dv.prepend(banner);
+    }
+
+    window.scrollTo({top:0,behavior:'instant'});
+
+    if(typeof openDB==='function'){
+      openDB().then(function(){ if(typeof renderDownloadsView==='function') renderDownloadsView(); }).catch(function(){});
+    }
+  }
+
+  function deactivateOfflineMode(){
+    var banner = document.getElementById('offlineBanner');
+    if(banner) banner.remove();
+    var sso = document.getElementById('serviceStatusOverlay');
+    if(sso) sso.style.display='';
+    window.location.reload();
+  }
+
+  window.addEventListener('load', function(){
+    if(!navigator.onLine){ setTimeout(activateOfflineMode, 200); }
+  });
+
+  window.addEventListener('offline', activateOfflineMode);
+  window.addEventListener('online',  deactivateOfflineMode);
+}());
 </script>
 
 
@@ -11049,7 +11112,6 @@ window.dlPlay=async function(id){
   if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
   const url=URL.createObjectURL(blobRec.blob);
   blobUrls[id]=url;
-  // Store blob URL + metadata in sessionStorage so offline.html can pick it up
   try{
     sessionStorage.setItem('offlinePlay_url',url);
     sessionStorage.setItem('offlinePlay_title',meta?.title||'');
