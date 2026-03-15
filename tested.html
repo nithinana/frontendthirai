@@ -11152,6 +11152,41 @@ document.getElementById('dlFindOverlay').addEventListener('click',function(e){if
 
 openDB().catch(console.error);
 
+// ---- Direct download from ?dlurl= (triggered from watch.html) ----
+async function startDownloadDirect(videoUrl, titleHint, imgHint) {
+  await openDB().catch(()=>{});
+  const all = await dbGetAll(S_META);
+  const dupe = all.find(m => m.videoUrl === videoUrl);
+  if (dupe) { dlToast('ℹ Already downloaded: ' + (dupe.title || 'film')); window.switchTab('downloads'); return; }
+
+  const id = genId();
+  const title = titleHint || 'Downloaded Film';
+  const imgUrl = imgHint || '';
+  const meta = { id, title, imgUrl, videoUrl, status: 'downloading', size: 0, addedAt: Date.now() };
+  await dbPut(S_META, meta);
+  activeDownloads[id] = { ctrl: { abort: () => {} } };
+  await renderDownloadsView();
+  if (typeof window.switchTab === 'function') window.switchTab('downloads');
+  dlToast('⏳ Starting download…');
+  doDownload(id, meta);
+}
+
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const dlurl = params.get('dlurl');
+  if (dlurl) {
+    // Remove param from URL bar cleanly
+    const clean = window.location.pathname;
+    window.history.replaceState({}, '', clean);
+    // Wait for DB + DOM to be ready, then kick off
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        startDownloadDirect(decodeURIComponent(dlurl));
+      }, 600);
+    });
+  }
+})();
+
 })();
 </script>
 </body>
