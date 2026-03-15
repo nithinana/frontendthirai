@@ -3573,7 +3573,7 @@
   </button>
 
   <button class="side-item" id="desk-downloads" onclick="switchTab('downloads')" aria-label="Downloads" title="Downloads">
-    <i class="fas fa-download"></i>
+    <span class="dl-nav-icon-wrap"><i class="fas fa-download"></i><span class="dl-status-dot" id="desk-dl-dot"></span></span>
   </button>
 
 </aside>
@@ -3718,7 +3718,7 @@
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
         <div class="nav-item" onclick="switchTab('downloads')" id="btm-downloads" style="display:none;">
-            <i class="fas fa-download"></i> <span>Downloads</span>
+            <span class="dl-nav-icon-wrap"><i class="fas fa-download"></i><span class="dl-status-dot" id="btm-dl-dot"></span></span> <span>Downloads</span>
         </div>
         <div class="nav-item" onclick="toggleMoreMenu()" id="btm-more">
             <i class="fas fa-border-all" id="btm-more-icon"></i> <span>More</span>
@@ -7868,7 +7868,59 @@ if ('serviceWorker' in navigator) {
 
 // ── OFFLINE MODE ─────────────────────────────────────────────
 (function(){
+
+  // Inject offline-popup styles once
+  const offlineStyle = document.createElement('style');
+  offlineStyle.textContent = `
+    #offlineBlockPopup {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(24,24,24,0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 12px 20px;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 9999;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    #offlineBlockPopup.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #offlineBlockPopup p { margin: 0; }
+    #offlineBlockPopup .obp-title {
+      font-size: 0.88rem; font-weight: 700; color: #fff; margin-bottom: 3px;
+    }
+    #offlineBlockPopup .obp-sub {
+      font-size: 0.76rem; color: rgba(255,255,255,0.4);
+    }
+  `;
+  document.head.appendChild(offlineStyle);
+
+  // Create the popup element
+  const popup = document.createElement('div');
+  popup.id = 'offlineBlockPopup';
+  popup.innerHTML =
+    '<p class="obp-title">You\'re offline</p>' +
+    '<p class="obp-sub">Only your downloaded films are available</p>';
+  document.body.appendChild(popup);
+
+  let _popupTimer = null;
+  function showOfflinePopup(){
+    clearTimeout(_popupTimer);
+    popup.classList.add('show');
+    _popupTimer = setTimeout(function(){ popup.classList.remove('show'); }, 2600);
+  }
+
   function activateOfflineMode(){
+    window._isOffline = true;
+
     document.querySelectorAll(
       '#view-home,#view-collections,#view-search,#view-actor-details,' +
       '#view-filter-results,#view-lang-category,#view-discover,' +
@@ -7896,12 +7948,9 @@ if ('serviceWorker' in navigator) {
       const banner = document.createElement('div');
       banner.id = 'offlineBanner';
       banner.innerHTML =
-        '<div style="display:flex;align-items:center;gap:10px;' +
-        'background:rgba(229,9,20,0.12);border:1px solid rgba(229,9,20,0.35);' +
-        'border-radius:10px;padding:12px 16px;margin:74px 16px 0;' +
-        'font-size:0.85rem;color:#f5a3a3;">' +
-        '<i class="fas fa-wifi-slash" style="font-size:1.1rem;color:#e50914;flex-shrink:0"></i>' +
-        '<span>You\'re offline \u2014 only your downloaded films are available.</span>' +
+        '<div style="text-align:center;padding:80px 20px 20px;">' +
+        '<p style="margin:0 0 6px;font-size:1rem;font-weight:700;color:#ffffff;">You\'re offline</p>' +
+        '<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.4);">Films you download appear here</p>' +
         '</div>';
       dv.prepend(banner);
     }
@@ -7914,6 +7963,7 @@ if ('serviceWorker' in navigator) {
   }
 
   function deactivateOfflineMode(){
+    window._isOffline = false;
     var banner = document.getElementById('offlineBanner');
     if(banner) banner.remove();
     var sso = document.getElementById('serviceStatusOverlay');
@@ -7921,7 +7971,18 @@ if ('serviceWorker' in navigator) {
     window.location.reload();
   }
 
+  // Patch switchTab to block non-downloads tabs when offline
+  // Wait for 'load' so all other script patches (downloads-script etc.) have run first
   window.addEventListener('load', function(){
+    var _origSwitchTab = window.switchTab;
+    window.switchTab = function(tab){
+      if(window._isOffline && tab !== 'downloads'){
+        showOfflinePopup();
+        return;
+      }
+      if(typeof _origSwitchTab === 'function') _origSwitchTab.call(this, tab);
+    };
+    // Now safe to activate offline mode (switchTab patch is in place)
     if(!navigator.onLine){ setTimeout(activateOfflineMode, 200); }
   });
 
@@ -10871,6 +10932,17 @@ function initDiscoverView(){
 
 #btm-downloads.active { color: white; }
 #desk-downloads.active { color: #fff; background: rgba(255,255,255,0.08); }
+
+/* Status dot on downloads icon */
+.dl-nav-icon-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.dl-status-dot {
+  position: absolute; top: -3px; right: -5px;
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1.5px solid var(--bg-body);
+  display: none;
+}
+.dl-status-dot.dl-dot-orange { display: block; background: #f97316; }
+.dl-status-dot.dl-dot-green  { display: block; background: #22c55e; }
 </style>
 
 <!-- Find Something to Download sheet -->
@@ -10932,6 +11004,21 @@ function dlToast(msg,dur=3000){
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
 }
 
+function updateDownloadDot(){
+  const allActive = Object.keys(activeDownloads).length > 0;
+  // We need the meta to detect interrupted items; use a quick sync check
+  dbGetAll(S_META).then(function(all){
+    const hasInterrupted = all.some(m => m.status === 'interrupted' || m.status === 'error');
+    const cls = allActive ? 'dl-dot-green' : hasInterrupted ? 'dl-dot-orange' : '';
+    ['btm-dl-dot','desk-dl-dot'].forEach(function(dotId){
+      const dot = document.getElementById(dotId);
+      if(!dot) return;
+      dot.classList.remove('dl-dot-green','dl-dot-orange');
+      if(cls) dot.classList.add(cls);
+    });
+  }).catch(function(){});
+}
+
 async function renderDownloadsView(){
   const view=document.getElementById('view-downloads');
   if(!view) return;
@@ -10969,6 +11056,7 @@ async function renderDownloadsView(){
     const p=document.getElementById('dlprog-'+id);
     if(p) p.classList.add('show');
   });
+  updateDownloadDot();
 }
 
 function buildCardHtml(meta){
