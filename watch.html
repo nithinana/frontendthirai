@@ -1453,6 +1453,9 @@
                         moviePlayer.src = data.video_url;
                         moviePlayer.load();
                         downloadButton.dataset.videoUrl = data.video_url;
+                        downloadButton.dataset.pageUrl = movieUrl;
+                        downloadButton.dataset.title = data.title || '';
+                        downloadButton.dataset.imgUrl = data.img_url || '';
                         downloadButton.style.display = 'flex';
                         movieTitleDisplay.textContent = data.title;
                         document.title = data.title;
@@ -2076,7 +2079,14 @@
             });
 
             document.getElementById('dlOptApp').addEventListener('click', function() {
-                window.location.href = 'tested.html?dlurl=' + encodeURIComponent(getVideoUrl());
+                const pageUrl = dlBtn.dataset.pageUrl || '';
+                const title   = dlBtn.dataset.title   || '';
+                const imgUrl  = dlBtn.dataset.imgUrl  || '';
+                const dest = 'tested.html'
+                    + '?dlurl='   + encodeURIComponent(pageUrl)
+                    + '&dltitle=' + encodeURIComponent(title)
+                    + '&dlimg='   + encodeURIComponent(imgUrl);
+                window.location.href = dest;
             });
 
             document.getElementById('dlModalClose').addEventListener('click', closeDlModal);
