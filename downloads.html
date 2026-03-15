@@ -620,7 +620,8 @@ async function doDownload(id, meta) {
   activeDownloads[id] = { controller };
 
   try {
-    const resp = await fetch(meta.videoUrl, { signal: controller.signal });
+const proxyUrl = `https://api.thirai.me/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
+const resp = await fetch(proxyUrl, { signal: controller.signal });
     if (!resp.ok) throw new Error('Fetch error ' + resp.status);
 
     const contentLength = resp.headers.get('Content-Length');
