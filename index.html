@@ -7938,7 +7938,7 @@ if ('serviceWorker' in navigator) {
     // Update nav
     document.querySelectorAll('.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
     const bd = document.getElementById('btm-downloads');
-    if(bd){ bd.style.display=''; bd.classList.add('active'); }
+    if(bd){ bd.classList.add('active'); } // keep display:none — icon stays in menu tab only
 
     const bb = document.getElementById('back-button');
     if(bb) bb.classList.add('visually-hidden');
@@ -11312,7 +11312,7 @@ document.getElementById('dlFindOverlay').addEventListener('click',function(e){if
   };
 })();
 
-openDB().catch(console.error);
+openDB().then(function(){ updateDownloadDot(); }).catch(console.error);
 
 // ---- Direct download triggered from watch.html via ?dlurl= ----
 async function startDownloadDirect(pageUrl, titleHint, imgHint) {
