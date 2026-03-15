@@ -3554,6 +3554,10 @@
     <i class="fas fa-compass"></i>
   </button>
 
+  <button class="side-item" id="desk-downloads" onclick="switchTab('downloads')" aria-label="Downloads" title="Downloads">
+    <i class="fas fa-download"></i>
+  </button>
+
 </aside>
 
 
@@ -3681,6 +3685,10 @@
         <div id="filter-loading" class="visually-hidden" style="text-align:center; color:#777; padding: 10px 0;">Loading...</div>
     </div>
 
+    <!-- ══════════════════════ DOWNLOADS VIEW ══════════════════════ -->
+    <div id="view-downloads" class="visually-hidden view-padded">
+    </div>
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('home')" id="btm-home">
             <i class="fas fa-home"></i> <span>Home</span>
@@ -3691,12 +3699,13 @@
         <div class="nav-item" onclick="switchTab('collections')" id="btm-collections">
             <i class="fas fa-layer-group"></i> <span>Collections</span>
         </div>
+        <div class="nav-item" onclick="switchTab('downloads')" id="btm-downloads" style="display:none;">
+            <i class="fas fa-download"></i> <span>Downloads</span>
+        </div>
         <div class="nav-item" onclick="toggleMoreMenu()" id="btm-more">
             <i class="fas fa-border-all" id="btm-more-icon"></i> <span>More</span>
         </div>
-        <div class="nav-item visually-hidden" id="btm-install">
-            <i class="fas fa-download"></i> <span>Install</span>
-        </div>
+
     </div>
 
     <!-- More Menu Overlay (mobile only) -->
@@ -3726,6 +3735,12 @@
                         <i class="fas fa-compass"></i>
                     </div>
                     <span>Discover</span>
+                </div>
+                <div class="more-menu-icon-btn" onclick="moreMenuAction('downloads')">
+                    <div class="more-menu-icon-wrap">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <span>Downloads</span>
                 </div>
             </div>
 
@@ -7825,25 +7840,7 @@ async function init() {
     </script>
 
 <script>
-let deferredPrompt;
-const installBtn = document.getElementById('btm-install');
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.classList.remove('visually-hidden');
-
-  installBtn.onclick = async () => {
-    installBtn.classList.add('visually-hidden');
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  };
-});
-
-window.addEventListener('appinstalled', () => {
-  installBtn.classList.add('visually-hidden');
-});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -10616,5 +10613,628 @@ function initDiscoverView(){
 })();
 </script>
 
+<!-- ══════════════════════ DOWNLOADS STYLES ══════════════════════ -->
+<style id="downloads-styles">
+#view-downloads { min-height: 100vh; padding-bottom: 80px; }
+
+.dl-empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 60vh; text-align: center; padding: 40px 30px; gap: 16px;
+}
+.dl-empty-icon { font-size: 5rem; color: rgba(255,255,255,0.12); line-height: 1; }
+.dl-empty-title { font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.75); }
+.dl-empty-sub { font-size: 0.88rem; color: rgba(255,255,255,0.38); line-height: 1.5; }
+.dl-find-btn {
+  margin-top: 8px; background: #fff; color: #000; border: none; border-radius: 13px;
+  font-size: 0.92rem; font-weight: 700; font-family: 'Inter', sans-serif;
+  padding: 13px 24px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  transition: opacity 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent;
+}
+.dl-find-btn:hover { opacity: 0.88; }
+.dl-find-btn:active { transform: scale(0.97); }
+
+.dl-list-wrap { padding: 0 16px; max-width: 680px; margin: 0 auto; }
+.dl-section-label {
+  font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35); margin-bottom: 12px; padding-left: 2px;
+}
+.dl-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+.dl-card {
+  background: rgba(20,20,20,0.97); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; overflow: hidden; animation: dlFadeUp 0.28s ease;
+}
+@keyframes dlFadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.dl-card-main { display: flex; align-items: center; gap: 13px; padding: 13px 14px; }
+.dl-card-poster {
+  width: 48px; height: 70px; border-radius: 8px; object-fit: cover;
+  background: #1a1a1a; flex-shrink: 0;
+}
+.dl-card-poster-ph {
+  width: 48px; height: 70px; border-radius: 8px; background: rgba(255,255,255,0.05);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.2); font-size: 1.1rem;
+}
+.dl-card-info { flex: 1; min-width: 0; }
+.dl-card-title {
+  font-size: 0.92rem; font-weight: 700; color: #f0f0f0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px;
+}
+.dl-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.72rem; color: rgba(255,255,255,0.38); }
+.dl-badge {
+  display: inline-flex; align-items: center; gap: 3px; font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 20px;
+}
+.dl-badge-done { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+.dl-badge-dl   { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.1); }
+.dl-badge-err  { background: rgba(255,68,68,0.1); color: #ff6666; border: 1px solid rgba(255,68,68,0.2); }
+
+.dl-card-actions { display: flex; gap: 7px; flex-shrink: 0; align-items: center; }
+.dl-act-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+  color: #f0f0f0; font-size: 1rem; border-radius: 9px; padding: 8px 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dl-act-btn:hover { background: rgba(255,255,255,0.11); }
+.dl-act-btn.play-btn { background: #fff; color: #000; border-color: transparent; }
+.dl-act-btn.play-btn:hover { background: #e5e5e5; }
+.dl-act-btn.del-btn:hover { background: rgba(255,68,68,0.1); color: #ff6666; border-color: rgba(255,68,68,0.18); }
+
+.dl-prog-wrap { padding: 0 14px 12px; display: none; }
+.dl-prog-wrap.show { display: block; }
+.dl-prog-track { height: 3px; background: rgba(255,255,255,0.09); border-radius: 10px; overflow: hidden; margin-bottom: 5px; }
+.dl-prog-fill  { height: 100%; width: 0%; background: #fff; border-radius: 10px; transition: width 0.3s ease; }
+.dl-prog-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: rgba(255,255,255,0.35); }
+
+/* Find overlay */
+#dlFindOverlay {
+  position: fixed; inset: 0; z-index: 4000;
+  background: rgba(0,0,0,0); backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 260ms ease, visibility 0s linear 260ms, background 260ms ease, backdrop-filter 260ms ease;
+}
+#dlFindOverlay.active {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  transition: opacity 260ms ease, visibility 0s, background 260ms ease, backdrop-filter 260ms ease;
+}
+#dlFindSheet {
+  width: 100%; max-width: 680px; max-height: 88vh;
+  background: #0f0f0f; border-radius: 24px 24px 0 0;
+  display: flex; flex-direction: column;
+  transform: translateY(100%); transition: transform 320ms cubic-bezier(0.32,1,0.46,1);
+  box-shadow: 0 -12px 60px rgba(0,0,0,0.8); overflow: hidden;
+}
+#dlFindOverlay.active #dlFindSheet { transform: translateY(0); }
+.dlf-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px;
+  margin: 14px auto 0; flex-shrink: 0;
+}
+.dlf-header {
+  padding: 16px 20px 12px; font-size: 1rem; font-weight: 800; color: #fff;
+  flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.07); position: relative;
+}
+.dlf-header span { font-size: 0.78rem; font-weight: 500; color: rgba(255,255,255,0.35); margin-left: 8px; }
+.dlf-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px; padding: 14px 16px 32px; overflow-y: auto;
+}
+.dlf-grid::-webkit-scrollbar { width: 0; }
+.dlf-card {
+  position: relative; border-radius: 8px; overflow: hidden;
+  aspect-ratio: 2/3; background: #1a1a1a; cursor: pointer;
+}
+.dlf-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dlf-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 55%);
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
+  opacity: 0; transition: opacity 0.18s ease;
+}
+.dlf-card:hover .dlf-card-overlay,
+.dlf-card:active .dlf-card-overlay { opacity: 1; }
+.dlf-dl-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+  border-radius: 50%; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center; font-size: 1rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dlf-dl-btn:hover { background: rgba(255,255,255,0.25); }
+.dlf-dl-btn:active { transform: scale(0.94); }
+.dlf-dl-btn.queued { background: rgba(34,197,94,0.25); border-color: rgba(34,197,94,0.5); }
+.dlf-dl-btn.queued i { color: #22c55e; }
+.dlf-close-btn {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.1rem;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+
+/* Offline player */
+#dlPlayerBackdrop {
+  position: fixed; inset: 0; z-index: 5000; background: #000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+}
+#dlPlayerBackdrop.open { opacity: 1; pointer-events: auto; }
+#dlOfflineVideo { width: 100%; max-width: 920px; max-height: 86vh; border-radius: 12px; background: #000; outline: none; }
+.dl-player-title {
+  margin-top: 12px; font-size: 0.88rem; font-weight: 700; color: rgba(255,255,255,0.6);
+  text-align: center; max-width: 920px; width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dl-player-close {
+  position: fixed; top: 16px; left: 16px;
+  background: rgba(255,255,255,0.1); border: none; color: #fff;
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; cursor: pointer; transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dl-player-close:hover { background: rgba(255,255,255,0.18); }
+
+/* Toast */
+#dlToast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  background: rgba(28,28,28,0.97); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; color: #fff; font-size: 0.86rem; font-weight: 500;
+  padding: 11px 18px; opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  z-index: 6000; white-space: nowrap; max-width: 88vw;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+}
+#dlToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#btm-downloads.active { color: white; }
+#desk-downloads.active { color: #fff; background: rgba(255,255,255,0.08); }
+</style>
+
+<!-- Find Something to Download sheet -->
+<div id="dlFindOverlay">
+  <div id="dlFindSheet">
+    <div class="dlf-handle"></div>
+    <div class="dlf-header">
+      Find something to download
+      <button class="dlf-close-btn" onclick="closeDlFind()"><i class="fas fa-times"></i></button>
+      <span>Popular films</span>
+    </div>
+    <div class="dlf-grid" id="dlfGrid"></div>
+  </div>
+</div>
+
+<!-- Offline player -->
+<div id="dlPlayerBackdrop">
+  <button class="dl-player-close" onclick="closeDlPlayer()"><i class="fas fa-times"></i></button>
+  <video id="dlOfflineVideo" controls playsinline></video>
+  <div class="dl-player-title" id="dlPlayerTitle"></div>
+</div>
+
+<!-- Toast -->
+<div id="dlToast"></div>
+
+<script id="downloads-script">
+(function(){
+
+const DB_NAME='ThiraiDownloads', DB_VER=1, S_META='meta', S_BLOB='blobs';
+let _db;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,DB_VER);
+    r.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains(S_META)) d.createObjectStore(S_META,{keyPath:'id'});
+      if(!d.objectStoreNames.contains(S_BLOB)) d.createObjectStore(S_BLOB,{keyPath:'id'});
+    };
+    r.onsuccess=e=>{_db=e.target.result;res(_db);};
+    r.onerror=e=>rej(e.target.error);
+  });
+}
+function dbPut(s,o){return new Promise((res,rej)=>{const t=_db.transaction(s,'readwrite');t.objectStore(s).put(o).onsuccess=()=>res();t.onerror=e=>rej(e.target.error);});}
+function dbGet(s,k){return new Promise((res,rej)=>{const t=_db.transaction(s,'readonly'),r=t.objectStore(s).get(k);r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
+function dbGetAll(s){return new Promise((res,rej)=>{const t=_db.transaction(s,'readonly'),r=t.objectStore(s).getAll();r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
+function dbDel(s,k){return new Promise((res,rej)=>{const t=_db.transaction(s,'readwrite');t.objectStore(s).delete(k).onsuccess=()=>res();t.onerror=e=>rej(e.target.error);});}
+
+const API='https://api.thirai.me';
+const activeDownloads={}, blobUrls={};
+
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fmtBytes(b){if(!b)return'';if(b<1048576)return(b/1024).toFixed(1)+' KB';if(b<1073741824)return(b/1048576).toFixed(1)+' MB';return(b/1073741824).toFixed(2)+' GB';}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function dlToast(msg,dur=3000){
+  const el=document.getElementById('dlToast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+async function renderDownloadsView(){
+  const view=document.getElementById('view-downloads');
+  if(!view) return;
+  const allMeta=await dbGetAll(S_META);
+
+  for(const m of allMeta){
+    if(m.status==='downloading' && !activeDownloads[m.id]){
+      m.status='interrupted';
+      await dbPut(S_META,{...m,status:'interrupted'});
+    }
+  }
+
+  allMeta.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
+
+  if(!allMeta.length){
+    view.innerHTML=`
+      <div class="dl-empty-state">
+        <div class="dl-empty-icon"><i class="fas fa-arrow-down-to-line"></i></div>
+        <div class="dl-empty-title">Films you download appear here</div>
+        <div class="dl-empty-sub">Save films to watch offline — no internet needed.</div>
+        <button class="dl-find-btn" onclick="openDlFind()">
+          <i class="fas fa-search"></i> Find Something to Download
+        </button>
+      </div>`;
+    return;
+  }
+
+  const doneCount=allMeta.filter(m=>m.status==='done').length;
+  let html=`<div class="dl-list-wrap">
+    <div class="dl-section-label" style="margin-top:8px;">Saved Films &mdash; ${doneCount} ready</div>
+    <div class="dl-list" id="dlCardList">`;
+  allMeta.forEach(meta=>{html+=buildCardHtml(meta);});
+  html+=`</div>
+    <button class="dl-find-btn" onclick="openDlFind()" style="margin:0 0 16px;">
+      <i class="fas fa-search"></i> Find Something to Download
+    </button>
+  </div>`;
+  view.innerHTML=html;
+
+  Object.keys(activeDownloads).forEach(id=>{
+    const p=document.getElementById('dlprog-'+id);
+    if(p) p.classList.add('show');
+  });
+}
+
+function buildCardHtml(meta){
+  const {id,title,imgUrl,size,status,videoUrl}=meta;
+  const done=status==='done', err=status==='error', interrupted=status==='interrupted', paused=status==='paused', going=!!activeDownloads[id];
+  const badge=done?'<span class="dl-badge dl-badge-done">✓ Ready</span>'
+    :err?'<span class="dl-badge dl-badge-err">✗ Error</span>'
+    :interrupted?'<span class="dl-badge dl-badge-err">⚠ Interrupted</span>'
+    :paused?'<span class="dl-badge dl-badge-dl" style="opacity:0.7">⏸ Paused</span>'
+    :'<span class="dl-badge dl-badge-dl">↓ Downloading</span>';
+  const szStr=size?fmtBytes(size):'';
+  const dateStr=meta.addedAt?new Date(meta.addedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
+  const canRetry=interrupted||err||paused;
+  return `<div class="dl-card" id="dlcard-${id}">
+    <div class="dl-card-main">
+      ${imgUrl?`<img class="dl-card-poster" src="${esc(imgUrl)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:'' }
+      <div class="dl-card-poster-ph" ${imgUrl?'style="display:none"':''}><i class="fas fa-film"></i></div>
+      <div class="dl-card-info">
+        <div class="dl-card-title" title="${esc(title||'')}">${esc(title||'Unknown')}</div>
+        <div class="dl-card-meta">
+          ${badge}
+          ${szStr?`<span>${szStr}</span>`:''}
+          ${dateStr?`<span>${dateStr}</span>`:''}
+        </div>
+      </div>
+      <div class="dl-card-actions">
+        ${done?`<button class="dl-act-btn play-btn" onclick="dlPlay('${id}')" title="Watch offline"><i class="fas fa-play"></i></button>`:''}
+        ${paused?`<button class="dl-act-btn" onclick="dlRetry('${id}')" title="Resume download" style="color:#4caf50"><i class="fas fa-play"></i></button>`:''}
+        ${canRetry&&!paused?`<button class="dl-act-btn" onclick="dlRetry('${id}')" title="Retry download" style="color:#f5a623"><i class="fas fa-rotate-right"></i></button>`:''}
+        ${going?`<button class="dl-act-btn" onclick="dlCancel('${id}')" title="Cancel"><i class="fas fa-xmark"></i></button>`:''}
+        ${!going?`<button class="dl-act-btn del-btn" onclick="dlDelete('${id}')" title="Delete"><i class="fas fa-trash-can"></i></button>`:''}
+      </div>
+    </div>
+    <div class="dl-prog-wrap ${going?'show':''}" id="dlprog-${id}">
+      <div class="dl-prog-track"><div class="dl-prog-fill" id="dlfill-${id}"></div></div>
+      <div class="dl-prog-label"><span id="dlpct-${id}">Connecting…</span><span id="dlrecv-${id}"></span></div>
+    </div>
+  </div>`;
+}
+
+function updateProgress(id,pct,recv,total){
+  const fill=document.getElementById('dlfill-'+id);
+  const pctEl=document.getElementById('dlpct-'+id);
+  const recvEl=document.getElementById('dlrecv-'+id);
+  if(!fill) return;
+  fill.style.width=pct+'%';
+  pctEl.textContent=pct<1?'Connecting…':Math.round(pct)+'%';
+  recvEl.textContent=total?fmtBytes(recv)+' / '+fmtBytes(total):fmtBytes(recv);
+}
+
+async function startDownload(pageUrl,titleHint,imgHint){
+  dlToast('⏳ Looking up film…');
+  let videoUrl,title,imgUrl;
+  try{
+    const r=await fetch(`${API}/watch?url=${encodeURIComponent(pageUrl)}`);
+    if(!r.ok) throw new Error('API '+r.status);
+    const d=await r.json();
+    if(!d.video_url) throw new Error('No video_url');
+    videoUrl=d.video_url; title=d.title||titleHint||'Unknown'; imgUrl=d.img_url||imgHint||'';
+  }catch(e){ dlToast('❌ Could not fetch film info'); return; }
+
+  const all=await dbGetAll(S_META);
+  const dupe=all.find(m=>m.videoUrl===videoUrl);
+  if(dupe){ dlToast('ℹ Already downloaded: '+(dupe.title||'film')); return; }
+
+  const id=genId();
+  const meta={id,title,imgUrl,videoUrl,status:'downloading',size:0,addedAt:Date.now()};
+  await dbPut(S_META,meta);
+  activeDownloads[id]={ctrl:{abort:()=>{}}};  // placeholder so renderDownloadsView sees it as active
+  await renderDownloadsView();
+  if(typeof window.switchTab==='function') window.switchTab('downloads');
+  doDownload(id,meta);
+}
+
+async function doDownload(id,meta){
+  const prog=document.getElementById('dlprog-'+id);
+  if(prog) prog.classList.add('show');
+  const ctrl=new AbortController();
+  activeDownloads[id]={ctrl};
+  try{
+    const proxyUrl=`${API}/proxy?url=${encodeURIComponent(meta.videoUrl)}`;
+    const resp=await fetch(proxyUrl,{signal:ctrl.signal});
+    if(!resp.ok) throw new Error('Fetch '+resp.status);
+    const total=parseInt(resp.headers.get('Content-Length')||'0',10);
+    const reader=resp.body.getReader();
+    const chunks=[];
+    let received=0;
+    while(true){
+      const {done,value}=await reader.read();
+      if(done) break;
+      if(ctrl.signal.aborted) break;
+      chunks.push(value); received+=value.length;
+      const pct=total?(received/total)*100:0;
+      updateProgress(id,pct,received,total);
+    }
+    if(ctrl.signal.aborted) return;
+    const blob=new Blob(chunks,{type:'video/mp4'});
+    await dbPut(S_BLOB,{id,blob});
+    await dbPut(S_META,{...meta,status:'done',size:blob.size});
+    delete activeDownloads[id];
+    dlToast('✅ '+meta.title+' saved!');
+    await renderDownloadsView();
+  }catch(e){
+    if(e.name==='AbortError') return;
+    await dbPut(S_META,{...meta,status:'error'});
+    delete activeDownloads[id];
+    dlToast('❌ Download failed');
+    await renderDownloadsView();
+  }
+}
+
+window.dlCancel=async function(id){
+  const a=activeDownloads[id]; if(a){a.ctrl.abort();delete activeDownloads[id];}
+  await dbDel(S_META,id); await dbDel(S_BLOB,id);
+  if(blobUrls[id]){URL.revokeObjectURL(blobUrls[id]);delete blobUrls[id];}
+  dlToast('🗑 Download cancelled'); await renderDownloadsView();
+};
+
+window.dlRetry=async function(id){
+  const meta=await dbGet(S_META,id);
+  if(!meta||!meta.videoUrl){dlToast('❌ Cannot retry — missing info');return;}
+  await dbDel(S_BLOB,id);
+  const updated={...meta,status:'downloading',size:0};
+  await dbPut(S_META,updated);
+  activeDownloads[id]={ctrl:{abort:()=>{}}};  // placeholder so renderDownloadsView sees it as active
+  await renderDownloadsView();
+  dlToast('⏳ Retrying: '+meta.title);
+  doDownload(id,updated);
+};
+
+window.dlDelete=async function(id){
+  if(blobUrls[id]){URL.revokeObjectURL(blobUrls[id]);delete blobUrls[id];}
+  await dbDel(S_META,id); await dbDel(S_BLOB,id);
+  dlToast('🗑 Deleted'); await renderDownloadsView();
+};
+
+window.dlPlay=async function(id){
+  const meta=await dbGet(S_META,id);
+  const blobRec=await dbGet(S_BLOB,id);
+  if(!blobRec){dlToast('❌ File not found — try re-downloading');return;}
+  if(blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
+  const url=URL.createObjectURL(blobRec.blob);
+  blobUrls[id]=url;
+  // Store blob URL + metadata in sessionStorage so offline.html can pick it up
+  try{
+    sessionStorage.setItem('offlinePlay_url',url);
+    sessionStorage.setItem('offlinePlay_title',meta?.title||'');
+    sessionStorage.setItem('offlinePlay_id',id);
+  }catch(e){}
+  window.location.href='offline.html?offline=1&id='+encodeURIComponent(id);
+};
+
+window.closeDlPlayer=function(){
+  const vid=document.getElementById('dlOfflineVideo');
+  vid.pause(); vid.src='';
+  document.getElementById('dlPlayerBackdrop').classList.remove('open');
+  document.body.style.overflow='';
+};
+document.getElementById('dlPlayerBackdrop').addEventListener('click',function(e){if(e.target===this)window.closeDlPlayer();});
+
+const POPULAR_MOVIES=[
+  {title:'Raja Rani',         img:'https://img.einthusan.io/etv/s3/moviecovers/2223-7856.jpg', url:'https://einthusan.tv/movie/watch/2223/?lang=tamil'},
+  {title:'Thani Oruvan',      img:'https://img.einthusan.io/etv/s3/moviecovers/2786-70f7.jpg', url:'https://einthusan.tv/movie/watch/2786/?lang=tamil'},
+  {title:'Mersal',            img:'https://img.einthusan.io/etv/s3/moviecovers/3QoX-3033.jpg', url:'https://einthusan.tv/movie/watch/3QoX/?lang=tamil'},
+  {title:'Sarkar',            img:'https://img.einthusan.io/etv/s3/moviecovers/559E-7360.jpg', url:'https://einthusan.tv/movie/watch/559E/?lang=tamil'},
+  {title:'Super Deluxe',      img:'https://img.einthusan.io/etv/s3/moviecovers/41m3-1b5f.jpg', url:'https://einthusan.tv/movie/watch/41m3/?lang=tamil'},
+  {title:'Vada Chennai',      img:'https://img.einthusan.io/etv/s3/moviecovers/3KSd-9f84.jpg', url:'https://einthusan.tv/movie/watch/3KSd/?lang=tamil'},
+  {title:'Love Today',        img:'https://img.einthusan.io/etv/s3/moviecovers/6jiA-f94b.jpg', url:'https://einthusan.tv/movie/watch/6jiA/?lang=tamil'},
+  {title:'Theri',             img:'https://img.einthusan.io/etv/s3/moviecovers/2937-2069.jpg', url:'https://einthusan.tv/movie/watch/2937/?lang=tamil'},
+  {title:'Premalu',           img:'https://img.einthusan.io/etv/s3/moviecovers/1t88-319c.jpg', url:'https://einthusan.tv/movie/watch/1t88/?lang=malayalam'},
+  {title:'Bangalore Days',    img:'https://img.einthusan.io/etv/s3/moviecovers/2473-2cf9.jpg', url:'https://einthusan.tv/movie/watch/2473/?lang=malayalam'},
+  {title:'Premam',            img:'https://img.einthusan.io/etv/s3/moviecovers/3175-1154.jpg', url:'https://einthusan.tv/movie/watch/3175/?lang=malayalam'},
+  {title:'Drishyam',          img:'https://img.einthusan.io/etv/s3/moviecovers/2384-f1d0.jpg', url:'https://einthusan.tv/movie/watch/2384/?lang=malayalam'},
+  {title:'Aavesham',          img:'https://img.einthusan.io/etv/s3/moviecovers/31c8-541c.jpg', url:'https://einthusan.tv/movie/watch/31c8/?lang=malayalam'},
+  {title:'Hridayam',          img:'https://img.einthusan.io/etv/s3/moviecovers/4i3K-4445.jpg', url:'https://einthusan.tv/movie/watch/4i3K/?lang=malayalam'},
+  {title:'Kumbalangi Nights', img:'https://img.einthusan.io/etv/s3/moviecovers/3Tcu-42b4.jpg', url:'https://einthusan.tv/movie/watch/3Tcu/?lang=malayalam'},
+  {title:'Maanaadu',          img:'https://img.einthusan.io/etv/s3/moviecovers/1vh7-09ed.jpg', url:'https://einthusan.tv/movie/watch/1vh7/?lang=tamil'},
+  {title:'Theeran',           img:'https://img.einthusan.io/etv/s3/moviecovers/6gF4-f571.jpg', url:'https://einthusan.tv/movie/watch/6gF4/?lang=tamil'},
+  {title:'Vikram',            img:'https://img.einthusan.io/etv/s3/moviecovers/3QoX-3033.jpg', url:'https://einthusan.tv/movie/watch/3QoX/?lang=tamil'},
+];
+
+const _queuedUrls=new Set();
+
+window.openDlFind=async function(){
+  const overlay=document.getElementById('dlFindOverlay');
+  const grid=document.getElementById('dlfGrid');
+  if(!overlay||!grid) return;
+  grid.innerHTML='';
+  POPULAR_MOVIES.forEach(movie=>{
+    const card=document.createElement('div');
+    card.className='dlf-card';
+    card.innerHTML=`
+      <img src="${esc(movie.img)}" alt="${esc(movie.title)}" loading="lazy">
+      <div class="dlf-card-overlay">
+        <button class="dlf-dl-btn${_queuedUrls.has(movie.url)?' queued':''}" title="Download ${esc(movie.title)}">
+          <i class="fas ${_queuedUrls.has(movie.url)?'fa-check':'fa-arrow-down'}"></i>
+        </button>
+      </div>`;
+    const btn=card.querySelector('.dlf-dl-btn');
+    btn.addEventListener('click',async(e)=>{
+      e.stopPropagation();
+      if(_queuedUrls.has(movie.url)){dlToast('ℹ Already queued');return;}
+      _queuedUrls.add(movie.url);
+      btn.classList.add('queued'); btn.innerHTML='<i class="fas fa-check"></i>';
+      dlToast('⏳ Starting: '+movie.title);
+      closeDlFind();
+      await startDownload(movie.url,movie.title,movie.img);
+    });
+    grid.appendChild(card);
+  });
+  overlay.classList.add('active');
+  document.body.style.overflow='hidden';
+};
+
+window.closeDlFind=function(){
+  document.getElementById('dlFindOverlay').classList.remove('active');
+  document.body.style.overflow='';
+};
+document.getElementById('dlFindOverlay').addEventListener('click',function(e){if(e.target===this)window.closeDlFind();});
+
+// Hook switchTab
+(function(){
+  const _orig=window.switchTab;
+  window.switchTab=function(tab){
+    if(tab==='downloads'){
+      document.querySelectorAll('#view-home,#view-collections,#view-search,#view-actor-details,#view-filter-results,#view-lang-category,#view-discover,#view-anime,#view-tmdb').forEach(e=>e.classList.add('visually-hidden'));
+      const v=document.getElementById('view-downloads'); if(v) v.classList.remove('visually-hidden');
+      document.querySelectorAll('.nav-item,.side-item').forEach(e=>e.classList.remove('active'));
+      const bd=document.getElementById('btm-downloads'); if(bd) bd.classList.add('active');
+      const dd=document.getElementById('desk-downloads'); if(dd) dd.classList.add('active');
+      const bb=document.getElementById('back-button'); if(bb) bb.classList.add('visually-hidden');
+      window.scrollTo({top:0,behavior:'instant'});
+      renderDownloadsView();
+      return;
+    }
+    const bd=document.getElementById('btm-downloads'); if(bd) bd.classList.remove('active');
+    const dd=document.getElementById('desk-downloads'); if(dd) dd.classList.remove('active');
+    const dv=document.getElementById('view-downloads'); if(dv) dv.classList.add('visually-hidden');
+    if(typeof _orig==='function') _orig.call(this,tab);
+  };
+})();
+
+// Hook moreMenuAction
+(function(){
+  const _orig=window.moreMenuAction;
+  window.moreMenuAction=function(action){
+    if(action==='downloads'){
+      if(typeof window.closeMoreMenu==='function') window.closeMoreMenu();
+      else{const o=document.getElementById('moreMenuOverlay');if(o)o.classList.remove('active');}
+      window.switchTab('downloads');
+      return;
+    }
+    if(typeof _orig==='function') _orig.call(this,action);
+  };
+})();
+
+openDB().catch(console.error);
+
+// ---- Direct download triggered from watch.html via ?dlurl= ----
+async function startDownloadDirect(pageUrl, titleHint, imgHint) {
+  await openDB().catch(() => {});
+  dlToast('⏳ Fetching film info…');
+
+  let videoUrl, title, imgUrl;
+  try {
+    const r = await fetch(`${API}/watch?url=${encodeURIComponent(pageUrl)}`);
+    if (!r.ok) throw new Error('API ' + r.status);
+    const d = await r.json();
+    if (!d.video_url) throw new Error('No video_url');
+    videoUrl = d.video_url;
+    title    = d.title    || titleHint || 'Unknown';
+    imgUrl   = d.img_url  || imgHint   || '';
+  } catch (e) {
+    dlToast('❌ Could not fetch film info');
+    return;
+  }
+
+  const all  = await dbGetAll(S_META);
+  const dupe = all.find(m => m.pageUrl === pageUrl || m.videoUrl === videoUrl);
+  if (dupe) { dlToast('ℹ Already downloaded: ' + (dupe.title || 'film')); window.switchTab('downloads'); return; }
+
+  const id   = genId();
+  // Store pageUrl so retries can re-fetch a fresh video link
+  const meta = { id, title, imgUrl, videoUrl, pageUrl, status: 'downloading', size: 0, addedAt: Date.now() };
+  await dbPut(S_META, meta);
+  activeDownloads[id] = { ctrl: { abort: () => {} } };
+  await renderDownloadsView();
+  if (typeof window.switchTab === 'function') window.switchTab('downloads');
+  dlToast('⏳ Starting download…');
+  doDownload(id, meta);
+}
+
+// ---- Retry with fresh link if the video URL has expired ----
+// Override dlRetry to re-fetch the page URL when available
+const _origDlRetry = window.dlRetry;
+window.dlRetry = async function(id) {
+  const meta = await dbGet(S_META, id);
+  if (meta && meta.pageUrl) {
+    dlToast('⏳ Getting fresh link…');
+    try {
+      const r = await fetch(`${API}/watch?url=${encodeURIComponent(meta.pageUrl)}`);
+      if (!r.ok) throw new Error('API ' + r.status);
+      const d = await r.json();
+      if (!d.video_url) throw new Error('No video_url');
+      await dbDel(S_BLOB, id);
+      const updated = { ...meta, videoUrl: d.video_url, status: 'downloading', size: 0 };
+      await dbPut(S_META, updated);
+      activeDownloads[id] = { ctrl: { abort: () => {} } };
+      await renderDownloadsView();
+      dlToast('⏳ Retrying: ' + meta.title);
+      doDownload(id, updated);
+    } catch (e) {
+      dlToast('❌ Could not refresh link');
+    }
+    return;
+  }
+  // Fall back to original retry for items without a pageUrl
+  if (typeof _origDlRetry === 'function') _origDlRetry(id);
+};
+
+(function() {
+  const params  = new URLSearchParams(window.location.search);
+  const dlurl   = params.get('dlurl');
+  if (dlurl) {
+    const dltitle = params.get('dltitle') || '';
+    const dlimg   = params.get('dlimg')   || '';
+    // Clean params from URL bar
+    window.history.replaceState({}, '', window.location.pathname);
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        startDownloadDirect(
+          decodeURIComponent(dlurl),
+          decodeURIComponent(dltitle),
+          decodeURIComponent(dlimg)
+        );
+      }, 600);
+    });
+  }
+})();
+
+})();
+</script>
 </body>
 </html>
