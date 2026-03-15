@@ -10961,6 +10961,7 @@ async function startDownload(pageUrl,titleHint,imgHint){
   const id=genId();
   const meta={id,title,imgUrl,videoUrl,status:'downloading',size:0,addedAt:Date.now()};
   await dbPut(S_META,meta);
+  activeDownloads[id]={ctrl:{abort:()=>{}}};  // placeholder so renderDownloadsView sees it as active
   await renderDownloadsView();
   if(typeof window.switchTab==='function') window.switchTab('downloads');
   doDownload(id,meta);
@@ -11130,6 +11131,7 @@ window.dlRetry=async function(id){
   await dbDel(S_BLOB,id);
   const updated={...meta,status:'downloading',size:0};
   await dbPut(S_META,updated);
+  activeDownloads[id]={ctrl:{abort:()=>{}}};  // placeholder so renderDownloadsView sees it as active
   await renderDownloadsView();
   dlToast('⏳ Retrying: '+meta.title);
   doDownload(id,updated);
