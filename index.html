@@ -11043,7 +11043,7 @@ window.dlPlay=async function(id){
     sessionStorage.setItem('offlinePlay_title',meta?.title||'');
     sessionStorage.setItem('offlinePlay_id',id);
   }catch(e){}
-  window.location.href='offline.html?offline=1&id='+encodeURIComponent(id);
+  window.location.href='offline?offline=1&id='+encodeURIComponent(id);
 };
 
 window.closeDlPlayer=function(){
