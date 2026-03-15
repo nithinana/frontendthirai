@@ -552,6 +552,7 @@
         .dls-opt-desc { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 400; }
 
         .dls-active-section { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+        .dls-interrupted-section { flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.07); }
         .dls-section-label {
             font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
             color: rgba(255,255,255,0.3); padding: 12px 16px 6px; flex-shrink: 0;
@@ -1317,6 +1318,11 @@
                         <span class="dls-opt-desc">Copy the direct video link</span>
                     </span>
                 </button>
+            </div>
+            <!-- Interrupted downloads section (shown when user dismisses popup) -->
+            <div class="dls-interrupted-section" id="dlsInterruptedSection" style="display:none">
+                <div class="dls-section-label">Interrupted</div>
+                <div class="dls-list" id="dlsInterruptedList"></div>
             </div>
             <!-- Active downloads section (shown only when downloads exist) -->
             <div class="dls-active-section" id="dlsActiveSection" style="display:none">
@@ -2647,30 +2653,25 @@
                 if (dlsOptApp) {
                     dlsOptApp.addEventListener('click', async () => {
                         closeStatusOverlay();
-                        const pageUrl  = origDlBtn ? (origDlBtn.dataset.pageUrl  || '') : '';
-                        const titleHint = origDlBtn ? (origDlBtn.dataset.title   || '') : '';
-                        const imgHint   = origDlBtn ? (origDlBtn.dataset.imgUrl  || '') : '';
-                        const videoUrl  = origDlBtn ? (origDlBtn.dataset.videoUrl || '') : '';
+                        const origDlBtn2 = document.getElementById('downloadButton');
+                        const videoUrl  = origDlBtn2 ? (origDlBtn2.dataset.videoUrl || '') : '';
+                        const titleHint = origDlBtn2 ? (origDlBtn2.dataset.title    || '') : '';
+                        const imgHint   = origDlBtn2 ? (origDlBtn2.dataset.imgUrl   || '') : '';
                         if (!videoUrl) return;
 
-                        // Generate a unique ID and write a meta record so index.html will
-                        // see it as "interrupted" if the user leaves before it finishes.
                         function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-                        const id = genId();
                         const meta = {
-                            id,
+                            id:       genId(),
                             title:    titleHint || 'Unknown',
                             imgUrl:   imgHint   || '',
                             videoUrl: videoUrl,
-                            pageUrl:  pageUrl,
                             status:   'downloading',
                             size:     0,
                             addedAt:  Date.now()
                         };
-                        await dbPut(S_META, meta);
-                        // Start the background download — progress shown in the overlay
+                        // Start download entirely in-page — no IDB write, no navigation
                         doBgDownload(meta);
-                        // Re-open the overlay so the user can see it kick off
+                        // Reopen overlay so user sees it running
                         openStatusOverlay();
                     });
                 }
@@ -2749,6 +2750,31 @@
 
             function closeIntDlPopup() {
                 intDlBackdrop.classList.remove('open');
+                // Show any still-interrupted items in the download overlay
+                const stillPending = _interruptedItems.filter(m => !bgDownloads[m.id]);
+                const sec = document.getElementById('dlsInterruptedSection');
+                const list = document.getElementById('dlsInterruptedList');
+                if (sec && list && stillPending.length > 0) {
+                    list.innerHTML = '';
+                    stillPending.forEach(meta => {
+                        if (document.getElementById('dlsi-item-' + meta.id)) return;
+                        const el = document.createElement('div');
+                        el.className = 'dls-item';
+                        el.id = 'dlsi-item-' + meta.id;
+                        el.innerHTML = `
+                            ${meta.imgUrl ? `<img class="dls-poster" src="${meta.imgUrl}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+                            <div class="dls-poster-ph" ${meta.imgUrl ? 'style="display:none"' : ''}><i class="bi bi-film"></i></div>
+                            <div class="dls-info">
+                                <div class="dls-item-title">${meta.title || 'Unknown Film'}</div>
+                                <div class="dls-eta" style="color:#f5a623;margin-top:2px"><i class="bi bi-exclamation-triangle-fill" style="font-size:0.65rem"></i> Interrupted</div>
+                            </div>
+                            <button class="idt-resume-btn" style="font-size:0.8rem;padding:7px 12px" onclick="resumeInterruptedFromOverlay('${meta.id}')">
+                                <i class="bi bi-arrow-repeat"></i> Resume
+                            </button>`;
+                        list.appendChild(el);
+                    });
+                    sec.style.display = 'block';
+                }
             }
 
             intDlClose.addEventListener('click', closeIntDlPopup);
@@ -2790,7 +2816,27 @@
                 refreshResumeAllBtn(); // re-evaluate after this item starts
             };
 
-            intDlResumeAll.addEventListener('click', async () => {
+            window.resumeInterruptedFromOverlay = async function (id) {
+                // Remove from interrupted section
+                const oldEl = document.getElementById('dlsi-item-' + id);
+                if (oldEl) oldEl.remove();
+                // Hide interrupted section if empty
+                const list = document.getElementById('dlsInterruptedList');
+                const sec = document.getElementById('dlsInterruptedSection');
+                if (list && sec && !list.children.length) sec.style.display = 'none';
+                // Start bg download (re-uses doBgDownload which renders into active section)
+                const meta = await dbGet(S_META, id);
+                if (!meta || !meta.videoUrl) return;
+                const updated = { ...meta, status: 'downloading', size: 0 };
+                await dbPut(S_META, updated);
+                doBgDownload(updated);
+                // Also update the original popup item if it's still in the DOM
+                const badge = document.getElementById('idt-badge-' + id);
+                if (badge) { badge.textContent = '↓ Downloading'; badge.className = 'idt-status-badge downloading'; }
+                const btn = document.getElementById('idt-btn-' + id);
+                if (btn) { btn.innerHTML = '<i class="bi bi-x"></i>'; btn.className = 'idt-resume-btn cancel-mode'; btn.onclick = () => cancelBgDownload(id); }
+                refreshResumeAllBtn();
+            };
                 const pending = _interruptedItems.filter(m => !bgDownloads[m.id]);
                 for (const meta of pending) {
                     await window.resumeSingleDownload(meta.id);
