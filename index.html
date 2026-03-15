@@ -7946,16 +7946,27 @@ if ('serviceWorker' in navigator) {
     const bb = document.getElementById('back-button');
     if(bb) bb.classList.add('visually-hidden');
 
-    // Add offline banner
+    // Add offline banner only if there are no downloads
     if(dv && !document.getElementById('offlineBanner')){
-      const banner = document.createElement('div');
-      banner.id = 'offlineBanner';
-      banner.innerHTML =
-        '<div style="text-align:center;padding:80px 20px 20px;">' +
-        '<p style="margin:0 0 6px;font-size:1rem;font-weight:700;color:#ffffff;">You\'re offline</p>' +
-        '<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.4);">Films you download appear here</p>' +
-        '</div>';
-      dv.prepend(banner);
+      if(typeof openDB==='function' && typeof dbGetAll==='function'){
+        openDB().then(function(){
+          return dbGetAll(typeof S_META !== 'undefined' ? S_META : 'meta');
+        }).then(function(items){
+          if(!items || items.length === 0){
+            var existing = document.getElementById('offlineBanner');
+            if(!existing){
+              const banner = document.createElement('div');
+              banner.id = 'offlineBanner';
+              banner.innerHTML =
+                '<div style="text-align:center;padding:80px 20px 20px;">' +
+                '<p style="margin:0 0 6px;font-size:1rem;font-weight:700;color:#ffffff;">You\'re offline</p>' +
+                '<p style="margin:0;font-size:0.85rem;color:rgba(255,255,255,0.4);">Films you download appear here</p>' +
+                '</div>';
+              dv.prepend(banner);
+            }
+          }
+        }).catch(function(){});
+      }
     }
 
     window.scrollTo({top:0,behavior:'instant'});
