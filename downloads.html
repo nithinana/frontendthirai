@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Downloads — Thirai</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: rgba(20,20,20,0.97);
+      --border: rgba(255,255,255,0.09);
+      --text: #f0f0f0;
+      --muted: rgba(255,255,255,0.38);
+      --accent: #fff;
+      --danger: #ff4444;
+      --success: #22c55e;
+      --progress-fill: #fff;
+      --radius: 18px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px;
+      background: rgba(10,10,10,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-back {
+      background: none; border: none; color: var(--text); font-size: 1.4rem;
+      cursor: pointer; padding: 6px 8px; border-radius: 10px;
+      display: flex; align-items: center; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-back:hover { background: rgba(255,255,255,0.08); }
+    .nav-title {
+      font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;
+    }
+    .nav-subtitle {
+      margin-left: auto;
+      font-size: 0.78rem; color: var(--muted); font-weight: 500;
+    }
+
+    /* ── MAIN ── */
+    .page { max-width: 680px; margin: 0 auto; padding: 28px 16px 60px; }
+
+    /* ── ADD SECTION ── */
+    .add-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      margin-bottom: 28px;
+    }
+    .add-card h2 {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+    }
+    .input-row {
+      display: flex; gap: 10px;
+    }
+    .url-input {
+      flex: 1; min-width: 0;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif;
+      padding: 12px 14px; outline: none;
+      transition: border-color 0.18s;
+    }
+    .url-input:focus { border-color: rgba(255,255,255,0.3); }
+    .url-input::placeholder { color: var(--muted); }
+
+    .btn-primary {
+      flex-shrink: 0;
+      background: #fff; color: #000;
+      border: none; border-radius: 13px;
+      font-size: 0.9rem; font-weight: 700; font-family: 'Inter', sans-serif;
+      padding: 12px 18px; cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .add-hint {
+      margin-top: 10px; font-size: 0.78rem; color: var(--muted); line-height: 1.5;
+    }
+    .add-hint code {
+      font-family: monospace; background: rgba(255,255,255,0.07);
+      padding: 2px 6px; border-radius: 5px; font-size: 0.76rem;
+    }
+
+    /* ── STATUS TOAST ── */
+    #statusToast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(30,30,30,0.97); border: 1px solid #333; border-radius: 12px;
+      color: #fff; font-size: 0.88rem; font-weight: 500; padding: 12px 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 999; white-space: nowrap; max-width: 90vw;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    #statusToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── SECTION HEADERS ── */
+    .section-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 12px; padding-left: 2px;
+    }
+
+    /* ── DOWNLOAD CARD ── */
+    .download-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .dl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .dl-main {
+      display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    }
+
+    .dl-poster {
+      width: 52px; height: 76px; border-radius: 10px;
+      object-fit: cover; background: #1a1a1a; flex-shrink: 0;
+    }
+    .dl-poster-placeholder {
+      width: 52px; height: 76px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: var(--muted);
+    }
+
+    .dl-info { flex: 1; min-width: 0; }
+    .dl-title {
+      font-size: 0.95rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .dl-meta {
+      font-size: 0.75rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px;
+      align-items: center;
+    }
+    .dl-status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 2px 8px; border-radius: 20px;
+    }
+    .badge-downloading {
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .badge-done {
+      background: rgba(34,197,94,0.12); color: #22c55e;
+      border: 1px solid rgba(34,197,94,0.2);
+    }
+    .badge-error {
+      background: rgba(255,68,68,0.1); color: #ff6666;
+      border: 1px solid rgba(255,68,68,0.2);
+    }
+
+    .dl-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+    .dl-action-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--text); font-size: 1.1rem; border-radius: 10px;
+      padding: 8px 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dl-action-btn:hover { background: rgba(255,255,255,0.12); }
+    .dl-action-btn.play-btn {
+      background: #fff; color: #000; border-color: transparent;
+    }
+    .dl-action-btn.play-btn:hover { background: #e0e0e0; }
+    .dl-action-btn.del-btn:hover { background: rgba(255,68,68,0.12); color: #ff6666; border-color: rgba(255,68,68,0.2); }
+
+    /* ── PROGRESS BAR ── */
+    .dl-progress-wrap {
+      padding: 0 16px 14px; display: none;
+    }
+    .dl-progress-wrap.visible { display: block; }
+    .dl-progress-track {
+      height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .dl-progress-fill {
+      height: 100%; width: 0%; background: #fff; border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .dl-progress-label {
+      font-size: 0.72rem; color: var(--muted); display: flex; justify-content: space-between;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state i { font-size: 2.8rem; display: block; margin-bottom: 14px; opacity: 0.35; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── OFFLINE PLAYER MODAL ── */
+    .player-backdrop {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.95);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 16px;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .player-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .player-close-btn {
+      position: fixed; top: 16px; left: 16px; z-index: 501;
+      background: rgba(255,255,255,0.1); border: none; color: #fff;
+      font-size: 1.3rem; border-radius: 50%; width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .player-close-btn:hover { background: rgba(255,255,255,0.18); }
+
+    #offlinePlayer {
+      width: 100%; max-width: 900px; max-height: 85vh;
+      border-radius: 14px; background: #000;
+      outline: none;
+    }
+    .player-title-bar {
+      margin-top: 14px; font-size: 0.9rem; font-weight: 700;
+      color: rgba(255,255,255,0.7); text-align: center;
+      max-width: 900px; width: 100%;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── STORAGE INFO ── */
+    .storage-bar-wrap { margin-bottom: 24px; }
+    .storage-bar-track {
+      height: 5px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; margin-bottom: 8px;
+    }
+    .storage-bar-fill { height: 100%; background: #fff; border-radius: 10px; transition: width 0.5s ease; }
+    .storage-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-back" onclick="history.back()" title="Back">
+    <i class="bi bi-arrow-left"></i>
+  </button>
+  <span class="nav-title">Downloads</span>
+  <span class="nav-subtitle" id="navSubtitle">Watch offline</span>
+</nav>
+
+<!-- MAIN -->
+<main class="page">
+
+  <!-- ADD DOWNLOAD -->
+  <div class="add-card">
+    <h2>Download a film</h2>
+    <div class="input-row">
+      <input
+        class="url-input" id="urlInput"
+        placeholder="Einthusan URL or film code…"
+        type="text" autocomplete="off" autocapitalize="none" spellcheck="false"
+      />
+      <button class="btn-primary" id="addBtn" onclick="startDownload()">
+        <i class="bi bi-download"></i> Download
+      </button>
+    </div>
+    <p class="add-hint">
+      Paste an Einthusan URL like <code>https://einthusan.tv/movie/watch/xyz/</code>
+      or just the film code, e.g. <code>xyz</code>. The video is saved to your browser — no internet needed to watch it later.
+    </p>
+  </div>
+
+  <!-- STORAGE BAR -->
+  <div class="storage-bar-wrap" id="storageWrap" style="display:none">
+    <div class="storage-bar-track">
+      <div class="storage-bar-fill" id="storageFill" style="width:0%"></div>
+    </div>
+    <div class="storage-labels">
+      <span id="storageUsed">0 MB used</span>
+      <span id="storageAvail">— available</span>
+    </div>
+  </div>
+
+  <!-- DOWNLOADS LIST -->
+  <div class="section-label" id="listLabel" style="display:none">Saved films</div>
+  <div class="download-list" id="downloadList"></div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="emptyState">
+    <i class="bi bi-cloud-arrow-down"></i>
+    <p>No downloads yet.<br>Paste a film URL above to save it for offline viewing.</p>
+  </div>
+
+</main>
+
+<!-- OFFLINE VIDEO PLAYER -->
+<div class="player-backdrop" id="playerBackdrop">
+  <button class="player-close-btn" onclick="closePlayer()"><i class="bi bi-x"></i></button>
+  <video id="offlinePlayer" controls playsinline></video>
+  <div class="player-title-bar" id="playerTitleBar"></div>
+</div>
+
+<!-- TOAST -->
+<div id="statusToast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STORAGE ENGINE — IndexedDB for blob storage
+// ═══════════════════════════════════════════════
+
+const DB_NAME   = 'ThiraiDownloads';
+const DB_VER    = 1;
+const STORE_META = 'meta';
+const STORE_BLOB = 'blobs';
+
+let db;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE_META)) d.createObjectStore(STORE_META, { keyPath: 'id' });
+      if (!d.objectStoreNames.contains(STORE_BLOB)) d.createObjectStore(STORE_BLOB, { keyPath: 'id' });
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbPut(store, obj) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(obj);
+    req.onsuccess = () => res();
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbGet(store, key) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(key);
+    req.onsuccess = e => res(e.target.result);
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbGetAll(store) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = e => res(e.target.result);
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbDelete(store, key) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).delete(key);
+    req.onsuccess = () => res();
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  UI STATE
+// ═══════════════════════════════════════════════
+
+const activeDownloads = {}; // id → { controller, objectUrl }
+let blobUrls = {};           // id → object URL for open players
+
+function toast(msg, dur = 3000) {
+  const el = document.getElementById('statusToast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function formatBytes(bytes) {
+  if (!bytes) return '0 MB';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+  return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ═══════════════════════════════════════════════
+//  STORAGE USAGE BAR
+// ═══════════════════════════════════════════════
+
+async function refreshStorageBar(allMeta) {
+  if (!navigator.storage || !navigator.storage.estimate) return;
+  try {
+    const est = await navigator.storage.estimate();
+    const used = est.usage || 0;
+    const quota = est.quota || 0;
+    const pct = quota ? Math.min(100, (used / quota) * 100) : 0;
+    document.getElementById('storageFill').style.width = pct + '%';
+    document.getElementById('storageUsed').textContent = formatBytes(used) + ' used';
+    document.getElementById('storageAvail').textContent = formatBytes(quota - used) + ' available';
+    document.getElementById('storageWrap').style.display = allMeta.length ? 'block' : 'none';
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER DOWNLOAD LIST
+// ═══════════════════════════════════════════════
+
+async function renderList() {
+  const allMeta = await dbGetAll(STORE_META);
+  const list = document.getElementById('downloadList');
+  const empty = document.getElementById('emptyState');
+  const label = document.getElementById('listLabel');
+
+  // Sort newest first
+  allMeta.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+
+  list.innerHTML = '';
+
+  if (!allMeta.length) {
+    empty.style.display = 'block';
+    label.style.display = 'none';
+    refreshStorageBar([]);
+    return;
+  }
+
+  empty.style.display = 'none';
+  label.style.display = 'block';
+  refreshStorageBar(allMeta);
+
+  for (const meta of allMeta) {
+    list.appendChild(buildCard(meta));
+  }
+}
+
+function buildCard(meta) {
+  const { id, title, imgUrl, size, status, addedAt } = meta;
+  const isDone = status === 'done';
+  const isErr  = status === 'error';
+  const isActive = activeDownloads[id] != null;
+
+  const card = document.createElement('div');
+  card.className = 'dl-card';
+  card.id = 'card-' + id;
+
+  const sizeStr = size ? formatBytes(size) : '';
+  const dateStr = addedAt ? new Date(addedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+  const badgeClass = isDone ? 'badge-done' : isErr ? 'badge-error' : 'badge-downloading';
+  const badgeIcon  = isDone ? '✓' : isErr ? '✗' : '↓';
+  const badgeText  = isDone ? 'Ready' : isErr ? 'Error' : 'Downloading';
+
+  card.innerHTML = `
+    <div class="dl-main">
+      ${imgUrl
+        ? `<img class="dl-poster" src="${imgUrl}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : ''
+      }
+      <div class="dl-poster-placeholder" ${imgUrl ? 'style="display:none"' : ''}>
+        <i class="bi bi-film"></i>
+      </div>
+
+      <div class="dl-info">
+        <div class="dl-title" title="${escHtml(title || 'Unknown')}">${escHtml(title || 'Unknown')}</div>
+        <div class="dl-meta">
+          <span class="dl-status-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+          ${sizeStr ? `<span>${sizeStr}</span>` : ''}
+          ${dateStr ? `<span>${dateStr}</span>` : ''}
+        </div>
+      </div>
+
+      <div class="dl-actions">
+        ${isDone ? `
+          <button class="dl-action-btn play-btn" title="Watch offline" onclick="playOffline('${id}')">
+            <i class="bi bi-play-fill"></i>
+          </button>
+        ` : ''}
+        ${isActive ? `
+          <button class="dl-action-btn" title="Cancel" onclick="cancelDownload('${id}')">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        ` : ''}
+        ${!isActive ? `
+          <button class="dl-action-btn del-btn" title="Delete" onclick="deleteDownload('${id}')">
+            <i class="bi bi-trash3"></i>
+          </button>
+        ` : ''}
+      </div>
+    </div>
+    <div class="dl-progress-wrap ${(!isDone && !isErr) ? 'visible' : ''}" id="prog-${id}">
+      <div class="dl-progress-track">
+        <div class="dl-progress-fill" id="fill-${id}" style="width:0%"></div>
+      </div>
+      <div class="dl-progress-label">
+        <span id="pct-${id}">Fetching…</span>
+        <span id="recv-${id}"></span>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateProgress(id, pct, received, total) {
+  const fill = document.getElementById('fill-' + id);
+  const pctEl = document.getElementById('pct-' + id);
+  const recvEl = document.getElementById('recv-' + id);
+  if (!fill) return;
+  fill.style.width = pct + '%';
+  pctEl.textContent = pct < 1 ? 'Connecting…' : Math.round(pct) + '%';
+  recvEl.textContent = total
+    ? `${formatBytes(received)} / ${formatBytes(total)}`
+    : formatBytes(received);
+}
+
+// ═══════════════════════════════════════════════
+//  START DOWNLOAD
+// ═══════════════════════════════════════════════
+
+async function startDownload() {
+  const input = document.getElementById('urlInput');
+  let raw = input.value.trim();
+  if (!raw) { toast('⚠ Paste a URL or film code first'); return; }
+
+  // Build the Einthusan URL
+  let einthusan;
+  if (raw.startsWith('http')) {
+    einthusan = raw;
+  } else {
+    // Treat as film code
+    einthusan = `https://einthusan.tv/movie/watch/${raw}/`;
+  }
+
+  const addBtn = document.getElementById('addBtn');
+  addBtn.disabled = true;
+
+  toast('⏳ Looking up film…');
+
+  let videoUrl, title, imgUrl;
+  try {
+    const apiResp = await fetch(`https://api.thirai.me/watch?url=${encodeURIComponent(einthusan)}`);
+    if (!apiResp.ok) throw new Error('API error ' + apiResp.status);
+    const data = await apiResp.json();
+    if (!data.video_url) throw new Error('No video URL in response');
+    videoUrl = data.video_url;
+    title    = data.title || raw;
+    imgUrl   = data.img_url || '';
+  } catch(e) {
+    toast('❌ Could not fetch film info. Check the URL.');
+    addBtn.disabled = false;
+    return;
+  }
+
+  // Check for duplicate
+  const allMeta = await dbGetAll(STORE_META);
+  const dupe = allMeta.find(m => m.videoUrl === videoUrl);
+  if (dupe) {
+    toast('ℹ Already downloaded: ' + (dupe.title || 'this film'));
+    addBtn.disabled = false;
+    return;
+  }
+
+  const id = genId();
+  const meta = {
+    id, title, imgUrl, videoUrl,
+    status: 'downloading',
+    size: 0,
+    addedAt: Date.now()
+  };
+
+  await dbPut(STORE_META, meta);
+  input.value = '';
+  addBtn.disabled = false;
+  await renderList();
+
+  doDownload(id, meta);
+}
+
+async function doDownload(id, meta) {
+  const controller = new AbortController();
+  activeDownloads[id] = { controller };
+
+  try {
+    const resp = await fetch(meta.videoUrl, { signal: controller.signal });
+    if (!resp.ok) throw new Error('Fetch error ' + resp.status);
+
+    const contentLength = resp.headers.get('Content-Length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+
+    const reader = resp.body.getReader();
+    const chunks = [];
+    let received = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (controller.signal.aborted) break;
+      chunks.push(value);
+      received += value.length;
+      const pct = total ? (received / total) * 100 : 0;
+      updateProgress(id, pct, received, total);
+    }
+
+    if (controller.signal.aborted) {
+      // Cancelled — cleanup handled in cancelDownload
+      return;
+    }
+
+    // Assemble blob
+    const blob = new Blob(chunks, { type: 'video/mp4' });
+    await dbPut(STORE_BLOB, { id, blob });
+
+    const updatedMeta = { ...meta, status: 'done', size: blob.size };
+    await dbPut(STORE_META, updatedMeta);
+
+    delete activeDownloads[id];
+    toast('✅ ' + meta.title + ' saved!');
+    await renderList();
+    await refreshStorageBar(await dbGetAll(STORE_META));
+
+  } catch(e) {
+    if (e.name === 'AbortError') return;
+    const errMeta = { ...meta, status: 'error' };
+    await dbPut(STORE_META, errMeta);
+    delete activeDownloads[id];
+    toast('❌ Download failed: ' + e.message);
+    await renderList();
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  CANCEL / DELETE
+// ═══════════════════════════════════════════════
+
+async function cancelDownload(id) {
+  const active = activeDownloads[id];
+  if (active) {
+    active.controller.abort();
+    delete activeDownloads[id];
+  }
+  await dbDelete(STORE_META, id);
+  await dbDelete(STORE_BLOB, id);
+  toast('🗑 Download cancelled');
+  await renderList();
+}
+
+async function deleteDownload(id) {
+  // Free any open blob URL
+  if (blobUrls[id]) {
+    URL.revokeObjectURL(blobUrls[id]);
+    delete blobUrls[id];
+  }
+  await dbDelete(STORE_META, id);
+  await dbDelete(STORE_BLOB, id);
+  toast('🗑 Deleted');
+  await renderList();
+}
+
+// ═══════════════════════════════════════════════
+//  OFFLINE PLAYER
+// ═══════════════════════════════════════════════
+
+async function playOffline(id) {
+  const meta = await dbGet(STORE_META, id);
+  const blobRecord = await dbGet(STORE_BLOB, id);
+  if (!blobRecord) { toast('❌ File not found — try re-downloading'); return; }
+
+  // Revoke old URL if any
+  if (blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
+
+  const url = URL.createObjectURL(blobRecord.blob);
+  blobUrls[id] = url;
+
+  const player = document.getElementById('offlinePlayer');
+  const backdrop = document.getElementById('playerBackdrop');
+
+  player.src = url;
+  player.load();
+  player.play().catch(() => {});
+
+  document.getElementById('playerTitleBar').textContent = meta?.title || 'Offline Film';
+  backdrop.classList.add('open');
+
+  // Prevent body scroll while player open
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayer() {
+  const player = document.getElementById('offlinePlayer');
+  const backdrop = document.getElementById('playerBackdrop');
+  player.pause();
+  player.src = '';
+  backdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+document.getElementById('playerBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('playerBackdrop')) closePlayer();
+});
+
+// Keyboard: Escape to close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePlayer();
+});
+
+// Enter to submit
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startDownload();
+});
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+
+(async () => {
+  try {
+    await openDB();
+    await renderList();
+
+    // Update nav subtitle with count
+    const allMeta = await dbGetAll(STORE_META);
+    const done = allMeta.filter(m => m.status === 'done').length;
+    if (done > 0) {
+      document.getElementById('navSubtitle').textContent =
+        done + ' film' + (done !== 1 ? 's' : '') + ' saved';
+    }
+  } catch(e) {
+    document.getElementById('emptyState').innerHTML =
+      '<i class="bi bi-exclamation-triangle"></i><p>Could not open local storage.<br>Try a different browser.</p>';
+  }
+})();
+</script>
+</body>
+</html>
