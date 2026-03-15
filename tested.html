@@ -11152,17 +11152,32 @@ document.getElementById('dlFindOverlay').addEventListener('click',function(e){if
 
 openDB().catch(console.error);
 
-// ---- Direct download from ?dlurl= (triggered from watch.html) ----
-async function startDownloadDirect(videoUrl, titleHint, imgHint) {
-  await openDB().catch(()=>{});
-  const all = await dbGetAll(S_META);
-  const dupe = all.find(m => m.videoUrl === videoUrl);
+// ---- Direct download triggered from watch.html via ?dlurl= ----
+async function startDownloadDirect(pageUrl, titleHint, imgHint) {
+  await openDB().catch(() => {});
+  dlToast('⏳ Fetching film info…');
+
+  let videoUrl, title, imgUrl;
+  try {
+    const r = await fetch(`${API}/watch?url=${encodeURIComponent(pageUrl)}`);
+    if (!r.ok) throw new Error('API ' + r.status);
+    const d = await r.json();
+    if (!d.video_url) throw new Error('No video_url');
+    videoUrl = d.video_url;
+    title    = d.title    || titleHint || 'Unknown';
+    imgUrl   = d.img_url  || imgHint   || '';
+  } catch (e) {
+    dlToast('❌ Could not fetch film info');
+    return;
+  }
+
+  const all  = await dbGetAll(S_META);
+  const dupe = all.find(m => m.pageUrl === pageUrl || m.videoUrl === videoUrl);
   if (dupe) { dlToast('ℹ Already downloaded: ' + (dupe.title || 'film')); window.switchTab('downloads'); return; }
 
-  const id = genId();
-  const title = titleHint || 'Downloaded Film';
-  const imgUrl = imgHint || '';
-  const meta = { id, title, imgUrl, videoUrl, status: 'downloading', size: 0, addedAt: Date.now() };
+  const id   = genId();
+  // Store pageUrl so retries can re-fetch a fresh video link
+  const meta = { id, title, imgUrl, videoUrl, pageUrl, status: 'downloading', size: 0, addedAt: Date.now() };
   await dbPut(S_META, meta);
   activeDownloads[id] = { ctrl: { abort: () => {} } };
   await renderDownloadsView();
@@ -11171,17 +11186,49 @@ async function startDownloadDirect(videoUrl, titleHint, imgHint) {
   doDownload(id, meta);
 }
 
+// ---- Retry with fresh link if the video URL has expired ----
+// Override dlRetry to re-fetch the page URL when available
+const _origDlRetry = window.dlRetry;
+window.dlRetry = async function(id) {
+  const meta = await dbGet(S_META, id);
+  if (meta && meta.pageUrl) {
+    dlToast('⏳ Getting fresh link…');
+    try {
+      const r = await fetch(`${API}/watch?url=${encodeURIComponent(meta.pageUrl)}`);
+      if (!r.ok) throw new Error('API ' + r.status);
+      const d = await r.json();
+      if (!d.video_url) throw new Error('No video_url');
+      await dbDel(S_BLOB, id);
+      const updated = { ...meta, videoUrl: d.video_url, status: 'downloading', size: 0 };
+      await dbPut(S_META, updated);
+      activeDownloads[id] = { ctrl: { abort: () => {} } };
+      await renderDownloadsView();
+      dlToast('⏳ Retrying: ' + meta.title);
+      doDownload(id, updated);
+    } catch (e) {
+      dlToast('❌ Could not refresh link');
+    }
+    return;
+  }
+  // Fall back to original retry for items without a pageUrl
+  if (typeof _origDlRetry === 'function') _origDlRetry(id);
+};
+
 (function() {
-  const params = new URLSearchParams(window.location.search);
-  const dlurl = params.get('dlurl');
+  const params  = new URLSearchParams(window.location.search);
+  const dlurl   = params.get('dlurl');
   if (dlurl) {
-    // Remove param from URL bar cleanly
-    const clean = window.location.pathname;
-    window.history.replaceState({}, '', clean);
-    // Wait for DB + DOM to be ready, then kick off
+    const dltitle = params.get('dltitle') || '';
+    const dlimg   = params.get('dlimg')   || '';
+    // Clean params from URL bar
+    window.history.replaceState({}, '', window.location.pathname);
     window.addEventListener('load', function() {
       setTimeout(function() {
-        startDownloadDirect(decodeURIComponent(dlurl));
+        startDownloadDirect(
+          decodeURIComponent(dlurl),
+          decodeURIComponent(dltitle),
+          decodeURIComponent(dlimg)
+        );
       }, 600);
     });
   }
