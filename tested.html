@@ -10921,7 +10921,6 @@ function buildCardHtml(meta){
       </div>
       <div class="dl-card-actions">
         ${done?`<button class="dl-act-btn play-btn" onclick="dlPlay('${id}')" title="Watch offline"><i class="fas fa-play"></i></button>`:''}
-        ${going?`<button class="dl-act-btn" onclick="dlPause('${id}')" title="Pause download" style="color:#f5a623"><i class="fas fa-pause"></i></button>`:''}
         ${paused?`<button class="dl-act-btn" onclick="dlRetry('${id}')" title="Resume download" style="color:#4caf50"><i class="fas fa-play"></i></button>`:''}
         ${canRetry&&!paused?`<button class="dl-act-btn" onclick="dlRetry('${id}')" title="Retry download" style="color:#f5a623"><i class="fas fa-rotate-right"></i></button>`:''}
         ${going?`<button class="dl-act-btn" onclick="dlCancel('${id}')" title="Cancel"><i class="fas fa-xmark"></i></button>`:''}
